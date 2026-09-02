@@ -35,4 +35,3 @@ is the same design explained for the people who use it and the judges who score 
 | File | What it is |
 | --- | --- |
 | [PLACEHOLDERS.md](PLACEHOLDERS.md) | Every placeholder token used in these pages and where its value comes from after deployment. |
-| [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md) | Questions a judge would ask that the specification does not answer yet. |
