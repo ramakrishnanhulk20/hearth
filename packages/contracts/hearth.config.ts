@@ -36,13 +36,17 @@ export type HearthNetwork = {
 };
 
 /**
- * Grand pays about once a day at an hourly period and hides its carry behind 24 draws; mid pays
- * about every six hours behind 6; frequent pays four prizes every draw and reconciles every draw,
- * because a count of four names nobody.
+ * Grand pays about once a day at an hourly period, mid about every six hours, frequent four prizes
+ * every draw. Every tier reconciles every draw, so what a tier offered and nobody won returns to its
+ * public pot one draw later and the jackpot accumulates in the open, the way PoolTogether's does.
+ * Raising `reconcileEvery` hides how many prizes a tier paid for that many draws, but the money
+ * nobody won then sits in the encrypted carry and the public prize size falls to one draw's share
+ * until the next reconcile. That trade is the deployment's to make; this one keeps the jackpot
+ * visible and hides balances, weights, results and the winner.
  */
 const TIERS: readonly [HearthTier, HearthTier, HearthTier] = [
-  { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 24, shares: 40, reconcileEvery: 24 },
-  { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 6, shares: 20, reconcileEvery: 6 },
+  { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 24, shares: 40, reconcileEvery: 1 },
+  { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 6, shares: 20, reconcileEvery: 1 },
   { prizeCount: 4, oddsNumerator: 1, oddsDenominator: 1, shares: 40, reconcileEvery: 1 },
 ];
 

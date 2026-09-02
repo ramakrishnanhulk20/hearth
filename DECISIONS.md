@@ -152,3 +152,12 @@ marked as such.
   FHEVM plugin, because the plugin rewrites `ZamaConfig.sol` at compile time and slither cannot map
   offsets back to the file on disk. Same compiler settings, so the same bytecode. 88 results, 85 in our
   contracts, all explained on docs/security/static-analysis.md; none changed the code.
+- 2026-09-03: every tier reconciles every draw on Sepolia (`reconcileEvery` 1, 1, 1), reversing the
+  24 / 6 / 1 cadence of the third design. The fairness run showed what the cadence costs: liquidity
+  is moved into the draw at every close and comes back to the public pot only at a reconcile, so with
+  a cadence of 24 the grand prize is one hour's share on 23 draws out of 24 and the accumulated pot
+  only shows on the reconcile draw. A hidden win count and a visible, accumulating jackpot cannot
+  both hold. The product keeps the jackpot visible, as PoolTogether's is, and hides balances,
+  weights, results and the winner; the per-draw count becomes public one draw later, as it is on
+  PoolTogether. The cadence stays a constructor argument and a documented dial. Ram can overrule by
+  one redeploy.
