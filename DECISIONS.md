@@ -119,3 +119,13 @@ marked as such.
   zero and HarvestFailed is emitted.
 - 2026-09-03: a `thresholdOf` view shares the winner-test arithmetic with evaluation so the
   verify page, the tests and a judge use one implementation.
+- 2026-09-03: an empty period does not move the scale bracket; only a measured aggregate
+  does. Otherwise an idle pool's bracket would decay two bits per draw and the first savers
+  to return would clear every threshold until it climbed back.
+- 2026-09-03: the yield-source setter refuses an address with no code (the zero address
+  still disables harvesting), because a call to a codeless address fails in the pool's own
+  frame where the try around `harvest` cannot catch it.
+- 2026-09-03: `MAX_BATCH` re-measured at 4 with the seed-ordered walk and the Sepolia tiers
+  (3,674,128 compute units per saver plus 748,032 per call); five savers exceed the
+  18,000,000 budget. The rejection sampler is gone: the range is a power of two, so masking
+  the hash is exactly uniform.

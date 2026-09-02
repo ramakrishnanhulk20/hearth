@@ -90,19 +90,25 @@ contract SponsoredYieldSource is IYieldSource, ZamaEthereumConfig, Ownable2Step,
     }
 
     /// @inheritdoc IYieldSource
-    /// @dev Reverts with NotRecipient for any other caller. Emits Harvested when an amount moves.
-    function harvest() external nonReentrant returns (uint64 amount) {
+    /// @dev Reverts with NotRecipient for any other caller. Emits Harvested when an amount moves. The
+    ///      plaintext amount in the event is what this source intended to send; what the pool books is the
+    ///      decryption of the returned handle, which the token wrote after clamping to this balance.
+    function harvest() external nonReentrant returns (euint64 transferred) {
         if (msg.sender != recipient) revert NotRecipient();
 
-        amount = harvestable();
+        uint64 amount = harvestable();
         accrued = 0;
         lastAccrualAt = uint64(block.timestamp);
-        if (amount == 0) return 0;
+        if (amount == 0) {
+            transferred = FHE.asEuint64(0);
+            FHE.allowTransient(transferred, recipient);
+            return transferred;
+        }
 
         balance -= amount;
         euint64 encrypted = FHE.asEuint64(amount);
         FHE.allowTransient(encrypted, address(asset));
-        asset.confidentialTransfer(recipient, encrypted);
+        transferred = asset.confidentialTransfer(recipient, encrypted);
 
         emit Harvested(amount, balance);
     }

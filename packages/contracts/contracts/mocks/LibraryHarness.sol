@@ -2,7 +2,6 @@
 pragma solidity ^0.8.27;
 
 import {Periods} from "../libraries/Periods.sol";
-import {UniformRandom} from "../libraries/UniformRandom.sol";
 
 /// @dev Test-only surface for the internal library functions. Never deployed.
 contract LibraryHarness {
@@ -16,9 +15,5 @@ contract LibraryHarness {
 
     function endOf(uint32 period, uint256 first, uint256 length) external pure returns (uint256) {
         return Periods.endOf(period, first, length);
-    }
-
-    function draw(uint256 entropy, uint256 upperBound) external pure returns (uint256) {
-        return UniformRandom.draw(entropy, upperBound);
     }
 }

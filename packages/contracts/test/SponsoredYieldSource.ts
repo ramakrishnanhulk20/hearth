@@ -1,5 +1,7 @@
-// Covers the sponsored yield source on its own, with a plain signer standing in for the prize pool.
-// Does not cover what the pool does with a harvest, or the Zama Confidential Vault adapter.
+// Covers the sponsored yield source on its own, with a plain signer standing in for the prize pool:
+// sponsoring, accrual, the rate change, who may harvest, and the encrypted handle a harvest returns.
+// Does not cover what the pool does with that handle, the public decryption the pool books it from, or
+// the Zama Confidential Vault adapter.
 import { FhevmType } from "@fhevm/hardhat-plugin";
 import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
@@ -80,23 +82,30 @@ describe("SponsoredYieldSource", () => {
     const before = await source.harvestable();
     const tx = await source.connect(pool).harvest();
     const receipt = await tx.wait();
-    const harvested = receipt!.logs
-      .map((log) => {
-        try {
-          return source.interface.parseLog(log);
-        } catch {
-          return null;
-        }
-      })
-      .find((parsed) => parsed?.name === "Harvested")!.args.amount as bigint;
+    const parsed = receipt!.logs.map((log) => {
+      try {
+        return source.interface.parseLog(log) ?? cusdc.interface.parseLog(log);
+      } catch {
+        return null;
+      }
+    });
+    const harvested = parsed.find((entry) => entry?.name === "Harvested")!.args.amount as bigint;
+    const moved = parsed.find((entry) => entry?.name === "ConfidentialTransfer")!.args.amount as string;
 
     expect(harvested).to.be.closeTo(before, RATE * 2n);
     expect(await source.balance()).to.equal(usd(100) - harvested);
     expect(await poolBalance()).to.equal(harvested);
     expect(await source.harvestable()).to.equal(0n);
+    // The pool books the decryption of this handle, never the plaintext in the event, so the handle has
+    // to carry the same amount and has to be readable by the recipient.
+    expect(await fhevm.userDecryptEuint(FhevmType.euint64, moved, cusdcAddress, pool)).to.equal(harvested);
   });
 
-  it("returns zero without reverting when nothing has accrued", async () => {
+  it("returns an encrypted zero without reverting when nothing has accrued", async () => {
+    const handle = await source.connect(pool).harvest.staticCall();
+    expect(handle, "the pool always gets a handle to prove, even for an empty harvest").to.not.equal(
+      ethers.ZeroHash,
+    );
     await expect(source.connect(pool).harvest()).to.not.emit(source, "Harvested");
     expect(await source.balance()).to.equal(0n);
   });
