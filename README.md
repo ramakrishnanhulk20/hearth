@@ -506,8 +506,7 @@ equal credits written; and reads the unfunded counter and expects zero.
 {{PROVE_OUTPUT}}
 ```
 
-The script is listed under [quick start](#quick-start) as still to be added. Executed
-attack outputs from the self-audit are committed under `{{ATTACK_LOG_DIR}}`.
+Executed attack outputs from the self-audit are committed under `docs/security/attacks`.
 
 ---
 
@@ -558,17 +557,14 @@ npm run typecheck -w @hearth/web
 npm run lint -w @hearth/web
 ```
 
-### Scripts still to be added
+### Operator scripts
 
-These are named in this README and in the docs and do not exist in any `package.json` yet.
-They are listed here rather than quietly omitted.
-
-| Command | What it will do | Status |
-| --- | --- | --- |
-| `npm run deploy:sepolia -w @hearth/contracts` | The script entry exists; `packages/contracts/deploy` is empty, so the deploy scripts themselves are still to be written | Entry present, scripts missing |
-| `npm run seed:sepolia -w @hearth/contracts` | Fund and shield a handful of demo savers, sponsor the yield source, and run one full draw so a judge lands on a populated pool | To be added |
-| `npm run prove:sepolia -w @hearth/contracts` | The prove-it command above | To be added |
-| `npm run audit:sepolia -w @hearth/contracts` | The executed attack scripts behind the threat model, writing their output to `{{ATTACK_LOG_DIR}}` | To be added |
+Every command named in this README and in the docs exists in `packages/contracts/package.json`.
+The deploy is `deploy:sepolia`, the demo pool is filled by `seed:sepolia`, one draw is driven by
+`draw:sepolia`, the live state is printed by `status:sepolia`, the prove-it command is
+`prove:sepolia`, and the executed attack scripts behind the threat model are `audit:sepolia`,
+which writes its transcript under `docs/security/attacks`. Each has a `:local` twin that runs
+against `hardhat node`.
 
 ### Secrets
 
@@ -849,7 +845,7 @@ path and no proxy.
 
 **Threat model:** [docs/security/threat-model.md](docs/security/threat-model.md). Nine
 attackers, what each wants, what stops them, and what does not, with the last column being
-the one worth reading. Executed attack outputs land under `{{ATTACK_LOG_DIR}}`.
+the one worth reading. Executed attack outputs land under `docs/security/attacks`.
 
 **Static analysis:** [docs/security/static-analysis.md](docs/security/static-analysis.md).
 slither reports 85 results on these contracts and solhint none; the page gives the one reason

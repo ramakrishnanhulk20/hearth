@@ -80,7 +80,6 @@ after the one being quoted.
 | Token | Value | Source |
 | --- | --- | --- |
 | `{{FAUCET_SEPOLIA_ETH}}` | The Sepolia ETH faucets we actually tested, as links | Test them before listing them |
-| `{{ATTACK_LOG_DIR}}` | Where the executed attack outputs are committed | Self-audit run |
 
 ## Retired
 

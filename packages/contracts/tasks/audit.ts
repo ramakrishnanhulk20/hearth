@@ -1138,11 +1138,14 @@ task("hearth:audit", "Executes every attack in the threat model against a live d
       for (const row of a.rows) console.log(`  ${row.verdict.padEnd(7)} row ${row.row.padEnd(3)} ${row.claim}`);
     } finally {
       console.log = printed;
-      const directory = join(hre.config.paths.root, "..", "..", "docs", "security", "attacks");
-      mkdirSync(directory, { recursive: true });
-      const file = join(directory, `${hre.network.name}-${Math.floor(Date.now() / 1000)}.log`);
-      writeFileSync(file, `${transcript.join("\n")}\n`, "utf8");
-      console.log(`\nThe whole transcript above is saved at ${file}`);
+      // A run that died before it could attack anything has nothing worth keeping on disk.
+      if (transcript.length > 0) {
+        const directory = join(hre.config.paths.root, "..", "..", "docs", "security", "attacks");
+        mkdirSync(directory, { recursive: true });
+        const file = join(directory, `${hre.network.name}-${Math.floor(Date.now() / 1000)}.log`);
+        writeFileSync(file, `${transcript.join("\n")}\n`, "utf8");
+        console.log(`\nThe whole transcript above is saved at ${file}`);
+      }
     }
 
     const failed = rows.filter((row) => row.verdict === "FAIL");

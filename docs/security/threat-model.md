@@ -131,8 +131,9 @@ simply to stop working.
 - **A late close is refused, not tolerated.** Closing must land before
   `closeDeadline(p)`, the middle of the window's second period. A close in the last block
   of the window would have left no room for the decryption round trip and would have
-  stranded the draw permanently. Now that transaction simply reverts and the draw is
-  skipped cleanly.
+  stranded the draw permanently. Now that transaction simply reverts. A draw whose close
+  never landed stays unclosed for ever: its liquidity was never moved into it, so there is
+  nothing to return and nothing to finalize.
 - **A skipped draw costs nothing.** Liquidity that was never offered stays in its tier and
   is offered again. A late award still books the harvest, still returns the offered
   liquidity to the tiers, and marks the draw `Skipped`. That period pays no prize, and no
@@ -284,7 +285,7 @@ to the close so that no prize can be resized after its seed exists.
 
 ## What is checked, and how
 
-Every claim above has a test. The executed outputs land under `{{ATTACK_LOG_DIR}}` and the
+Every claim above has a test. The executed outputs land under `docs/security/attacks` and the
 numbers are pasted into the README.
 
 | Claim | The check |

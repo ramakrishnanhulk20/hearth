@@ -1,0 +1,239 @@
+Hearth self-audit on localhost, 2026-09-02T21:57:35.256Z
+vault 0x1589B5c2f3fc8f7983cfD4b7e0F15E8618a2b221, pool 0x5a85B0775C0108C60378b55886450a4A77256169, asset 0x287ACC5bfb84E70D6D36BB13EB09DdF1a5d2Be2c
+period 1, 5 savers, bracket 2^40, tier liquidity 0.00 USDC
+Every row below is one line of the table "What is checked, and how" in docs/security/threat-model.md, in order.
+
+Row 1. A stranger cannot read a saver's principal, winnings, weight and credit
+  moved the local clock to 2026-09-02T22:07:34.000Z, period 2, so the period being drawn is over
+closing draw 1, which has until 2026-09-02T22:22:31.000Z
+closed draw 1 (tx 0xc92d182ed415472f57c139edd70c031b457188bac5cdfe722189cbfe16feed4c, gas 1,240,372)
+draw 1: asking for the seed, the scale, the empty flag and the harvest, in that order
+  the KMS signed: seed 6632501327866026481, scale count 3, someone held a balance: true, harvest 600.00 USDC
+awarded draw 1 (tx 0x3f7566a19434d011b93a256eb095323137842b37a5a148c687e823cb8fbe074a, gas 163,669)
+  draw 1 runs against a range of 2^41
+evaluated draw 1 in a batch of 4 (tx 0xeadc46b133699a9ea9160e82854114318b85cfa3bfd2dd358cf5b22e0743e44a, gas 2,884,888)
+  4 of 5 savers done (gas 2,884,888)
+evaluated draw 1 in a batch of 4 (tx 0x9ef521d0d2795ed908daa1142c49030206ab804a5a13b8535c6d5f46029ae8a3, gas 1,108,984)
+  5 of 5 savers done (gas 1,108,984)
+  the saver at 0x36377E05aA1EC745B9364ABd00B8BA5978542C7c reads their own weight in draw 1: 702,000,000,000 balance-seconds
+  a wallet that has never touched Hearth, 0x77D6735898000261839c01C39Bd6f5D33E65F502, asks the same four handles
+  principal (0x812d1bf7ddc4ed8e55092560f07ea06abd6a11f911ff0000000000007a690500): User 0x77D6735898000261839c01C39Bd6f5D33E65F502 is not authorized to user decrypt handle 0x812d1bf7ddc4ed8e55092560f07ea06abd6a11f911ff0000000000007a690500!
+  winnings (0x704fb66974eee8c871af7b9564f556aeeb0355eb37ff0000000000007a690500): User 0x77D6735898000261839c01C39Bd6f5D33E65F502 is not authorized to user decrypt handle 0x704fb66974eee8c871af7b9564f556aeeb0355eb37ff0000000000007a690500!
+  weight in draw 1 (0x88d022954acb041eb2cfe03ad10579cf528ecb2bd2ff0000000000007a690500): User 0x77D6735898000261839c01C39Bd6f5D33E65F502 is not authorized to user decrypt handle 0x88d022954acb041eb2cfe03ad10579cf528ecb2bd2ff0000000000007a690500!
+  credit in draw 1 (0x354e695fed0b0095601781a86aad917bdce9f01682ff0000000000007a690500): User 0x77D6735898000261839c01C39Bd6f5D33E65F502 is not authorized to user decrypt handle 0x354e695fed0b0095601781a86aad917bdce9f01682ff0000000000007a690500!
+  PASS: all four handles refused the stranger, and the saver read their own weight of 702,000,000,000
+
+Row 2. The pool's exact total time-weighted balance is not obtainable
+  the pool's aggregate lives in storage slot 6 of the vault as 0x92fbe8f5075443a90540f58c2a6453b834d30153d0ff0000000000007a690600, a euint128 with no getter
+  slot 7 holds the matching total balance handle and slot 8 its timestamp, 2026-09-02T21:58:02.000Z, which is what identifies the three words
+  a fresh wallet 0x7446BAd0Fa63C1596aa64b890A90d3395dbf6845 asks for it: User 0x7446BAd0Fa63C1596aa64b890A90d3395dbf6845 is not authorized to user decrypt handle 0x92fbe8f5075443a90540f58c2a6453b834d30153d0ff0000000000007a690600!
+  the deployer and owner 0xd57D8F8A615F35133D8121e58F4ed778A4F612E9 asks for it: User 0xd57D8F8A615F35133D8121e58F4ed778A4F612E9 is not authorized to user decrypt handle 0x92fbe8f5075443a90540f58c2a6453b834d30153d0ff0000000000007a690600!
+  for this run only, the local mock's own clear-text store says the number is 29,400,000,000 balance-seconds; that store does not exist on Sepolia and no wallet can reach it through the protocol
+  the balance handle in slot 7 is 0xc016791a821ff3b70c57ac19cc25726e1c57d0080fff0000000000007a690500
+  moved the local clock to 2026-09-02T22:17:32.000Z, period 3, so a second draw publishes its own bracket
+closing draw 2, which has until 2026-09-02T22:32:31.000Z
+closed draw 2 (tx 0x5ee10783e9af35a51a748e035d99468991ec74f506a182b7f2aff8c1d3414973, gas 1,227,465)
+draw 2: asking for the seed, the scale, the empty flag and the harvest, in that order
+  the KMS signed: seed 14709864121179429556, scale count 2, someone held a balance: true, harvest 598.00 USDC
+awarded draw 2 (tx 0xb0fa028c8e00b5847945ef51e8154a61576225fbe57c5919a70685d4a86165bc, gas 160,881)
+  draw 2 runs against a range of 2^41
+evaluated draw 2 in a batch of 4 (tx 0x546dcbec918427845d41ee0f58948193be4d4ebb2fe8ad21e63a219b16ac0caf, gas 2,840,463)
+  4 of 5 savers done (gas 2,840,463)
+evaluated draw 2 in a batch of 4 (tx 0x18f3f55f7f31f012e2705b399b3d362e0d2ae0a232123e7721f1584e491807f9, gas 1,095,073)
+  5 of 5 savers done (gas 1,095,073)
+  draw 1 published 2^41 and draw 2 published 2^41, which is everything the chain says about either total
+  so the older total sits in (1,099,511,627,776, 2,199,023,255,552] balance-seconds and the newer in (1,099,511,627,776, 2,199,023,255,552]
+  the move between them is bounded to (-1,832.51, 1,832.51) USDC held for a whole period, a factor-of-two band and not a number
+  PASS: the aggregate handle refused both a random wallet and the owner, and the two published brackets bound the move between them to a factor-of-two band
+
+Row 3. A flash deposit earns almost nothing
+  claimed the faucet for 0xda7e8cFeFd74F1Aa7FBAE003cAF6EED612384D7d (tx 0xd0d4888e6cfb66fb064f3fb887ffc966ae324d21a7034ad37c3813cc4f617f39, gas 74,566)
+  approved the wrapper to take 1,000.00 USDC from 0xda7e8cFeFd74F1Aa7FBAE003cAF6EED612384D7d (tx 0xab4843530c78f1b2854c700ec92ecfca39798fa59594116d2dfe07ae35a8441e, gas 46,375)
+  wrapped 1,000.00 USDC for 0xda7e8cFeFd74F1Aa7FBAE003cAF6EED612384D7d (tx 0x69f1f34a4fc6bb3328a2e9aef6d5a512a2938788765c50a57005ccf02460c971, gas 302,435)
+  moved the local clock to 2026-09-02T22:27:00.000Z, period 3, so the deposit lands 30 seconds before period 3 ends
+  deposited an encrypted amount for 0xda7e8cFeFd74F1Aa7FBAE003cAF6EED612384D7d (tx 0x3c995edb0c7104ebbc8662f2bc573a04d8d1997831d271313164777b21dd6ddb, gas 1,273,082)
+  the deposit landed at 2026-09-02T22:27:01.000Z, 30 seconds before period 3 ended
+  moved the local clock to 2026-09-02T22:27:32.000Z, period 4, so the draw for that period can be closed
+closing draw 3, which has until 2026-09-02T22:42:31.000Z
+closed draw 3 (tx 0xb7aab7dc78b3883d63f462c1923db01116a3fb5c92480af9842b96a8aff7ea71, gas 1,243,724)
+draw 3: asking for the seed, the scale, the empty flag and the harvest, in that order
+  the KMS signed: seed 1928312371585194822, scale count 2, someone held a balance: true, harvest 600.00 USDC
+awarded draw 3 (tx 0xdb832f5b3526dfe63e3f59d99f00f5339c66ad00db05b9faa2911b2f3029d405, gas 160,869)
+  draw 3 runs against a range of 2^41
+evaluated draw 3 in a batch of 4 (tx 0xe257335e0a97e6f1cdab89c461e93cb6e5cfb6360c767d62f5f4d8a5783e7054, gas 2,681,263)
+  4 of 6 savers done (gas 2,681,263)
+evaluated draw 3 in a batch of 4 (tx 0xdd973b49b989c2e3dd8c95cf4a4b86a2c3065f98c79514014ebab194eb2faf8d, gas 1,663,697)
+  6 of 6 savers done (gas 1,663,697)
+finalized draw 1 (tx 0xa9e72b87e367d62e95b7da29a47881e49c27b8b8c678c085c733030f220b609a, gas 475,299)
+the grand tier published its carry at draw 1, asking for the cleartext
+reconciled the grand tier, putting 0.00 USDC back on offer (tx 0x66c78c2f9facdf7a82b1d458decc44afcacfb1f2c8a1b17329c5958fb894e56e, gas 164,158)
+the mid tier published its carry at draw 1, asking for the cleartext
+reconciled the mid tier, putting 0.00 USDC back on offer (tx 0xffc420c9ecef79a482a7b6d70efd7e8a48ee6252cdfde242eba4d74934bf5c76, gas 164,282)
+the frequent tier published its carry at draw 1, asking for the cleartext
+reconciled the frequent tier, putting 0.00 USDC back on offer (tx 0x8d4e2c987b318d5f4587998c5598a98137c01e60204b50b19c939186a16dbf86, gas 164,282)
+  the flash wallet decrypted its own weight for draw 3: 30,000,000,000 balance-seconds from 1,000.00 USDC held for 30 seconds
+  the full-period holder decrypted theirs: 720,000,000,000 balance-seconds from 1,200.00 USDC held for all 600 seconds
+  the flash wallet brought 83.3333% of the other saver's money and came away with 4.1666% of its odds
+  the time-weighted ceiling for that stake and that many seconds is 30,000,000,000 balance-seconds
+  PASS: the flash weight is exactly stake times seconds held, 30,000,000,000, which is 4.1666% of a full-period holder's
+
+Row 4. Fake savers cannot stall a draw
+  registering 25 addresses that hold nothing, through the deposit hook, which is the only way in
+  the saver list went from 6 to 31 addresses, and isSaver of the first fake reads true
+  moved the local clock to 2026-09-02T22:37:32.000Z, period 5, so draw 4, the first draw the fakes are in the walk of, can be closed
+  closed draw 4 (tx 0xee733dda7311f2c9b178275993919f078ec91a3a2a25cac0e715625263878644, gas 1,280,636)
+  awarded draw 4 against a KMS-signed seed of 10861203778987611181 (tx 0xf88cbfb2e334cd6d39df8544f5fe8785202f66de5fc7e7fe57e09d317e7d7443, gas 160,869)
+  draw 4 evaluated 31 of 31 savers in 8 calls for 22,267,295 gas, about 718,299 gas a saver
+  the fake saver 0xe98c485895d4537E104614697df1E9B1D350513e decrypted its own weight for draw 4: 0
+  the fake saver 0x44B8be521E6DcfcdD37d7025e1b68E6C50c052C5 decrypted its own weight for draw 4: 0
+  the fake saver 0xEdB66c29849c77456D8B887b94C3c5bb52153E41 decrypted its own weight for draw 4: 0
+  PASS: 25 empty addresses joined the list, the walk still finished all 31 savers in 8 calls for 22,267,295 gas, and every fake weighs zero
+
+Row 5. Nobody can choose who is evaluated
+  moved the local clock to 2026-09-02T22:47:32.000Z, period 6, so a fresh draw is available to walk
+  closed draw 5 (tx 0xe793cb1d0dd09470268be21c04803ccbf7bc2a255a8a27cb7b846301448f423c, gas 1,187,665)
+  awarded draw 5 against a KMS-signed seed of 10893089553807456321 (tx 0x1caeb2a30e620dacf8fa9b9044903919a0bad56010c2952ba1ef3b79c62b2a81, gas 160,869)
+  draw 5 has seed 10893089553807456321, so its walk starts at index 12 of 31 savers
+  walkOf before: start 0, count 0; cursorOf before: 0
+  walkOf reads zeros until the first evaluate call fixes it from the seed and the saver count
+  the caller is the saver at account index 3, 0xf0eb0FbdFA8cC88e504904043dbF380b65c504af, who sits at list index 1
+  the next saver the walk owes work to is 0x09800e5d7e5c0a929fd841e2717d900f16E76E0F
+  0xf0eb0FbdFA8cC88e504904043dbF380b65c504af called evaluate(5, 1) from their own key (tx 0xcca5b2604dcad6670af36099aeb4643e89102286fa32b593e4f6a0b15c953241, gas 1,093,762)
+  walkOf after: start 12, count 31; cursorOf after: 1
+  the seed-derived saver 0x09800e5d7e5c0a929fd841e2717d900f16E76E0F is now evaluated: true
+  the caller is evaluated: false, and the caller is not who the seed picked
+  PASS: the call advanced the seed-derived walk from 0 to 1 and paid out to 0x09800e5d7e5c0a929fd841e2717d900f16E76E0F, not to the caller
+
+Row 6. A late close is refused and the draw costs nothing
+  draw 6 is the draw for the period running now, and its close deadline is 2026-09-02T23:12:31.000Z
+  moved the local clock to 2026-09-02T23:12:32.000Z, period 8, so draw 6 is past its close deadline and nobody closed it
+  closeDraw(6) from the keeper: CloseWindowClosed(6)
+  tier liquidity before 240.00 / 120.00 / 240.00 USDC and after 240.00 / 120.00 / 240.00 USDC
+  draw 6 reads not closed, and finalizeDraw(6) answers DrawNotOpen(6)
+  a draw whose close never landed keeps that status for ever: its liquidity was never moved into it, and the Skipped status is only for a draw that was closed and awarded late, which row 7 runs
+  PASS: the late close reverted CloseWindowClosed(6), the draw still reads not closed and no tier lost a unit
+
+Row 7. A missed award loses nothing
+  closed draw 7 (tx 0x4fce017edfd9247040bf708fc52df8c6f8781c01e49b64391eb286a1181f0bb2, gas 1,108,065)
+  draw 7 closed with 600.00 USDC of tier liquidity moved into it
+  moved the local clock to 2026-09-02T23:27:32.000Z, period 10, so the whole window of draw 7 passed with no award
+  awarded draw 7 against a KMS-signed seed of 6373753500347136614 (tx 0xf6ec8cf136af3b76afdd7b5afc3801c21c1f83dc4ee072eddb033b48f9ce6e6c, gas 385,294)
+  the late award booked a harvest of 1,502.00 USDC and marked the draw skipped
+  tier liquidity went from 0.00 to 2,102.00 USDC, which is the 600.00 offered plus the harvest
+  the vault reads the draw as finalized: true, so nothing is left riding on it
+  PASS: the draw reads Skipped, every one of the 600.00 USDC offered is back in the tiers and the 1,502.00 USDC harvest was still booked
+
+Row 8. A reverting yield source does not stop the clock
+  pointed the pool at a yield source that always reverts, 0x87071E0cC3656Fc873C7a886123A1dFd9C2522Fc (tx 0x4b26802e6dff1c18d467053c2099d0def13fef19b9e3d6387195da835d34174d, gas 32,876)
+  closed draw 8 (tx 0x511da1c643f4fe51652c5fcc3f679de23d5e3ad0c036813f5fc241a15a2d90b8, gas 885,125)
+  the close succeeded and emitted HarvestFailed 1 time(s) for draw 8
+  the draw reads closed and its harvest handle publicly decrypts to 0.00 USDC
+  put the working yield source back (tx 0x9a4b9de5a6733ed57cab645851a43093eaae5592b1d5beff929153ae876b55b1, gas 32,876)
+  awarded draw 8 against a KMS-signed seed of 14933715682895856101 (tx 0x29dc141fdfb63caa8b6dd89ab2853088cce218594e42ee56011817067d755f22, gas 131,809)
+  PASS: the close went through with a source that reverts, emitted HarvestFailed and booked a zero harvest
+
+Row 9. An over-subscribed tier clamps rather than overpaying
+  a tier only over-subscribes when savers are worth several times the published bracket, and the bracket follows the pool within three bits a draw, so the case is built by emptying the pool, letting the bracket walk down to one small holder, and then putting far more back than one draw can follow
+  emptying every saver but one so the published bracket walks down to the dust holder
+  0x36377E05aA1EC745B9364ABd00B8BA5978542C7c withdrew everything (tx 0x5ad7813ad6ad206071cfb17c4b96947866894f3adab3629e679201591c4d918f, gas 820,628)
+  0xf0eb0FbdFA8cC88e504904043dbF380b65c504af withdrew everything (tx 0xed567aef17ebd5508267d2329f6fbb65d1f693324c554af9f5532f79691c5e57, gas 803,860)
+  0xefc2BD34872A3CbBcAA20f1fbc36e199aaa7b183 withdrew everything (tx 0x48463d2165f9a1d1b3d98b39f048cbea35d3902c7d6e02a64d7db4a55693ab87, gas 803,860)
+  0xbd10AE81506cA7664a009Ee96447DDB5a4485e91 withdrew everything (tx 0x31b9821a1d8aa1139a67fc1eb71ec7187651f5fb7691aee8a7eccc511dd997c5, gas 803,860)
+  0xda7e8cFeFd74F1Aa7FBAE003cAF6EED612384D7d withdrew everything (tx 0xb74648d3c6edc9e1c9ab27aa0c4729cd37d030a43c0258675b57ec40c4900150, gas 803,860)
+  moved the local clock to 2026-09-02T23:37:32.000Z, period 11, so the first shrunken period starts clean
+  the pool publishes a bracket of 2^41 right now
+  moved the local clock to 2026-09-02T23:47:32.000Z, period 12, so the shrunken period is over
+  closed draw 11 (tx 0xbd24fddce4c35b90371b32afec35cd8603618439acdadfd3ce33c6ca424d9aad, gas 1,147,559)
+  awarded draw 11 against a KMS-signed seed of 16408297332941942936 (tx 0xa0e9c3723fed9ecfd2b58207dfdcb3e4179e7709b353e95bd6ee0407ca4a843c, gas 163,669)
+    draw 11 moved the bracket to 2^39
+  moved the local clock to 2026-09-02T23:57:32.000Z, period 13, so the shrunken period is over
+  closed draw 12 (tx 0xc65a0b4106d8d2893b26d3898e6c0142dee324fe939814be4d12c224096533f6, gas 1,187,665)
+  awarded draw 12 against a KMS-signed seed of 8080122875270763789 (tx 0xba25e4a6dd115c68b126ad072ddc90957a61483a386fabe9a8b42fb966975273, gas 163,657)
+    draw 12 moved the bracket to 2^37
+  moved the local clock to 2026-09-03T00:07:32.000Z, period 14, so the shrunken period is over
+  closed draw 13 (tx 0x8e8a2aaae5134aa8dba9a9c204bb3237eb23a132c8cce5342438421a55329190, gas 1,147,865)
+  awarded draw 13 against a KMS-signed seed of 6059464364299656128 (tx 0x20054fb9bd81f4b4cbea0b24d6f8b60a0bd35c173e9b3bd7a8ac927c6109bac7, gas 163,669)
+    draw 13 moved the bracket to 2^36
+  moved the local clock to 2026-09-03T00:17:32.000Z, period 15, so the shrunken period is over
+  closed draw 14 (tx 0xe8c89adc3f76325c90d8b8ce6d6898b423172856b4b0881e13e2ee2f28b591b4, gas 1,147,865)
+  awarded draw 14 against a KMS-signed seed of 11616414341229492702 (tx 0x99797305cfb6ce74ae66c5635ba28d264dd8d8018c0db411e8e28ca2f55bd870, gas 160,869)
+    draw 14 moved the bracket to 2^36
+  moved the local clock to 2026-09-03T00:27:32.000Z, period 16, so the top-ups all count for a whole period
+  every saver now deposits 3,000.00 USDC, which is far more than the published bracket can follow in one draw
+  0x36377E05aA1EC745B9364ABd00B8BA5978542C7c already holds 8,800.00 USDC, so nothing is minted
+  approved the wrapper to take 3,000.00 USDC from 0x36377E05aA1EC745B9364ABd00B8BA5978542C7c (tx 0xb6a254715ccfeaa40c100690346c4feb0301fb0bc7b15edf097f395796512fd8, gas 46,375)
+  wrapped 3,000.00 USDC for 0x36377E05aA1EC745B9364ABd00B8BA5978542C7c (tx 0x35ec710be127f70f371f88997157534b024f36246ba7351fbfff80ecd3dd1efa, gas 279,969)
+  deposited an encrypted amount for 0x36377E05aA1EC745B9364ABd00B8BA5978542C7c (tx 0x72e16844a0b6a81830a499315249836ed8bd92b6eca0ec13f464b431a08d4c89, gas 1,145,343)
+  0xf0eb0FbdFA8cC88e504904043dbF380b65c504af already holds 9,400.00 USDC, so nothing is minted
+  approved the wrapper to take 3,000.00 USDC from 0xf0eb0FbdFA8cC88e504904043dbF380b65c504af (tx 0x4647f77e71d5c16ae5041f39ca9d4a003e486bb8361c74acf1fa79f663f8a341, gas 46,375)
+  wrapped 3,000.00 USDC for 0xf0eb0FbdFA8cC88e504904043dbF380b65c504af (tx 0x4cdce056d7b227ae9daa4068cab8dda581ebacb0bff153d3c48bf8b40e756b41, gas 279,981)
+  deposited an encrypted amount for 0xf0eb0FbdFA8cC88e504904043dbF380b65c504af (tx 0x407cda5f65529e369a8b938f4210050240908519853b1264d24d93649ce8aed8, gas 1,128,575)
+  0xefc2BD34872A3CbBcAA20f1fbc36e199aaa7b183 already holds 9,700.00 USDC, so nothing is minted
+  approved the wrapper to take 3,000.00 USDC from 0xefc2BD34872A3CbBcAA20f1fbc36e199aaa7b183 (tx 0xa2a10a7929d35495c29c24ce40d38a4c2d2a381ff1706fa9dcae928ca0112f1a, gas 46,375)
+  wrapped 3,000.00 USDC for 0xefc2BD34872A3CbBcAA20f1fbc36e199aaa7b183 (tx 0xb1f7d7e257dd527b6a8e5b4ec1c097fe0a5843c2016f97308c08ab7584f5a523, gas 279,981)
+  deposited an encrypted amount for 0xefc2BD34872A3CbBcAA20f1fbc36e199aaa7b183 (tx 0x6806f5fc87494afef0bbcc09189e6c2f3ce8ce308172bfd66cf1d64a6f4cb715, gas 1,128,575)
+  0xbd10AE81506cA7664a009Ee96447DDB5a4485e91 already holds 9,850.00 USDC, so nothing is minted
+  approved the wrapper to take 3,000.00 USDC from 0xbd10AE81506cA7664a009Ee96447DDB5a4485e91 (tx 0x8657268865c20bb05054f495afcdeafa85456a0fbdb6c73d387c90ed08ccbbef, gas 46,375)
+  wrapped 3,000.00 USDC for 0xbd10AE81506cA7664a009Ee96447DDB5a4485e91 (tx 0x3739d692aff4ccaeb1b586de239fbf448ea81781c2685f64a2a756f89b403112, gas 279,969)
+  deposited an encrypted amount for 0xbd10AE81506cA7664a009Ee96447DDB5a4485e91 (tx 0xb83f18cf5ccb2889b77d4a3bd8a854dadf97c216f758932c360ae356fbd3915f, gas 1,128,575)
+  0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f already holds 9,925.00 USDC, so nothing is minted
+  approved the wrapper to take 3,000.00 USDC from 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f (tx 0xdef54fe2a84eaff5c137070611da037dc313d97de4d4165b05a58de89be84790, gas 46,375)
+  wrapped 3,000.00 USDC for 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f (tx 0x5b7e25a80b3ba963e81002348e4b0329db7ca71a7fca780adb717f6e32a68d25, gas 279,981)
+  deposited an encrypted amount for 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f (tx 0x5544ed2b5cebbeb532ea0e7bb0b46921f3125d92f557868e9567bf57d357fa90, gas 1,120,175)
+  moved the local clock to 2026-09-03T00:37:32.000Z, period 17, so the top-up period is over and its draw can run
+  closed draw 16 (tx 0x7b28a6a7c95399b52f4aaab6380a74346ef01c699c0c1263db7c934f66b65c32, gas 1,203,924)
+  awarded draw 16 against a KMS-signed seed of 4468923168583543320 (tx 0x0c72df055f42a0b84206548d3aaed27e2eb999686a09bd0dade83960195f7f84, gas 163,657)
+  draw 16 runs against 2^39 with prizes of 120.00 / 60.00 / 30.00 USDC and 240.00 / 120.00 / 240.00 USDC on offer
+  0x36377E05aA1EC745B9364ABd00B8BA5978542C7c weighs 1,788,000,000,000, the public thresholds owe it 120.00 USDC and the vault credited 120.00 USDC
+  0xf0eb0FbdFA8cC88e504904043dbF380b65c504af weighs 1,779,000,000,000, the public thresholds owe it 120.00 USDC and the vault credited 120.00 USDC
+  0xefc2BD34872A3CbBcAA20f1fbc36e199aaa7b183 weighs 1,770,000,000,000, the public thresholds owe it 240.00 USDC and the vault credited 120.00 USDC
+  0xbd10AE81506cA7664a009Ee96447DDB5a4485e91 weighs 1,761,000,000,000, the public thresholds owe it 180.00 USDC and the vault credited 60.00 USDC
+  0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f weighs 1,797,000,000,000, the public thresholds owe it 180.00 USDC and the vault credited 60.00 USDC
+  the grand tier had 240.00 USDC available, the thresholds asked it for 120.00 USDC, it paid 120.00 USDC and has 120.00 USDC left
+  the mid tier had 120.00 USDC available, the thresholds asked it for 120.00 USDC, it paid 120.00 USDC and has 0.00 USDC left
+  the frequent tier had 240.00 USDC available, the thresholds asked it for 600.00 USDC, it paid 240.00 USDC and has 0.00 USDC left
+  the available and remaining figures on those three lines come from the local mock's clear-text store, which does not exist on Sepolia
+  savers were credited 480.00 USDC in total against 600.00 USDC the draw held
+  putting the seeded stakes back so the local pool looks the way hearth:seed left it
+  0x36377E05aA1EC745B9364ABd00B8BA5978542C7c withdrew everything (tx 0x9a786b3159e00d331e27dc94fdfeef3708d9d9941fd96a56a1f591eb645b07cc, gas 777,728)
+  deposited an encrypted amount for 0x36377E05aA1EC745B9364ABd00B8BA5978542C7c (tx 0xef414e757deb573d41be7f74fae39950150385be5fb18be51d6d006f0c9d43c9, gas 1,060,315)
+  0xf0eb0FbdFA8cC88e504904043dbF380b65c504af withdrew everything (tx 0x0aeddb0ff5affd19675fbbd7b36a45a68c0cefbccabcf2a5832f2b802affa71f, gas 760,960)
+  deposited an encrypted amount for 0xf0eb0FbdFA8cC88e504904043dbF380b65c504af (tx 0x2c40c8addcb3947b46b867bed664a8d739d80a7c994ffb81d12c01708762f4e6, gas 1,060,339)
+  0xefc2BD34872A3CbBcAA20f1fbc36e199aaa7b183 withdrew everything (tx 0x33d16215dcb82af2c6f48d1d69df3b8a4f283e139617e32539d09bbbbc35bbcf, gas 760,960)
+  deposited an encrypted amount for 0xefc2BD34872A3CbBcAA20f1fbc36e199aaa7b183 (tx 0xbc28c7f87fc3572814b8895576792de80cc09171cd74e45592a4f7292c17deb4, gas 1,060,339)
+  0xbd10AE81506cA7664a009Ee96447DDB5a4485e91 withdrew everything (tx 0x4f101ede524f1fb60868308f86a5d735fc18e63c060a0be6b300dc51340e6321, gas 760,960)
+  deposited an encrypted amount for 0xbd10AE81506cA7664a009Ee96447DDB5a4485e91 (tx 0x57e2dd014d4c2bfeb0dcc6fc59e8849ce1107b0b6928a164b7e78a505423442e, gas 1,060,339)
+  0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f withdrew everything (tx 0x4f6cf9724280887ced57b3dc086bbad04bf437fa7a11dc0203d40cdc22ef404c, gas 812,260)
+  deposited an encrypted amount for 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f (tx 0x14e83bbb1370d8f68178a212ab185274bc7c1c7d0ea496e73f410948bfbdb009, gas 1,060,327)
+  PASS: the thresholds asked for 840.00 USDC, the draw held 600.00 USDC and paid 480.00 USDC, never more
+
+Row 10. An award proof cannot be replayed against another draw
+  lifted the KMS proof of draw 16 out of the public transaction 0x0c72df055f42a0b84206548d3aaed27e2eb999686a09bd0dade83960195f7f84
+  it carries seed 4468923168583543320, scale count 5, non-empty true, harvest 1,200.00 USDC and 67 bytes of signatures
+  closed draw 15 (tx 0x01b8d7d63845b5e3deddcf9ab1291e03ccf9d10ca6fb235e5d1b11e4c3dc0da3, gas 1,130,315)
+  resubmitted against its own draw 16: WrongStatus(16, 2)
+  resubmitted against draw 15, which is closed and waiting for its own proof: KMSInvalidSigner(0xeFBf5c5bC8A26Bee84d9AC8C1526D5d1447bb591)
+  draw 15 still reads closed
+  PASS: the proof was refused against its own draw (WrongStatus(16, 2)) and against draw 15 (KMSInvalidSigner(0xeFBf5c5bC8A26Bee84d9AC8C1526D5d1447bb591))
+
+Row 11. Nobody withdraws more than they own
+  covered by the property test "keeps every balance, remainder and carry accounted for under a random sequence of actions" in test/Invariants.ts
+  NOT RUN: a property test over a random sequence of actions belongs in the suite, not in a live run
+
+Row 12. Money is conserved
+  covered by the same property test in test/Invariants.ts, and the payout share is covered by "pays each saver a share of the prizes that tracks their share of the pool" in test/Fairness.ts
+  NOT RUN: a property test over a random sequence of actions belongs in the suite, not in a live run
+
+12 rows in 6.0s: 10 PASS, 0 FAIL, 2 NOT RUN
+  PASS    row 1   A stranger cannot read a saver's principal, winnings, weight and credit
+  PASS    row 2   The pool's exact total time-weighted balance is not obtainable
+  PASS    row 3   A flash deposit earns almost nothing
+  PASS    row 4   Fake savers cannot stall a draw
+  PASS    row 5   Nobody can choose who is evaluated
+  PASS    row 6   A late close is refused and the draw costs nothing
+  PASS    row 7   A missed award loses nothing
+  PASS    row 8   A reverting yield source does not stop the clock
+  PASS    row 9   An over-subscribed tier clamps rather than overpaying
+  PASS    row 10  An award proof cannot be replayed against another draw
+  NOT RUN row 11  Nobody withdraws more than they own
+  NOT RUN row 12  Money is conserved
