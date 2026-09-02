@@ -87,3 +87,16 @@ waiting for the end of its 24-draw span.
 | Token | Why it is gone |
 | --- | --- |
 | `{{AGGREGATE_EXAMPLE}}` | The pool's exact total weight is no longer published. Replaced by `{{BRACKET_EXAMPLE}}`. |
+
+## Added by the README draft
+
+| Token | Meaning | Source of the value |
+| --- | --- | --- |
+| `{{REPO_URL}}` | The public GitHub repository | Ram, at push time |
+| `{{DOCS_URL}}` | The docs route of the live app | The app deployment |
+| `{{VIDEO_URL}}` | The demo video, hosted on X, YouTube or Loom | Ram, after recording |
+| `{{X_POST_URL}}` | The X post or thread announcing the project | Ram, after posting |
+| `{{TEST_OUTPUT}}` | The pasted output of `npm test` in the contracts package | The final suite run |
+| `{{PROVE_OUTPUT}}` | The pasted output of the prove-it command on Sepolia | The live run |
+| `{{GAS_DEPOSIT}}` | Gas of one deposit through the receive hook on Sepolia | A live receipt |
+| `{{GAS_WITHDRAW}}` | Gas of one `withdrawAll` on Sepolia | A live receipt |

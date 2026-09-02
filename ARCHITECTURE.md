@@ -58,9 +58,10 @@ Draw lifecycle, all steps permissionless:
    liquidity from the liquidity known at that moment (harvests booked by earlier awards
    plus reconciled remainders), moves that liquidity into the draw, draws a fresh encrypted
    random seed, asks the vault for the encrypted scale of period `p`'s aggregate weight,
-   harvests yield as one encrypted transfer from the yield source, and marks the seed, the
-   scale, the non-empty flag and the harvest handle publicly decryptable. Prize sizes are
-   therefore fixed before any random value exists.
+   harvests yield as one encrypted transfer from the yield source. Four handles end up
+   publicly decryptable: the pool marks the seed and the harvest, the vault marks the scale
+   count and the non-empty flag inside `scaleFor`, since only the vault is allowed on them.
+   Prize sizes are therefore fixed before any random value exists.
 2. `awardDraw(p, seed, scaleCount, nonEmpty, harvested, proof)`, at any time after the close,
    with the KMS-signed cleartexts of the four handles in that order. Verifies the proof on
    chain, books the harvest to the tiers by shares, updates the scale, and then: inside the
@@ -394,7 +395,7 @@ sequenceDiagram
     Note over V,P: window ends after period p+2
     K->>V: finalizeDraw(p)
     K->>Z: publicDecrypt(carry of each tier that is due)
-    K->>P: reconcile(p, tier, carry, proof)
+    K->>P: reconcile(tier, carry, proof)
 ```
 
 ## 12. Contract dependency graph

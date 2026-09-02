@@ -79,7 +79,7 @@ marked as such.
   `CoprocessorEventsIterator.next()` and updates it only after two awaits, so two overlapping
   decryptions re-query the same block range and the second throws "Parse event ... in
   backward order". A mock limitation, not a contract one.
-- 2026-09-03: `MAX_BATCH` is 4, measured on the mock's price table with the Sepolia tier set:
+- 2026-09-03, superseded by the re-measurement below: `MAX_BATCH` is 4, measured on the mock's price table with the Sepolia tier set:
   a saver costs 3,836,128 compute units across three tiers with a four-prize frequent tier,
   so five savers exceed the 20,000,000 cap. The vault's NatSpec carries the coefficients.
 - 2026-09-03: Sepolia period is one hour, not thirty minutes, with the grand tier at odds 1/24

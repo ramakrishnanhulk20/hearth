@@ -281,7 +281,7 @@ sequenceDiagram
     Note over V,P: window ends after period p+2
     K->>V: finalizeDraw(p)
     K->>Z: publicDecrypt(carry of each tier that is due)
-    K->>P: reconcile(p, tier, carry, proof)
+    K->>P: reconcile(tier, carry, proof)
 ```
 
 ### Contract dependencies
@@ -681,21 +681,47 @@ parameter meanings and a candidate mainnet set: [deploying](docs/operations/depl
 {{TEST_OUTPUT}}
 ```
 
-Covered: deposit through the ERC-7984 hook including the encrypted refusal at the
-per-saver cap, withdrawal ordering and clamping, the time-weighted balance across period
-boundaries and the three observation slots, the scale comparison and the bracket tracker,
-close and its deadline, award with a real KMS proof and its replay guard, the empty and
-skipped paths, the evaluation walk and its cursor, the nested-threshold winner test against
-the same arithmetic `thresholdOf` exposes, tier over-subscription and the clamp, finalize,
-the reconcile cadence, a reverting yield source, pause scope, two-step ownership, and the
-conservation properties: paid equals credited, nobody withdraws more than principal plus
-winnings, and the vault's token balance equals principal plus unclaimed winnings.
+The suite runs against Zama's mock coprocessor through the Hardhat plugin, so every
+encrypted operation, every access control grant and every KMS-signed decryption is really
+performed rather than stubbed out. What it covers, one line per test:
 
-Not covered by this suite: the live relayer and the live key management service, real gas
-and real coprocessor prices, nonce behaviour under a reorg, and anything Zama's own
-contracts do internally. Those are exercised by the Sepolia deployment, the prove-it
-command and the keeper's own suite, which is listed separately in
-[packages/keeper/README.md](packages/keeper/README.md) and touches no network at all.
+- One full cycle with the books balanced: deposit, close, award, evaluate, finalize,
+  reconcile, withdraw.
+- Prize sizes are fixed at the close, before the seed exists, and the award leaves them
+  alone.
+- The evaluation walk starts at the seed, runs in fixed batches, and reaches each saver
+  exactly once. A batch stops at the coprocessor budget and the next call resumes from the
+  cursor.
+- A saver who joined after the draw's period is skipped with no encrypted work at all.
+- The published scale climbs to the aggregate from far below and comes down from far above.
+- A period nobody held a balance in hands its liquidity back and keeps the carry.
+- An award that missed its window still books the harvest and still hands the liquidity
+  back.
+- A close after the deadline is refused, and a close at the start of the last period is
+  allowed.
+- Each tier publishes its carry on its own cadence and it is booked back exactly once.
+- Every threshold matches an off-chain mirror, and what is paid matches what the mirror
+  says.
+- A saver reads their own weight and credit; a stranger is refused.
+- A reverting yield source does not stop a close, and a pool with no source books a zero.
+- A mid-period deposit is weighted by the fraction of the period it was present.
+- Three observations are enough to weigh a draw two periods later.
+- A deposit above the per-saver cap is refused by refunding it.
+- Pause stops deposits and closing and never stops withdrawals.
+- The Chainlink upkeep reports the closable draw and closes exactly that one.
+- A forged award proof is rejected, and a tier configuration or a scale the pool cannot run
+  is refused at deployment.
+- The period arithmetic and the sponsored source have their own files.
+
+Not covered. The property and invariant tests are milestone 2 in `PLAN.md` and are not
+written yet: conservation of funds as a property rather than as one worked example, no
+withdrawal above principal plus winnings, tier payouts never above liquidity, and the
+distribution of winners per tier over many draws against the stated odds. Nor does this
+suite touch the live relayer, the live key management service, real gas, real coprocessor
+prices, nonce behaviour under a reorg, or anything Zama's own contracts do internally.
+Those belong to the Sepolia deployment and the prove-it command. The keeper has its own
+suite, described in [packages/keeper/README.md](packages/keeper/README.md), which touches
+no network at all.
 
 ---
 
@@ -773,7 +799,7 @@ hearth/
 | App | Next.js App Router, React, Tailwind, wagmi, viem | 15.5, 19, 3.4.17, 2.19.5, 2.55.8 |
 | App encryption | `@zama-fhe/sdk` | ^3.4.0 |
 | App motion | React Three Fiber, drei, postprocessing, Lenis | 9.7, 10.7.8, 3.1.1, 1.3.26 |
-| Keeper | Node 20, ethers, pm2 | 6.16.0 |
+| Keeper | Node 20 with its own test runner, ethers 6.16.0, run under pm2 for a demo | No framework |
 | Automation | Chainlink time-based upkeep, interface declared locally | Two selectors, no package |
 
 ---

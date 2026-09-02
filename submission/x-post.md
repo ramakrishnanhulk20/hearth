@@ -10,14 +10,14 @@ before posting, and check the thread renders as one thread rather than five sepa
 
 ## Variant A: a single post
 
-Fits the 280-character limit, so it works on any account. 267 characters with the
-placeholders as written; check it again once the real URLs are in, because a link counts as
-23 characters however long it is.
+Fits the 280-character limit, so it works on any account. 267 characters as written, and
+279 once the placeholder becomes a real link, because X counts every link as 23 characters
+however long it is. There is no room left, so do not add a word.
 
-> Hearth: no-loss prize savings where nobody can see what you saved or what you won.
+> Hearth: prize savings where nobody can see what you saved or what you won.
 >
-> Balances encrypted with @zama FHE. Odds are time-weighted. The draw is publicly checkable
-> by anyone. There is no claim button, so no transaction names the winner.
+> Balances encrypted with @zama FHE. Odds are time-weighted. Anyone can check the draw. No
+> claim button, so no transaction names the winner.
 >
 > Live on Sepolia: {{APP_URL}}
 >
@@ -28,7 +28,8 @@ placeholders as written; check it again once the real URLs are in, because a lin
 ## Variant B: a five-post thread
 
 Post 1 is the hook and carries the tag. The rest are replies. Keep the video on post 5 so
-the thread reads before it plays.
+the thread reads before it plays. Lengths as written: 257, 269, 275, 270 and 226 characters
+with the four links counted at 23 each. Only post 5 has room for another line.
 
 **1/5**
 
@@ -42,15 +43,15 @@ the thread reads before it plays.
 
 > You deposit confidential USDC. The pool's yield is handed out as prizes every hour. Your
 > principal comes back whenever you ask, in full. Your odds come from your average balance
-> across the whole period, so nobody can flash a big balance in one block before the draw
-> and take the prize.
+> across the whole period, so nobody can flash a big balance in one block and take the
+> prize.
 
 **3/5**
 
 > The hard part is keeping the draw checkable while the balances stay secret. The random
 > seed is drawn inside Zama's coprocessor and published after the period ends with a proof
-> the contract verifies on chain. From it, anyone can recompute the exact threshold any
-> address had to beat.
+> the contract verifies on chain. From it anyone can recompute the threshold any address
+> had to beat.
 
 **4/5**
 

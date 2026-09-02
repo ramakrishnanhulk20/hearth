@@ -170,7 +170,7 @@ the pool failed to fund. With verified harvests it is always zero.
 
 ### 5. Reconcile
 
-`reconcile(p, tier, carry, proof)` on the pool, one tier at a time, and only when that
+`reconcile(tier, carry, proof)` on the pool, one tier at a time, and only when that
 tier is due.
 
 Each tier reconciles on its own cadence, set at deployment as `reconcileEvery[t]` draws.
@@ -252,7 +252,7 @@ sequenceDiagram
     Note over V,P: window ends after period p+2
     K->>V: finalizeDraw(p)
     K->>Z: publicDecrypt(carry of each tier that is due)
-    K->>P: reconcile(p, tier, carry, proof)
+    K->>P: reconcile(tier, carry, proof)
 ```
 
 ## What this page does not cover
