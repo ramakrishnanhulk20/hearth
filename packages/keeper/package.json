@@ -1,0 +1,33 @@
+{
+  "name": "@hearth/keeper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Keeper that drives Hearth draws: close, award, evaluate, finalize, reconcile",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "hearth-keeper": "dist/src/index.js"
+  },
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/src/index.js",
+    "once": "node dist/src/index.js --once",
+    "plan": "node dist/src/index.js --once --dry-run",
+    "test": "npm run build && node --test \"dist/test/*.test.js\"",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@zama-fhe/relayer-sdk": "0.4.1",
+    "dotenv": "^16.6.1",
+    "ethers": "^6.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.30",
+    "typescript": "^5.9.3"
+  }
+}

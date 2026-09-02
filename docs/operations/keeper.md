@@ -33,9 +33,10 @@ saves savers the trouble, not a role the pool depends on for safety.
    carry, publishes the unfunded counter, and marks the carry publicly decryptable for any
    tier that is due to reconcile, emitting `CarryPublished`.
 6. **Reconcile, per due tier.** For each tier that `finalizeDraw` published, fetch the
-   carry cleartext and call `reconcile(p, tier, carry, proof)`. That books the verified
-   number back into the tier's plaintext liquidity, resets the carry to zero and emits
-   `TierReconciled`.
+   carry cleartext and call `reconcile(tier, carry, proof)`. The pool checks the proof against
+   the handle the vault published, books the verified number into the tier's plaintext
+   liquidity, the vault subtracts it from the carry (which may have grown since it was
+   published), and `TierReconciled` is emitted.
 
 Step 6 does not run for every tier every draw. On Sepolia the frequent tier is due every
 draw, the mid tier every 6 and the grand tier every 24. The reason is privacy, not gas,
@@ -88,8 +89,8 @@ Every step above is permissionless, and the app exposes the ones a saver would w
   then awards. The relayer call is the same one the keeper makes, and the SDK does it from
   the page.
 - **Advance evaluation.** Runs `evaluate(p, count)` for the draw currently open,
-  advancing the shared walk by a batch. This is the button to press if the keeper's budget
-  ran out before the walk reached you. It does not let you pick yourself, and that is the
+  advancing the shared walk by a batch. This is the button to press if the keeper is down
+  and the walk has not reached you yet. It does not let you pick yourself, and that is the
   feature: because nobody can single themselves out, sending this transaction says nothing
   about whether you won.
 - **Finalize and reconcile.** Runs the two closing steps for any draw whose window has
@@ -139,30 +140,43 @@ limits of 20,000,000 compute units per transaction with 5,000,000 in sequential 
 `evaluate` accepts any count, so if Zama reprices an operation the keeper can drop to a
 smaller batch without a redeploy.
 
-**The keeper caps its own spend.** Nothing on chain limits how much evaluation costs, so
-the budget lives in the keeper's configuration. It advances the walk until its per-draw
-budget is spent. The honest consequence is stated in the
-[threat model](../security/threat-model.md): in a pool padded with worthless addresses,
-the walk may not reach every real saver inside the window, and someone would need to press
-"Advance evaluation" to push it further. Because the walk starts at a different point
-every draw, nobody sits permanently at the back of the queue.
+**The keeper evaluates the whole walk.** Nothing on chain limits how much evaluation costs,
+and the keeper does not stop part way either; what it enforces is a fee ceiling
+(`KEEPER_MAX_FEE_GWEI`), below which it keeps sending until the cursor reaches the end. The
+honest consequence is stated in the [threat model](../security/threat-model.md): a pool
+padded with worthless addresses costs the keeper more gas per draw, not the savers their
+prizes, because addresses with no observation before the period are skipped without any
+encrypted work. If the keeper is down, anyone can press "Advance evaluation", and because
+the walk starts at a different point every draw, nobody sits permanently at the back.
 
 ## Running it
 
+The keeper is the `@hearth/keeper` package. It signs with account index 1 of the same
+`RECOVERY_PHRASE` the deploy uses and reads `SEPOLIA_RPC_URL` from `packages/contracts/.env`;
+its own settings live in `packages/keeper/.env`:
+
 ```
-KEEPER_PRIVATE_KEY=...        # the account that sends the transactions
-SEPOLIA_RPC_URL=...
-RELAYER_URL=...               # Zama's relayer for the network
-POOL_ADDRESS={{ADDRESS_POOL}}
-VAULT_ADDRESS={{ADDRESS_VAULT}}
-MAX_GAS_PER_DRAW=...          # the self-imposed evaluation budget
+HEARTH_VAULT={{ADDRESS_VAULT}}
+HEARTH_POOL={{ADDRESS_POOL}}
+HEARTH_SOURCE={{ADDRESS_SOURCE}}   # optional, printed at boot
+KEEPER_BATCH=4                     # savers of encrypted work per evaluate call
+KEEPER_POLL_SECONDS=30
+KEEPER_MAX_FEE_GWEI=20             # refuse to send above this
+```
+
+```
+npm run compile -w @hearth/contracts    # the keeper reads the compiled ABI
+npm run build -w @hearth/keeper
+npm run plan -w @hearth/keeper          # one pass, simulates every call, sends nothing
+npm run once -w @hearth/keeper          # one live pass
+pm2 start packages/keeper/ecosystem.config.cjs
 ```
 
 The keeper is stateless between ticks: it reads the draw state, the evaluation cursor and
 the reconcile cadence from the chain and works out what to do. Restarting it loses
-nothing. It is safe to run two of them; the second one's redundant calls revert or no-op,
-because every step succeeds exactly once per draw and per tier, and two evaluate calls
-racing each other simply advance the same cursor.
+nothing. Run one instance per account: on chain every step succeeds exactly once per draw
+and per tier and two evaluate calls simply advance the same cursor, but two keepers on one
+account race each other for the transaction nonce.
 
 ## What this page does not cover
 
