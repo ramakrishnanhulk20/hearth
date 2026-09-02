@@ -148,3 +148,7 @@ marked as such.
   demo pool as it found it and can be repeated any number of times.
 - 2026-09-03: `walkOf` returns `(start, count)`. The earlier name `length` collided with a tuple's own
   `length` in the generated TypeScript types and made the return type unusable.
+- 2026-09-03: slither runs against a plain compile of the contracts in a throwaway copy without the
+  FHEVM plugin, because the plugin rewrites `ZamaConfig.sol` at compile time and slither cannot map
+  offsets back to the file on disk. Same compiler settings, so the same bytecode. 88 results, 85 in our
+  contracts, all explained on docs/security/static-analysis.md; none changed the code.
