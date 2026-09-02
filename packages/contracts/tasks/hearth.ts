@@ -520,16 +520,22 @@ task("hearth:seed", "Sponsors the yield source and fills the pool with five save
     const deployer = signers[0];
 
     console.log(`Seeding Hearth on ${hre.network.name}.`);
-    console.log(`sponsoring the yield source with ${usd(config.initialSponsorship)} USDC`);
-    await obtain(ctx, deployer, config.initialSponsorship);
-    await send(
-      `  approved the source to take ${usd(config.initialSponsorship)} USDC`,
-      (ctx.underlying.connect(deployer) as Contract).approve(ctx.addresses.source, config.initialSponsorship),
-    );
-    await send(
-      `  sponsored ${usd(config.initialSponsorship)} USDC`,
-      ctx.source.connect(deployer).sponsor(config.initialSponsorship),
-    );
+    // A seed that stops half way, for example on a relayer hiccup, must be safe to run again, so
+    // every step checks the chain for what is already done before spending anything.
+    if ((await ctx.source.balance()) >= config.initialSponsorship) {
+      console.log(`the yield source already holds its sponsorship, so nothing more is sponsored`);
+    } else {
+      console.log(`sponsoring the yield source with ${usd(config.initialSponsorship)} USDC`);
+      await obtain(ctx, deployer, config.initialSponsorship);
+      await send(
+        `  approved the source to take ${usd(config.initialSponsorship)} USDC`,
+        (ctx.underlying.connect(deployer) as Contract).approve(ctx.addresses.source, config.initialSponsorship),
+      );
+      await send(
+        `  sponsored ${usd(config.initialSponsorship)} USDC`,
+        ctx.source.connect(deployer).sponsor(config.initialSponsorship),
+      );
+    }
     console.log(
       `the source now holds ${usd(await ctx.source.balance())} USDC and releases ` +
         `${usd((await ctx.source.ratePerSecond()) * ctx.periodLength)} USDC a period`,
@@ -539,17 +545,29 @@ task("hearth:seed", "Sponsors the yield source and fills the pool with five save
       const saver = signers[FIRST_SAVER_ACCOUNT + index];
       const stake = SEED_STAKES[index];
       const address = await saver.getAddress();
+      if (await ctx.vault.isSaver(address)) {
+        console.log(`saver at account index ${FIRST_SAVER_ACCOUNT + index}, ${address}, is already in the pool`);
+        continue;
+      }
       console.log(`saver at account index ${FIRST_SAVER_ACCOUNT + index}, ${address}, is depositing ${usd(stake)} USDC`);
       await obtain(ctx, saver, stake);
       await wrapAndDeposit(ctx, saver, stake);
 
-      const principal = await userDecrypt(
-        hre,
-        await ctx.vault.confidentialBalanceOf(address),
-        ctx.addresses.vault,
-        saver,
-      );
-      console.log(`  they decrypted their own principal and it reads ${usd(principal)} USDC`);
+      try {
+        const principal = await userDecrypt(
+          hre,
+          await ctx.vault.confidentialBalanceOf(address),
+          ctx.addresses.vault,
+          saver,
+        );
+        console.log(`  they decrypted their own principal and it reads ${usd(principal)} USDC`);
+      } catch (error) {
+        // The deposit is on chain either way; a failed self-decryption is the relayer's problem and
+        // is reported rather than allowed to strand the remaining savers.
+        const message = error instanceof Error ? error.message.split("
+")[0] : String(error);
+        console.log(`  their own decryption failed, which does not affect the deposit: ${message}`);
+      }
     }
 
     console.log(`the vault now has ${await ctx.vault.saverCount()} savers and period ${await ctx.vault.currentPeriod()} is running`);
