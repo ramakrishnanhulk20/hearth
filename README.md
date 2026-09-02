@@ -797,9 +797,9 @@ hearth/
 | Base libraries | `@openzeppelin/contracts` (Ownable2Step, Pausable, ReentrancyGuard, SafeERC20) | ^5.6.1 |
 | Language | Solidity | 0.8.27 |
 | Contract tooling | Hardhat, `@fhevm/hardhat-plugin`, `@fhevm/mock-utils`, hardhat-deploy, TypeChain, solhint | 2.28.6, 0.4.2, 0.4.2, 0.11.45, 8.3.2, 6.2.1 |
-| Relayer client | `@zama-fhe/relayer-sdk` in the contracts tests and the keeper | 0.4.1 |
+| Local FHE mock | `@zama-fhe/relayer-sdk`, required by the Hardhat plugin and used only by the local simulator | 0.4.4 |
+| Encryption and decryption client | `@zama-fhe/sdk` in the operator tasks, the keeper and the app | 3.5.1 |
 | App | Next.js App Router, React, Tailwind, wagmi, viem | 15.5, 19, 3.4.17, 2.19.5, 2.55.8 |
-| App encryption | `@zama-fhe/sdk` | ^3.4.0 |
 | App motion | React Three Fiber, drei, postprocessing, Lenis | 9.7, 10.7.8, 3.1.1, 1.3.26 |
 | Keeper | Node 20 with its own test runner, ethers 6.16.0, run under pm2 for a demo | No framework |
 | Automation | Chainlink time-based upkeep, interface declared locally | Two selectors, no package |

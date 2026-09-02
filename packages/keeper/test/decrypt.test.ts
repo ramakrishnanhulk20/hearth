@@ -4,19 +4,33 @@
 // Does not cover the live relayer, the KMS signatures, or whether a handle is decryptable yet.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { PublicDecryptResults } from "@zama-fhe/relayer-sdk/node";
+import type { DecryptPublicValuesResult, EncryptedValue } from "@zama-fhe/sdk";
 import { awardHandles } from "../src/plan.js";
 import type { ClearValue, DecryptSource } from "../src/relayer.js";
 import { DecryptError, asBigint, asBoolean, createDecryptor, orderValues, readAward } from "../src/relayer.js";
 
 const POLICY = { attempts: 1, baseDelayMs: 1, maxDelayMs: 1 };
 
-function results(pairs: Record<string, ClearValue>, proof = "0xproof"): PublicDecryptResults {
+/** A 32 byte handle whose last hex digits are `tail`, which is what the SDK will accept. */
+function handle(tail: string): string {
+  return `0x${tail.padStart(64, "0")}`;
+}
+
+const AA = handle("aa");
+const BB = handle("bb");
+const CC = handle("cc");
+
+/**
+ * The SDK types a clear value with branded number types (`Uint8Number` and friends), so a plain
+ * JavaScript number, which is exactly what a euint8 arrives as at runtime, does not typecheck
+ * against them. The cast is at this boundary so the fixtures can model what really comes back.
+ */
+function results(pairs: Record<string, ClearValue>, proof = "0xproof"): DecryptPublicValuesResult {
   return {
-    clearValues: pairs,
+    clearValues: pairs as DecryptPublicValuesResult["clearValues"],
     abiEncodedClearValues: "0x",
-    decryptionProof: proof,
-  } as unknown as PublicDecryptResults;
+    decryptionProof: proof as `0x${string}`,
+  };
 }
 
 test("an award asks for the seed, the scale, the empty flag and the harvest, in that order", () => {
@@ -30,29 +44,40 @@ test("an award asks for the seed, the scale, the empty flag and the harvest, in 
 });
 
 test("cleartexts come back in the order they were asked for, whatever order the relayer used", () => {
-  const values = orderValues(
-    ["0xaa", "0xbb", "0xcc"],
-    results({ "0xcc": 3n, "0xaa": 1n, "0xbb": 2n }),
-  );
+  const values = orderValues([AA, BB, CC], results({ [CC]: 3n, [AA]: 1n, [BB]: 2n }));
   assert.deepEqual(values, [1n, 2n, 3n]);
 });
 
 test("a handle is matched whatever case the relayer echoes it in", () => {
-  const values = orderValues(["0xAbCd"], results({ "0xabcd": 42n }));
+  const values = orderValues([handle("AbCd")], results({ [handle("abcd")]: 42n }));
   assert.deepEqual(values, [42n]);
 });
 
 test("a missing cleartext is a loud error naming the handle", () => {
-  assert.throws(() => orderValues(["0xaa", "0xbb"], results({ "0xaa": 1n })), (error: unknown) => {
+  assert.throws(() => orderValues([AA, BB], results({ [AA]: 1n })), (error: unknown) => {
     assert.ok(error instanceof DecryptError);
-    assert.match((error as Error).message, /0xbb/);
+    assert.match((error as Error).message, new RegExp(BB));
     return true;
   });
+});
+
+test("a cleartext of a shape no award can use is refused rather than coerced", () => {
+  assert.throws(() => orderValues([AA], results({ [AA]: new Uint8Array([1]) as unknown as ClearValue })), DecryptError);
 });
 
 test("the four award values are named in the right order", () => {
   const award = readAward([7n, 3n, true, 1_240_000n]);
   assert.deepEqual(award, { seed: 7n, scaleCount: 3n, nonEmpty: true, harvested: 1_240_000n });
+});
+
+test("the scale count survives arriving as a number, which is how a euint8 comes back", () => {
+  // uint8, uint16 and uint32 decrypt to JavaScript numbers and everything wider to bigints, so an
+  // award mixes the two shapes in one response.
+  const award = readAward([7n, 3, true, 1_240_000n]);
+  assert.deepEqual(award, { seed: 7n, scaleCount: 3n, nonEmpty: true, harvested: 1_240_000n });
+  assert.equal(asBigint(3, "the scale count"), 3n);
+  assert.equal(asBoolean(0, "flag"), false);
+  assert.equal(asBoolean(1, "flag"), true);
 });
 
 test("an award with the wrong number of cleartexts is refused rather than guessed at", () => {
@@ -73,41 +98,57 @@ test("two decryptions asked for at once still run one after the other", async ()
   let overlapped = false;
   const order: string[] = [];
   const source: DecryptSource = {
-    async publicDecrypt(handles: string[]): Promise<PublicDecryptResults> {
+    async decryptPublicValues(handles: EncryptedValue[]): Promise<DecryptPublicValuesResult> {
       inFlight += 1;
       if (inFlight > 1) overlapped = true;
       await new Promise((done) => setTimeout(done, 5));
       inFlight -= 1;
-      const handle = handles[0] ?? "0x";
-      order.push(handle);
-      return results({ [handle]: 1n });
+      const asked = handles[0] ?? "0x";
+      order.push(asked);
+      return results({ [asked]: 1n });
     },
   };
 
   const decryptor = createDecryptor(source, { policy: POLICY, timeoutMs: 1_000 });
-  await Promise.all([decryptor.publicDecrypt(["0xaa"]), decryptor.publicDecrypt(["0xbb"])]);
+  await Promise.all([decryptor.publicDecrypt([AA]), decryptor.publicDecrypt([BB])]);
 
   assert.equal(overlapped, false);
-  assert.deepEqual(order, ["0xaa", "0xbb"]);
+  assert.deepEqual(order, [AA, BB]);
 });
 
 test("a failed decryption does not block the next one", async () => {
   let call = 0;
   const source: DecryptSource = {
-    async publicDecrypt(handles: string[]): Promise<PublicDecryptResults> {
+    async decryptPublicValues(handles: EncryptedValue[]): Promise<DecryptPublicValuesResult> {
       call += 1;
       if (call === 1) throw new TypeError("bad handle");
       return results({ [handles[0] ?? "0x"]: 5n });
     },
   };
   const decryptor = createDecryptor(source, { policy: POLICY, timeoutMs: 1_000 });
-  await assert.rejects(decryptor.publicDecrypt(["0xaa"]));
-  const second = await decryptor.publicDecrypt(["0xbb"]);
+  await assert.rejects(decryptor.publicDecrypt([AA]));
+  const second = await decryptor.publicDecrypt([BB]);
   assert.deepEqual(second.values, [5n]);
   assert.equal(second.proof, "0xproof");
 });
 
 test("asking for no handles at all is a mistake, not a request", () => {
-  const decryptor = createDecryptor({ publicDecrypt: async () => results({}) }, { policy: POLICY, timeoutMs: 1 });
+  const decryptor = createDecryptor(
+    { decryptPublicValues: async () => results({}) },
+    { policy: POLICY, timeoutMs: 1 },
+  );
   assert.throws(() => decryptor.publicDecrypt([]), DecryptError);
+});
+
+test("something that is not a 32 byte handle never reaches the relayer", async () => {
+  let called = false;
+  const source: DecryptSource = {
+    async decryptPublicValues(): Promise<DecryptPublicValuesResult> {
+      called = true;
+      return results({});
+    },
+  };
+  const decryptor = createDecryptor(source, { policy: POLICY, timeoutMs: 1_000 });
+  await assert.rejects(decryptor.publicDecrypt(["0xaa"]), DecryptError);
+  assert.equal(called, false);
 });

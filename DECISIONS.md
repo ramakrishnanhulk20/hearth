@@ -165,4 +165,41 @@ marked as such.
   Zama SDK line, not the legacy `@zama-fhe/relayer-sdk` 0.4.x. Against the live Sepolia KMS every
   user decryption through the legacy line, 0.4.1 and 0.4.4 alike, failed in share reconstruction
   three times running; the same handle decrypted in four seconds through the current SDK. The
-  Hardhat plugin keeps its own legacy copy for the local mock, which never talks to the real KMS.
+  legacy package stays in `packages/contracts` as a development dependency because
+  `@fhevm/hardhat-plugin` 0.4.2 requires it through `@fhevm/mock-utils` while Hardhat loads the
+  config, so removing it makes every Hardhat command fail before it starts. Nothing of ours
+  imports it, and the local mock it serves never talks to the real KMS.
+- 2026-09-03: the operator tasks build one SDK per signing account and one signer-less SDK for
+  public decryptions. Per account because the transport key pair and the EIP-712 permit the
+  relayer checks are bound to the address that signed them, and a single seed, prove or audit run
+  decrypts as five savers, the prover and a fresh stranger. Signer-less for the public path
+  because `decryptPublicValues` needs no wallet, so that instance cannot user-decrypt anyone's
+  handle by mistake. The ethers adapter's `createConfig` accepts an EIP-1193 provider or a signer
+  but has no provider-only variant, so the read-only provider goes through the generic
+  `createConfig` with `EthersProvider` instead.
+- 2026-09-03: a decryption is retried only when `@zama-fhe/sdk` marks the failure retryable or the
+  cause chain carries one of `AclPublicDecryptionError`, `RelayerFetchError`,
+  `RelayerMaxRetryError`, `RelayerRequestInternalError` or `RelayerTimeoutError`, or an HTTP 5xx.
+  The SDK collapses everything except its own transient set into a terminal
+  `DecryptionFailedError`, so the reason has to be read off the cause. A `NotEntitledError` is
+  deliberately not on the list: that is the access control list refusing, which is exactly what
+  prove step 3 and audit rows 1 and 2 need to see once and print, not six times with backoff.
+- 2026-09-03: every helper that turns a cleartext into a number accepts a JavaScript number as
+  well as a bigint. `@zama-fhe/sdk` returns `euint8`, `euint16` and `euint32` as numbers and
+  everything wider as bigints, where the legacy relayer SDK returned bigints throughout, so a
+  draw's award mixes both shapes in one response: the seed and the harvest are bigints and the
+  scale count is a number. This was found the hard way on Sepolia, where the first live award
+  failed on a strict type check after `closeDraw` had already spent its gas. The SDK's own
+  `ClearValue` type uses branded number types, so a plain number does not typecheck against it
+  even though that is exactly what arrives; the test fixtures cast at that one boundary.
+- 2026-09-03: a user decryption that fails KMS share reconstruction is retried under a freshly
+  generated transport key pair rather than by waiting. Sepolia's KMS is thirteen parties and a
+  user decryption reconstructs from nine signcrypted shares; one party is currently serving a
+  share the others disagree with, and the relayer answers "Gao decoding failure ... n=13, deg=4,
+  #shares=9". Measured against the live vault: the same handle failed six times out of six when
+  asked again under the same transport key pair, and succeeded on the third try when
+  `permits.clear()` regenerated the key pair between tries, so the bad share is fixed to the key
+  pair rather than drawn per request. The seeded savers then read back 1,200 / 600 / 300 / 150 /
+  75 USDC after seven, two, one, two and four redraws. Twenty redraws are budgeted because a prove
+  run makes ten decryptions in a row. The keeper only ever decrypts publicly, which carries no
+  transport key pair, so it keeps the plain ask-again path for the same signal.

@@ -3,6 +3,12 @@
 // Does not cover real network timing or the relayer's own queueing.
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import {
+  DecryptionFailedError,
+  NotEntitledError,
+  RelayerRequestFailedError,
+  RpcRateLimitError,
+} from "@zama-fhe/sdk";
 import { backoffDelay, errorText, isRetryableRelayerError, withRetry } from "../src/retry.js";
 
 const POLICY = { attempts: 4, baseDelayMs: 1_000, maxDelayMs: 8_000 };
@@ -17,11 +23,56 @@ test("rate limiting and a handle that is not decryptable yet are worth another t
 });
 
 test("an ACL answer of not allowed is treated as a node that is behind, and asked again", () => {
-  // The relayer SDK checks the ACL against its own RPC before it calls the relayer. Every handle
-  // the keeper asks about was made publicly decryptable by closeDraw in a mined transaction.
+  // The SDK checks the ACL against its own RPC before it calls the relayer, then folds the
+  // refusal into a terminal DecryptionFailedError. Every handle the keeper asks about was made
+  // publicly decryptable by closeDraw in a mined transaction, so the reason is read off the cause.
+  // The name is FhevmErrorBase because @fhevm/sdk's error base overwrites it on everything it
+  // throws, so only the message says what happened.
   const acl = new Error("Handle 0x11 is not allowed for public decryption");
-  acl.name = "ACLPublicDecryptionError";
+  acl.name = "FhevmErrorBase";
   assert.equal(isRetryableRelayerError(acl), true);
+  assert.equal(
+    isRetryableRelayerError(new DecryptionFailedError("Public decryption failed", { cause: acl })),
+    true,
+  );
+});
+
+test("a KMS party serving a bad share is worth another draw of the share set", () => {
+  const shares = new Error(
+    "Error reconstructing all blocks: Gao decoding failure: Allowed at most 0 errors but xgcd " +
+      "factor degree indicates 1.. n=13, deg=4, #shares=9",
+  );
+  assert.equal(
+    isRetryableRelayerError(new DecryptionFailedError("Failed to decrypt encrypted values", { cause: shares })),
+    true,
+  );
+});
+
+test("the SDK's own verdict on a transient failure is honoured", () => {
+  assert.equal(isRetryableRelayerError(new RelayerRequestFailedError("too many requests", 429)), true);
+  assert.equal(isRetryableRelayerError(new RpcRateLimitError("the node throttled the ACL read")), true);
+});
+
+test("the wordings the current relayer gives a timeout, a retry limit and a server fault", () => {
+  for (const message of [
+    "Public decryption: Request timed out after 120000ms",
+    "Public decryption: Maximum polling retry limit exceeded (10 attempts)",
+    "Public decryption: Relayer SDK internal error",
+  ]) {
+    const fault = new Error(message);
+    fault.name = "FhevmErrorBase";
+    assert.equal(isRetryableRelayerError(new DecryptionFailedError("Public decryption failed", { cause: fault })), true);
+  }
+});
+
+test("a refusal by the access control list is final, whatever the wording", () => {
+  const refused = new NotEntitledError({
+    encryptedValue: "0x11",
+    contractAddress: "0x22",
+    account: "0x33",
+  });
+  assert.equal(isRetryableRelayerError(refused), false);
+  assert.equal(isRetryableRelayerError(new RelayerRequestFailedError("bad request", 400)), false);
 });
 
 test("a mistake in our own request is not retried", () => {

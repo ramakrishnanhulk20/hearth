@@ -14,7 +14,7 @@ Updated 3 September 2026, during the Sepolia deployment.
 - Contracts, third pass: `HearthVault`, `HearthPrizePool`, `SponsoredYieldSource`,
   interfaces and libraries compile and lint clean; 32 tests green on the mock; batch limit
   measured at four savers per evaluation on the Sepolia tiers.
-- Keeper package built with 52 offline tests; documentation pages (19) written to the
+- Keeper package built with 59 offline tests; documentation pages (19) written to the
   third design; README and submission drafts written with placeholders; MIT licence.
 - Deploy script, network config and operator tasks (spread gas, seed, status, draw,
   verify, prove) built and run end to end on a local node twice; the prove-it command
@@ -30,14 +30,23 @@ Updated 3 September 2026, during the Sepolia deployment.
   contract suite is 35 tests. Executed attack scripts: 10 of the 12 threat-model rows run
   locally and pass, transcript under `docs/security/attacks`.
 - Every tier now reconciles every draw so the jackpot accumulates in public; docs follow.
-- Sepolia deployed and verified (addresses below), 10,000 USDC sponsored at 20 an hour,
-  saver index 2 in with 1,200 USDC. The legacy relayer SDK cannot decrypt against the live
-  KMS any more; tooling is moving to `@zama-fhe/sdk` 3.5.1 (in progress).
+- Sepolia deployed and verified (addresses below), 10,000 USDC sponsored at 20 an hour, all
+  five demo savers in with 1,200 / 600 / 300 / 150 / 75 USDC.
+- Operator tasks and keeper migrated off the legacy `@zama-fhe/relayer-sdk` onto
+  `@zama-fhe/sdk` 3.5.1. Live on Sepolia: every saver reads back their own principal
+  (1,200 / 600 / 300 / 150 / 75 USDC), a fresh wallet is refused with `NotEntitledError`, and
+  draw 1 closed, awarded against a KMS-signed seed and evaluated all five savers.
+- Two live faults found and fixed during that migration. One of Zama's thirteen KMS parties is
+  serving a share the others disagree with, which fails reconstruction for a given transport
+  key pair every time; the tasks recover by regenerating the key pair, which is the only thing
+  that redraws the share set. And the new SDK returns `euint8`, `euint16` and `euint32` as
+  JavaScript numbers where the legacy one returned bigints, which broke the draw's scale count
+  until the coercions were widened.
 
 ## Next
 
-- Finish the SDK migration, seed savers 3 to 6, run the keeper through at least two draws,
-  prove-it output, attack scripts run live, threat model finalised, README numbers.
+- Run the keeper through at least two draws, prove-it output, attack scripts run live,
+  threat model finalised, README numbers.
 - Then the app rewire, the docs route, the README numbers, and the submission package.
 
 ## Blocked on Ram

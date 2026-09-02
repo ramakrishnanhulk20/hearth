@@ -87,10 +87,10 @@ export class Keeper {
     const signer = wallet.connect(provider);
     const relayer =
       decryptor ??
-      (await connectRelayer(config, {
+      connectRelayer(config, provider, {
         onRetry: (attempt, delay) =>
           line(`the relayer is not ready yet, asking again in ${Math.round(delay / 1000)}s (try ${attempt})`),
-      }));
+      });
 
     const keeper = new Keeper(
       config,

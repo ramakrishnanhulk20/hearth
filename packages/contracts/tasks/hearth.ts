@@ -1,4 +1,4 @@
-import { FhevmType } from "@fhevm/hardhat-plugin";
+import { FhevmType, type FhevmTypeEuint } from "@fhevm/hardhat-plugin";
 import type { Contract, ContractTransactionReceipt, ContractTransactionResponse, Signer } from "ethers";
 import { task, types } from "hardhat/config";
 import type { HardhatRuntimeEnvironment, HttpNetworkConfig } from "hardhat/types";
@@ -48,10 +48,19 @@ export const ERC20_ABI = [
   "function claim()",
 ];
 
-export type Cleartext = bigint | boolean | string;
-type DecryptResults = { readonly clearValues: Record<string, Cleartext>; readonly decryptionProof: string };
+/**
+ * Every shape a decrypted value arrives in. `euint8`, `euint16` and `euint32` come back as
+ * JavaScript numbers and everything wider as a bigint, so the draw's scale count is a number while
+ * its seed and harvest are bigints. The legacy relayer SDK returned bigints throughout, which is
+ * why this only matters from `@zama-fhe/sdk` onward.
+ */
+export type Cleartext = bigint | boolean | number | string;
 export type Published = { readonly values: readonly Cleartext[]; readonly proof: string };
-type RelayerInstance = { publicDecrypt(handles: string[]): Promise<DecryptResults> };
+
+type Hex = `0x${string}`;
+type ClearMap = Readonly<Record<string, unknown>>;
+type ZamaModule = typeof import("@zama-fhe/sdk");
+type ZamaSdk = import("@zama-fhe/sdk").ZamaSDK;
 
 export type Hearth = {
   readonly hre: HardhatRuntimeEnvironment;
@@ -101,6 +110,7 @@ export function at(timestamp: bigint): string {
 
 export function asBigint(value: Cleartext | undefined, what: string): bigint {
   if (typeof value === "bigint") return value;
+  if (typeof value === "number") return BigInt(value);
   if (typeof value === "boolean") return value ? 1n : 0n;
   if (typeof value === "string") return BigInt(value);
   throw new Error(`${what} came back as ${typeof value}, and a number was expected`);
@@ -112,52 +122,274 @@ export function asBoolean(value: Cleartext | undefined, what: string): boolean {
 }
 
 /** The relayer answers with a map keyed by handle and says nothing about key case. */
-function order(handles: readonly string[], results: DecryptResults): readonly Cleartext[] {
-  const byHandle = new Map<string, Cleartext>();
-  for (const [key, value] of Object.entries(results.clearValues)) byHandle.set(key.toLowerCase(), value);
+function order(handles: readonly string[], clearValues: ClearMap): readonly Cleartext[] {
+  const byHandle = new Map<string, unknown>();
+  for (const [key, value] of Object.entries(clearValues)) byHandle.set(key.toLowerCase(), value);
   return handles.map((handle) => {
     const value = byHandle.get(handle.toLowerCase());
     if (value === undefined) throw new Error(`the relayer returned no cleartext for handle ${handle}`);
-    return value;
+    const kind = typeof value;
+    if (kind !== "bigint" && kind !== "number" && kind !== "boolean" && kind !== "string") {
+      throw new Error(`the cleartext of ${handle} came back as ${kind}, which is not a number, a flag or an address`);
+    }
+    return value as Cleartext;
   });
 }
 
-let relayer: RelayerInstance | null = null;
-
-async function sepoliaRelayer(hre: HardhatRuntimeEnvironment): Promise<RelayerInstance> {
-  if (relayer !== null) return relayer;
-  const { createInstance, SepoliaConfig } = await import("@zama-fhe/relayer-sdk/node");
-  const url = (hre.network.config as HttpNetworkConfig).url;
-  relayer = (await createInstance({ ...SepoliaConfig, network: url })) as unknown as RelayerInstance;
-  return relayer;
+function asHex(value: string, what: string): Hex {
+  if (!/^0x[0-9a-fA-F]*$/.test(value)) throw new Error(`${what} is not hex: ${value}`);
+  return value as Hex;
 }
 
 /**
- * One public decryption with its KMS proof. The proof is bound to the order the handles were asked
- * in, so that order is the contract rather than a convenience. Requests are never overlapped: the
- * coprocessor's event cursor is shared per instance.
+ * Loaded the first time a Sepolia task decrypts rather than when Hardhat loads this file. The SDK
+ * drags in the FHE runtime and its multi-megabyte keys, and every compile, deploy and local run
+ * would otherwise pay for a module they never call.
  */
-export async function publicDecrypt(hre: HardhatRuntimeEnvironment, handles: readonly string[]): Promise<Published> {
-  const asked = [...handles];
-  if (hre.network.name !== "sepolia") {
-    const results = (await hre.fhevm.publicDecrypt(asked)) as unknown as DecryptResults;
-    return { values: order(asked, results), proof: results.decryptionProof };
-  }
+let sdkModule: Promise<ZamaModule> | null = null;
 
-  // A handle published seconds ago is not decryptable until the relayer has caught up with the
-  // block that published it, so a first refusal is normal rather than a failure.
+function zama(): Promise<ZamaModule> {
+  sdkModule ??= import("@zama-fhe/sdk");
+  return sdkModule;
+}
+
+/**
+ * One SDK per account. The transport key pair and the EIP-712 permit the relayer checks are bound
+ * to the address that signed them, and a single run decrypts as five savers, the prover and a
+ * fresh stranger, so a shared instance would throw the previous account's credentials away on
+ * every switch.
+ */
+const sdkBySigner = new Map<string, Promise<ZamaSdk>>();
+let readOnlySdk: Promise<ZamaSdk> | null = null;
+
+function rpcUrl(hre: HardhatRuntimeEnvironment): string {
+  return (hre.network.config as HttpNetworkConfig).url;
+}
+
+async function signerSdk(hre: HardhatRuntimeEnvironment, who: Signer): Promise<ZamaSdk> {
+  const key = (await who.getAddress()).toLowerCase();
+  const known = sdkBySigner.get(key);
+  if (known !== undefined) return known;
+
+  const building = (async (): Promise<ZamaSdk> => {
+    const [{ ZamaSDK, memoryStorage }, { createConfig }, { node }, { sepolia }] = await Promise.all([
+      zama(),
+      import("@zama-fhe/sdk/ethers"),
+      import("@zama-fhe/sdk/node"),
+      import("@zama-fhe/sdk/chains"),
+    ]);
+    return new ZamaSDK(
+      createConfig({
+        chains: [{ ...sepolia, network: rpcUrl(hre) }],
+        signer: who,
+        storage: memoryStorage,
+        relayers: { [sepolia.id]: node() },
+      }),
+    );
+  })();
+  sdkBySigner.set(key, building);
+  return building;
+}
+
+/**
+ * A public decryption is signer-independent, so this instance is configured with a provider and no
+ * wallet at all and cannot user-decrypt anyone's handle by mistake. The ethers adapter's
+ * createConfig has no provider-only variant, so the provider is wrapped by hand and handed to the
+ * generic one.
+ */
+function publicSdk(hre: HardhatRuntimeEnvironment): Promise<ZamaSdk> {
+  readOnlySdk ??= (async (): Promise<ZamaSdk> => {
+    const [{ ZamaSDK, createConfig, memoryStorage }, { EthersProvider }, { node }, { sepolia }] = await Promise.all([
+      zama(),
+      import("@zama-fhe/sdk/ethers"),
+      import("@zama-fhe/sdk/node"),
+      import("@zama-fhe/sdk/chains"),
+    ]);
+    return new ZamaSDK(
+      createConfig({
+        chains: [{ ...sepolia, network: rpcUrl(hre) }],
+        provider: new EthersProvider({ provider: hre.ethers.provider }),
+        storage: memoryStorage,
+        relayers: { [sepolia.id]: node() },
+      }),
+    );
+  })();
+  return readOnlySdk;
+}
+
+/**
+ * Failures that mean "ask again in a moment" rather than "never". @zama-fhe/sdk folds everything
+ * outside its own transient set into a terminal DecryptionFailedError and keeps the original on
+ * `cause`, so the reason has to be read off the chain.
+ *
+ * Matched on message text rather than on the error class, because `@fhevm/sdk`'s error base
+ * overwrites `name` with "FhevmErrorBase" on every error it throws: the class that was raised is
+ * simply not on the object. Verified against the live relayer on 2 September 2026, where an ACL
+ * refusal arrived as `DecryptionFailedError` wrapping a cause named "FhevmErrorBase".
+ *
+ * The access control entry is here because the SDK checks the list against its own RPC before it
+ * calls the relayer, and every handle asked for publicly was made decryptable by a mined
+ * transaction, so that answer means the node is a block or two behind rather than that the handle
+ * is private. A user decryption refused by the list is a NotEntitledError instead, which reads
+ * "is not authorized to decrypt handle" and is deliberately not on this list.
+ */
+const ASK_AGAIN_MESSAGES = [
+  "not allowed for public decryption",
+  "request timed out",
+  "maximum polling retry limit exceeded",
+  "relayer sdk internal error",
+  "fetch failed",
+  "socket hang up",
+  "econnreset",
+  "etimedout",
+  "eai_again",
+];
+
+/**
+ * Sepolia's KMS is thirteen parties and a user decryption reconstructs from nine of their shares,
+ * each signcrypted to the caller's transport key. One party currently serves a share the others
+ * disagree with, and reconstruction fails with "Gao decoding failure ... n=13, deg=4, #shares=9".
+ *
+ * Measured on 2 September 2026: the same handle failed six times out of six when asked again under
+ * the same transport key pair, and succeeded on the third try when the key pair was regenerated
+ * between tries. The bad share is fixed to the key pair, so waiting changes nothing and a fresh
+ * key pair is the only thing that redraws it. Zama's party set is Zama's to fix; asking again
+ * under a new key is ours.
+ */
+const BAD_SHARE_MESSAGES = ["error reconstructing all blocks", "gao decoding failure"];
+
+/** What a failed decryption is worth doing about. */
+type Recovery = "give up" | "ask again" | "new credentials";
+
+/**
+ * How many times each recovery is worth trying. A wait for the coprocessor to catch up is long and
+ * a redrawn share is not, so they do not share a budget. Twenty redraws because the bad share is
+ * drawn far more often than not: on 2 September 2026 one handle took seven redraws, and a prove
+ * run makes ten decryptions in a row, so a budget that clears one handle most of the time still
+ * loses whole runs.
+ */
+const ASK_AGAIN_LIMIT = 6;
+const NEW_CREDENTIALS_LIMIT = 20;
+
+/** viem, ethers and the FHE backend each nest a lower level failure under a different key. */
+function causeChain(error: unknown): Record<string, unknown>[] {
+  const nodes: Record<string, unknown>[] = [];
+  let current: unknown = error;
+  for (let depth = 0; depth < 6 && current !== null && current !== undefined; depth++) {
+    if (typeof current !== "object") break;
+    const node = current as Record<string, unknown>;
+    nodes.push(node);
+    current = node["cause"] ?? node["error"] ?? node["info"];
+  }
+  return nodes;
+}
+
+function saysAny(nodes: readonly Record<string, unknown>[], needles: readonly string[]): boolean {
+  return nodes.some((node) => {
+    const message = node["message"];
+    const details = node["details"];
+    const text = `${typeof message === "string" ? message : ""} ${typeof details === "string" ? details : ""}`;
+    const lowered = text.toLowerCase();
+    return needles.some((needle) => lowered.includes(needle));
+  });
+}
+
+async function classify(error: unknown): Promise<Recovery> {
+  const nodes = causeChain(error);
+  if (saysAny(nodes, BAD_SHARE_MESSAGES)) return "new credentials";
+
+  const { isRetryable } = await zama();
+  if (isRetryable(error)) return "ask again";
+  if (saysAny(nodes, ASK_AGAIN_MESSAGES)) return "ask again";
+
+  // The relayer's own status getter, for a server fault whose wording this file has not seen.
+  const serverFault = nodes.some((node) => {
+    const status = node["statusCode"] ?? node["status"];
+    return typeof status === "number" && status >= 500;
+  });
+  return serverFault ? "ask again" : "give up";
+}
+
+/** The first line of whatever the failure carries, which is the part a terminal can read. */
+export function firstLine(error: unknown): string {
+  return error instanceof Error ? error.message.split("\n")[0].trim() : String(error);
+}
+
+/**
+ * The SDK spreads the three facts of an access-control refusal over a four-sentence paragraph, and
+ * prove step 3 and the audit transcript print a refusal straight to the terminal. Any other
+ * failure is not the list refusing, so it is left alone.
+ */
+export function decryptRefusal(error: unknown): string | null {
+  const shaped = error as { code?: unknown; account?: unknown; contractAddress?: unknown; encryptedValue?: unknown };
+  if (shaped.code !== "NOT_ENTITLED") return null;
+  return (
+    `NotEntitledError: the access control list does not allow ${String(shaped.account)} to decrypt ` +
+    `${String(shaped.encryptedValue)} on ${String(shaped.contractAddress)}`
+  );
+}
+
+/**
+ * A handle published seconds ago is not decryptable until the coprocessor and the RPC node have
+ * caught up with the block that published it, so a first refusal is normal rather than a failure.
+ * Only the failures the SDK marks retryable and the two families above are acted on; a refusal on
+ * the access control list comes straight back, which is what keeps a stranger's refusal one
+ * attempt long.
+ *
+ * `reseed` throws the caller's transport key pair and permits away, which is the only thing that
+ * moves a bad KMS share. A public decryption has no transport key pair to throw away, so it
+ * passes nothing and falls back to plain waiting for that class.
+ */
+async function withBackoff<T>(run: () => Promise<T>, reseed?: () => Promise<void>): Promise<T> {
   let wait = 4_000;
-  for (let attempt = 1; ; attempt++) {
+  let asked = 0;
+  let reseeded = 0;
+  for (;;) {
     try {
-      const results = await (await sepoliaRelayer(hre)).publicDecrypt(asked);
-      return { values: order(asked, results), proof: results.decryptionProof };
+      return await run();
     } catch (error) {
-      if (attempt >= 6) throw error;
-      console.log(`  the relayer is not ready yet, asking again in ${wait / 1_000}s (try ${attempt})`);
+      const recovery = await classify(error);
+      if (recovery === "give up") throw error;
+
+      if (recovery === "new credentials" && reseed !== undefined) {
+        reseeded += 1;
+        if (reseeded > NEW_CREDENTIALS_LIMIT) throw error;
+        await reseed();
+        console.log(`  a KMS share did not reconstruct, asking again under a fresh transport key (try ${reseeded})`);
+        continue;
+      }
+
+      asked += 1;
+      if (asked > ASK_AGAIN_LIMIT) throw error;
+      console.log(`  the relayer is not ready yet, asking again in ${wait / 1_000}s (try ${asked}): ${firstLine(error)}`);
       await new Promise((done) => setTimeout(done, wait));
       wait = Math.min(wait * 2, 30_000);
     }
   }
+}
+
+/**
+ * One public decryption with its KMS proof. The clear values come back in the order the handles
+ * were asked in, and that order is the contract rather than a convenience: the pool ABI-encodes
+ * the values itself in the same order and checks the KMS signature over that encoding, so asking
+ * in any other order makes checkSignatures revert.
+ */
+export async function publicDecrypt(hre: HardhatRuntimeEnvironment, handles: readonly string[]): Promise<Published> {
+  const asked = [...handles];
+  if (hre.network.name !== "sepolia") {
+    const results = (await hre.fhevm.publicDecrypt(asked)) as unknown as {
+      clearValues: ClearMap;
+      decryptionProof: string;
+    };
+    return { values: order(asked, results.clearValues), proof: results.decryptionProof };
+  }
+
+  const sdk = await publicSdk(hre);
+  const wanted = asked.map((handle, index) => asHex(handle, `handle ${index + 1}`));
+  return withBackoff(async () => {
+    const published = await sdk.decryption.decryptPublicValues(wanted);
+    return { values: order(asked, published.clearValues), proof: published.decryptionProof };
+  });
 }
 
 /** An address that has never held the value has no handle at all, which reads as a plaintext zero. */
@@ -166,9 +398,21 @@ export async function userDecrypt(
   handle: string,
   contract: string,
   who: Signer,
+  type: FhevmTypeEuint = FhevmType.euint64,
 ): Promise<bigint> {
   if (handle === hre.ethers.ZeroHash) return 0n;
-  return hre.fhevm.userDecryptEuint(FhevmType.euint64, handle, contract, who);
+  if (hre.network.name !== "sepolia") {
+    return hre.fhevm.userDecryptEuint(type, handle, contract, who);
+  }
+
+  const sdk = await signerSdk(hre, who);
+  const wanted = asHex(handle, "the handle");
+  const contractAddress = asHex(contract, "the contract address");
+  const values = await withBackoff(
+    () => sdk.decryption.decryptValues([{ encryptedValue: wanted, contractAddress }]),
+    () => sdk.permits.clear(),
+  );
+  return asBigint(order([handle], values)[0], `the cleartext of ${handle}`);
 }
 
 /** True once every saver in the draw's walk has been evaluated. A walk of zero has not started. */
@@ -547,12 +791,14 @@ task("hearth:seed", "Sponsors the yield source and fills the pool with five save
       const address = await saver.getAddress();
       if (await ctx.vault.isSaver(address)) {
         console.log(`saver at account index ${FIRST_SAVER_ACCOUNT + index}, ${address}, is already in the pool`);
-        continue;
+      } else {
+        console.log(`saver at account index ${FIRST_SAVER_ACCOUNT + index}, ${address}, is depositing ${usd(stake)} USDC`);
+        await obtain(ctx, saver, stake);
+        await wrapAndDeposit(ctx, saver, stake);
       }
-      console.log(`saver at account index ${FIRST_SAVER_ACCOUNT + index}, ${address}, is depositing ${usd(stake)} USDC`);
-      await obtain(ctx, saver, stake);
-      await wrapAndDeposit(ctx, saver, stake);
 
+      // Read back on every run, not just after a deposit, so a resumed seed still proves that the
+      // saver and nobody else can read what they hold.
       try {
         const principal = await userDecrypt(
           hre,
@@ -564,8 +810,7 @@ task("hearth:seed", "Sponsors the yield source and fills the pool with five save
       } catch (error) {
         // The deposit is on chain either way; a failed self-decryption is the relayer's problem and
         // is reported rather than allowed to strand the remaining savers.
-        const message = error instanceof Error ? error.message.split("
-")[0] : String(error);
+        const message = decryptRefusal(error) ?? firstLine(error);
         console.log(`  their own decryption failed, which does not affect the deposit: ${message}`);
       }
     }
@@ -684,7 +929,7 @@ task("hearth:prove", "Proves the whole promise end to end from one saver's accou
     try {
       await userDecrypt(hre, await ctx.vault.confidentialBalanceOf(address), ctx.addresses.vault, stranger);
     } catch (error) {
-      refused = error instanceof Error ? error.message.split("\n")[0] : String(error);
+      refused = decryptRefusal(error) ?? firstLine(error);
     }
     if (refused === "") throw new ProveFailed("a wallet with no claim on my balance decrypted it, which must never happen");
     say(`a fresh wallet ${stranger.address} asked for the same handle and was refused: ${refused}`);

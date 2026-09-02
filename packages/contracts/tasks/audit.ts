@@ -14,6 +14,7 @@ import {
   asBoolean,
   at,
   chainNow,
+  decryptRefusal,
   driveDraw,
   group,
   load,
@@ -125,6 +126,9 @@ const PROTOCOL_ERRORS = new Interface([
 ]);
 
 function describe(error: unknown): string {
+  const refusal = decryptRefusal(error);
+  if (refusal !== null) return refusal;
+
   const shaped = error as {
     revert?: { name: string; args: readonly unknown[] } | null;
     data?: string;
@@ -383,9 +387,7 @@ async function rowStranger(a: Audit): Promise<void> {
       detail(`${what}: no handle exists, so there is nothing to ask for`);
       continue;
     }
-    const message = await refused(() =>
-      a.hre.fhevm.userDecryptEuint(FhevmType.euint64, handle, vault, stranger),
-    );
+    const message = await refused(() => userDecrypt(a.hre, handle, vault, stranger));
     if (message === null) {
       detail(`${what}: READ by the stranger, which must never happen`);
       continue;
@@ -436,12 +438,8 @@ async function rowAggregate(a: Audit): Promise<void> {
   );
 
   const stranger = a.hre.ethers.Wallet.createRandom().connect(a.hre.ethers.provider);
-  const asStranger = await refused(() =>
-    a.hre.fhevm.userDecryptEuint(FhevmType.euint128, handle, vault, stranger),
-  );
-  const asOwner = await refused(() =>
-    a.hre.fhevm.userDecryptEuint(FhevmType.euint128, handle, vault, a.signers[0]),
-  );
+  const asStranger = await refused(() => userDecrypt(a.hre, handle, vault, stranger, FhevmType.euint128));
+  const asOwner = await refused(() => userDecrypt(a.hre, handle, vault, a.signers[0], FhevmType.euint128));
   detail(`a fresh wallet ${stranger.address} asks for it: ${asStranger ?? "READ IT, which must never happen"}`);
   detail(`the deployer and owner ${await a.signers[0].getAddress()} asks for it: ${asOwner ?? "READ IT, which must never happen"}`);
 

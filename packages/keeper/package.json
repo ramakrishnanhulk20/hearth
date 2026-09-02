@@ -22,7 +22,7 @@
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@zama-fhe/relayer-sdk": "0.4.1",
+    "@zama-fhe/sdk": "3.5.1",
     "dotenv": "^16.6.1",
     "ethers": "^6.16.0"
   },

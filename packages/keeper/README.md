@@ -211,9 +211,10 @@ touches a network, a wallet or the relayer.
   a full walk covering every saver exactly once.
 - **The decryption**: the four award handles in the order the proof is bound to, cleartexts paired
   back to the handles that were asked for whatever order or case the relayer answers in, a missing
-  cleartext failing loudly, the coercion of a boolean handle, and the promise that two decryptions
-  never overlap.
-- **The retry policy**: which relayer failures are worth another try, a reason found inside a
+  cleartext failing loudly, the coercion of a boolean handle, something that is not a 32 byte
+  handle never reaching the relayer, and the promise that two decryptions never overlap.
+- **The retry policy**: which relayer failures are worth another try, `@zama-fhe/sdk`'s own verdict
+  on a transient failure, a refusal by the access control list being final, a reason found inside a
   wrapped cause, the doubling wait and its ceiling, a permanent failure thrown at once without
   waiting, and giving up after the configured number of tries.
 - **The boot ABI check**: a renamed function or a renamed struct field is caught at boot, with

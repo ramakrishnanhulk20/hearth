@@ -1,3 +1,5 @@
+import { isRetryable } from "@zama-fhe/sdk";
+
 export interface RetryPolicy {
   readonly attempts: number;
   readonly baseDelayMs: number;
@@ -12,8 +14,9 @@ export interface RetryHooks {
 
 const REAL_SLEEP = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
 
-/** Walks the whole error chain, because the relayer SDK wraps a fetch failure inside its own
- * error and the useful label sits on the cause rather than on the message. */
+/** Walks the whole error chain, because the SDK folds a relayer or access-list failure into a
+ * DecryptionFailedError of its own and the useful label sits on the cause rather than on the
+ * message. */
 export function errorText(error: unknown): string {
   const parts: string[] = [];
   let current: unknown = error;
@@ -39,6 +42,10 @@ export function errorText(error: unknown): string {
  * Signals that mean "ask again in a moment", not "this will never work". A freshly published
  * handle is not decryptable until the coprocessor has caught up, and the relayer rate limits.
  *
+ * These sit alongside the SDK's own `isRetryable`, which covers only what its taxonomy marks
+ * transient: a relayer 429 or timeout, and an RPC throttle. Everything else it collapses into a
+ * terminal DecryptionFailedError, so the reason has to be read off the cause chain.
+ *
  * "not allowed for public decryption" is on the list because the SDK checks the ACL against its
  * own RPC before it calls the relayer. The keeper only ever asks about handles that closeDraw
  * already made publicly decryptable, so that answer means the node is a block or two behind, not
@@ -47,6 +54,12 @@ export function errorText(error: unknown): string {
 const RETRYABLE = [
   "429",
   "not allowed for public decryption",
+  // Sepolia's KMS is thirteen parties and reconstruction takes a subset of their shares. One
+  // party currently serves a share the others disagree with. The keeper only ever asks for public
+  // decryptions, which carry no transport key pair for the operator tasks' recovery to redraw, so
+  // asking again is the only lever here.
+  "error reconstructing all blocks",
+  "gao decoding failure",
   "rate_limited",
   "rate limited",
   "protocol_overload",
@@ -57,6 +70,12 @@ const RETRYABLE = [
   "gateway_not_reachable",
   "protocol_paused",
   "internal_server_error",
+  // The wordings @fhevm/sdk 0.13 gives the same three conditions. They are matched as text
+  // because its error base overwrites `name` with "FhevmErrorBase" on everything it throws, so
+  // the class that was raised is not on the object to match against.
+  "request timed out",
+  "maximum polling retry limit exceeded",
+  "relayer sdk internal error",
   "status 500",
   "status 502",
   "status 503",
@@ -73,6 +92,7 @@ const RETRYABLE = [
 ];
 
 export function isRetryableRelayerError(error: unknown): boolean {
+  if (isRetryable(error)) return true;
   const text = errorText(error);
   if (text === "") return false;
   return RETRYABLE.some((needle) => text.includes(needle));
