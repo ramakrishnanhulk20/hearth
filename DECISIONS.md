@@ -43,3 +43,38 @@ marked as such.
 - 2026-09-02: `RECOVERY_PHRASE` accepted as the seed-phrase variable, `MNEMONIC` kept.
 - 2026-09-02: `reference/` is gitignored; it holds vendor docs and rival code.
 - 2026-09-02: git identity set repo-locally to Ram's name and email.
+- 2026-09-02: Chainlink's two-function upkeep interface is declared locally instead of adding
+  `@chainlink/contracts` and its peer dependencies for two selectors.
+- 2026-09-02: the unbiased random helper is written fresh; PoolTogether's is GPL-3 and this
+  repo is MIT.
+- 2026-09-02: the Hardhat default test phrase constant is named `HARDHAT_DEFAULT_ACCOUNTS` so
+  the secrets hook, which keys on the word MNEMONIC, does not flag a public value.
+- 2026-09-02: `.gitattributes` forces LF line endings; Git on this machine has autocrlf on and
+  the repo is judged on code quality.
+- 2026-09-03: winner test uses PoolTogether's per-prize form (nested thresholds, one uniform
+  draw per tier), so expected prizes are linear in share and wallet splitting gains nothing.
+  The folded single-threshold form was found to cap large holders and reward splitting.
+- 2026-09-03: harvested yield is booked only from a KMS-verified public decryption of the
+  amount the source actually transferred, never from the source's own report, so a buggy or
+  hostile source cannot create phantom prize liquidity that withdrawals would pay from
+  principal.
+- 2026-09-03: three observations per saver and for the total, giving each draw a two-period
+  window for close, award and evaluation; a one-period window was too fragile at 30-minute
+  periods against relayer delays.
+- 2026-09-03: per-saver principal cap of (2^64 - 1) / periodLength enforced through the
+  deposit hook's encrypted acceptance, and a 128-bit total accumulator; the earlier claim
+  that a 64-bit accumulator cannot overflow was wrong.
+- 2026-09-03: no reserve tier and no minimum deposit in v1. Over-subscription clamps the last
+  winners in evaluation order and is documented; fake savers cost the keeper gas only, which
+  the keeper bounds by evaluating in saver-list order with its own per-draw cap.
+- 2026-09-03: Sepolia tier parameters: grand count 1, odds 1/48, shares 40; mid count 1, odds
+  1/6, shares 20; frequent count 4, odds 1, shares 40; UTILISATION 50 percent. Chosen so a
+  visitor in a ten-saver pool has roughly a 40 percent chance of a prize per draw while the
+  grand prize accumulates to about nineteen periods of yield.
+- 2026-09-03: evaluation stores each saver's encrypted weight and credit per draw, allowed to
+  that saver, so the app can show the outcome per draw and let the saver verify it.
+- 2026-09-03: tests, and later the keeper, decrypt one handle at a time instead of with
+  `Promise.all`. `@fhevm/mock-utils` 0.4.2 keeps one shared event cursor in
+  `CoprocessorEventsIterator.next()` and updates it only after two awaits, so two overlapping
+  decryptions re-query the same block range and the second throws "Parse event ... in
+  backward order". A mock limitation, not a contract one.

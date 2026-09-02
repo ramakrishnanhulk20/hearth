@@ -11,15 +11,11 @@ contract TestUSDC is ERC20 {
 
     mapping(address claimant => uint256 timestamp) public lastClaimed;
 
-    error FaucetCooldown(uint256 availableAt);
-
     event FaucetClaimed(address indexed claimant, uint256 amount);
 
-    constructor() ERC20("Lantern Test USD", "tUSDC") {}
+    error FaucetCooldown(uint256 availableAt);
 
-    function decimals() public pure override returns (uint8) {
-        return 6;
-    }
+    constructor() ERC20("Lantern Test USD", "tUSDC") {}
 
     function claim() external {
         uint256 availableAt = lastClaimed[msg.sender] + FAUCET_COOLDOWN;
@@ -35,5 +31,9 @@ contract TestUSDC is ERC20 {
     function claimableAt(address claimant) external view returns (uint256) {
         if (lastClaimed[claimant] == 0) return 0;
         return lastClaimed[claimant] + FAUCET_COOLDOWN;
+    }
+
+    function decimals() public pure override returns (uint8) {
+        return 6;
     }
 }
