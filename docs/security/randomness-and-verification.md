@@ -24,9 +24,9 @@ documentation:
 - **It is cryptographically secure and stays encrypted** until something explicitly makes
   it decryptable.
 
-## Why nobody can re-roll it
+## Why nobody can re-roll it, or resize what it wins
 
-Three things, together.
+Four things, together.
 
 1. **Closing succeeds once.** The draw state machine allows `closeDraw(p)` exactly once
    per draw. There is no second attempt to buy a better number.
@@ -37,6 +37,11 @@ Three things, together.
    decryptable. That flag is permanent and irrevocable on Zama's access control list, so
    the number the world sees is the number the contract committed to, not one chosen
    afterwards.
+4. **The prizes are fixed before the seed exists.** Each tier's prize size and the
+   liquidity it offers are computed at the top of the same closing transaction, before
+   `randEuint64` is called. In an earlier draft they were set later, at the award, which
+   left a window in which somebody could read the seed, work out that they had won, and
+   then move liquidity between tiers to make that win worth more. That window is gone.
 
 Compare that with the alternative designs. A draw fed by a block hash can be re-rolled by
 a validator who does not like the result. A draw fed by an off-chain number can be chosen
@@ -48,21 +53,45 @@ randomness and no off-chain generator.
 | Value | Published when | Why it has to be public |
 | --- | --- | --- |
 | The seed `R` | At close, readable after the relayer decrypts it | Without it nobody can recompute a threshold |
-| The pool's total weight `W` | At close | Thresholds are relative to the whole pool |
-| The harvest for the draw | At close | It sets every prize size |
-| Each tier's prize size and offered liquidity | At award | Needed to check what a win pays |
-| The three tier remainders | At finalization | Needed to check how many prizes were paid |
-| The unfunded counter | At finalization | Proves the pool funded every credit it wrote |
+| The scale count, from which the bracket `M` follows | At close | Thresholds are relative to the size of the pool |
+| Whether the period was non-empty | At close | Distinguishes an empty draw from a real one |
+| The harvest for the draw | At close | It is the money that funds later prizes |
+| Each tier's prize size and its plaintext offered liquidity | At close | Needed to check what a win pays |
+| Each tier's carry | At finalization, but only on that tier's own cadence | Needed to check how many prizes the tier paid |
+| The unfunded counter | At finalization | Proves the pool funded every credit the vault wrote |
 
-Everything on that list arrives after the period it decides has already ended. Publishing
+Two things are deliberately **not** on that list. The pool's exact total time-weighted
+balance is never published, because doing so let an observer recover a lone mover's
+deposit amount exactly; the bracket above it is published instead. And no per-saver value
+is ever marked publicly decryptable.
+
+Everything on the list arrives after the period it decides has already ended. Publishing
 `R` cannot help anyone change a weight, because weights for period `p` are frozen the
 moment period `p` ends, which is before the draw can even be closed.
 
 Each of those numbers reaches the contract with a signature from Zama's key management
 service, verified on chain by `FHE.checkSignatures`. The proof is bound to the handles in
-a fixed order, `[seed, aggregate, harvested]` at award and the three remainders in tier
-order at reconciliation, so nothing can be shuffled between slots or replayed against a
-different draw. The draw's state machine is the replay guard: each step succeeds once.
+a fixed order: `[seed, scaleCount, nonEmpty, harvested]` at award, and one carry handle per
+reconciliation. Nothing can be shuffled between slots or replayed against a different
+draw. The draw's state machine is the replay guard: each step succeeds once per draw, and
+reconciliation once per tier.
+
+## The bracket, and how the vault tracks it
+
+The pool's total time-weighted balance for a period, `W`, stays encrypted. The number the
+draw runs against is `M = 2^m`, the smallest power of two at or above `W`.
+
+The vault tracks `m` from draw to draw rather than computing it from scratch. At each
+close it compares `W` under encryption against the five powers of two around the previous
+draw's `m`, adds the five results into one small encrypted count, and marks that count
+publicly decryptable. The pool reads the verified count and works out the new `m`, which
+can move by at most three steps per draw. A separate encrypted comparison against 1 gives
+the non-empty flag.
+
+So the public record per draw is one small integer, and it changes only when the pool
+crosses a power of two. `scaleBits()` on the pool reads the current `m`; the deployment
+seeds it with `initialScaleBits`, the expected bit length of the first period's total, and
+the tracker corrects any error by up to three bits per draw.
 
 ## How anyone recomputes a threshold
 
@@ -73,12 +102,18 @@ For draw `p`, saver address `u`, tier `t` with `count[t]` prizes and odds
 
 ```
 prn         = keccak256(abi.encode(R, p, u, t))
-r           = uniform(prn, W)                                  // 0 <= r < W
-threshold_k = floor((r + k * W) * oddsDen[t] / (oddsNum[t] * count[t]))
+r           = prn mod M                                        // 0 <= r < M
+threshold_k = floor((r + k * M) * oddsDen[t] / (oddsNum[t] * count[t]))
 ```
 
 for each `k` from `0` to `count[t] - 1`. That saver won prize `k` if and only if their
 time-weighted weight for period `p` was strictly greater than `threshold_k`.
+
+You do not have to reimplement it. The vault exposes
+`thresholdOf(drawId, saver, tier, k)` as a pure view over the same arithmetic evaluation
+uses, so the app's verify panel, the test suite and a judge with a block explorer all read
+the same implementation. Reimplementing it off chain is four lines of big-integer
+arithmetic if you would rather check the contract against your own code.
 
 A worked example with small numbers is in
 [winner selection](../concepts/winner-selection.md). A filled example from a real Sepolia
@@ -88,48 +123,37 @@ draw is here:
 | --- | --- |
 | Draw | `{{DRAW_ID_EXAMPLE}}` |
 | Seed `R` | `{{SEED_EXAMPLE}}` |
-| Total weight `W` | `{{AGGREGATE_EXAMPLE}}` |
+| Bracket `M` | `{{BRACKET_EXAMPLE}}` |
 | Harvest | `{{HARVEST_EXAMPLE}}` |
 | Tier prize sizes | `{{PRIZES_EXAMPLE}}` |
 | Prizes paid per tier | `{{PAID_EXAMPLE}}` |
 
-The app's verify panel does this arithmetic in the browser for any address you type in.
-It has no privileged access; it is the same public inputs and the same formula.
+The app's verify panel does this arithmetic in the browser for any address you type in. It
+has no privileged access; it is the same public inputs and the same formula.
 
-## The bias of `uniform`
+## Why the remainder is unbiased
 
-Reducing a big random number to a range with a plain remainder is biased. If `2^256` is
-not an exact multiple of `W`, the low residues occur slightly more often, and that bias
-lands unevenly on savers.
+Reducing a big random number into a range with a plain remainder is usually biased. If
+`2^256` is not an exact multiple of the range, the low residues occur slightly more often,
+and that bias lands unevenly on savers. PoolTogether V5 solves it with rejection sampling,
+and so did an earlier draft of Hearth.
 
-Rejection sampling removes it completely rather than bounding it:
+Hearth no longer needs to. `M` is a power of two by construction, and `2^256` is an exact
+multiple of every power of two up to `2^256`. So `prn mod M` is simply the low `m` bits of
+a 256-bit hash, and every value from `0` to `M - 1` comes from exactly the same number of
+inputs. **The bias is zero, not small**, with no loop, no rejection and nothing for a
+verifier to reproduce carefully.
 
-```
-min = (2^256 - W) % W
-while prn < min:
-    prn = keccak256(prn)
-return prn % W
-```
-
-Discarding the first `min` values leaves exactly `2^256 - min` candidates, and that count
-is an exact multiple of `W`. Every value from `0` to `W - 1` is then produced by exactly
-the same number of inputs. **The bias is zero, not small.**
-
-The cost is the loop, and it is not a real cost. The chance of even one rehash is
-`min / 2^256`, which is below `W / 2^256`. The pool's total weight is held in a 128-bit
-accumulator, so `W` is under `2^128` and the chance of a single extra hash is below one in
-`2^128`. Every rehash is a plain keccak of the previous value, so anyone recomputing the
-result gets the same answer.
-
-This is the same approach PoolTogether V5 uses for the same reason. Our implementation is
-written fresh, because theirs is GPL-3 licensed and this repository is MIT.
+That is a side benefit of publishing the bracket rather than the exact total, and it is
+worth stating because it removes a piece of code that anybody checking the draw would
+otherwise have to match exactly.
 
 ## Address grinding does not work
 
 Once `R` is public, someone could generate addresses until they find one with a low
-threshold. It would be useless. Thresholds are compared against a weight for period
-`p`, and a brand new address has no observations at or before period `p`, so its weight
-is zero. Zero beats no threshold. To have weight in period `p` you had to hold a balance
+threshold. It would be useless. Thresholds are compared against a weight for period `p`,
+and a brand new address has no observations at or before period `p`, so its weight is
+zero. Zero beats no threshold. To have weight in period `p` you had to hold a balance
 during period `p`, which was over before `R` existed.
 
 Grinding for a future draw fails for the other reason: that draw's seed has not been
@@ -143,9 +167,12 @@ Being precise about this is the point of the page.
 
 - The seed was generated on chain, inside a transaction, under the network key, and
   published exactly once.
+- The prize sizes and offered liquidity were fixed before that seed existed.
 - The rule applied to every saver is public, uniform and recomputable by anyone.
-- The prize sizes follow from the harvest and the tier parameters by public arithmetic.
-- The number of prizes each tier paid matches what the tier offered minus what came back.
+- The prize sizes follow from the tier liquidity and the tier parameters by public
+  arithmetic.
+- The number of prizes each tier paid matches what the tier offered minus what came back
+  in its carry.
 - The pool funded every credit the vault wrote, since the unfunded counter is published
   and is zero.
 
@@ -157,13 +184,15 @@ Being precise about this is the point of the page.
   contract checks the signature, not the semantics. A dishonest quorum could sign a value
   of its choosing. Every application on this protocol shares that assumption; it is
   attacker 8 in the [threat model](threat-model.md).
-- That the published total `W` really is the sum of every saver's weight. An outsider
-  cannot add up encrypted weights. What they have instead is that the same public,
-  immutable code computed the aggregate and each saver's weight from the same
-  observations, and that the conservation invariants hold: paid equals credited, and
-  nobody withdraws more than principal plus winnings.
+- That the published bracket really is the bracket of the sum of every saver's weight. An
+  outsider cannot add up encrypted weights, and now cannot see the sum either. What they
+  have instead is that the same public, immutable code computed the comparisons and each
+  saver's weight from the same observations, and that the conservation invariants hold:
+  paid equals credited, and nobody withdraws more than principal plus winnings.
 - Anything about who won. That is the whole point, and it is why publishing more would
-  make verification stronger and the product worse.
+  make verification stronger and the product worse. Publishing the exact total is the
+  concrete example: it made the pool's size checkable, and it also made a lone mover's
+  deposit recoverable to the base unit.
 
 ## What a saver can check that nobody else can
 
@@ -171,10 +200,11 @@ A saver can go one step further than an outsider, because they can decrypt their
 weight and their own credit for a draw.
 
 1. Reveal your weight for draw `p`.
-2. Recompute your own thresholds from the public `R` and `W`.
+2. Recompute your own thresholds from the public `R` and `M`, or read them from
+   `thresholdOf`.
 3. Count how many you beat, multiply by the tier's prize size.
 4. Reveal your credit for draw `p` and check it matches.
 
-If it does not match, either a tier ran out before you were evaluated, which is the
-documented clamp, or something is wrong and you have the numbers to prove it. The app
-does all four steps for you and shows the arithmetic.
+If it does not match, either a tier ran out before the walk reached you, which is the
+documented clamp, or something is wrong and you have the numbers to prove it. The app does
+all four steps for you and shows the arithmetic.

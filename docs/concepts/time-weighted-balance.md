@@ -26,14 +26,14 @@ contribution, not the snapshot.
 
 ## What a late deposit is worth
 
-A period on Sepolia is 1,800 seconds. Weight is balance multiplied by the seconds it was
+A period on Sepolia is 3,600 seconds. Weight is balance multiplied by the seconds it was
 held, so weight is measured in USDC-seconds.
 
 | Saver | What they did | Weight for the period |
 | --- | --- | --- |
-| Ada | Held 100 USDC for the whole 1,800 seconds | 100 x 1800 = 180,000 |
-| Ben | Deposited 1,000 USDC with 180 seconds left | 1,000 x 180 = 180,000 |
-| Cy | Held 1,000 USDC for the whole period | 1,000 x 1800 = 1,800,000 |
+| Ada | Held 100 USDC for the whole 3,600 seconds | 100 x 3600 = 360,000 |
+| Ben | Deposited 1,000 USDC with 360 seconds left | 1,000 x 360 = 360,000 |
+| Cy | Held 1,000 USDC for the whole period | 1,000 x 3600 = 3,600,000 |
 
 Ben put in ten times Ada's money and bought exactly the same odds, because he was there
 for one tenth of the time. Cy, who did what the product is for, has ten times the odds of
@@ -80,6 +80,12 @@ Reading your weight for period `p` uses the newest observation at or before that
 Every encrypted step here is one multiply by a public number and one add. That is what
 keeps evaluation cheap enough to batch.
 
+One detail that matters for the counting argument below. Every exit writes an observation,
+whether or not it moved any principal, because the vault cannot see which of your two
+balances the withdrawal came out of. That is harmless: a slot only shifts when a new
+period has started, so a withdrawal of winnings alone consumes no slot beyond the one your
+period was going to use anyway.
+
 ## Why three observations are enough
 
 This is the question a reviewer should ask, and the answer is a counting argument.
@@ -96,11 +102,16 @@ the at most two that landed after it.
 
 That is why the window is two periods and not longer. Widen the window and you need a
 fourth slot; keep it at one period and a single delayed relayer response can lose a draw,
-which is what a 30-minute period made painfully likely.
+which is what a short period made painfully likely. Closing has a deadline of its own, half
+a period before the window's end, so the same three slots always cover the round trip that
+follows a close.
 
-The vault keeps the same three observations for the pool's total balance, so the
-aggregate weight of a period is computed by the identical rule and is valid over the same
-window.
+The vault keeps the same three observations for the pool's total balance, so the aggregate
+weight of a period is computed by the identical rule and is valid over the same window.
+That aggregate is never published. What the vault publishes is the power-of-two bracket
+above it, and it works that bracket out by comparing the same accumulated number against
+five fixed powers of two under encryption. See
+[what stays private](../security/what-stays-private.md).
 
 ## The two size limits
 
@@ -108,16 +119,23 @@ Encrypted values here are 64-bit unsigned integers, so the arithmetic has to sta
 that range. Overflowing an encrypted number is worse than overflowing a plain one,
 because nothing reverts and nobody sees it happen.
 
-**Per saver.** The vault refuses any deposit that would take you above
-`maxPrincipal = (2^64 - 1) / L`. At a 30-minute period that is about 10 billion USDC. At
-a daily period it is about 213 million USDC. Since your running total cannot exceed your
-balance multiplied by the period length, and your balance cannot exceed that cap, your
-running total cannot exceed 64 bits. The refusal is returned as an encrypted false and
-the token refunds you in the same transaction, so hitting the cap does not disclose your
-balance.
+**Per saver.** The vault refuses any deposit whose amount, or whose resulting principal,
+would be above `maxPrincipal = (2^64 - 1) / L`. At a one-hour period that is about 5
+billion USDC. At a daily period it is about 213 million USDC. Since your running total
+cannot exceed your balance multiplied by the period length, and your balance cannot exceed
+that cap, your running total cannot exceed 64 bits. The refusal is returned as an encrypted
+false and the token refunds you in the same transaction, so hitting the cap does not
+disclose your balance.
 
-**For the pool total.** The total's running accumulator is 128 bits rather than 64, so
-the aggregate cannot overflow for any supply the wrapper is able to mint.
+The check bounds the incoming amount as well as the result, and that second bound is not
+decoration. Encrypted addition wraps around at 64 bits without reverting, so a deposit of
+`2^64` minus your principal would produce a sum of zero, and a check that only looked at
+the sum would wave it through. With both the amount and the existing principal held under
+the cap, the sum cannot reach `2^64` at any period length the constructor allows, so the
+wrap is unreachable rather than merely unlikely.
+
+**For the pool total.** The total's running accumulator is 128 bits rather than 64, so the
+aggregate cannot overflow for any supply the wrapper is able to mint.
 
 An earlier version of this design claimed a 64-bit accumulator could not overflow. That
 was wrong, a design review caught it, and the cap plus the 128-bit total is the fix.
@@ -126,6 +144,6 @@ was wrong, a design review caught it, and the cap plus the 128-bit total is the 
 
 It does not cover what happens once your weight is known. That is the
 [winner test](winner-selection.md). It also does not claim time weighting is a privacy
-feature: your weight is encrypted, but the pool's total weight for each period is
-published, and with very few savers that total is informative. See
-[what stays private](../security/what-stays-private.md).
+feature: your weight is encrypted, but the bracket the pool's total falls in is published
+every draw, and with very few savers that bracket pins a weight to within a factor of two.
+See [what stays private](../security/what-stays-private.md).

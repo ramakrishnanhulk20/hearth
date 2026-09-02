@@ -61,28 +61,31 @@ Draw lifecycle, all steps permissionless:
    harvests yield as one encrypted transfer from the yield source, and marks the seed, the
    scale, the non-empty flag and the harvest handle publicly decryptable. Prize sizes are
    therefore fixed before any random value exists.
-2. `awardDraw(p, seed, scaleCount, nonEmpty, harvested, proof)`, inside the window, with
-   the KMS-signed cleartexts of the four handles in that order. Verifies the proof on chain,
-   books the harvest to the tiers by shares, and then either opens the draw or marks it
-   `Empty` (nobody held a balance in period `p`), returning the offered liquidity to the
-   tiers. If the window has already closed, the harvest is still booked, the offered
-   liquidity is returned and the draw is marked `Skipped`, so no yield or liquidity is
-   ever lost.
+2. `awardDraw(p, seed, scaleCount, nonEmpty, harvested, proof)`, at any time after the close,
+   with the KMS-signed cleartexts of the four handles in that order. Verifies the proof on
+   chain, books the harvest to the tiers by shares, updates the scale, and then: inside the
+   window, either opens the draw or marks it `Empty` (nobody held a balance in period `p`),
+   returning the offered liquidity to the tiers; after the window, returns the offered
+   liquidity and marks the draw `Skipped`. Either way no yield or liquidity is ever lost.
 3. `evaluate(p, count)` on the vault, any number of times inside the window. Walks the
    saver list from a per-draw cursor that starts at `seed mod saverCount`, in list order,
-   for up to `count` savers (at most `MAX_BATCH` that need encrypted work). Nobody chooses
-   who is evaluated or in what order; a saver who wants their own result advances the same
-   walk as the keeper does. Savers with no observation at or before period `p` are skipped
+   for up to `count` savers (at most `MAX_BATCH` that need encrypted work). The walk length
+   is the saver count at the first evaluation of that draw; savers who join later are not in
+   the walk and would have zero weight for that period anyway. Nobody chooses who is
+   evaluated or in what order; a saver who wants their own result advances the same walk as
+   the keeper does. Savers with no observation at or before period `p` are skipped
    in plaintext at no encrypted cost. Each evaluated saver's encrypted weight and credit are
    stored and allowed to that saver, and the encrypted total credited in the batch is
    pulled from the prize pool.
 4. `finalizeDraw(p)`, after the window. The vault folds each tier's encrypted remainder
-   into that tier's encrypted carry. Tiers reconcile on their own cadence
-   (`reconcileEvery[t]` draws): when a tier is due, the vault marks its carry publicly
-   decryptable, and `reconcile(p, tier, carry, proof)` on the pool books the verified
-   cleartext back into that tier's plaintext liquidity and resets the carry to zero. Until
-   then the carry rides along, encrypted, and is added to the tier's offered liquidity at
-   every close.
+   into that tier's encrypted carry. Tiers reconcile on their own cadence: a tier is due at
+   the finalization of every draw whose id is a multiple of `reconcileEvery[t]`, unless a
+   publication is still pending. When due, the vault marks its carry publicly decryptable and
+   records which draw published it; `reconcile(tier, carry, proof)` on the pool verifies the
+   cleartext against that handle, books it into the tier's plaintext liquidity, and the vault
+   subtracts it from the carry (which may have grown since) and clears the pending flag. A
+   carry that is not pending is added to the tier's offered liquidity at every close; a
+   pending carry waits.
 
 Winner selection happens at the draw. From the moment `awardDraw` verifies the seed and
 the scale, every saver's result for every tier is fixed: the thresholds are public
@@ -148,10 +151,12 @@ an observer recover a lone mover's deposit from two consecutive aggregates and t
 public timestamp of their own transaction. Instead the vault publishes the scale of `W`:
 the smallest power of two at or above it, `M = 2^m`, tracked incrementally. At close the
 vault compares `W` under encryption against `2^(m-2) .. 2^(m+2)` around the previous
-draw's `m` and against 1, sums the results into one small encrypted count, and marks that
-count publicly decryptable. The pool derives the new `m` from the verified count (moving
-by at most three steps per draw) and whether the period was empty. An observer learns
-only when the pool crosses a power of two.
+draw's `m`, sums those five results into one small encrypted count, and separately
+compares `W` against zero for the non-empty flag; both are marked publicly decryptable.
+The pool sets the new `m` to `m - 2 + count`, clamped to the range 1 to 120, so the bracket moves
+down by at most two steps or up by at most three per draw and catches up over a few draws
+if the pool jumps more than that. An observer learns only when the pool crosses a power of
+two.
 
 Inputs fixed per draw after `awardDraw`: the public seed `R`, the public range `M`, and
 for each tier `t` the prize size `prize[t]`, the prize count `count[t]`, the odds
@@ -180,8 +185,8 @@ across wallets changes nothing in expectation. Because `M` is between `W` and `2
 tier pays between half and all of its nominal `count * odds` prizes per draw; what is not
 paid stays in the tier's carry and is offered again.
 
-Over-subscription: each prize is half of the tier's offered liquidity divided by the
-prize count (V5's 50 percent utilisation), so a tier pays twice its expected number of
+Over-subscription: each prize is half of the tier's plaintext liquidity at close divided by
+the prize count (V5's 50 percent utilisation), and the encrypted carry only adds capacity, so a tier pays twice its expected number of
 prizes before the clamp bites. When it bites, the last winner in walk order receives the
 remainder and later winners of that tier receive nothing. The walk order is fixed by the
 seed, so nobody can buy a better place. Hearth has no reserve tier, unlike V5. The clamp
@@ -215,8 +220,8 @@ draw that is `Empty`, `Skipped` or not yet awarded.
 - After each evaluation batch the vault gives the prize pool a transient allowance on the
   encrypted batch total; the pool gives the token a transient allowance and transfers that
   amount to the vault. The token allows the vault on the transferred handle, so the vault
-  adds any difference to one global encrypted unfunded counter, whose current handle is
-  published at every finalization. With verified harvests it is always zero.
+  adds any difference to one global encrypted unfunded counter, never reset, whose current
+  handle is published at every finalization. With verified harvests it is always zero.
 - Yield is never booked from a number the source reports. The source transfers an
   encrypted amount to the pool; the pool, allowed on that handle as the recipient, makes it
   publicly decryptable and books the KMS-verified cleartext at award time. A source that
@@ -416,7 +421,8 @@ Events. Vault: `Deposited(saver)`, `Withdrawn(saver)`, `Evaluated(saver, drawId)
 `DrawFinalized(drawId, unfunded)`, `CarryPublished(drawId, tier, carryHandle)`,
 `PrizePoolSet(prizePool)`, plus OpenZeppelin's `Paused`, `Unpaused`,
 `OwnershipTransferStarted`, `OwnershipTransferred`. Pool: `DrawClosed(drawId, seedHandle,
-scaleHandle, nonEmptyHandle, harvestHandle, prize[3], offered[3])`, `DrawAwarded(drawId,
+scaleHandle, nonEmptyHandle, harvestHandle, prize[3], offered[3])` where `offered` is the
+plaintext part moved into the draw, `DrawAwarded(drawId,
 seed, scaleBits, harvested)`, `DrawEmpty(drawId, harvested)`, `DrawSkipped(drawId,
 harvested)`, `TierReconciled(drawId, tier, carry)`, `HarvestFailed(drawId)`,
 `YieldSourceSet(yieldSource)`, `Funded(amount)`. Source: `Sponsored(from, amount,

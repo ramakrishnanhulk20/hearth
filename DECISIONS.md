@@ -5,7 +5,7 @@ marked as such.
 
 - 2026-09-02, Ram: rebuild the draw engine as a confidential PoolTogether V5 (per-saver
   evaluation over encrypted time-weighted balances), not a hardened scan.
-- 2026-09-02, Ram: publish the per-draw aggregate weight and the random seed, and say
+- 2026-09-02, Ram, superseded on 3 September (see below): publish the per-draw aggregate weight and the random seed, and say
   so plainly in the leakage table.
 - 2026-09-02, Ram: rename the project. Build as a real product; the demo is a recording.
 - 2026-09-02, Ram: docs site is hand-built in the app, GitBook style, not Docusaurus.
@@ -19,7 +19,7 @@ marked as such.
 - 2026-09-02, superseded on 3 September (see below): three prize tiers with independent
   per-tier randomness, V5 maths, prize count folded into the winning zone so each saver wins
   at most one prize per tier.
-- 2026-09-02: tier over-subscription is handled by an encrypted remaining-liquidity
+- 2026-09-02, superseded on 3 September (see below): tier over-subscription is handled by an encrypted remaining-liquidity
   counter per tier per draw, clamping each payout, and by offering only half of a tier's
   liquidity per draw (V5's utilisation rate). Paid totals per tier are decrypted once per
   draw to reconcile; that reveals how many prizes were paid, never to whom.
@@ -34,12 +34,12 @@ marked as such.
   on Sepolia pays yield on Zama's mock USDC (Aave refuses USDC deposits, cap exceeded;
   Compound needs Circle's USDC; Zama's own vault batcher is idle there). The Zama
   Confidential Vault adapter is the documented mainnet path.
-- 2026-09-02: Sepolia draw period is 30 minutes so a visitor can see a full cycle; the
+- 2026-09-02, superseded on 3 September (see below): Sepolia draw period is 30 minutes so a visitor can see a full cycle; the
   README states a daily period for mainnet. The period is a constructor parameter.
 - 2026-09-02: the keeper is a script we host (close, fetch decryption proofs, award,
   evaluate savers in batches); Chainlink Automation time-based upkeep is documented as
   redundancy for the close step, which needs no off-chain proof.
-- 2026-09-02: no registration bond. Fake savers no longer affect the draw, only the
+- 2026-09-02, superseded on 3 September (see below): no registration bond. Fake savers no longer affect the draw, only the
   keeper's evaluation budget, which is capped per draw and prioritised by recency.
 - 2026-09-02: `RECOVERY_PHRASE` accepted as the seed-phrase variable, `MNEMONIC` kept.
 - 2026-09-02: `reference/` is gitignored; it holds vendor docs and rival code.
@@ -65,10 +65,10 @@ marked as such.
 - 2026-09-03: per-saver principal cap of (2^64 - 1) / periodLength enforced through the
   deposit hook's encrypted acceptance, and a 128-bit total accumulator; the earlier claim
   that a 64-bit accumulator cannot overflow was wrong.
-- 2026-09-03: no reserve tier and no minimum deposit in v1. Over-subscription clamps the last
+- 2026-09-03, superseded on 3 September (see below): no reserve tier and no minimum deposit in v1. Over-subscription clamps the last
   winners in evaluation order and is documented; fake savers cost the keeper gas only, which
   the keeper bounds by evaluating in saver-list order with its own per-draw cap.
-- 2026-09-03: Sepolia tier parameters: grand count 1, odds 1/48, shares 40; mid count 1, odds
+- 2026-09-03, superseded on 3 September (see below): Sepolia tier parameters: grand count 1, odds 1/48, shares 40; mid count 1, odds
   1/6, shares 20; frequent count 4, odds 1, shares 40; UTILISATION 50 percent. Chosen so a
   visitor in a ten-saver pool has roughly a 40 percent chance of a prize per draw while the
   grand prize accumulates to about nineteen periods of yield.

@@ -1,8 +1,9 @@
 # Try it on Sepolia
 
-Sepolia is Ethereum's public test network. The money on it is not real, so you can run
-the whole cycle for free. Budget about 45 minutes if you want to see a draw land, because
-a period on Sepolia is 30 minutes.
+Sepolia is Ethereum's public test network. The money on it is not real, so you can run the
+whole cycle for free. A period on Sepolia is one hour, so budget up to about an hour and a
+half if you want to watch the draw for a period you deposited in. The two-minute path at
+the bottom of this page does not wait for one.
 
 The live app is at {{APP_URL}}. Everything below can also be done straight from a block
 explorer if you prefer to watch the raw calls.
@@ -70,8 +71,11 @@ The app builds the encrypted input and its proof for you with Zama's SDK. The va
 receive hook credits exactly the amount the token says actually moved, not the amount you
 asked for, so a transfer that is short for any reason cannot create phantom principal.
 
-The vault refuses a deposit that would push you above the per-saver cap, which on a
-30-minute period is about 10 billion USDC. The refusal is itself encrypted: the hook
+The vault refuses a deposit whose amount, or whose resulting principal, would push you
+above the per-saver cap, which on a one-hour period is about 5 billion USDC. Both halves
+of that check matter: encrypted addition wraps silently at 64 bits, so bounding the
+incoming amount as well as the total is what stops a huge deposit from wrapping the sum
+round to a small number and slipping through. The refusal is itself encrypted: the hook
 returns an encrypted false and the token refunds you inside the same transaction, so a
 rejection does not tell anyone what your balance was.
 
@@ -95,23 +99,31 @@ So Hearth keeps them apart on purpose:
 - Deposit again from the same balance without wrapping again.
 
 The correlation weakens with time, with reuse of a standing balance, and with other
-people's wrapper traffic. Doing it in one click removes all three defences. The app
-shows the warning at the wrap step rather than hiding the trade-off.
+people's wrapper traffic. Doing it in one click removes all three defences. The app shows
+the warning at the wrap step rather than hiding the trade-off.
+
+It is worth being blunt about what a pinned balance costs you, because it is more than the
+deposit amount. Thresholds are public by design, since they are what makes the draw
+checkable. So anyone who knows your balance can compute whether you won, in every tier, in
+every draw from then on, without decrypting anything. That is why this is two steps and
+not one.
 
 ## 5. Wait for a draw
 
-Periods on Sepolia are 30 minutes long. The draw for a period can only be closed after
-that period has ended, and it must be finished within the following two periods. So a
-deposit you make now earns odds for the current period, and the result of that period
-lands within the next hour.
+Periods on Sepolia are one hour long. The draw for a period can only be closed after that
+period has ended, and everything about it has to finish within the following two periods.
+Closing itself has a tighter deadline, the middle of the second of those periods, so that
+the decryption round trip and the award always have room. So a deposit you make now earns
+odds for the current period, and the result of that period lands within the next couple of
+hours.
 
 The app shows the current period, the time left, and the state of the last few draws. You
-do not have to do anything. If you want to push it along yourself, every step of a draw
-is callable by anyone; see [the keeper page](../operations/keeper.md).
+do not have to do anything. If you want to push it along yourself, every step of a draw is
+callable by anyone; see [the keeper page](../operations/keeper.md).
 
 Your odds for a period are based on your average balance across that whole period, not
 your balance at the end of it. Depositing five minutes before the period closes buys you
-one sixth of the odds of having held the same amount all period. That is deliberate; see
+one twelfth of the odds of having held the same amount all period. That is deliberate; see
 [time-weighted balance](../concepts/time-weighted-balance.md).
 
 ## 6. Reveal what you hold and what you won
@@ -131,7 +143,9 @@ You can reveal four things about yourself:
 | Credit, per draw | What that draw paid you. Zero if you did not win. |
 
 The last two are what let you check the draw yourself: take your weight, take the public
-seed and the public total, recompute your thresholds, and confirm the credit matches. See
+seed and the public bracket, recompute your thresholds, and confirm the credit matches.
+The vault exposes the threshold arithmetic as a view, `thresholdOf`, so you can compare
+your own working against the contract's. See
 [randomness and verification](../security/randomness-and-verification.md).
 
 Nobody else can read any of these four. The relayer refuses a decryption request from an
@@ -141,11 +155,16 @@ address the contract has not granted, and that refusal is the enforcement, not a
 
 There is no claim transaction, only a claim button.
 
-Your prize is already in your winnings balance the moment the draw is evaluated. Step 6
-is how you learn about it. Once your winnings are revealed, the app shows "Claim prize";
+Your prize is already in your winnings balance the moment the walk reaches you. Step 6 is
+how you learn about it. Once your winnings are revealed, the app shows "Claim prize";
 pressing it sends an ordinary withdrawal for exactly that amount, and step 8 takes the
 rest home. On chain a claim and a withdrawal are the same call with the same shape, and
 that is what keeps a winner from standing out.
+
+There is nothing to press to be credited, either. Evaluation walks the saver list from a
+point that draw's seed decides, and the app's "Advance evaluation" button moves that shared
+walk forward rather than picking you out of it. A saver who presses it is not telling
+anybody they won.
 
 ## 8. Withdraw
 
@@ -153,9 +172,11 @@ that is what keeps a winner from standing out.
 vault.withdraw(encryptedAmount, inputProof)      // or vault.withdrawAll()
 ```
 
-Withdrawals pay from winnings first, then from principal. Any shortfall the token reports
-is credited straight back into your winnings, so nothing is ever stranded. One
-confidential transfer, one event, an encrypted amount.
+Withdrawals pay from winnings first, then from principal. The amount is clamped to the
+smaller of what you hold and what the vault holds, because a confidential transfer moves
+the whole amount or nothing at all and never a part of it. Working that out before the
+transfer is what keeps the ledger exact without any repair afterwards. One confidential
+transfer, one event, an encrypted amount.
 
 Principal is never locked. You can withdraw in the middle of a draw, and the weight the
 draw already fixed for you does not change.
@@ -167,10 +188,15 @@ Two calls, because unwrapping is asynchronous by design. First `unwrap`, then
 not ours.
 
 The first call burns the encrypted amount and marks it for public decryption. The second
-releases the
-plaintext tokens once Zama's protocol has produced the cleartext and its proof. The
-amount you unwrap is public, exactly like the amount you wrapped. If that matters to you,
-unwrap in round numbers unrelated to your position, or leave a standing confidential
+releases the plaintext tokens once Zama's protocol has produced the cleartext and its
+proof. The amount you unwrap is public, exactly like the amount you wrapped, and it is the
+first call that publishes it, so an unwrap you never finalize has already leaked.
+
+That gives a second thing worth knowing. If you wrap in and unwrap out in full, the
+difference between the two public totals is a lower bound on everything you have ever won,
+and once you have emptied out it is exact. Unwrapping to a fresh address does not help,
+because the confidential transfer to that address is itself the link. If it matters to
+you, unwrap in round numbers unrelated to your position, or leave a standing confidential
 balance behind.
 
 ## The two-minute judge path
@@ -181,7 +207,7 @@ balance behind.
 4. Open the draw panel and press "Advance draw" to close and award the last finished
    period yourself, or watch the keeper do it.
 5. Reveal again: your weight and credit for that draw appear.
-6. Open the verify panel: the public seed and total are there, your thresholds are
+6. Open the verify panel: the public seed and bracket are there, your thresholds are
    recomputed in front of you, and the comparison matches.
 7. Click "Withdraw all". Principal and any winnings come back in one transfer.
 

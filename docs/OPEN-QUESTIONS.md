@@ -1,150 +1,172 @@
 # Open questions
 
 Things a judge or a careful reader would ask that `ARCHITECTURE.md` does not answer.
-Written while drafting these pages, so that the docs state what is specified and flag
-what is not, rather than guessing.
+Written while drafting these pages, so that the docs state what is specified and flag what
+is not, rather than guessing.
 
-Each item says what is missing and where it bites in the documentation.
+Each item says what is missing and where it bites in the documentation. Rewritten against
+the 3 September revision, which answered eight of the previous thirteen.
 
-## 1. The over-subscription figure for the count-1 tiers looks wrong
+## 1. How does the scale count map to the new bracket?
 
-`ARCHITECTURE.md` section 4 says:
+Section 4 says the vault "compares `W` under encryption against `2^(m-2) .. 2^(m+2)`
+around the previous draw's `m` and against 1, sums the results into one small encrypted
+count", and that the pool "derives the new `m` from the verified count (moving by at most
+three steps per draw)".
 
-> "The probability of the clamp biting is about one to two percent per draw for the
-> frequent tier with count 4 and a few percent with count 1"
+Three things are unresolved in that sentence.
 
-The frequent-tier figure checks out. That tier expects 4 prizes and can fund 8, and for a
-pool of many small savers the count is close to Poisson with mean 4, giving about a 2
-percent chance of needing a ninth.
+First, how many comparisons feed the count. Read literally, the comparison against 1 is
+summed in with the five bracket comparisons, which would make six. But the non-empty flag
+is a separate publicly decryptable handle in its own right, listed third in the award's
+four-handle proof order, so it cannot also be folded into the count. Six comparisons
+producing two published values is the reading that fits the rest of the specification; the
+sentence reads as though one value comes out of all six.
 
-The count-1 figure does not. The mid tier expects `count * odds = 1/6` prizes and can fund
-2, so the clamp needs three or more winners, which is roughly 0.07 percent. The grand tier
-expects 1/48 and needs three winners, which is around one in a million. Neither is "a few
-percent".
+Second, the exact mapping. Five thresholds distinguish six outcomes, so the count should
+be able to name any bracket from `m-2` to `m+3`, which is a move of up to two down or
+three up. "At most three steps" is stated but the direction is not, and the arithmetic
+that turns the count into `m` is not written down.
 
-**Where it bites:** `docs/concepts/prizes-and-tiers.md` states the frequent-tier figure as
-derived and says the count-1 tiers clamp far more rarely, rather than repeating the
-sentence above. If the specification meant something different by that phrase, the page
-needs correcting.
+Third, what happens when the true bracket is outside the window. If the pool grows by more
+than three bits in one period, the tracker must saturate at the edge of its window and
+catch up over later draws. That is the only behaviour consistent with "corrects it by up to
+three bits per draw" in section 13, but it is not stated, and it decides whether a large
+sudden deposit gets under-scaled odds for one draw or several.
 
-## 2. `MAX_BATCH` has no value yet
+**Where it bites:** `docs/security/randomness-and-verification.md` describes five
+comparisons plus a separate comparison against 1, and says the bracket moves by at most
+three steps, without giving the mapping. `docs/concepts/how-a-draw-works.md` says the same
+thing in plainer words.
 
-Section 2 says "at most `MAX_BATCH` savers per call" and section 9 says the keeper
-evaluates "in batches of `MAX_BATCH`", but the number is never given. `PLAN.md` milestone
-1 lists measuring it as work still to do.
+## 2. `MAX_BATCH` has no confirmed live value
 
-**Where it bites:** used as `{{MAX_BATCH}}` in eight places across the docs.
+`DECISIONS.md` records `MAX_BATCH` as 4, measured against the mock's price table with the
+Sepolia tier set at 3,836,128 compute units per saver. `ARCHITECTURE.md` names the constant
+but never gives a number, and the figure has already moved once with the tier set.
 
-## 3. Can an address join the saver list without depositing anything?
+**Where it bites:** used as `{{MAX_BATCH}}` throughout the docs. The placeholder is kept
+rather than filled from the mock, because a number quoted in the documentation should come
+from the live coprocessor. It may land at 3 or 4.
 
-The deposit hook cannot branch on an encrypted amount, so a transfer of an encrypted zero
-plausibly still runs the hook and registers the caller as a saver. Our previous design had
-exactly this: a wallet that never held the token could register itself, and an operator
-could register other wallets with one reused encrypted zero.
+## 3. Which draws are a tier "due" to reconcile on?
 
-Section 2 says unknown addresses are "skipped without reverting" during evaluation, and
-`DECISIONS.md` says fake savers "cost the keeper gas only", which reads as though the
-answer is yes.
+Section 2 says a tier reconciles every `reconcileEvery[t]` draws and that `finalizeDraw`
+marks the carry decryptable "when a tier is due". It does not say what due means: `drawId`
+divisible by the cadence, a per-tier counter of finalizations since the last reconcile, or
+something the caller chooses.
 
-**Where it bites:** `docs/security/threat-model.md` attacker 3 states that fake savers cost
-the keeper gas and change nobody's odds. If registration is in fact gated, that section
-understates the defence.
+The difference is visible. A divisibility rule means a tier's reconcile always lands on
+the same draw numbers, which is predictable and easy to audit. A counter means a skipped
+finalization shifts the whole schedule.
 
-## 4. Is a saver ever removed from the list?
+**Where it bites:** `docs/operations/keeper.md` tells the keeper to reconcile "each tier
+that `finalizeDraw` published", which is true either way, and
+`docs/concepts/prizes-and-tiers.md` describes the cadence without committing to how it is
+counted.
 
-Views include `saverCount()`, `saverAt(i)` and `isSaver(a)`, but nothing describes removal
-after a full withdrawal. If the list is append-only, the keeper's evaluation cost grows
-monotonically with everyone who ever deposited, not with the current saver count.
+## 4. What does the `drawId` in `reconcile(p, tier, carry, proof)` bind to?
 
-**Where it bites:** the budget section of `docs/operations/keeper.md`.
+The carry is a running total across the whole cadence span, so it is not a property of one
+draw. The signature takes a draw id anyway, presumably the draw whose `finalizeDraw`
+published the handle. It is not stated, and it matters for replay: the specification says
+"each step succeeds once per draw and per tier", which is the right guard only if the id is
+the publishing draw.
 
-## 5. Is the unfunded counter global or per draw?
+**Where it bites:** `docs/concepts/how-a-draw-works.md` step 5 and
+`docs/security/randomness-and-verification.md` both describe the proof binding.
 
-Section 13 lists the event `DrawFinalized(drawId, remaining[3], unfunded)`, which reads as
-per draw, and the view `unfundedHandle()` with no argument, which reads as global.
+## 5. Does `DrawClosed` carry the plaintext part of `offered`, or the whole offer?
 
-**Where it bites:** described as "an encrypted unfunded counter" in
+Section 6 defines `offered[t]` as the tier's plaintext liquidity plus its encrypted carry.
+Section 13 gives the event as `DrawClosed(drawId, ..., prize[3], offered[3])` with
+plaintext arrays. The encrypted half cannot be in a plaintext array, so `offered[3]` must
+be the plaintext part only, which means the event under-reports what the tier can actually
+pay.
+
+**Where it bites:** `docs/security/what-stays-private.md` lists "each tier's prize size and
+offered plaintext liquidity" as public, and
+`docs/security/randomness-and-verification.md` does the same. Both hedge on the word
+plaintext rather than asserting which number the event carries.
+
+## 6. What happens to the evaluation walk when the saver list grows mid-window?
+
+The cursor starts at `seed mod saverCount` and advances in list order until it wraps. New
+savers can join during periods `p+1` and `p+2`, because deposits are never blocked by a
+draw in progress, and the list is append-only.
+
+Two things are undefined. Whether `saverCount` is snapshotted at the award or read live,
+which decides whether the modulus and the wrap point can move under the walk. And whether a
+saver who joins after the award is walked over at all: they have no observation at or
+before period `p`, so they cost nothing, but they do shift the wrap point.
+
+**Where it bites:** `docs/operations/keeper.md` tells the keeper to advance "until the walk
+wraps", and `docs/concepts/how-a-draw-works.md` describes the cursor.
+
+## 7. Is `awardDraw` callable after the window, or not?
+
+Section 2 introduces `awardDraw` as happening "inside the window", then in the same
+paragraph specifies what happens "if the window has already closed": the harvest is booked,
+the liquidity is returned and the draw is marked `Skipped`. The second sentence requires
+the call to be legal outside the window that the first sentence restricts it to.
+
+The intent is clear enough, but "inside the window" is the wrong qualifier on the
+signature line if a late award is a supported path with its own behaviour.
+
+**Where it bites:** `docs/concepts/how-a-draw-works.md` step 2 and the missed-step table in
+`docs/operations/keeper.md` both treat a late award as legal and describe the `Skipped`
+outcome. If it is in fact rejected after the window, both are wrong and a stranded draw's
+harvest is lost.
+
+## 8. Is the unfunded counter ever reset?
+
+Section 5 describes "one global encrypted unfunded counter, whose current handle is
+published at every finalization", and section 13 gives `DrawFinalized(drawId, unfunded)`.
+Nothing describes clearing it. A global counter that only ever grows is the right shape for
+a solvency proof, but if a shortfall ever did occur, every later finalization would keep
+publishing it with no way to distinguish a new shortfall from the old one.
+
+**Where it bites:** described as a global counter in
 `docs/concepts/how-a-draw-works.md` and `docs/security/randomness-and-verification.md`,
-without committing either way.
+which say it is always zero under honest operation and stop there.
 
-## 6. How does the Confidential Vault adapter provide a synchronous `harvest()`?
+## 9. Is there a way to move winnings into principal without leaving the vault?
 
-`IYieldSource.harvest()` returns the encrypted amount transferred in the same call.
-Zama's batcher does not work that way: a redemption joins a batch, waits for the batch to
-reach its minimum age, waits for the aggregate to be decrypted and the vault to settle,
-and only then is claimable. Zama's own batch-lifecycle documentation describes the four
-stages as join, dispatch, finalize, claim.
+`ARCHITECTURE.md` now states plainly that winnings never count toward odds and that weight
+is principal only. It still describes no path to reinvest. A saver has to withdraw and
+deposit again, which is two transactions and two token transfers, and the withdrawal is
+also the exact behavioural residual the design warns about.
 
-Section 7 says the adapter "redeems growth through the redeem batcher" but does not say
-how that maps onto a single synchronous call.
+**Where it bites:** `docs/faq.md` question 6 tells savers to withdraw and deposit back. A
+one-transaction reinvest would be both cheaper and quieter, and it is not specified.
 
-**Where it bites:** `docs/concepts/yield-source.md` names this as the main piece of work
-in taking the adapter live, rather than describing a mechanism that may not be the one
-intended.
+## 10. `DECISIONS.md` keeps superseded lines without marking them
 
-## 7. What can the sponsor do after sponsoring?
-
-Section 7 describes `sponsor`, `ratePerSecond` and `harvest`, and section 13 lists a
-`RateChanged(rate)` event, but not who may change the rate, nor whether a sponsor can
-withdraw an unspent balance.
-
-**Where it bites:** `docs/security/threat-model.md` attacker 6 says a sponsor can stop
-sponsoring, and explicitly logs the withdrawal question rather than asserting an answer.
-
-## 8. The constructor signatures are not written down
-
-Section 6's repo layout and section 13's views are specified, but no constructor argument
-list is. In particular: does `HearthPrizePool` take the vault address in its constructor,
-with `vault.setPrizePool` closing the loop afterwards? That is what the event list
-implies, since `PrizePoolSet` is a vault event and there is no matching pool event.
-
-**Where it bites:** `docs/operations/deploying.md` gives the deploy order and a table of
-what each parameter means, and states that it is not a claim about argument order.
-
-## 9. What does `evaluate` do for an `Empty` or `Skipped` draw?
-
-Section 2 defines both states but does not say whether `evaluate(p, savers)` reverts,
-no-ops, or marks savers evaluated with a zero credit for such a draw. The difference
-matters for the app, which has to decide whether to show an evaluate button.
-
-## 10. Do winnings count toward odds, and is there a reinvest path?
-
-`DECISIONS.md` says prizes go to "a separate encrypted winnings balance that does not
-count toward odds". `ARCHITECTURE.md` never restates it: section 3 tracks a `balance` and
-section 5 talks about principal, but the exclusion is not written down there.
-
-There is also no described way to move winnings into principal in one step. A saver has to
-withdraw and deposit again, which is two transactions and two token transfers.
-
-**Where it bites:** answered in `docs/faq.md` question 6 on the strength of
-`DECISIONS.md`. If the vault does something different, that answer is wrong.
-
-## 11. The pause scope is only in `DECISIONS.md`
-
-`DECISIONS.md` says pause stops "deposits and draw closing only, never withdrawals or
-evaluation". `ARCHITECTURE.md` lists `paused()` views and OpenZeppelin's `Pausable` in the
-dependency graph, but never states what pausing actually stops.
-
-**Where it bites:** `docs/security/threat-model.md` attacker 5 states the scope, sourced
-from `DECISIONS.md`. It is load-bearing for the claim that withdrawals are always
-available, so it should be in the specification and enforced by a test.
-
-## 12. Does withdrawing only winnings touch the time-weighted record?
-
-`withdraw` pays from winnings first and principal second. If a saver withdraws an amount
-covered entirely by winnings, their principal has not changed, so intuitively no
-observation should be pushed. Section 3 describes observation updates "on a balance
-change" without saying which balance.
-
-**Where it bites:** if a winnings-only withdrawal pushed an observation, it would consume
-one of the three slots and could interact with the two-period window argument.
-
-## 13. `DECISIONS.md` keeps superseded lines without marking them
-
-Three entries dated 2 September 2026 were replaced by entries dated 3 September: the
-folded single-threshold winner test, two observations per saver, and the one-period
-evaluation window. `ARCHITECTURE.md` section 14 explains the changes, but a judge reading
-`DECISIONS.md` top to bottom will hit the old lines first and may quote them back.
+Entries dated 2 September 2026 were replaced by entries dated 3 September: the folded
+single-threshold winner test, two observations per saver, the one-period evaluation window,
+publishing the aggregate, prize sizes fixed at award, evaluation by address list, and the
+shortfall re-credit on withdrawal. `ARCHITECTURE.md` section 14 explains the changes, but a
+judge reading `DECISIONS.md` top to bottom will hit the old lines first and may quote them
+back.
 
 **Suggestion:** mark each superseded line, in place, with the date and the entry that
 replaced it.
+
+## Answered by the 3 September revision
+
+Kept as a record so that a reader who saw the earlier list knows these were closed rather
+than dropped.
+
+| Was | Now |
+| --- | --- |
+| The over-subscription figure for the count-1 tiers looked wrong | Section 4 states about 2 percent for the frequent tier and a negligible fraction for mid and grand. |
+| Can an address join the saver list without depositing anything? | Yes. Section 5 says the hook cannot see the amount, so any address that triggers it joins, even with an encrypted zero. |
+| Is a saver ever removed from the list? | No. Section 5 says the list is never pruned. |
+| Is the unfunded counter global or per draw? | Global. Section 5 says so, and the event lost its per-tier array. See question 8 for what is still missing. |
+| How does the Confidential Vault adapter provide a synchronous `harvest()`? | Section 7 moves the redemption ahead of the harvest: the keeper walks a redemption through the batcher's four stages so the proceeds are already in the adapter when `harvest` is called. |
+| What can the sponsor do after sponsoring? | Section 7 says a sponsorship cannot be withdrawn and only the owner can change the rate. |
+| The constructor signatures are not written down | Section 13 gives all three, with the `Tier` struct. |
+| What does `evaluate` do for an `Empty` or `Skipped` draw? | Section 4 says it reverts, and also for a draw not yet awarded. |
+| Do winnings count toward odds? | Section 3 says no: weight is principal only. The reinvest half is still open as question 9. |
+| The pause scope is only in `DECISIONS.md` | Section 5 states it: pause stops deposits and closing, never withdrawals, evaluation, award, finalize or reconcile. |
+| Does withdrawing only winnings touch the time-weighted record? | Section 3 says every exit records an observation regardless, and that it is harmless because slots shift only on a period change. |

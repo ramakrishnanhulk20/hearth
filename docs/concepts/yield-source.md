@@ -18,8 +18,22 @@ Two functions. `harvest` moves the accrued yield to the prize pool as a confiden
 transfer and returns the encrypted amount that actually moved. `harvestable` is for the
 app's display and the pool never uses it for accounting.
 
+`harvest` is synchronous on purpose. It moves whatever the source has ready at that
+moment, and a source that earns asynchronously is expected to have prepared that amount
+ahead of time rather than making the pool wait.
+
 Swapping the source is a single owner call on the pool, `setYieldSource`, and it emits
 `YieldSourceSet`. Nothing else in the system knows or cares which source is attached.
+
+A source that reverts does not stop a draw. The pool catches the failure, treats that
+draw's harvest as a trivial encrypted zero, and emits `HarvestFailed`. The close succeeds,
+the draw runs on the liquidity the tiers already hold, and the yield that failed to move
+is collected by a later harvest. A broken or mis-wired source starves the prize side; it
+cannot stop the clock.
+
+When a harvest does land, it is booked at the award of that draw and offered at the next
+close. So the yield of period `p` funds the prizes of draw `p+1`, not of draw `p`. That is
+what lets prize sizes be fixed before the seed exists.
 
 ## Sepolia: the sponsored source
 
@@ -29,6 +43,9 @@ A sponsor calls the source's own `sponsor` function with public USDC. The source
 into confidential USDC and books exactly what the wrapper minted, not what the sponsor
 asked for. From there the balance drips at `ratePerSecond`, currently `{{SPONSOR_RATE}}`,
 and `harvest` sends whatever has accrued to the pool.
+
+A sponsorship is a donation. There is no path for a sponsor to take it back, and only the
+source's owner can change the drip rate, which emits `RateChanged`.
 
 Sponsor amounts, the drip rate and every harvest are public. That is not a compromise: in
 PoolTogether the amount of yield a vault contributes is public too, and every prize size
@@ -97,9 +114,13 @@ flowchart LR
     Vault --> cUSDC
 ```
 
-The adapter joins the deposit batcher with the pool's confidential USDC, holds
-confidential shares, and redeems the growth through the redeem batcher when the pool
-harvests.
+The adapter joins the deposit batcher with the pool's confidential USDC and holds
+confidential shares. Redemption runs on its own schedule, ahead of the harvest: the keeper
+periodically asks the redeem batcher for the growth and walks that request through its four
+stages, so that by the time the pool next calls `harvest`, the redeemed confidential USDC
+is already sitting in the adapter and the harvest is a single transfer like any other.
+That is how an asynchronous venue meets a synchronous interface. Every one of the four
+stages is permissionless, so nobody has to wait on Zama's operator to run them.
 
 ### The addresses
 
@@ -137,14 +158,16 @@ nothing would be a lie a judge could check in a minute.
 ### What plugging it in means in practice
 
 The batcher moves in four stages: join, dispatch, finalize, claim. A batch waits until it
-reaches a minimum age, then its aggregate is decrypted, then the vault settles, then
+reaches a minimum age, then its total is decrypted, then the vault settles, then
 participants claim. Every one of those stages is permissionless, so the pool is never
 stuck waiting for Zama's operator, and claims never expire.
 
-That rhythm is slower than the sponsored source's instant drip, and it is the main piece
-of work in taking the adapter live. A harvest becomes "redeem some shares now, collect
-the proceeds a batch later" rather than a single synchronous call. The exact shape of
-that is an open question, logged in [OPEN-QUESTIONS.md](../OPEN-QUESTIONS.md).
+That rhythm is slower than the sponsored source's instant drip, which is why the keeper
+runs the redemption ahead of time rather than inside `harvest`. The pool's contract never
+waits: it asks the adapter for whatever has already been claimed back. What remains as
+real work in taking this live is the keeper side of it, deciding how often to start a
+redemption and how much of the position to redeem, and that is a policy choice with no
+on-chain consequence if it is late.
 
 ### What Hearth would inherit
 

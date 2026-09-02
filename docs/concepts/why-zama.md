@@ -41,8 +41,15 @@ Not "built on Zama". Here is the list, with what each one does for us.
 
 `euint64` for money and weights, `euint128` for the pool's total accumulator, `ebool` for
 the outcome of a comparison. Every saver's principal, winnings, weight and credit is one
-of these. The arithmetic we perform on them is `FHE.add`, `FHE.sub`, `FHE.mul` by a
-public number, `FHE.min`, `FHE.gt` and `FHE.select`.
+of these, and so is each tier's carry. The arithmetic we perform on them is `FHE.add`,
+`FHE.sub`, `FHE.mul` by a public number, `FHE.min`, `FHE.gt`, `FHE.le`, `FHE.and` and
+`FHE.select`.
+
+Comparison is doing more work here than the winner test alone. Five encrypted comparisons
+per draw place the pool's total weight against the powers of two around its last known
+bracket, and the only thing that leaves the encrypted world is the small count of how many
+of the five it beat. That is how the draw gets a public scale to run against without the
+total itself ever becoming a number.
 
 `FHE.select` deserves a note, because it is what makes the whole design possible. It is
 an if-statement whose condition is encrypted: it returns one of two encrypted values and
@@ -90,9 +97,10 @@ later transactions. `FHE.allow` grants a saver permanent read access to their ow
 principal, winnings, per-draw weight and per-draw credit. `FHE.allowTransient` grants
 access for the length of one transaction, which is how the vault hands the pool a
 one-time allowance over an evaluation batch's total without ever giving it standing
-access. `FHE.makePubliclyDecryptable` opens a value to everybody, and we use it on
-exactly five kinds of value: the seed, the aggregate weight, the harvest, the per-tier
-remainders and the unfunded counter.
+access. `FHE.makePubliclyDecryptable` opens a value to everybody, and we use it on exactly
+six kinds of value: the seed, the scale count that gives the bracket, the non-empty flag,
+the harvest, a tier's carry when that tier is due to reconcile, and the unfunded counter.
+The pool's exact total weight is deliberately not on that list.
 
 That last call is one-way and permanent. It is the single most consequential thing a
 contract on this protocol can do, so every use of it in Hearth is listed in
@@ -105,8 +113,9 @@ which is a signature standard that shows the signer exactly what they are approv
 Zama's relayer returns the plaintext of values that saver is allowed on.
 
 It is an off-chain request. No transaction, no gas, no trace. That is why Hearth can have
-no claim function at all: learning that you won costs nothing and leaves nothing behind,
-so winners and losers are indistinguishable by their behaviour on chain.
+no claim function at all: learning that you won costs nothing and leaves nothing behind.
+The other half of that promise is that evaluation cannot be aimed at yourself either, so
+there is no transaction of any kind that only a winner would send.
 
 The bounty requires user decryption of both balance and winnings. Hearth also grants the
 per-draw weight and per-draw credit, so a saver can verify the draw's arithmetic against
@@ -120,10 +129,11 @@ management service, the group that holds the network's decryption key. The contr
 verifies that signature on chain with `FHE.checkSignatures` before acting on the number.
 
 This is what turns "we say the seed was 12345" into a number the contract itself refuses
-to accept without proof. Hearth uses it twice per draw: once for the seed, aggregate and
-harvest together at award time, and once for the three tier remainders at reconciliation.
-Both proofs are bound to their handles in a fixed order, so nothing can be shuffled or
-replayed into a different draw.
+to accept without proof. Hearth uses it once per draw for the seed, the scale count, the
+non-empty flag and the harvest together at award time, and again for a tier's carry
+whenever that tier is due to reconcile, which for the grand tier is once every 24 draws.
+Every proof is bound to its handles in a fixed order, so nothing can be shuffled or
+replayed into a different draw or a different tier.
 
 ## What a saver actually trusts
 

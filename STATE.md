@@ -18,10 +18,13 @@ Updated 3 September 2026, during milestone 1.
 
 ## Next
 
-- Apply the review's design changes (nested prize thresholds, verified harvest, three
-  observations and a two-period window, per-draw weight and credit handles), then the
-  full-cycle and fairness tests, then measure batch size on the mock.
-- Deploy script, keeper, seed, prove-it and attack scripts; Sepolia deployment.
+- Third contract pass in progress: aggregate published only as its power-of-two bracket,
+  prize sizes fixed at close, seed-ordered evaluation walk, per-tier reconcile cadence with
+  an encrypted carry, withdraw clamped to the vault balance, threshold view.
+- In parallel: documentation pages being revised to that design; keeper package being built.
+- Then: deploy script and Sepolia config, seed and prove-it scripts, fairness and invariant
+  tests, static analysis, Sepolia deployment and verification, self-audit, app rewire, docs
+  site, README, submission drafts.
 
 ## Blocked on Ram
 
