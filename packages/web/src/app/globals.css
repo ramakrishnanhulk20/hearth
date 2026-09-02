@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+  :root {
+    --bg: #000000;
+    --surface: #141414;
+    --raised: #0c0c0c;
+
+    --hairline: rgba(255, 255, 255, 0.1);
+    --hairline-soft: rgba(255, 255, 255, 0.06);
+    --hairline-strong: rgba(255, 255, 255, 0.24);
+    --hover: rgba(255, 255, 255, 0.04);
+    --seal: rgba(255, 255, 255, 0.13);
+
+    --text: rgba(255, 255, 255, 0.82);
+    --muted: rgba(255, 255, 255, 0.54);
+    --faint: rgba(255, 255, 255, 0.34);
+
+    --flame: 249 209 0;
+    --flame-fill: 249 209 0;
+    --flame-soft: 252 228 114;
+    --ember: 250 168 53;
+    --on-flame: 14 14 14;
+    --good: 10 148 41;
+    --bad: 221 50 50;
+
+    --grain-opacity: 0.05;
+    color-scheme: dark;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #ececec;
+    --surface: #ffffff;
+    --raised: #f4f4f4;
+
+    --hairline: rgba(0, 0, 0, 0.1);
+    --hairline-soft: rgba(0, 0, 0, 0.06);
+    --hairline-strong: rgba(0, 0, 0, 0.22);
+    --hover: rgba(0, 0, 0, 0.04);
+    --seal: rgba(0, 0, 0, 0.16);
+
+    --text: rgba(0, 0, 0, 0.84);
+    --muted: rgba(0, 0, 0, 0.56);
+    --faint: rgba(0, 0, 0, 0.44);
+
+    --flame: 150 114 0;
+    --flame-fill: 249 209 0;
+    --flame-soft: 200 152 0;
+    --ember: 200 130 20;
+    --on-flame: 14 14 14;
+
+    --grain-opacity: 0.03;
+    color-scheme: light;
+  }
+
+  .force-dark {
+    --bg: #000000;
+    --surface: #141414;
+    --raised: #0c0c0c;
+    --hairline: rgba(255, 255, 255, 0.1);
+    --hairline-soft: rgba(255, 255, 255, 0.06);
+    --hairline-strong: rgba(255, 255, 255, 0.24);
+    --hover: rgba(255, 255, 255, 0.04);
+    --seal: rgba(255, 255, 255, 0.13);
+    --text: rgba(255, 255, 255, 0.82);
+    --muted: rgba(255, 255, 255, 0.54);
+    --faint: rgba(255, 255, 255, 0.34);
+    --flame: 249 209 0;
+    --flame-soft: 252 228 114;
+    color-scheme: dark;
+  }
+
+  html {
+
+    scroll-behavior: auto;
+  }
+
+  body {
+    @apply bg-ink text-parchment font-sans antialiased;
+    overscroll-behavior-y: none;
+    transition: background-color 0.4s ease;
+  }
+
+  ::selection {
+    background: rgba(249, 209, 0, 0.85);
+    color: #000;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--hairline-strong);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+
+  .label {
+    @apply inline-flex items-center gap-2.5 font-sans text-[11px] uppercase tracking-label text-faint;
+  }
+
+  .label::before {
+    content: "";
+    @apply block h-[7px] w-[7px] shrink-0 rounded-[2px] bg-flame;
+  }
+
+  .glass {
+    @apply rounded-card border border-hairlineSoft bg-surface shadow-glass;
+  }
+
+  .glass-fill {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(24, 21, 16, 0.64), rgba(9, 9, 8, 0.6));
+  }
+
+  .glass-fill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(130% 72% at 50% -14%, rgba(255, 244, 224, 0.1), transparent 58%);
+  }
+}
+
+@keyframes lantern-flicker {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.86);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  65% {
+    opacity: 0.72;
+    transform: scale(0.95);
+  }
+}
+
+.lantern-flame {
+  transform-origin: center;
+  animation: lantern-flicker 1.15s ease-in-out infinite;
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-rise {
+  animation: fade-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

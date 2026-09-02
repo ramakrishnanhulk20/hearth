@@ -1,0 +1,26 @@
+{
+  "name": "hearth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Confidential no-loss prize savings on the Zama Protocol",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "comments": {
+    "@fhevm/solidity": "Declared here rather than in the workspace so npm always hoists it to the root node_modules. The Hardhat plugin resolves the library relative to its own directory, so a nested copy makes the local simulator fail to start."
+  },
+  "dependencies": {
+    "@fhevm/solidity": "0.11.1"
+  },
+  "scripts": {
+    "fhe:test": "node scripts/use-fhe.mjs 0.11.1",
+    "fhe:ship": "node scripts/use-fhe.mjs 0.13.2",
+    "compile": "npm run compile -w @hearth/contracts",
+    "test": "npm run test -w @hearth/contracts",
+    "lint": "npm run lint -w @hearth/contracts"
+  }
+}

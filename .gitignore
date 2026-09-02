@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# builds
+.next/
+.next-verify/
+out/
+build/
+dist/
+artifacts/
+cache/
+types/
+fhevmTemp/
+coverage/
+coverage.json
+*.tsbuildinfo
+
+# environment
+.env
+.env.local
+.env*.local
+
+# editors and os
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# logs
+npm-debug.log*
+yarn-error.log*
+
+# vercel
+.vercel
+
+# saved program material, vendor docs and competitor code, not ours to publish
+reference/
+CLAUDE.md
+AGENT-RETROS.md
