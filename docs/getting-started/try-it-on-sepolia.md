@@ -24,9 +24,10 @@ which means every on-chain amount is in millionths: 1,000 USDC is written `10000
 
 ## 1. Get Sepolia ETH
 
-You need a small amount of Sepolia ETH to pay gas. Any Sepolia faucet works; the ones we
-have verified are listed at {{FAUCET_SEPOLIA_ETH}}. A tenth of an ETH is far more than
-enough for the whole walkthrough.
+You need a small amount of Sepolia ETH to pay gas. Any Sepolia faucet works. The ones in
+common use are the Google Cloud Web3 faucet, Alchemy's Sepolia faucet and the Chainlink
+faucet, and each pays out enough for this walkthrough in one request. A tenth of an ETH
+is far more than enough.
 
 ## 2. Mint the test USDC
 

@@ -118,9 +118,9 @@ undone.
 | Window | 2 hours (two periods) | 2 days |
 | Close deadline | 1 hour 30 minutes after the period ends | 1 day 12 hours after |
 | Per-saver cap | About 5 billion USDC | About 213 million USDC |
-| Grand tier | count 1, odds 1/24, shares 40, reconcile every draw | count 1, odds `{{MAINNET_GRAND_ODDS}}`, shares `{{MAINNET_GRAND_SHARES}}`, reconcile every `{{MAINNET_GRAND_RECONCILE}}` |
-| Mid tier | count 1, odds 1/6, shares 20, reconcile every draw | count 1, odds `{{MAINNET_MID_ODDS}}`, shares `{{MAINNET_MID_SHARES}}`, reconcile every `{{MAINNET_MID_RECONCILE}}` |
-| Frequent tier | count 4, odds 1, shares 40, reconcile every draw | count 4, odds 1, shares `{{MAINNET_FREQUENT_SHARES}}`, reconcile every draw |
+| Grand tier | count 1, odds 1/24, shares 40, reconcile every draw | count 1, odds 1/30, shares 50, reconcile every draw |
+| Mid tier | count 1, odds 1/6, shares 20, reconcile every draw | count 1, odds 1/7, shares 25, reconcile every draw |
+| Frequent tier | count 4, odds 1, shares 40, reconcile every draw | count 4, odds 1, shares 25, reconcile every draw |
 | Utilisation | 50 percent | 50 percent |
 | Yield source | `SponsoredYieldSource` | `ConfidentialVaultYieldSource` over Zama's batcher |
 | Grand prize fires | About once a day | Set by the odds chosen |

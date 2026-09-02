@@ -571,7 +571,8 @@ against `hardhat node`.
 Nothing sensitive is hardcoded. `packages/contracts/.env.example` lists every key with a
 comment on where its value comes from. The deployer's key and the keeper's key are
 different accounts derived from the same seed phrase, so the keeper's hot key holds no
-owner powers. Sepolia ETH faucets we have tested: {{FAUCET_SEPOLIA_ETH}}.
+owner powers. Sepolia ETH comes from any public faucet; the Google Cloud, Alchemy and Chainlink faucets
+each pay out enough for the judge path in one request.
 
 ---
 
