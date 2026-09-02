@@ -345,8 +345,9 @@ contract HearthPrizePool is
     ///      handle is then a trivial zero and HarvestFailed is emitted, so a broken source can never
     ///      strand a period. The vault marks the scale and the non-empty flag publicly decryptable itself,
     ///      because it is the contract allowed on them. Costs 3,039,448 homomorphic compute units at a
-    ///      handle depth of 1,109,064 and about 1.23 million gas, measured on the Sepolia tier set, which
-    ///      is independent of how many savers the pool has. Emits DrawClosed.
+    ///      handle depth of 1,109,064 and about 1.23 million gas, measured with the Sepolia tier
+    ///      parameters against the mock coprocessor's price table rather than on Sepolia itself, and
+    ///      independent of how many savers the pool has. Emits DrawClosed.
     function closeDraw(uint32 drawId) public whenNotPaused nonReentrant {
         uint32 period = _currentPeriod();
         if (drawId == 0 || period < drawId + 1 || block.timestamp >= closeDeadline(drawId)) {

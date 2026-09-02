@@ -25,7 +25,7 @@ const POOL = [
 const VAULT = [
   "function evaluate(uint32 drawId, uint256 count)",
   "function cursorOf(uint32 drawId) view returns (uint256)",
-  "function walkOf(uint32 drawId) view returns (uint256 start, uint256 length)",
+  "function walkOf(uint32 drawId) view returns (uint256 start, uint256 count)",
   "function evaluatedCount(uint32 drawId) view returns (uint256)",
   "function finalizeDraw(uint32 drawId)",
   "function finalized(uint32 drawId) view returns (bool)",

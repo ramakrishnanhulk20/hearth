@@ -10,7 +10,18 @@
     "lint": "solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "postcompile": "npm run typechain",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain",
-    "deploy:sepolia": "hardhat deploy --network sepolia"
+    "node:local": "hardhat node",
+    "deploy:local": "hardhat deploy --network localhost",
+    "deploy:sepolia": "hardhat deploy --network sepolia",
+    "verify:sepolia": "hardhat hearth:verify --network sepolia",
+    "seed:local": "hardhat hearth:seed --network localhost",
+    "seed:sepolia": "hardhat hearth:seed --network sepolia",
+    "status:local": "hardhat hearth:status --network localhost",
+    "status:sepolia": "hardhat hearth:status --network sepolia",
+    "draw:local": "hardhat hearth:draw --network localhost",
+    "draw:sepolia": "hardhat hearth:draw --network sepolia",
+    "prove:local": "hardhat hearth:prove --network localhost",
+    "prove:sepolia": "hardhat hearth:prove --network sepolia"
   },
   "dependencies": {
     "@openzeppelin/confidential-contracts": "0.5.3",

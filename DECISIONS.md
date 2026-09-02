@@ -129,3 +129,22 @@ marked as such.
   (3,674,128 compute units per saver plus 748,032 per call); five savers exceed the
   18,000,000 budget. The rejection sampler is gone: the range is a power of two, so masking
   the hash is exactly uniform.
+- 2026-09-03: `fhe:ship` builds against `@fhevm/solidity` 0.13.2, not 0.13.3. Hardhat plugin 0.4.2,
+  the newest published, matches the text of the library's Ethereum config block exactly, and 0.13.3
+  dropped two placeholder comment lines from it, so `hardhat compile` fails before solc runs. Every
+  address in both versions is identical. Move to 0.13.3 when the plugin follows.
+- 2026-09-03: the operator tasks run on `hardhat node` with `--network localhost`, or on Sepolia, never
+  on the in-process network: the plugin only deploys its mock coprocessor for tests and for the node,
+  and a chain that dies with the process could not carry state between six CLI commands anyway.
+- 2026-09-03: explorer verification goes through hardhat-verify's v2 endpoint. hardhat-deploy's own
+  `etherscan-verify` still posts to the per-network v1 endpoints, which Etherscan retired.
+- 2026-09-03: account roles from the recovery phrase: index 0 deploys and owns, index 1 is the keeper
+  and nothing else, indexes 2 to 6 are the five demo savers, index 6 is the prover. The keeper is never
+  a saver, so its transactions carry no saver's information.
+- 2026-09-03: Sepolia sponsorship is 10,000 mock USDC released at 20 an hour, about 20 days of prizes,
+  so the pool keeps paying through the judging window without anyone topping it up.
+- 2026-09-03: the prove-it command never waits for a period by default. It checks the newest awarded
+  draw the prover holds weight in, and withdraws only its own stake plus winnings, so a run leaves the
+  demo pool as it found it and can be repeated any number of times.
+- 2026-09-03: `walkOf` returns `(start, count)`. The earlier name `length` collided with a tuple's own
+  `length` in the generated TypeScript types and made the return type unusable.

@@ -17,9 +17,15 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
+// 0.13.3 is listed but is not what `fhe:ship` uses. Hardhat plugin 0.4.2, the newest there is,
+// checks the library's ZamaConfig.sol by matching the text of its `_getEthereumConfig` block
+// exactly, and 0.13.3 dropped two placeholder comment lines from that block. Every address in the
+// file is identical, so this is a plugin text check rather than a protocol change, but it makes
+// `hardhat compile` fail before solc ever runs. Move `fhe:ship` to 0.13.3 once the plugin follows.
 const SUPPORTED = {
   "0.11.1": { mode: "local simulator + live network", peers: "satisfied" },
   "0.13.2": { mode: "live network only", peers: "overridden" },
+  "0.13.3": { mode: "live network only, blocked by hardhat plugin 0.4.2", peers: "overridden" },
 };
 
 const version = process.argv[2];

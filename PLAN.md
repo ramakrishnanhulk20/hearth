@@ -31,7 +31,7 @@ delegated the remaining choices; each is logged in `DECISIONS.md`.
 ## R&D brief, in short
 
 - Library versions: `@fhevm/solidity` 0.11.1 for local tests (the Hardhat plugin 0.4.2
-  pins it), 0.13.3 for the Sepolia build via `scripts/use-fhe.mjs`;
+  pins it), 0.13.2 for the Sepolia build via `scripts/use-fhe.mjs`, because hardhat plugin 0.4.2 rejects 0.13.3;
   `@openzeppelin/confidential-contracts` 0.5.3; `@openzeppelin/contracts` 5.6.1;
   `@zama-fhe/sdk` 3.5.1 in the app; Hardhat 2.x.
 - Zama functions used: listed in `INTAKE.md` section 4.

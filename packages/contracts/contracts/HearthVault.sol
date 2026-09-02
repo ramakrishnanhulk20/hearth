@@ -90,7 +90,8 @@ contract HearthVault is
     uint8 public constant SCALE_PROBES = 5;
 
     /// @notice Savers needing encrypted work per `evaluate` call.
-    /// @dev Measured with `fhevm.computeTransactionHCU` on the Sepolia tier set (prize counts 1, 1 and 4
+    /// @dev Measured with `fhevm.computeTransactionHCU` against the mock coprocessor's price table,
+    ///      not on Sepolia, using the Sepolia tier parameters (prize counts 1, 1 and 4
     ///      at odds 1/24, 1/6 and 1): 748,032 homomorphic compute units of fixed cost per call plus
     ///      3,674,128 per saver. Four savers cost 15,444,544 units at a handle depth of 3,240,000, and
     ///      every further saver adds 381,000 to that depth through the tier remainder chain. The
@@ -510,7 +511,11 @@ contract HearthVault is
 
     /// @notice Where the evaluation walk of `drawId` starts and how many savers it covers.
     /// @dev Both are zero until the first `evaluate` call fixes them from the seed and the saver count.
-    function walkOf(uint32 drawId) external view returns (uint32 start, uint32 length) {
+    /// @return start Index in the saver list the walk begins at.
+    /// @return count How many savers the walk covers. Named `count` rather than `length`, which
+    ///         collides with a tuple's own `length` in generated TypeScript clients and makes the
+    ///         return type unusable there.
+    function walkOf(uint32 drawId) external view returns (uint32 start, uint32 count) {
         DrawState storage state = _draws[drawId];
         return (state.start, state.length);
     }

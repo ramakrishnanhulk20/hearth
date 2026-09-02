@@ -65,7 +65,7 @@ that `finalizeDraw` published", which is true either way, and
 `docs/concepts/prizes-and-tiers.md` describes the cadence without committing to how it is
 counted.
 
-## 4. What does the `drawId` in `reconcile(p, tier, carry, proof)` bind to?
+## 4. What does the `drawId` in `reconcile(tier, carry, proof)` bind to?
 
 The carry is a running total across the whole cadence span, so it is not a property of one
 draw. The signature takes a draw id anyway, presumably the draw whose `finalizeDraw`

@@ -40,3 +40,6 @@ reference/
 CLAUDE.md
 AGENT-RETROS.md
 packages/contracts-fair/
+packages/contracts/deployments/localhost/
+packages/contracts-audit/
+packages/contracts-slither/

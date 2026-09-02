@@ -7,6 +7,7 @@ import "@typechain/hardhat";
 import "hardhat-deploy";
 import type { HardhatUserConfig } from "hardhat/config";
 import { vars } from "hardhat/config";
+import "./tasks/hearth";
 
 loadEnv();
 

@@ -384,9 +384,9 @@ describe("Hearth", () => {
     const order = await walkOrder(drawId, published.seed);
     await (await vault.connect(keeper).evaluate(drawId, 2)).wait();
 
-    const [start, length] = await vault.walkOf(drawId);
-    expect(start).to.equal(published.seed % 4n);
-    expect(length).to.equal(4);
+    const walk = await vault.walkOf(drawId);
+    expect(walk.start).to.equal(published.seed % 4n);
+    expect(walk.count).to.equal(4);
     expect(await vault.cursorOf(drawId)).to.equal(2);
     expect(await vault.evaluatedCount(drawId)).to.equal(2);
     expect(await vault.evaluated(drawId, order[0])).to.equal(true);
