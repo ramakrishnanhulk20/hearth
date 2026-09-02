@@ -79,3 +79,43 @@ marked as such.
   `CoprocessorEventsIterator.next()` and updates it only after two awaits, so two overlapping
   decryptions re-query the same block range and the second throws "Parse event ... in
   backward order". A mock limitation, not a contract one.
+- 2026-09-03: `MAX_BATCH` is 4, measured on the mock's price table with the Sepolia tier set:
+  a saver costs 3,836,128 compute units across three tiers with a four-prize frequent tier,
+  so five savers exceed the 20,000,000 cap. The vault's NatSpec carries the coefficients.
+- 2026-09-03: Sepolia period is one hour, not thirty minutes, with the grand tier at odds 1/24
+  so it still pays about daily. A ten-saver pool needs about eleven million gas per draw
+  (three evaluation batches plus close, award, finalize and reconcile); at hourly draws and
+  the current 1 gwei base fee that is about 0.26 ETH a day, half of what thirty-minute draws
+  would cost for the same four prizes an hour.
+- 2026-09-03: the vault keeps exactly fifteen state variables (solhint's recommended cap);
+  per-draw weight and credit live in one `Outcome` struct, and "remainders initialised" is
+  read from the handle itself.
+- 2026-09-03: the tier loop breaks, not continues, at the first threshold above 64 bits,
+  since thresholds only rise with the prize index; the first prize of a tier seeds the tier's
+  payout and the first tier seeds the credit, saving six encrypted adds per saver.
+- 2026-09-03: a sole saver wins every prize of the frequent tier for any seed, which the tests
+  use as the certain-win case; odds cannot exceed one, so a ninety percent holder wins all
+  four prizes only for about sixty percent of seeds.
+- 2026-09-03: the per-period aggregate is no longer published. Publishing it exactly lets an
+  observer recover a lone mover's deposit from two consecutive aggregates and the public
+  timestamp of their own transaction (the second review proved it exact, not approximate).
+  The vault publishes only the aggregate's power-of-two bracket, tracked under encryption
+  by five comparisons per draw, and draws are run against that bracket. This reverses the
+  2 September choice to publish the aggregate; Ram made that choice on advice that
+  understated the leak, and this is the real-product answer.
+- 2026-09-03: prize sizes and offered liquidity are fixed at close, before the seed exists,
+  so nothing done after seeing the seed can change what a win is worth.
+- 2026-09-03: closing is allowed only until the middle of the window's second period, and a
+  missed award returns the offered liquidity, so a last-block close cannot strand a draw.
+- 2026-09-03: evaluation walks the saver list from a seed-derived start with a cursor;
+  callers choose how many to advance, never whom. Self-evaluation is therefore not a
+  winner tell and the clamp order is fixed by the draw.
+- 2026-09-03: tiers reconcile on their own cadence with an encrypted carry (grand every 24
+  draws, mid every 6, frequent every draw), so a jackpot payout is attributed to a day of
+  eligible savers rather than to the two percent eligible in one draw.
+- 2026-09-03: withdrawals clamp to the vault's own confidential balance because an ERC-7984
+  transfer moves the whole amount or nothing; the shortfall re-credit is gone.
+- 2026-09-03: a reverting yield source no longer stops a close; the harvest is booked as
+  zero and HarvestFailed is emitted.
+- 2026-09-03: a `thresholdOf` view shares the winner-test arithmetic with evaluation so the
+  verify page, the tests and a judge use one implementation.

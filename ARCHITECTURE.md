@@ -7,8 +7,8 @@ time-weighted balance. Principal is withdrawable at any time.
 
 This document is the implementation specification. It follows PoolTogether V5's design
 (time-weighted average balance, tiered prizes, per-saver winner test) and adapts each
-part to encrypted arithmetic. Revised 3 September 2026 after an adversarial design review;
-the review's findings and their resolutions are listed in section 14.
+part to encrypted arithmetic, with the deviations named in section 14. Revised 3
+September 2026 after two adversarial design reviews.
 
 ## 1. System overview
 
@@ -27,7 +27,7 @@ flowchart LR
     USDC -- "approve" --> cUSDC
     Saver -- "confidentialTransferAndCall" --> Vault
     Saver -- "withdraw" --> Vault
-    Vault -- "aggregate handle" --> Pool
+    Vault -- "scale of the aggregate" --> Pool
     Pool -- "fund(encrypted amount)" --> Vault
     Yield -- "harvest (encrypted transfer)" --> Pool
     Keeper -- "closeDraw, awardDraw,<br/>evaluate, finalize, reconcile" --> Pool
@@ -47,39 +47,51 @@ for `ts >= firstPeriodAt`; `periodStart(p) = firstPeriodAt + (p - 1) * L`;
 `periodEnd(p) = periodStart(p + 1)`. Draw `p` covers period `p` and is decided by balances
 held during period `p`.
 
-The window of draw `p` is periods `p+1` and `p+2`. Every step of draw `p` must land
-inside its window; `windowEndsAt(p) = periodEnd(p + 2)`.
+The window of draw `p` is periods `p+1` and `p+2`; `windowEndsAt(p) = periodEnd(p + 2)`.
+Closing is allowed only in the first three quarters of the window
+(`closeDeadline(p) = periodStart(p + 2) + L / 2`), so that the KMS round trip, the award
+and every evaluation batch always have at least half a period left.
 
 Draw lifecycle, all steps permissionless:
 
-1. `closeDraw(p)`, inside the window. Draws a fresh encrypted random seed, snapshots the
-   encrypted aggregate weight of period `p`, harvests yield as one encrypted transfer from
-   the yield source, and marks all three handles publicly decryptable.
-2. `awardDraw(p, seed, aggregate, harvested, proof)`, inside the window, with the KMS-signed
-   cleartexts of the three handles in that order. Verifies the proof on chain, credits the
-   verified harvest to the tiers by shares, then either opens the draw (fixes each tier's
-   prize size and offered liquidity) or marks it `Empty` when the aggregate is zero or no
-   tier has liquidity. If the window has already closed, the harvest is still credited and
-   the draw is marked `Skipped`, so no yield is ever lost.
-3. `evaluate(p, savers[])` on the vault, any number of times inside the window, at most
-   `MAX_BATCH` savers per call. Runs the winner test for each saver over encrypted values,
-   credits encrypted winnings, stores the saver's encrypted weight and credit for that
-   draw, and pulls the encrypted total credited from the prize pool. A saver is evaluated
-   once per draw; repeats and unknown addresses are skipped without reverting.
-4. `finalizeDraw(p)`, after the window. The vault marks each tier's encrypted remaining
-   liquidity and its unfunded counter publicly decryptable. `reconcile(p, remaining[],
-   proof)` on the pool returns unpaid liquidity to the tiers.
+1. `closeDraw(p)`, before `closeDeadline(p)`. Fixes each tier's prize size and offered
+   liquidity from the liquidity known at that moment (harvests booked by earlier awards
+   plus reconciled remainders), moves that liquidity into the draw, draws a fresh encrypted
+   random seed, asks the vault for the encrypted scale of period `p`'s aggregate weight,
+   harvests yield as one encrypted transfer from the yield source, and marks the seed, the
+   scale, the non-empty flag and the harvest handle publicly decryptable. Prize sizes are
+   therefore fixed before any random value exists.
+2. `awardDraw(p, seed, scaleCount, nonEmpty, harvested, proof)`, inside the window, with
+   the KMS-signed cleartexts of the four handles in that order. Verifies the proof on chain,
+   books the harvest to the tiers by shares, and then either opens the draw or marks it
+   `Empty` (nobody held a balance in period `p`), returning the offered liquidity to the
+   tiers. If the window has already closed, the harvest is still booked, the offered
+   liquidity is returned and the draw is marked `Skipped`, so no yield or liquidity is
+   ever lost.
+3. `evaluate(p, count)` on the vault, any number of times inside the window. Walks the
+   saver list from a per-draw cursor that starts at `seed mod saverCount`, in list order,
+   for up to `count` savers (at most `MAX_BATCH` that need encrypted work). Nobody chooses
+   who is evaluated or in what order; a saver who wants their own result advances the same
+   walk as the keeper does. Savers with no observation at or before period `p` are skipped
+   in plaintext at no encrypted cost. Each evaluated saver's encrypted weight and credit are
+   stored and allowed to that saver, and the encrypted total credited in the batch is
+   pulled from the prize pool.
+4. `finalizeDraw(p)`, after the window. The vault folds each tier's encrypted remainder
+   into that tier's encrypted carry. Tiers reconcile on their own cadence
+   (`reconcileEvery[t]` draws): when a tier is due, the vault marks its carry publicly
+   decryptable, and `reconcile(p, tier, carry, proof)` on the pool books the verified
+   cleartext back into that tier's plaintext liquidity and resets the carry to zero. Until
+   then the carry rides along, encrypted, and is added to the tier's offered liquidity at
+   every close.
 
-Winner selection happens at the draw. From the moment `awardDraw` verifies the seed and the
-aggregate, every saver's result for every tier is fixed: the thresholds are public numbers
-anyone can recompute, and the comparison is against an encrypted weight that can no longer
-change. Evaluation writes an already-decided result. The keeper evaluates everyone in
-saver-list order right after the award; any saver can evaluate themselves or anyone else
-from the app; no saver transaction is needed to win.
+Winner selection happens at the draw. From the moment `awardDraw` verifies the seed and
+the scale, every saver's result for every tier is fixed: the thresholds are public
+numbers anyone can recompute, and the comparison is against an encrypted weight that can
+no longer change. Evaluation writes an already-decided result in a fixed order; the
+keeper evaluates everyone right after the award; no saver transaction is needed to win.
 
-A draw whose close or award never lands stays `None` or `Closed` and is skipped: its
-liquidity, if it was never offered, stays in the tiers, and its harvest is booked by the
-late award. Nothing is lost; that period pays no prize.
+A draw whose close never lands stays `None` and is skipped: its liquidity was never moved
+and its harvest is collected by the next close. That period pays no prize.
 
 ## 3. Encrypted time-weighted average balance (TWAB)
 
@@ -97,11 +109,11 @@ struct Observation { euint64 cum; euint64 balance; uint32 ts; }
 `cum` is balance-seconds accumulated since the start of the period that contains `ts`.
 Resetting at each period start bounds the accumulator by `balance * L`.
 
-Bounds: the vault refuses any deposit that would put a saver above
-`maxPrincipal = (2^64 - 1) / L` (about 10 billion USDC at a 30-minute period, about 213
-million USDC at a daily period), so a saver's `cum` never exceeds 64 bits. The total
-observation uses a 128-bit `cum`, so the aggregate never overflows for any supply the
-wrapper can mint.
+Bounds: the vault refuses any deposit whose amount, or whose resulting principal, exceeds
+`maxPrincipal = (2^64 - 1) / L` (about 5 billion USDC at an hourly period, about 213
+million USDC at a daily period), so a saver's `cum` never exceeds 64 bits and the
+addition that checks the cap cannot wrap. The total observation uses a 128-bit `cum`, so
+the aggregate never overflows for any supply the wrapper can mint.
 
 On a balance change at time `now` in period `q` to `newBalance`:
 
@@ -119,125 +131,139 @@ observation at or before period `p`:
 - If no observation is at or before `p`: zero, decided in plaintext from the timestamps,
   with no encrypted work.
 
-Inside the window (periods `p+1` and `p+2`) the newest observation at or before `p` is
-always one of the three slots: at most two later periods have started, so at most two
-newer observations have been pushed. The vault keeps the same three observations for the
-total balance, so the aggregate weight of a period is computed the same way and is valid
-for the same window.
+Rule: `k` observations support a window of `k - 1` periods, because a slot is pushed at
+most once per period. Three slots cover the two-period window. If history is ever
+missing inside the window, that saver's weight is treated as zero rather than reverting
+the batch.
 
-Every encrypted operation here is one multiply by a public number and one add.
+The vault keeps the same three observations for the total balance. Any exit records an
+observation whether or not principal changed; that is harmless, because slots shift only
+when a new period has started. Winnings never count toward odds: the weight is principal
+only.
 
-## 4. Winner test
+## 4. The scale of the aggregate, and the winner test
 
-Inputs fixed per draw after `awardDraw`: the public seed `R`, the public aggregate weight
-`W`, and for each tier `t` the prize size `prize[t]`, the prize count `count[t]`, the odds
-`odds[t]` as a fraction and the offered liquidity `offered[t]`.
+The aggregate weight `W` of a period is never published. Publishing it exactly would let
+an observer recover a lone mover's deposit from two consecutive aggregates and the
+public timestamp of their own transaction. Instead the vault publishes the scale of `W`:
+the smallest power of two at or above it, `M = 2^m`, tracked incrementally. At close the
+vault compares `W` under encryption against `2^(m-2) .. 2^(m+2)` around the previous
+draw's `m` and against 1, sums the results into one small encrypted count, and marks that
+count publicly decryptable. The pool derives the new `m` from the verified count (moving
+by at most three steps per draw) and whether the period was empty. An observer learns
+only when the pool crosses a power of two.
+
+Inputs fixed per draw after `awardDraw`: the public seed `R`, the public range `M`, and
+for each tier `t` the prize size `prize[t]`, the prize count `count[t]`, the odds
+`odds[t]` as a fraction and the offered liquidity.
 
 PoolTogether V5 gives each saver `count[t]` independent chances per tier, each won with
-probability `min(1, twab * odds[t] / W)`. Hearth reproduces that expectation with one
-uniform draw per tier and nested thresholds, so that the number of prizes a saver wins in
-tier `t` is `floor(z)` or `ceil(z)` with `z = twab * odds[t] * count[t] / W`, capped at
-`count[t]`:
+probability `min(1, twab * odds[t] / W)`. Hearth reproduces that expectation, scaled by
+`W / M`, with one uniform draw per tier and nested thresholds:
 
 ```
 prn    = keccak256(abi.encode(R, p, u, t))
-r      = uniform(prn, W)                                   // rejection sampling, plaintext
+r      = prn mod M                                          // M is a power of two, so no bias
 for k in 0 .. count[t]-1:
-    threshold_k = floor((r + k * W) * oddsDen[t] / (oddsNum[t] * count[t]))   // plaintext
-    won_k       = threshold_k < 2^64 ? FHE.gt(twab, uint64(threshold_k)) : false
+    threshold_k = floor((r + k * M) * oddsDen[t] / (oddsNum[t] * count[t]))   // plaintext
+    won_k       = threshold_k < 2^64 - 1 ? FHE.gt(twab, uint64(threshold_k)) : false
     tierPay    += FHE.select(won_k, prize[t], 0)
 pay[t]          = FHE.min(remaining[p][t], tierPay)
 remaining[p][t] = FHE.sub(remaining[p][t], pay[t])
 credit         += pay[t]
 ```
 
-`won_k` is true exactly when `twab * odds * count > r + k * W`. The thresholds are nested,
+`won_k` is true exactly when `twab * odds * count > r + k * M`. The thresholds are nested,
 so a saver wins prizes `0 .. j-1` for some `j`, and the expected number of prizes is
-exactly `min(count, z)`, linear in the saver's share. Splitting a balance across wallets
-changes nothing in expectation, and a large holder's expected prizes equal V5's.
+`min(count, twab * odds * count / M)`, linear in the saver's weight. Splitting a balance
+across wallets changes nothing in expectation. Because `M` is between `W` and `2W`, a
+tier pays between half and all of its nominal `count * odds` prizes per draw; what is not
+paid stays in the tier's carry and is offered again.
 
-Over-subscription: each prize is half of the tier's liquidity divided by the prize count
-(V5's 50 percent utilisation), so a tier pays twice its expected number of prizes before
-the clamp bites. When it bites, the last winner receives the remainder and later winners
-of that tier receive nothing, in evaluation order. Hearth has no reserve tier, unlike V5,
-which tops up an over-subscribed tier from its reserve. How often the clamp bites depends
-on the tier's expected number of prizes: about two percent of draws for the frequent tier
-(count 4, odds 1, expected four prizes, capacity eight), six to eight percent for a tier
-that expects one prize per draw, and a negligible fraction for the mid tier (one prize
-every six draws) and the grand tier (one in 48). It is documented, and a saver can
-evaluate themselves early.
-
-`evaluate` reverts for a draw that is `Empty`, `Skipped` or not yet awarded. Winnings
-never count toward odds: the weight is principal only.
+Over-subscription: each prize is half of the tier's offered liquidity divided by the
+prize count (V5's 50 percent utilisation), so a tier pays twice its expected number of
+prizes before the clamp bites. When it bites, the last winner in walk order receives the
+remainder and later winners of that tier receive nothing. The walk order is fixed by the
+seed, so nobody can buy a better place. Hearth has no reserve tier, unlike V5. The clamp
+bites in about two percent of draws for the frequent tier (count 4, odds 1) and a
+negligible fraction for the mid and grand tiers.
 
 The only plaintext branch is on the public threshold exceeding 64 bits, which happens
-for low-odds tiers when the aggregate is very large; in that case no 64-bit weight can
-exceed it, so the answer is false without a comparison. Nothing branches on a secret.
+for low-odds tiers when `M` is very large; in that case no 64-bit weight can exceed it, so
+the answer is false without a comparison. Thresholds only rise with `k`, so the tier loop
+stops at the first such threshold. Nothing branches on a secret.
 
-The vault stores, per draw and saver, the encrypted weight and the encrypted credit, both
-decryptable by that saver only, so the app can show "you won X in draw p" and let the
-saver verify the comparison against the published thresholds.
+A pure view `thresholdOf(drawId, saver, tier, k)` exposes the same arithmetic, so a judge,
+the app's verify page and the tests share one implementation. `evaluate` reverts for a
+draw that is `Empty`, `Skipped` or not yet awarded.
 
 ## 5. Money flow, ACL grants and invariants
 
 - Deposits arrive through the ERC-7984 receive hook with the actually transferred
-  encrypted amount. The hook refuses any caller but the configured asset. A deposit that
-  would exceed `maxPrincipal` returns an encrypted false, and the token refunds it in the
-  same transaction. Principal, the saver's observations and the total observations are
-  updated in the same transaction. The hook cannot see the amount, so any address that
-  triggers it joins the saver list, even with an encrypted zero; such a saver has zero
-  weight and can never win, and the list is never pruned. The cost of padding the list
-  falls on the keeper's evaluation gas only.
-- Any exit records an observation, whether or not principal changed. That is harmless:
-  observations shift only when a new period has started, so the newest observation at or
-  before period `p` stays available for the whole two-period window.
-- Pause stops deposits and draw closing only. Withdrawals, evaluation, award, finalize and
-  reconcile are never pausable, which is what keeps "withdraw at any time" true.
+  encrypted amount. The hook refuses any caller but the configured asset. A deposit whose
+  amount or resulting principal exceeds `maxPrincipal` returns an encrypted false, and the
+  token refunds it in the same transaction. Principal, the saver's observations and the
+  total observations are updated in the same transaction. The hook cannot see the amount,
+  so any address that triggers it joins the saver list, even with an encrypted zero; such
+  a saver has zero weight and can never win, and the list is never pruned. The cost of
+  padding the list falls on evaluation gas only.
 - `withdraw(amount)` and `withdrawAll()` are the only exits. They pay from winnings first,
-  then principal, clamp to what is available, and re-credit any shortfall the token
-  reports into winnings, so principal accounting stays exact. Every exit is one
-  confidential transfer and one event, whether or not it contains a prize.
+  then principal, and clamp to the smaller of what the saver holds and what the vault
+  holds, read from the vault's own confidential balance handle, because an ERC-7984
+  transfer moves the whole amount or nothing. Every exit is one confidential transfer and
+  one event, whether or not it contains a prize.
 - After each evaluation batch the vault gives the prize pool a transient allowance on the
   encrypted batch total; the pool gives the token a transient allowance and transfers that
   amount to the vault. The token allows the vault on the transferred handle, so the vault
-  adds any shortfall to one global encrypted unfunded counter, whose current handle is
-  published at every finalization. With verified harvests the counter is always zero.
+  adds any difference to one global encrypted unfunded counter, whose current handle is
+  published at every finalization. With verified harvests it is always zero.
 - Yield is never booked from a number the source reports. The source transfers an
   encrypted amount to the pool; the pool, allowed on that handle as the recipient, makes it
-  publicly decryptable and books the KMS-verified cleartext at award time.
-- ACL grants, per hand-off: the vault computes the aggregate and marks it publicly
+  publicly decryptable and books the KMS-verified cleartext at award time. A source that
+  reverts does not stop a close: the harvest handle is then a trivial zero and a
+  `HarvestFailed` event is emitted.
+- Pause stops deposits and draw closing only. Withdrawals, evaluation, award, finalize and
+  reconcile are never pausable.
+- ACL grants, per hand-off: the vault computes the scale count and marks it publicly
   decryptable itself; the vault grants the pool a transient allowance on the batch total;
-  the pool grants the token a transient allowance before `confidentialTransfer`; after every
-  batch the vault re-allows itself on every remaining-liquidity handle and allows itself and
-  the saver on the saver's winnings, weight and credit; the hook's encrypted acceptance is
-  allowed to the token for the transaction.
+  the pool grants the token a transient allowance before `confidentialTransfer`; after
+  every batch the vault re-allows itself on every remaining-liquidity and carry handle and
+  allows itself and the saver on the saver's winnings, weight and credit; the hook's
+  encrypted acceptance is allowed to the token for the transaction.
 - Invariants, checked in tests: vault token balance equals total principal plus total
-  unclaimed winnings; pool token balance equals total tier liquidity plus liquidity offered
-  and not yet reconciled; every tier's remainder is between zero and what was offered;
-  paid equals credited; nobody withdraws more than principal plus winnings.
-- Public decryption proofs are bound to handle order: `[seed, aggregate, harvested]` for
-  the award and the three remainders in tier order for reconciliation. The draw state
-  machine is the replay guard: each step succeeds once per draw.
+  unclaimed winnings; pool token balance equals plaintext liquidity plus every encrypted
+  carry plus liquidity offered and not yet finalized; every tier's remainder is between
+  zero and what was offered; paid equals credited; nobody withdraws more than principal
+  plus winnings.
+- Public decryption proofs are bound to handle order: `[seed, scaleCount, nonEmpty,
+  harvested]` for the award and one carry handle per reconciliation. The draw state
+  machine is the replay guard: each step succeeds once per draw and per tier.
 
-## 6. Prize liquidity (plaintext)
+## 6. Prize liquidity
 
-Harvests and reconciled remainders accumulate in `liquidity[t]` by shares, with the
-integer remainder of each split going to the grand tier. At award time, for each tier:
-`prize[t] = liquidity[t] * UTILISATION / count[t]`, `offered[t] = liquidity[t]`, and the
-tier's liquidity is zero until reconciliation returns what was not paid. A remainder
-reconciled after the next award is offered one draw later; nothing is lost. The grand
-tier has low odds, so its liquidity accumulates across draws and pays rarely and large.
+Harvests are booked at award, by shares, with the integer remainder of each split going
+to the grand tier, into a plaintext `liquidity[t]`. At close, for each tier:
+`offered[t] = liquidity[t]` (plaintext, moved into the draw) plus the tier's encrypted
+`carry[t]`, and `prize[t] = liquidity[t] * UTILISATION / count[t]` from the plaintext part
+only, so prize sizes stay public and the encrypted carry only ever adds capacity.
+
+Tiers reconcile on their own cadence. The frequent tier reconciles every draw. The mid
+and grand tiers reconcile every 6 and every 24 draws respectively, so the count of prizes
+they paid becomes public only over a span in which nearly every saver was eligible at
+some point, rather than naming a jackpot winner out of the two percent of savers eligible
+in one draw. The plaintext jackpot shown in the app is the booked liquidity; the encrypted
+carry is the part it does not yet show.
 
 Grand-tier odds are measured over one period. V5 measures them over the tier's whole
 accrual window, so a large holder who joins for a single period takes a full proportional
 shot at the accumulated pot. This is a stated deviation; the cheap fix, an accumulator of
 balance-seconds since the last grand payout, is noted for a later version.
 
-Tier parameters (count, odds, shares) are constructor arguments chosen with V5's odds
-formula in the deploy config. Sepolia, at a 30-minute period: grand count 1, odds 1/48,
-shares 40; mid count 1, odds 1/6, shares 20; frequent count 4, odds 1, shares 40. With a
-harvest of H per period the grand prize settles near 19 H and pays about daily; the
-frequent tier pays four prizes near 0.1 H each draw.
+Tier parameters (count, odds, shares, reconcile cadence) are constructor arguments.
+Sepolia, at a one-hour period: grand count 1, odds 1/24, shares 40, reconcile every 24;
+mid count 1, odds 1/6, shares 20, reconcile every 6; frequent count 4, odds 1, shares
+40, reconcile every draw. With a harvest of H per period the grand prize settles near
+10 H and pays about daily; the frequent tier pays up to four prizes near 0.1 H each draw.
 
 ## 7. Yield source
 
@@ -269,13 +295,14 @@ moment. Sources that earn asynchronously prepare that amount ahead of time.
 ## 8. Randomness and verifiability
 
 `FHE.randEuint64()` is generated inside the coprocessor from a public seed under the FHE
-key; nobody can predict or re-roll it, and `closeDraw` runs once per draw. The draw
-publishes `R`, `W` and the harvest once the period is over, verified on chain through
-`FHE.checkSignatures`. Anyone can recompute every threshold; a saver can check their own
-outcome against their decrypted weight. The bias of `uniform` is removed by rejection
-sampling.
+key; nobody can predict or re-roll it, and `closeDraw` runs once per draw. Prize sizes are
+fixed before the seed exists, so nothing anyone does after seeing the seed can change what
+a win is worth. The draw publishes `R`, the scale count, the non-empty flag and the
+harvest once the period is over, verified on chain through `FHE.checkSignatures`. Anyone
+can recompute every threshold from `R` and `M`; a saver can check their own outcome
+against their decrypted weight.
 
-Once `R` and `W` are public, whoever would call `awardDraw` can compute their own outcome.
+Once `R` and `M` are public, whoever would call `awardDraw` can compute their own outcome.
 Awarding is permissionless and the app offers it to anyone, so a keeper that declines to
 award a draw it lost cannot make the draw disappear; the residual is stated in the threat
 model.
@@ -284,12 +311,12 @@ model.
 
 `HearthPrizePool` implements Chainlink's `checkUpkeep` and `performUpkeep` for the close
 step, which needs no off-chain data. The keeper script performs every step, in this
-order for draw `p`: close; fetch the three public decryptions; award; evaluate savers in
-saver-list order in batches of `MAX_BATCH`, skipping savers whose first observation is
-after period `p`; after the window, finalize, fetch the remainder decryptions, reconcile;
-and it reconciles `p` before awarding `p+1` whenever possible. Every step is callable by
-anyone, so a saver can always advance a draw themselves. The keeper's spend per draw is
-its own policy; nothing on chain caps evaluation.
+order for draw `p`: close early in period `p+1`; fetch the four public decryptions;
+award; evaluate by advancing the walk in batches of `MAX_BATCH` until the cursor wraps;
+after the window, finalize, and for each tier that is due fetch the carry decryption and
+reconcile. Every step is callable by anyone, so a saver can always advance a draw
+themselves. The keeper's spend per draw is its own policy; nothing on chain caps
+evaluation.
 
 ## 10. What stays encrypted, what is public
 
@@ -297,22 +324,35 @@ Encrypted, decryptable only by the saver: principal, unclaimed winnings, the wei
 the credit of every evaluated draw, and therefore whether they won a given draw.
 
 Public by design: the list of saver addresses and when each deposited, withdrew or was
-evaluated, and in which batch; the per-draw seed, aggregate weight and harvest; each
-tier's prize size and how many prizes it paid, learned once per draw from the reconciled
-remainder; sponsor amounts; the amount wrapped into or unwrapped out of confidential USDC,
-which is a public ERC-20 movement at the token layer.
+evaluated, and in which batch; the per-draw seed, the scale of the aggregate (its power
+of two), the harvest, each tier's prize size and offered liquidity; how many prizes the
+frequent tier paid, once per draw, and how many the mid and grand tiers paid, once per
+6 and per 24 draws; sponsor amounts; the amount wrapped into or unwrapped out of
+confidential USDC, which is a public ERC-20 movement at the token layer.
 
-Anonymity set: with one saver the published aggregate is that saver's weight; with two,
-each can subtract the other. The app states this below three savers.
+Inferable, and named as such: a saver whose balance an observer can pin, for example
+because they wrapped exactly what they deposited seconds earlier, has a public outcome
+in every draw, because thresholds are public; the app keeps wrap and deposit as separate
+steps and offers round wrap amounts for this reason. Cumulative winnings become a public
+lower bound for an address that wraps in and unwraps out in full. A balance that never
+changes is narrowed slowly by the published prize counts over many draws. When the
+grand tier pays, the winner is one of the savers eligible for it during the reconcile
+span, roughly the whole pool over a day, not one saver out of a draw.
+
+Anonymity set: with one saver the scale of the aggregate is that saver's weight to
+within a factor of two; with two, each can bound the other. The app states this below
+three savers.
 
 Token layer: Zama's confidential USDC is an upgradeable wrapper whose owner can appoint
 observers able to decrypt every amount that moves through the token, including deposit
-and payout amounts, and can pause or deny-list addresses. Hearth's own ledger (principal,
-winnings, weights, credits) is never readable by the token or an observer.
+and payout amounts, retroactively, and can pause or deny-list addresses. Hearth's own
+ledger (principal, winnings, weights, credits) is never readable by the token or an
+observer.
 
 Residual behavioural leak: a saver who withdraws immediately after every draw they won
 gives an observer a statistical hint. No winner-only transaction type exists on chain; a
-claim is an ordinary withdraw of the winnings amount.
+claim is an ordinary withdraw of the winnings amount, and evaluation cannot be aimed at
+oneself.
 
 ## 11. Main sequence: one draw end to end
 
@@ -329,17 +369,17 @@ sequenceDiagram
     V->>V: principal += amount, observations updated
     Note over V,P: period p ends
     K->>P: closeDraw(p)
-    P->>P: seed = randEuint64
+    P->>P: fix prize sizes, move liquidity into the draw, seed = randEuint64
     P->>Y: harvest()
     Y-->>P: encrypted transfer, handle
-    P->>V: aggregateFor(p)
-    V-->>P: encrypted aggregate handle
-    P->>Z: makePubliclyDecryptable(seed, aggregate, harvested)
-    K->>Z: publicDecrypt([seed, aggregate, harvested])
+    P->>V: scaleFor(p, previous m)
+    V-->>P: encrypted scale count and non-empty flag
+    P->>Z: makePubliclyDecryptable(seed, scale, nonEmpty, harvested)
+    K->>Z: publicDecrypt([seed, scale, nonEmpty, harvested])
     Z-->>K: cleartexts + KMS proof
-    K->>P: awardDraw(p, seed, aggregate, harvested, proof)
-    P->>P: checkSignatures, book harvest, fix prize sizes
-    K->>V: evaluate(p, savers)
+    K->>P: awardDraw(p, seed, scale, nonEmpty, harvested, proof)
+    P->>P: checkSignatures, book harvest, open the window
+    K->>V: evaluate(p, count) until the walk wraps
     V->>V: per saver: weight, thresholds, gt, select, clamp
     V->>P: fund(encrypted credited total)
     P->>V: confidentialTransfer(vault, total)
@@ -348,8 +388,8 @@ sequenceDiagram
     V-->>S: confidentialTransfer(principal + winnings)
     Note over V,P: window ends after period p+2
     K->>V: finalizeDraw(p)
-    K->>Z: publicDecrypt(remaining[p][t])
-    K->>P: reconcile(p, remaining, proof)
+    K->>Z: publicDecrypt(carry of each tier that is due)
+    K->>P: reconcile(p, tier, carry, proof)
 ```
 
 ## 12. Contract dependency graph
@@ -370,59 +410,65 @@ flowchart TD
     Pool --> OZ
 ```
 
-## 13. Events and views
+## 13. Events, views and constructors
 
 Events. Vault: `Deposited(saver)`, `Withdrawn(saver)`, `Evaluated(saver, drawId)`,
-`DrawFinalized(drawId, remaining[3], unfunded)`, `PrizePoolSet(prizePool)`, plus
-OpenZeppelin's `Paused`, `Unpaused`, `OwnershipTransferStarted`, `OwnershipTransferred`.
-Pool: `DrawClosed(drawId, seedHandle, aggregateHandle, harvestHandle)`,
-`DrawAwarded(drawId, seed, aggregate, harvested, prize[3], offered[3])`,
-`DrawEmpty(drawId, aggregate, harvested)`, `DrawSkipped(drawId, harvested)`,
-`DrawReconciled(drawId, paid[3], returned[3])`, `YieldSourceSet(yieldSource)`,
-`Funded(amount)`. Source: `Sponsored(from, amount, balance)`, `RateChanged(rate)`,
-`Harvested(amount, balance)`.
+`DrawFinalized(drawId, unfunded)`, `CarryPublished(drawId, tier, carryHandle)`,
+`PrizePoolSet(prizePool)`, plus OpenZeppelin's `Paused`, `Unpaused`,
+`OwnershipTransferStarted`, `OwnershipTransferred`. Pool: `DrawClosed(drawId, seedHandle,
+scaleHandle, nonEmptyHandle, harvestHandle, prize[3], offered[3])`, `DrawAwarded(drawId,
+seed, scaleBits, harvested)`, `DrawEmpty(drawId, harvested)`, `DrawSkipped(drawId,
+harvested)`, `TierReconciled(drawId, tier, carry)`, `HarvestFailed(drawId)`,
+`YieldSourceSet(yieldSource)`, `Funded(amount)`. Source: `Sponsored(from, amount,
+balance)`, `RateChanged(rate)`, `Harvested(amount, balance)`.
 
 Views the app and keeper read. Vault: `confidentialBalanceOf(saver)`,
 `confidentialWinningsOf(saver)`, `weightHandle(drawId, saver)`, `creditHandle(drawId,
-saver)`, `observationOf(saver, slot)`, `evaluated(drawId, saver)`,
-`evaluatedCount(drawId)`, `saverCount()`, `saverAt(i)`, `isSaver(a)`,
-`firstObservationAt(saver)`, `aggregateHandle(period)`, `remainingHandles(drawId)`,
-`finalized(drawId)`, `unfundedHandle()`, `currentPeriod()`, `periodOf(ts)`,
-`periodEnd(p)`, `windowEndsAt(p)`, `maxPrincipal()`, `paused()`. Pool: `drawOf(drawId)`,
-`drawParams(drawId)`, `tierOf(t)`, `liquidity(t)`, `canClose()`, `closableDraw()`,
-`currentPeriod()`, `yieldSource()`, `paused()`. Source: `harvestable()`, `balance()`,
-`ratePerSecond()`.
+saver)`, `thresholdOf(drawId, saver, tier, k)`, `observationOf(saver, slot)`,
+`evaluated(drawId, saver)`, `evaluatedCount(drawId)`, `cursorOf(drawId)`,
+`saverCount()`, `saverAt(i)`, `isSaver(a)`, `firstObservationAt(saver)`,
+`remainingHandles(drawId)`, `carryHandle(tier)`, `finalized(drawId)`,
+`unfundedHandle()`, `currentPeriod()`, `periodOf(ts)`, `periodEnd(p)`,
+`windowEndsAt(p)`, `maxPrincipal()`, `paused()`. Pool: `drawOf(drawId)`,
+`drawParams(drawId)`, `tierOf(t)`, `liquidity(t)`, `scaleBits()`, `canClose()`,
+`closableDraw()`, `closeDeadline(p)`, `currentPeriod()`, `yieldSource()`, `paused()`.
+Source: `harvestable()`, `balance()`, `ratePerSecond()`.
 
 Constructors and deploy order:
 
 ```
 HearthVault(IERC7984 asset, uint256 periodLength, uint256 firstPeriodAt, address owner)
-HearthPrizePool(IHearthVault vault, IERC7984 asset, Tier[3] tiers, address owner)
-    Tier = { uint32 prizeCount; uint64 oddsNumerator; uint64 oddsDenominator; uint16 shares }
+HearthPrizePool(IHearthVault vault, IERC7984 asset, Tier[3] tiers, uint8 initialScaleBits, address owner)
+    Tier = { uint32 prizeCount; uint64 oddsNumerator; uint64 oddsDenominator; uint16 shares; uint16 reconcileEvery }
 SponsoredYieldSource(IERC7984ERC20Wrapper asset, address recipient, uint64 ratePerSecond, address owner)
 ```
 
 Deploy the vault, then the pool, then `vault.setPrizePool(pool)`, then the source with the
-pool as recipient, then `pool.setYieldSource(source)`, then sponsor it.
+pool as recipient, then `pool.setYieldSource(source)`, then sponsor it. `initialScaleBits`
+is the expected first-period aggregate's bit length; the scale tracker corrects it by up
+to three bits per draw.
 
-The exact reads and writes per screen are listed in the app section of the docs once
-the contracts are deployed; the addresses and ABI go in the README.
+## 14. Deviations from PoolTogether V5, and review history
 
-## 14. Review findings and resolutions
+Deviations: no reserve tier; grand odds per period rather than over the accrual window;
+one uniform draw per tier with nested thresholds instead of one per prize index; the
+draw range is the aggregate's power-of-two bracket rather than the exact aggregate, so a
+tier pays between half and all of its nominal prizes per draw; prizes are held as an
+encrypted winnings balance until withdrawn rather than transferred at claim.
 
-From the 2 September review of the first draft:
+Resolved in the 2 September review of the first draft: folded prize counts, unverified
+harvests, a one-period window, wrong overflow claims, undefined evaluation semantics,
+missing events and views, the claim presentation.
 
-- Folding the prize count into the winning zone broke proportionality for large holders
-  and rewarded wallet splitting. Resolved: nested thresholds, section 4.
-- Harvested yield was booked from the source's own report. Resolved: the pool decrypts
-  and verifies the transferred amount, sections 2 and 5.
-- A one-period window was fragile at 30-minute periods. Resolved: three observations and a
-  two-period window, sections 2 and 3.
-- The 64-bit accumulator claim was wrong. Resolved: per-saver cap and a 128-bit total,
-  section 3.
-- Double evaluation, uninitialised remainders, empty aggregates, missing events and views,
-  keeper ordering and the claim presentation were undefined. Resolved in sections 2, 4, 9
-  and 13.
-- Accepted as documented limitations: no reserve tier; grand odds per period; evaluation
-  order decides ties in an over-subscribed tier; a saver not evaluated inside the window
-  forfeits that draw, as an unclaimed V5 prize expires; privacy below three savers.
+Resolved in the 3 September review of the second draft: the exact aggregate leak
+(replaced by the scale), prize sizes fixed after the seed (moved to close), a last-block
+close stranding a draw (close deadline plus returned liquidity), self-evaluation as a
+winner tell (fixed walk order), jackpot winners identifiable from per-draw counts (tier
+reconcile cadence), withdrawals assuming a clamping token (clamp to the vault balance),
+the cap check wrapping, a reverting yield source stalling closes, unbounded tier
+configuration, and the missing threshold view.
+
+Accepted and documented: evaluation order decides ties in an over-subscribed tier; a
+saver not evaluated inside the window forfeits that draw, as an unclaimed V5 prize
+expires; privacy below three savers; a pinned balance has a public outcome; the token
+operator's observer power; slow narrowing of static balances.
