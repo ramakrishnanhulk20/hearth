@@ -4,7 +4,7 @@
  *
  * Sepolia's coprocessor is on v0.13, but Zama's Hardhat plugin pins v0.11 and ships the host
  * contracts it simulates against, so there is no local test environment for v0.13 and no sign of
- * one coming. Lantern only uses operations that exist identically in both, so the contract source
+ * one coming. Hearth only uses operations that exist identically in both, so the contract source
  * never changes. This swaps which library that identical source is compiled against: v0.11 to run
  * the suite locally in seconds, v0.13 to build what actually goes on chain.
  *

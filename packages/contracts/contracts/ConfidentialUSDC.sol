@@ -13,6 +13,6 @@ contract ConfidentialUSDC is ERC7984ERC20Wrapper, ZamaEthereumConfig {
         IERC20 underlying
     )
         ERC7984ERC20Wrapper(underlying)
-        ERC7984("Confidential Test USD", "ctUSDC", "https://lantern.finance/token/ctusdc.json")
+        ERC7984("Confidential Test USD", "ctUSDC", "")
     {}
 }

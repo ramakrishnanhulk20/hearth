@@ -15,7 +15,7 @@ contract TestUSDC is ERC20 {
 
     error FaucetCooldown(uint256 availableAt);
 
-    constructor() ERC20("Lantern Test USD", "tUSDC") {}
+    constructor() ERC20("Hearth Test USD", "tUSDC") {}
 
     function claim() external {
         uint256 availableAt = lastClaimed[msg.sender] + FAUCET_COOLDOWN;
