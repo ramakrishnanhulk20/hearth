@@ -846,6 +846,10 @@ path and no proxy.
 attackers, what each wants, what stops them, and what does not, with the last column being
 the one worth reading. Executed attack outputs land under `{{ATTACK_LOG_DIR}}`.
 
+**Static analysis:** [docs/security/static-analysis.md](docs/security/static-analysis.md).
+slither reports 85 results on these contracts and solhint none; the page gives the one reason
+behind each family and names the two results that deserved a second look.
+
 ### Limitations
 
 The full numbered list is [docs/limitations.md](docs/limitations.md). In short:

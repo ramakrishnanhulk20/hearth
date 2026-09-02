@@ -24,6 +24,7 @@ is the same design explained for the people who use it and the judges who score 
 | [security/what-stays-private.md](security/what-stays-private.md) | Seven rules: the bracket and the leak it replaced, what a pinned balance costs, the wrap seam in both directions, what the prize counts measure, the token layer, why evaluation is not a tell, and the behavioural residual. |
 | [security/threat-model.md](security/threat-model.md) | Nine attackers, what each wants, what stops them, and what does not. Plus the executed failures of our previous design. |
 | [security/randomness-and-verification.md](security/randomness-and-verification.md) | Where the seed comes from, why nobody can re-roll it or resize what it wins, and how anyone recomputes a threshold after the fact. |
+| [security/static-analysis.md](security/static-analysis.md) | The slither and solhint runs, and the one reason behind each of the five families of findings. |
 | [operations/keeper.md](operations/keeper.md) | The keeper's job step by step, the ordering rule, what happens when it is down, and the gas budget. |
 | [operations/deploying.md](operations/deploying.md) | Deploy order, constructor signatures and parameters, verification, and the Sepolia parameter set against a mainnet one. |
 | [limitations.md](limitations.md) | Every documented limitation in one numbered list of fourteen. |
