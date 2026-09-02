@@ -1,0 +1,74 @@
+Hearth self-audit on sepolia, 2026-09-02T23:09:10.016Z
+vault 0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52, pool 0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2, asset 0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639
+period 2, 5 savers, bracket 2^42, tier liquidity 17.79 USDC
+Every row below is one line of the table "What is checked, and how" in docs/security/threat-model.md, in order.
+
+Row 1. A stranger cannot read a saver's principal, winnings, weight and credit
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 2)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 3)
+  the saver at 0x36377E05aA1EC745B9364ABd00B8BA5978542C7c reads their own weight in draw 1: 3,355,200,000,000 balance-seconds
+  a wallet that has never touched Hearth, 0x4759C20e953d4a9f6d267a28883CF0691c85a812, asks the same four handles
+  principal (0x5529f684ed6b6b6d273b11fa22cc7b0f33d1644639ff0000000000aa36a70500): NotEntitledError: the access control list does not allow 0x4759C20e953d4a9f6d267a28883CF0691c85a812 to decrypt 0x5529f684ed6b6b6d273b11fa22cc7b0f33d1644639ff0000000000aa36a70500 on 0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52
+  winnings (0x2d80745d999e9d5a45310a2d5561cf4bb08890e589ff0000000000aa36a70500): NotEntitledError: the access control list does not allow 0x4759C20e953d4a9f6d267a28883CF0691c85a812 to decrypt 0x2d80745d999e9d5a45310a2d5561cf4bb08890e589ff0000000000aa36a70500 on 0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52
+  weight in draw 1 (0x1c680da39e197259a3e925ef162dd6d324bed137f9ff0000000000aa36a70500): NotEntitledError: the access control list does not allow 0x4759C20e953d4a9f6d267a28883CF0691c85a812 to decrypt 0x1c680da39e197259a3e925ef162dd6d324bed137f9ff0000000000aa36a70500 on 0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52
+  credit in draw 1 (0xee9fb08b56eec79a8153cf97ec5fdb35b9634064c8ff0000000000aa36a70500): NotEntitledError: the access control list does not allow 0x4759C20e953d4a9f6d267a28883CF0691c85a812 to decrypt 0xee9fb08b56eec79a8153cf97ec5fdb35b9634064c8ff0000000000aa36a70500 on 0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52
+  PASS: all four handles refused the stranger, and the saver read their own weight of 3,355,200,000,000
+
+Row 2. The pool's exact total time-weighted balance is not obtainable
+  the pool's aggregate lives in storage slot 6 of the vault as 0x81e00fc8c0bc43823ca6543773af88c884b5fa9670ff0000000000aa36a70600, a euint128 with no getter
+  slot 7 holds the matching total balance handle and slot 8 its timestamp, 2026-09-02T22:47:24.000Z, which is what identifies the three words
+  a fresh wallet 0x5dd872816C7c95886C4A9B55f65efd8cACe032Fe asks for it: NotEntitledError: the access control list does not allow 0x5dd872816C7c95886C4A9B55f65efd8cACe032Fe to decrypt 0x81e00fc8c0bc43823ca6543773af88c884b5fa9670ff0000000000aa36a70600 on 0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52
+  the deployer and owner 0xd57D8F8A615F35133D8121e58F4ed778A4F612E9 asks for it: NotEntitledError: the access control list does not allow 0xd57D8F8A615F35133D8121e58F4ed778A4F612E9 to decrypt 0x81e00fc8c0bc43823ca6543773af88c884b5fa9670ff0000000000aa36a70600 on 0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52
+  the balance handle in slot 7 is 0xdacbcbd8a7d1bc5250d5204d75586e11a08ca42909ff0000000000aa36a70500
+  only 1 awarded draw is on chain, so the bracket difference has nothing to compare against yet
+  PASS: the aggregate handle refused both a random wallet and the owner; the bracket difference needs two awarded draws and this pool has one
+
+Row 3. A flash deposit earns almost nothing
+  NOT RUN: the deposit has to land a fixed number of seconds before a period ends, which needs the local clock
+
+Row 4. Fake savers cannot stall a draw
+  NOT RUN: registering 25 addresses and running the whole walk against them is a local-only expense
+
+Row 5. Nobody can choose who is evaluated
+  NOT RUN: no awarded draw with an unfinished walk exists on this network right now
+
+Row 6. A late close is refused and the draw costs nothing
+  NOT RUN: letting a close deadline pass without closing needs the local clock
+
+Row 7. A missed award loses nothing
+  NOT RUN: letting a whole evaluation window pass before awarding needs the local clock
+
+Row 8. A reverting yield source does not stop the clock
+  NOT RUN: pointing the pool at a broken source needs the owner key and a deploy, so it is kept to the local chain
+
+Row 9. An over-subscribed tier clamps rather than overpaying
+  NOT RUN: forcing more winners than a tier can fund needs the local clock to walk the published bracket down first
+
+Row 10. An award proof cannot be replayed against another draw
+  lifted the KMS proof of draw 1 out of the public transaction 0xc0955854ac2ba20be483ea3b6d65dd4e4a543b55de4aefabb9831dd1dc2ba933
+  it carries seed 9535999690437666720, scale count 1, non-empty true, harvest 17.79 USDC and 489 bytes of signatures
+  resubmitted against its own draw 1: a revert with the unnamed selector 0xc5b2d764
+  PASS: no other draw is waiting to be awarded, so the replay could only be tried against the original, which answered a revert with the unnamed selector 0xc5b2d764
+
+Row 11. Nobody withdraws more than they own
+  covered by the property test "keeps every balance, remainder and carry accounted for under a random sequence of actions" in test/Invariants.ts
+  NOT RUN: a property test over a random sequence of actions belongs in the suite, not in a live run
+
+Row 12. Money is conserved
+  covered by the same property test in test/Invariants.ts, and the payout share is covered by "pays each saver a share of the prizes that tracks their share of the pool" in test/Fairness.ts
+  NOT RUN: a property test over a random sequence of actions belongs in the suite, not in a live run
+
+12 rows in 22.6s: 3 PASS, 0 FAIL, 9 NOT RUN
+  PASS    row 1   A stranger cannot read a saver's principal, winnings, weight and credit
+  PASS    row 2   The pool's exact total time-weighted balance is not obtainable
+  NOT RUN row 3   A flash deposit earns almost nothing
+  NOT RUN row 4   Fake savers cannot stall a draw
+  NOT RUN row 5   Nobody can choose who is evaluated
+  NOT RUN row 6   A late close is refused and the draw costs nothing
+  NOT RUN row 7   A missed award loses nothing
+  NOT RUN row 8   A reverting yield source does not stop the clock
+  NOT RUN row 9   An over-subscribed tier clamps rather than overpaying
+  PASS    row 10  An award proof cannot be replayed against another draw
+  NOT RUN row 11  Nobody withdraws more than they own
+  NOT RUN row 12  Money is conserved
