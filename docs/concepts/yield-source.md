@@ -37,11 +37,11 @@ what lets prize sizes be fixed before the seed exists.
 
 ## Sepolia: the sponsored source
 
-`SponsoredYieldSource` is what runs on the live deployment at `{{ADDRESS_SOURCE}}`.
+`SponsoredYieldSource` is what runs on the live deployment at `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91`.
 
 A sponsor calls the source's own `sponsor` function with public USDC. The source wraps it
 into confidential USDC and books exactly what the wrapper minted, not what the sponsor
-asked for. From there the balance drips at `ratePerSecond`, currently `{{SPONSOR_RATE}}`,
+asked for. From there the balance drips at `ratePerSecond`, currently `5,555 base units a second, which is 19.998 USDC a period`,
 and `harvest` sends whatever has accrued to the pool.
 
 A sponsorship is a donation. There is no path for a sponsor to take it back, and only the

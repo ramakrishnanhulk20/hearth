@@ -14,9 +14,9 @@ explorer if you prefer to watch the raw calls.
 | --- | --- | --- |
 | Mock USDC (public ERC-20, open `mint`) | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` | Zama |
 | Confidential USDC (`cUSDCMock`, ERC-7984 wrapper) | `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639` | Zama |
-| HearthVault | `{{ADDRESS_VAULT}}` | Hearth |
-| HearthPrizePool | `{{ADDRESS_POOL}}` | Hearth |
-| SponsoredYieldSource | `{{ADDRESS_SOURCE}}` | Hearth |
+| HearthVault | `0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52` | Hearth |
+| HearthPrizePool | `0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2` | Hearth |
+| SponsoredYieldSource | `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91` | Hearth |
 
 The two Zama addresses are the ones published in Zama's own Confidential Vault address
 reference for Sepolia, so the test token is Zama's, not ours. Both tokens use 6 decimals,

@@ -181,7 +181,7 @@ Zama publishes the per-transaction budget on Sepolia as 20,000,000 compute units
 with 5,000,000 in sequential depth, and prices a 64-bit add at 162,000, a comparison at
 about 118,000, a select at 55,000 and a multiply by a public number at 365,000. Those
 numbers put one saver in the low millions of compute units, which is why evaluation is
-batched at `{{MAX_BATCH}}` savers per transaction. The measured figure is
+batched at `4` savers per transaction. The measured figure is
 `{{HCU_EVALUATE}}` per saver and the measured gas is `{{GAS_EVALUATE}}`.
 
 ## What this page does not cover

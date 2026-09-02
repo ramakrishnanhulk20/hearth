@@ -100,7 +100,7 @@ zero, and the list is never pruned.
   is not a saver, and a saver whose first observation is after the period all get skipped
   without reverting, and the skip is decided from plaintext timestamps at no encrypted
   cost. One bad entry cannot fail a batch.
-- **Batches are capped** at `{{MAX_BATCH}}` savers needing encrypted work per call, so no
+- **Batches are capped** at `4` savers needing encrypted work per call, so no
   single transaction can be pushed past Zama's compute limit.
 
 **Not stopped:** the keeper's cost per draw grows with the saver list, which is

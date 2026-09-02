@@ -11,7 +11,7 @@ failure, not a discovery.
 
 The winner test runs over encrypted numbers, and Zama caps a single transaction at
 20,000,000 compute units with 5,000,000 in sequential depth on Sepolia. One saver's
-evaluation costs `{{HCU_EVALUATE}}` of that, so at most `{{MAX_BATCH}}` savers needing
+evaluation costs `{{HCU_EVALUATE}}` of that, so at most `4` savers needing
 encrypted work fit in one call.
 
 **What it means:** a pool with many savers needs many transactions per draw. The cost

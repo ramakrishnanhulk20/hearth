@@ -142,13 +142,13 @@ with grand odds of 1 in 365 gives an annual grand prize, which is the shape V5 u
 
 | Contract | Network | Address | Verified |
 | --- | --- | --- | --- |
-| HearthVault | Sepolia | `{{ADDRESS_VAULT}}` | [Etherscan](https://sepolia.etherscan.io/address/{{ADDRESS_VAULT}}#code) |
-| HearthPrizePool | Sepolia | `{{ADDRESS_POOL}}` | [Etherscan](https://sepolia.etherscan.io/address/{{ADDRESS_POOL}}#code) |
-| SponsoredYieldSource | Sepolia | `{{ADDRESS_SOURCE}}` | [Etherscan](https://sepolia.etherscan.io/address/{{ADDRESS_SOURCE}}#code) |
+| HearthVault | Sepolia | `0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52` | [Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) |
+| HearthPrizePool | Sepolia | `0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2` | [Etherscan](https://sepolia.etherscan.io/address/0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2#code) |
+| SponsoredYieldSource | Sepolia | `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91` | [Etherscan](https://sepolia.etherscan.io/address/0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91#code) |
 | Confidential USDC (Zama) | Sepolia | `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639` | Zama's deployment |
 | Mock USDC (Zama) | Sepolia | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` | Zama's deployment |
 
-Deployment block: `{{DEPLOY_BLOCK}}`. First period start: `{{FIRST_PERIOD_AT}}`.
+Deployment block: `11622398`. First period start: `1788386400 (2 September 2026, 22:00:00 UTC)`.
 
 ## Verification
 

@@ -138,7 +138,7 @@ does not decide anything. It writes down a result that already exists.
 
 The caller says how many savers to advance. They do not say which. The vault walks the
 saver list from a per-draw cursor that starts at `seed mod saverCount` and moves forward
-in list order, doing up to `count` savers and at most `{{MAX_BATCH}}` that need encrypted
+in list order, doing up to `count` savers and at most `4` that need encrypted
 work. Savers with no observation at or before period `p` have a weight of zero, and they
 are skipped from their plaintext timestamps at no encrypted cost at all.
 

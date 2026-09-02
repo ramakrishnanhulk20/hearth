@@ -96,7 +96,7 @@ To put a number on it, suppose the Sepolia source drips 10 USDC per period. Then
 prize sits near 96 USDC and lands about once a day, the mid prize near 12 USDC about every
 six hours, and four prizes of about 1 USDC land in every draw, with each of those figures
 free to run up to twice as large depending on the bracket. The live drip rate is
-`{{SPONSOR_RATE}}` and the live prize sizes are on the app's draw panel, read from the
+`5,555 base units a second, which is 19.998 USDC a period` and the live prize sizes are on the app's draw panel, read from the
 chain.
 
 These are constructor arguments, chosen with PoolTogether V5's odds formula in the deploy

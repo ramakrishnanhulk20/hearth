@@ -25,7 +25,7 @@ saves savers the trouble, not a role the pool depends on for safety.
 4. **Evaluate.** Call `evaluate(p, count)` on the vault, repeatedly, until the walk wraps
    back to where it started. Each call advances a per-draw cursor through the saver list
    from a start derived from the seed. The keeper picks `count`, never which addresses;
-   `{{MAX_BATCH}}` is the most savers needing encrypted work that fit in one transaction.
+   `4` is the most savers needing encrypted work that fit in one transaction.
    Savers with no observation at or before period `p` are skipped by the contract itself,
    from plaintext timestamps, at no encrypted cost.
 5. **Finalize.** After the window closes at the end of period `p+2`, call
@@ -128,7 +128,7 @@ Costs per draw, from the live deployment.
 | --- | --- | --- |
 | Close | 1 | `{{GAS_CLOSE}}` |
 | Award | 1 | `{{GAS_AWARD}}` |
-| Evaluate | `ceil(savers / {{MAX_BATCH}})` | `{{GAS_EVALUATE_BATCH}}` |
+| Evaluate | `ceil(savers / 4)` | `{{GAS_EVALUATE_BATCH}}` |
 | Finalize | 1 | `{{GAS_FINALIZE}}` |
 | Reconcile | 3, one per tier, since every tier is due every draw | `{{GAS_RECONCILE}}` |
 
@@ -137,7 +137,7 @@ At `{{SAVER_COUNT_EXAMPLE}}` savers that is `{{GAS_PER_DRAW}}` gas per draw, or 
 day and `{{ETH_PER_DAY}}` per day; on a daily period it is `{{ETH_PER_DAY_MAINNET}}`.
 
 Per-saver evaluation is `{{GAS_EVALUATE}}` gas and `{{HCU_EVALUATE}}` compute units. The
-batch size `{{MAX_BATCH}}` is set from that measurement against Zama's published Sepolia
+batch size `4` is set from that measurement against Zama's published Sepolia
 limits of 20,000,000 compute units per transaction with 5,000,000 in sequential depth.
 `evaluate` accepts any count, so if Zama reprices an operation the keeper can drop to a
 smaller batch without a redeploy.
@@ -158,9 +158,9 @@ The keeper is the `@hearth/keeper` package. It signs with account index 1 of the
 its own settings live in `packages/keeper/.env`:
 
 ```
-HEARTH_VAULT={{ADDRESS_VAULT}}
-HEARTH_POOL={{ADDRESS_POOL}}
-HEARTH_SOURCE={{ADDRESS_SOURCE}}   # optional, printed at boot
+HEARTH_VAULT=0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52
+HEARTH_POOL=0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2
+HEARTH_SOURCE=0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91   # optional, printed at boot
 KEEPER_BATCH=4                     # savers of encrypted work per evaluate call
 KEEPER_POLL_SECONDS=30
 KEEPER_MAX_FEE_GWEI=20             # refuse to send above this

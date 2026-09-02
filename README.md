@@ -7,7 +7,7 @@ USDC, your balance stays encrypted on chain, the yield the pool earns is handed 
 prizes every period, and your principal is withdrawable at any time. Nobody, including
 us, can read what you saved or what you won. Anybody can check that the draw was honest.
 
-[Live app]({{APP_URL}}) · [Documentation]({{DOCS_URL}}) · [Contracts on Etherscan](https://sepolia.etherscan.io/address/{{ADDRESS_VAULT}}#code) · [Demo video]({{VIDEO_URL}}) · [X thread]({{X_POST_URL}})
+[Live app]({{APP_URL}}) · [Documentation]({{DOCS_URL}}) · [Contracts on Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) · [Demo video]({{VIDEO_URL}}) · [X thread]({{X_POST_URL}})
 
 Built for the Zama Developer Program, Mainnet Season 4, bounty "Build the Confidential
 PoolTogether App".
@@ -20,13 +20,13 @@ Ethereum Sepolia, chain id 11155111. Period length one hour.
 
 | Network | Contract | Address | Verified |
 | --- | --- | --- | --- |
-| Sepolia | HearthVault | `{{ADDRESS_VAULT}}` | [Etherscan](https://sepolia.etherscan.io/address/{{ADDRESS_VAULT}}#code) |
-| Sepolia | HearthPrizePool | `{{ADDRESS_POOL}}` | [Etherscan](https://sepolia.etherscan.io/address/{{ADDRESS_POOL}}#code) |
-| Sepolia | SponsoredYieldSource | `{{ADDRESS_SOURCE}}` | [Etherscan](https://sepolia.etherscan.io/address/{{ADDRESS_SOURCE}}#code) |
+| Sepolia | HearthVault | `0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52` | [Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) |
+| Sepolia | HearthPrizePool | `0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2` | [Etherscan](https://sepolia.etherscan.io/address/0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2#code) |
+| Sepolia | SponsoredYieldSource | `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91` | [Etherscan](https://sepolia.etherscan.io/address/0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91#code) |
 | Sepolia | Confidential USDC (Zama's, not ours) | `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639` | [Etherscan](https://sepolia.etherscan.io/address/0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639#code) |
 | Sepolia | Mock USDC with an open `mint` (Zama's) | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` | [Etherscan](https://sepolia.etherscan.io/address/0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF#code) |
 
-Deployment block `{{DEPLOY_BLOCK}}`. First period starts at `{{FIRST_PERIOD_AT}}`.
+Deployment block `11622398`. First period starts at `1788386400 (2 September 2026, 22:00:00 UTC)`.
 Chainlink Automation upkeep: `{{CHAINLINK_UPKEEP_ID}}`.
 
 ---
@@ -69,7 +69,7 @@ it on 2 September 2026, which is where those numbers come from.
 | Who won a draw | Public | Named by the claim transaction, which only a winner sends | No claim transaction exists to send |
 | Flash a large balance in, win, withdraw | Blocked by time-weighted odds | Works. Executed: 19 wins in 20 draws, whole cycle in one transaction | Blocked by time-weighted odds |
 | Can a stranger check the draw | Yes, everything is public | No, nothing is published | Yes, the seed and the pool's scale are published with a proof |
-| Cost of one draw | One transaction | One chained transaction per group of savers, so one saver can stall everybody | Close in one transaction, then independent batches of `{{MAX_BATCH}}` savers, in any order |
+| Cost of one draw | One transaction | One chained transaction per group of savers, so one saver can stall everybody | Close in one transaction, then independent batches of `4` savers, in any order |
 | How many savers the pool supports | Unlimited | Often capped at 32 addresses | Unlimited. Only the batch size is capped |
 | Principal | Withdrawable any time | Withdrawable | Withdrawable any time, including in the middle of a draw |
 | Prize money | Real yield | Usually an admin-funded reserve | Sponsored on Sepolia, real yield through Zama's Confidential Vault on mainnet |
@@ -188,7 +188,7 @@ and no saver's weight for that period can change any more.
 
 **3. Evaluate.** The vault walks the saver list from a cursor that starts at
 `seed mod saverCount`, in list order, doing as many savers as the caller asks for and at
-most `{{MAX_BATCH}}` that need encrypted work. For each one it reads their encrypted
+most `4` that need encrypted work. For each one it reads their encrypted
 weight, runs the winner test against the public thresholds, and adds the result to their
 encrypted winnings. Evaluation decides nothing. It writes down a result that already
 exists.
@@ -414,7 +414,7 @@ trivial encrypted zero, `HarvestFailed` is emitted, and the close succeeds.
 ### On Sepolia: a sponsored source
 
 `SponsoredYieldSource` holds confidential USDC that a sponsor wrapped into it, and releases
-it at `ratePerSecond`, currently `{{SPONSOR_RATE}}`. A sponsorship is a donation: there is
+it at `ratePerSecond`, currently `5,555 base units a second, which is 19.998 USDC a period`. A sponsorship is a donation: there is
 no path to take it back, and only the owner can change the rate. Sponsor amounts, the rate
 and every harvest are public, exactly as the yield a PoolTogether vault contributes is
 public. What is confidential in Hearth is who saved how much and who won, never how much
@@ -742,7 +742,7 @@ Figures are live Sepolia receipts at `{{GAS_PRICE_ASSUMPTION}}`, quoted for a po
 | --- | --- | --- |
 | Close | 1 | `{{GAS_CLOSE}}` |
 | Award | 1 | `{{GAS_AWARD}}` |
-| Evaluate | `ceil(savers / {{MAX_BATCH}})` | `{{GAS_EVALUATE_BATCH}}` |
+| Evaluate | `ceil(savers / 4)` | `{{GAS_EVALUATE_BATCH}}` |
 | Finalize | 1 | `{{GAS_FINALIZE}}` |
 | Reconcile | 0 to 3, depending on which tiers are due | `{{GAS_RECONCILE}}` |
 
@@ -757,7 +757,7 @@ units. Zama caps one transaction on Sepolia at 20,000,000 compute units with 5,0
 sequential depth. The batch size was measured against the coprocessor's price table on the
 Sepolia tier set at 748,032 units of fixed cost per call plus 3,674,128 per saver, which
 puts four savers at 15,444,544 units and five at 19,118,672. Hearth budgets 18,000,000 and
-4,500,000 so a heavier tier set still fits, so the constant is `{{MAX_BATCH}}`. `evaluate`
+4,500,000 so a heavier tier set still fits, so the constant is `4`. `evaluate`
 accepts any count, so if Zama reprices an operation the keeper drops to a smaller batch
 with no redeploy.
 
@@ -855,7 +855,7 @@ behind each family and names the two results that deserved a second look.
 
 The full numbered list is [docs/limitations.md](docs/limitations.md). In short:
 
-1. Evaluation is batched at `{{MAX_BATCH}}` savers needing encrypted work per transaction.
+1. Evaluation is batched at `4` savers needing encrypted work per transaction.
    Participation is not capped; only the batch is.
 2. A saver the evaluation walk does not reach inside the two-period window forfeits that
    draw, as an unclaimed PoolTogether V5 prize expires.
