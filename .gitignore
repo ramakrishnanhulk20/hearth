@@ -39,3 +39,4 @@ yarn-error.log*
 reference/
 CLAUDE.md
 AGENT-RETROS.md
+packages/contracts-fair/

@@ -5,16 +5,18 @@ Updated 3 September 2026, during milestone 1.
 ## Done
 
 - Intake complete: program, docs, PoolTogether V5, Sepolia yield venues, fourteen
-  rivals, executed audit of the previous contract. Evidence under `reference/`.
-- Ram's decisions recorded in `DECISIONS.md`; design in `ARCHITECTURE.md`, revised after
-  an adversarial design review; milestones in `PLAN.md`.
-- Git hooks installed and proven (bad commits rejected); repo identity set; baseline
-  commit made; `RECOVERY_PHRASE` wired into the Hardhat config; ten Sepolia accounts derive
-  from it, the first is the deployer with 8.28 ETH, the rest are unfunded.
-- First draft of `HearthVault`, `HearthPrizePool`, `SponsoredYieldSource`, interfaces and
-  libraries compiles and lints; library and yield-source tests pass; the full-cycle test
-  is being fixed on the mock.
-- Python 3.12 and slither 0.11.6 installed for static analysis.
+  rivals, executed audit of the previous contract. Evidence under .
+- Design in , revised after two adversarial reviews (one on the spec, one
+  on the spec plus the first draft); every decision in ; milestones in
+  .
+- Git hooks installed and proven; repo identity set;  wired in; ten
+  Sepolia accounts derive from it, the first is the deployer with 8.28 ETH.
+- Contracts, third pass: , , ,
+  interfaces, libraries, compile and lint clean; 32 tests green on the mock; batch limit
+  measured at four savers per evaluation on the Sepolia tiers.
+- Keeper package built with 52 offline tests; documentation pages (18) written to the
+  third design; README and submission drafts in progress.
+- Python 3.12 and slither 0.11.6 installed.
 
 ## Next
 
