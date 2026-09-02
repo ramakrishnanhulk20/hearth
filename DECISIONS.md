@@ -16,15 +16,16 @@ marked as such.
   count toward odds, and the only way money leaves is `withdraw`, which pays winnings
   first. No claim transaction exists, so nothing a winner does differs from anyone else.
   The bounty's "claim" step is the EIP-712 reveal of winnings plus that same withdraw.
-- 2026-09-02: three prize tiers with independent per-tier randomness, V5 maths, prize
-  count folded into the winning zone so each saver wins at most one prize per tier.
+- 2026-09-02, superseded on 3 September (see below): three prize tiers with independent
+  per-tier randomness, V5 maths, prize count folded into the winning zone so each saver wins
+  at most one prize per tier.
 - 2026-09-02: tier over-subscription is handled by an encrypted remaining-liquidity
   counter per tier per draw, clamping each payout, and by offering only half of a tier's
   liquidity per draw (V5's utilisation rate). Paid totals per tier are decrypted once per
   draw to reconcile; that reveals how many prizes were paid, never to whom.
-- 2026-09-02: encrypted TWAB keeps two observations per saver with the cumulative reset
-  at each period start, so a 64-bit accumulator cannot overflow; evaluation for draw p
-  is open during period p+1, as in V5.
+- 2026-09-02, superseded on 3 September (see below): encrypted TWAB keeps two observations
+  per saver with the cumulative reset at each period start; evaluation for draw p is open
+  during period p+1, as in V5. The overflow claim in the original wording was wrong.
 - 2026-09-02: core contracts are immutable. Owner powers are two-step ownership with
   renounce disabled, a pause that stops deposits and draw closing only, never
   withdrawals or evaluation, a yield-source setter, and a rescue for foreign ERC-20s.

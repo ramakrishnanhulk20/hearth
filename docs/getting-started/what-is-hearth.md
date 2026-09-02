@@ -82,7 +82,9 @@ numbers are public.
 
 ### 3. Claim
 
-There is no claim button, and that is the point.
+There is no claim transaction, and that is the point. The app does have a "Claim prize"
+button: it is an ordinary withdrawal of the winnings you just revealed, and on chain it
+looks exactly like any other withdrawal.
 
 Winnings are credited to a separate encrypted balance inside the vault while the draw is
 being evaluated. Nothing you do makes that happen and nothing you do reveals it. To find

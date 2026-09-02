@@ -139,12 +139,13 @@ address the contract has not granted, and that refusal is the enforcement, not a
 
 ## 7. Claim
 
-There is no claim step, and there is no claim button to look for.
+There is no claim transaction, only a claim button.
 
 Your prize is already in your winnings balance the moment the draw is evaluated. Step 6
-is how you learn about it. Step 8 is how you take it home. That is the whole claim flow,
-and it is designed that way so that a winner and a loser send exactly the same
-transactions, in the same shapes, at the same rate.
+is how you learn about it. Once your winnings are revealed, the app shows "Claim prize";
+pressing it sends an ordinary withdrawal for exactly that amount, and step 8 takes the
+rest home. On chain a claim and a withdrawal are the same call with the same shape, and
+that is what keeps a winner from standing out.
 
 ## 8. Withdraw
 

@@ -160,9 +160,15 @@ Over-subscription: each prize is half of the tier's liquidity divided by the pri
 (V5's 50 percent utilisation), so a tier pays twice its expected number of prizes before
 the clamp bites. When it bites, the last winner receives the remainder and later winners
 of that tier receive nothing, in evaluation order. Hearth has no reserve tier, unlike V5,
-which tops up an over-subscribed tier from its reserve. The probability of the clamp
-biting is about one to two percent per draw for the frequent tier with count 4 and a few
-percent with count 1; it is documented, and a saver can evaluate themselves early.
+which tops up an over-subscribed tier from its reserve. How often the clamp bites depends
+on the tier's expected number of prizes: about two percent of draws for the frequent tier
+(count 4, odds 1, expected four prizes, capacity eight), six to eight percent for a tier
+that expects one prize per draw, and a negligible fraction for the mid tier (one prize
+every six draws) and the grand tier (one in 48). It is documented, and a saver can
+evaluate themselves early.
+
+`evaluate` reverts for a draw that is `Empty`, `Skipped` or not yet awarded. Winnings
+never count toward odds: the weight is principal only.
 
 The only plaintext branch is on the public threshold exceeding 64 bits, which happens
 for low-odds tiers when the aggregate is very large; in that case no 64-bit weight can
@@ -178,7 +184,15 @@ saver verify the comparison against the published thresholds.
   encrypted amount. The hook refuses any caller but the configured asset. A deposit that
   would exceed `maxPrincipal` returns an encrypted false, and the token refunds it in the
   same transaction. Principal, the saver's observations and the total observations are
-  updated in the same transaction.
+  updated in the same transaction. The hook cannot see the amount, so any address that
+  triggers it joins the saver list, even with an encrypted zero; such a saver has zero
+  weight and can never win, and the list is never pruned. The cost of padding the list
+  falls on the keeper's evaluation gas only.
+- Any exit records an observation, whether or not principal changed. That is harmless:
+  observations shift only when a new period has started, so the newest observation at or
+  before period `p` stays available for the whole two-period window.
+- Pause stops deposits and draw closing only. Withdrawals, evaluation, award, finalize and
+  reconcile are never pausable, which is what keeps "withdraw at any time" true.
 - `withdraw(amount)` and `withdrawAll()` are the only exits. They pay from winnings first,
   then principal, clamp to what is available, and re-credit any shortfall the token
   reports into winnings, so principal accounting stays exact. Every exit is one
@@ -186,8 +200,8 @@ saver verify the comparison against the published thresholds.
 - After each evaluation batch the vault gives the prize pool a transient allowance on the
   encrypted batch total; the pool gives the token a transient allowance and transfers that
   amount to the vault. The token allows the vault on the transferred handle, so the vault
-  records any shortfall in an encrypted unfunded counter that is published at
-  finalization. With verified harvests the counter is always zero.
+  adds any shortfall to one global encrypted unfunded counter, whose current handle is
+  published at every finalization. With verified harvests the counter is always zero.
 - Yield is never booked from a number the source reports. The source transfers an
   encrypted amount to the pool; the pool, allowed on that handle as the recipient, makes it
   publicly decryptable and books the KMS-verified cleartext at award time.
@@ -234,15 +248,23 @@ interface IYieldSource {
 }
 ```
 
+`harvest` is synchronous on purpose: it moves whatever the source holds ready at that
+moment. Sources that earn asynchronously prepare that amount ahead of time.
+
 - `SponsoredYieldSource` (Sepolia): sponsors wrap public USDC into confidential USDC held by
   the source through its own `sponsor` function; it books exactly what the wrapper minted,
   drips at `ratePerSecond`, and `harvest` transfers the accrued amount to the pool. Sponsor
-  amounts, the rate and harvests are public, as yield amounts are in PoolTogether. Yield
-  that accrues while the pool has no savers is paid to the first draws that have any.
-- `ConfidentialVaultYieldSource` (mainnet path): joins Zama's Confidential Vault deposit
-  batcher with the pool's confidential USDC, holds confidential shares, and redeems growth
-  through the redeem batcher. On Sepolia the staging vault is idle, so the adapter is
-  documented and tested against the batcher interface, not wired to the live pool.
+  amounts, the rate and harvests are public, as yield amounts are in PoolTogether. A
+  sponsorship is a donation to the prize pool and cannot be withdrawn; only the owner can
+  change the rate. Yield that accrues while the pool has no savers is paid to the first
+  draws that have any.
+- `ConfidentialVaultYieldSource` (mainnet path): the pool's confidential USDC is joined
+  into Zama's Confidential Vault deposit batcher and held as confidential shares. The
+  keeper periodically requests a redemption of the growth through the redeem batcher
+  (join, dispatch, finalize, claim, each permissionless), so that by the next `harvest`
+  the redeemed confidential USDC is already sitting in the adapter; `harvest` then
+  transfers it. On Sepolia the staging vault is idle, so the adapter is documented and
+  tested against the batcher interface, not wired to the live pool.
 
 ## 8. Randomness and verifiability
 
@@ -370,6 +392,18 @@ saver)`, `observationOf(saver, slot)`, `evaluated(drawId, saver)`,
 `drawParams(drawId)`, `tierOf(t)`, `liquidity(t)`, `canClose()`, `closableDraw()`,
 `currentPeriod()`, `yieldSource()`, `paused()`. Source: `harvestable()`, `balance()`,
 `ratePerSecond()`.
+
+Constructors and deploy order:
+
+```
+HearthVault(IERC7984 asset, uint256 periodLength, uint256 firstPeriodAt, address owner)
+HearthPrizePool(IHearthVault vault, IERC7984 asset, Tier[3] tiers, address owner)
+    Tier = { uint32 prizeCount; uint64 oddsNumerator; uint64 oddsDenominator; uint16 shares }
+SponsoredYieldSource(IERC7984ERC20Wrapper asset, address recipient, uint64 ratePerSecond, address owner)
+```
+
+Deploy the vault, then the pool, then `vault.setPrizePool(pool)`, then the source with the
+pool as recipient, then `pool.setYieldSource(source)`, then sponsor it.
 
 The exact reads and writes per screen are listed in the app section of the docs once
 the contracts are deployed; the addresses and ABI go in the README.
