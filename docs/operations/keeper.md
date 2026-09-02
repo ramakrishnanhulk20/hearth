@@ -114,7 +114,7 @@ on-chain automation network cannot fetch any of that, so pretending it could wou
 theatre.
 
 The upkeep is optional. It needs LINK in a registered upkeep account, and it is redundancy
-rather than the primary path. `{{CHAINLINK_UPKEEP_ID}}` records the registration if one is
+rather than the primary path. not registered yet, the keeper alone runs the demo pool records the registration if one is
 live.
 
 We declare the two-function interface locally instead of adding the whole Chainlink
@@ -132,8 +132,8 @@ Costs per draw, from the live deployment.
 | Finalize | 1 | `{{GAS_FINALIZE}}` |
 | Reconcile | 3, one per tier, since every tier is due every draw | `{{GAS_RECONCILE}}` |
 
-At `{{SAVER_COUNT_EXAMPLE}}` savers that is `{{GAS_PER_DRAW}}` gas per draw, or about
-`{{ETH_PER_DRAW}}` at `{{GAS_PRICE_ASSUMPTION}}`. On a one-hour period that is 24 draws a
+At 5 savers that is `{{GAS_PER_DRAW}}` gas per draw, or about
+`{{ETH_PER_DRAW}}` at 1 gwei, the Sepolia base fee at deployment. On a one-hour period that is 24 draws a
 day and `{{ETH_PER_DAY}}` per day; on a daily period it is `{{ETH_PER_DAY_MAINNET}}`.
 
 Per-saver evaluation is `{{GAS_EVALUATE}}` gas and `{{HCU_EVALUATE}}` compute units. The

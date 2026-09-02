@@ -27,7 +27,7 @@ Ethereum Sepolia, chain id 11155111. Period length one hour.
 | Sepolia | Mock USDC with an open `mint` (Zama's) | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` | [Etherscan](https://sepolia.etherscan.io/address/0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF#code) |
 
 Deployment block `11622398`. First period starts at `1788386400 (2 September 2026, 22:00:00 UTC)`.
-Chainlink Automation upkeep: `{{CHAINLINK_UPKEEP_ID}}`.
+Chainlink Automation upkeep: not registered yet, the keeper alone runs the demo pool.
 
 ---
 
@@ -729,8 +729,8 @@ no network at all.
 
 ## What it costs
 
-Figures are live Sepolia receipts at `{{GAS_PRICE_ASSUMPTION}}`, quoted for a pool of
-`{{SAVER_COUNT_EXAMPLE}}` savers.
+Figures are live Sepolia receipts at 1 gwei, the Sepolia base fee at deployment, quoted for a pool of
+5 savers.
 
 | What a user does | Gas | In plain words |
 | --- | --- | --- |
