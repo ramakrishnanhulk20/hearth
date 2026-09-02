@@ -173,18 +173,20 @@ the pool failed to fund. With verified harvests it is always zero.
 `reconcile(tier, carry, proof)` on the pool, one tier at a time, and only when that
 tier is due.
 
-Each tier reconciles on its own cadence, set at deployment as `reconcileEvery[t]` draws.
-On Sepolia the frequent tier reconciles every draw, the mid tier every 6 draws and the
-grand tier every 24. When a tier is due, `finalizeDraw` marks its carry publicly
-decryptable and emits `CarryPublished`. Anyone fetches the cleartext, calls `reconcile`
-with the KMS proof, and the verified number is booked back into that tier's plaintext
-liquidity. The carry resets to zero and `TierReconciled` is emitted.
+Each tier reconciles on the cadence set at deployment as `reconcileEvery[t]` draws. On
+Sepolia every tier is due every draw. When a tier is due, `finalizeDraw` marks its carry
+publicly decryptable and emits `CarryPublished`. Anyone fetches the cleartext, calls
+`reconcile` with the KMS proof, and the verified number is booked back into that tier's
+plaintext liquidity. The vault subtracts that same number from the carry, which may have
+grown in the meantime, and `TierReconciled` is emitted.
 
 Reconciling is what makes the prize count for that tier public, because the carry is the
-part of what was offered that nobody won. The cadence is why the grand tier's count
-becomes public once a day rather than once an hour: a jackpot is then attributed to
-everybody who was eligible across a whole day, not to the handful eligible in one draw.
-Nothing evaporates either way. You never learn who won.
+part of what was offered that nobody won. At a cadence of one, each tier's count becomes
+public one draw after the draw it belongs to, and each tier's whole pot is back in the
+open where the app can show it growing. Raising the cadence hides the count for that many
+draws and hides the growing pot along with it, which is the trade set out in
+[prizes and tiers](prizes-and-tiers.md). Nothing evaporates either way, and at any cadence
+you never learn who won.
 
 ## What happens if a step never lands
 

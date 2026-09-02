@@ -12,9 +12,9 @@ import type { HearthPrizePool, HearthVault, SponsoredYieldSource } from "../type
  * Everything here is what any saver could do from the app. No step needs an owner key.
  */
 
-const TIER_NAMES = ["grand", "mid", "frequent"] as const;
+export const TIER_NAMES = ["grand", "mid", "frequent"] as const;
 const STATUS_NAMES = ["not closed", "closed", "awarded", "empty", "skipped"] as const;
-const EVALUATE_BATCH = 4;
+export const EVALUATE_BATCH = 4;
 
 /**
  * Account roles, zero based, all derived from the one recovery phrase. Index 0 deploys and owns,
@@ -22,9 +22,9 @@ const EVALUATE_BATCH = 4;
  * information, and indexes 2 to 6 are the demo savers. The prover is the last and smallest of
  * them, so a prove run reads a real saver's own numbers rather than a fresh address's.
  */
-const KEEPER_ACCOUNT = 1;
-const FIRST_SAVER_ACCOUNT = 2;
-const PROVER_ACCOUNT = 6;
+export const KEEPER_ACCOUNT = 1;
+export const FIRST_SAVER_ACCOUNT = 2;
+export const PROVER_ACCOUNT = 6;
 
 const SEED_STAKES = [1_200, 600, 300, 150, 75].map((whole) => BigInt(whole) * 1_000_000n);
 const PROVE_STAKE = 500_000_000n;
@@ -33,7 +33,7 @@ const PROVE_STAKE = 500_000_000n;
 const RECENT_DRAWS = 4;
 
 /** Only the calls the tasks make, so the same code drives our wrapper and Zama's. */
-const WRAPPER_ABI = [
+export const WRAPPER_ABI = [
   "function rate() view returns (uint256)",
   "function underlying() view returns (address)",
   "function wrap(address to, uint256 amount)",
@@ -41,19 +41,19 @@ const WRAPPER_ABI = [
   "function confidentialTransferAndCall(address to, bytes32 amount, bytes inputProof, bytes data) returns (bytes32)",
 ];
 
-const ERC20_ABI = [
+export const ERC20_ABI = [
   "function balanceOf(address account) view returns (uint256)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function mint(address to, uint256 amount)",
   "function claim()",
 ];
 
-type Cleartext = bigint | boolean | string;
+export type Cleartext = bigint | boolean | string;
 type DecryptResults = { readonly clearValues: Record<string, Cleartext>; readonly decryptionProof: string };
-type Published = { readonly values: readonly Cleartext[]; readonly proof: string };
+export type Published = { readonly values: readonly Cleartext[]; readonly proof: string };
 type RelayerInstance = { publicDecrypt(handles: string[]): Promise<DecryptResults> };
 
-type Hearth = {
+export type Hearth = {
   readonly hre: HardhatRuntimeEnvironment;
   readonly vault: HearthVault;
   readonly pool: HearthPrizePool;
@@ -72,11 +72,11 @@ type Hearth = {
 
 class ProveFailed extends Error {}
 
-function group(value: bigint | number): string {
+export function group(value: bigint | number): string {
   return value.toLocaleString("en-US");
 }
 
-function usd(units: bigint): string {
+export function usd(units: bigint): string {
   const negative = units < 0n;
   const absolute = negative ? -units : units;
   const whole = (absolute / 1_000_000n).toLocaleString("en-US");
@@ -84,29 +84,29 @@ function usd(units: bigint): string {
   return `${negative ? "-" : ""}${whole}.${fraction}`;
 }
 
-function duration(seconds: bigint): string {
+export function duration(seconds: bigint): string {
   if (seconds <= 0n) return "0s";
   const minutes = seconds / 60n;
   const rest = seconds % 60n;
   return minutes === 0n ? `${rest}s` : `${minutes}m ${rest}s`;
 }
 
-function statusName(status: bigint | number): string {
+export function statusName(status: bigint | number): string {
   return STATUS_NAMES[Number(status)] ?? `unknown (${status})`;
 }
 
-function at(timestamp: bigint): string {
+export function at(timestamp: bigint): string {
   return new Date(Number(timestamp) * 1000).toISOString();
 }
 
-function asBigint(value: Cleartext | undefined, what: string): bigint {
+export function asBigint(value: Cleartext | undefined, what: string): bigint {
   if (typeof value === "bigint") return value;
   if (typeof value === "boolean") return value ? 1n : 0n;
   if (typeof value === "string") return BigInt(value);
   throw new Error(`${what} came back as ${typeof value}, and a number was expected`);
 }
 
-function asBoolean(value: Cleartext | undefined, what: string): boolean {
+export function asBoolean(value: Cleartext | undefined, what: string): boolean {
   if (typeof value === "boolean") return value;
   return asBigint(value, what) !== 0n;
 }
@@ -137,7 +137,7 @@ async function sepoliaRelayer(hre: HardhatRuntimeEnvironment): Promise<RelayerIn
  * in, so that order is the contract rather than a convenience. Requests are never overlapped: the
  * coprocessor's event cursor is shared per instance.
  */
-async function publicDecrypt(hre: HardhatRuntimeEnvironment, handles: readonly string[]): Promise<Published> {
+export async function publicDecrypt(hre: HardhatRuntimeEnvironment, handles: readonly string[]): Promise<Published> {
   const asked = [...handles];
   if (hre.network.name !== "sepolia") {
     const results = (await hre.fhevm.publicDecrypt(asked)) as unknown as DecryptResults;
@@ -161,7 +161,7 @@ async function publicDecrypt(hre: HardhatRuntimeEnvironment, handles: readonly s
 }
 
 /** An address that has never held the value has no handle at all, which reads as a plaintext zero. */
-async function userDecrypt(
+export async function userDecrypt(
   hre: HardhatRuntimeEnvironment,
   handle: string,
   contract: string,
@@ -172,31 +172,31 @@ async function userDecrypt(
 }
 
 /** True once every saver in the draw's walk has been evaluated. A walk of zero has not started. */
-async function walkComplete(vault: HearthVault, drawId: number): Promise<boolean> {
+export async function walkComplete(vault: HearthVault, drawId: number): Promise<boolean> {
   const walk = await vault.walkOf(drawId);
   return walk.count > 0n && (await vault.cursorOf(drawId)) >= walk.count;
 }
 
-async function chainNow(hre: HardhatRuntimeEnvironment): Promise<bigint> {
+export async function chainNow(hre: HardhatRuntimeEnvironment): Promise<bigint> {
   const block = await hre.ethers.provider.getBlock("latest");
   if (block === null) throw new Error("the node returned no latest block");
   return BigInt(block.timestamp);
 }
 
-async function mine(call: Promise<ContractTransactionResponse>): Promise<ContractTransactionReceipt> {
+export async function mine(call: Promise<ContractTransactionResponse>): Promise<ContractTransactionReceipt> {
   const tx = await call;
   const receipt = await tx.wait();
   if (receipt === null) throw new Error(`transaction ${tx.hash} did not confirm`);
   return receipt;
 }
 
-async function send(what: string, call: Promise<ContractTransactionResponse>): Promise<ContractTransactionReceipt> {
+export async function send(what: string, call: Promise<ContractTransactionResponse>): Promise<ContractTransactionReceipt> {
   const receipt = await mine(call);
   console.log(`${what} (tx ${receipt.hash}, gas ${group(receipt.gasUsed)})`);
   return receipt;
 }
 
-async function load(hre: HardhatRuntimeEnvironment): Promise<Hearth> {
+export async function load(hre: HardhatRuntimeEnvironment): Promise<Hearth> {
   if (hre.network.name === "hardhat") {
     throw new Error(
       "The in-process hardhat network has no FHEVM coprocessor outside `hardhat test`, and its chain " +
@@ -249,7 +249,7 @@ async function load(hre: HardhatRuntimeEnvironment): Promise<Hearth> {
  * Gets `amount` of the public token to `who`. Zama's mock USDC mints to anyone; the local TestUSDC
  * has a faucet on a cooldown instead, which is why a short balance can still fail here.
  */
-async function obtain(ctx: Hearth, who: Signer, amount: bigint): Promise<void> {
+export async function obtain(ctx: Hearth, who: Signer, amount: bigint): Promise<void> {
   const address = await who.getAddress();
   const held = (await ctx.underlying.balanceOf(address)) as bigint;
   if (held >= amount) {
@@ -279,7 +279,7 @@ async function obtain(ctx: Hearth, who: Signer, amount: bigint): Promise<void> {
   }
 }
 
-async function wrapAndDeposit(ctx: Hearth, who: Signer, amount: bigint): Promise<void> {
+export async function wrapAndDeposit(ctx: Hearth, who: Signer, amount: bigint): Promise<void> {
   const address = await who.getAddress();
   await send(
     `  approved the wrapper to take ${usd(amount)} USDC from ${address}`,
@@ -302,15 +302,15 @@ async function wrapAndDeposit(ctx: Hearth, who: Signer, amount: bigint): Promise
   );
 }
 
-async function warp(hre: HardhatRuntimeEnvironment, seconds: bigint): Promise<void> {
+export async function warp(hre: HardhatRuntimeEnvironment, seconds: bigint): Promise<void> {
   await hre.network.provider.send("evm_increaseTime", [Number(seconds)]);
   await hre.network.provider.send("evm_mine", []);
 }
 
-type DrawOutcome = { readonly closed: number | null; readonly awarded: number | null };
+export type DrawOutcome = { readonly closed: number | null; readonly awarded: number | null };
 
 /** Every step a keeper pass performs, in the order a single draw needs them. */
-async function driveDraw(ctx: Hearth, keeper: Signer): Promise<DrawOutcome> {
+export async function driveDraw(ctx: Hearth, keeper: Signer): Promise<DrawOutcome> {
   const period = Number(await ctx.pool.currentPeriod());
   let closed: number | null = null;
 
@@ -331,7 +331,7 @@ async function driveDraw(ctx: Hearth, keeper: Signer): Promise<DrawOutcome> {
   return { closed, awarded: awarded.length > 0 ? awarded[awarded.length - 1] : null };
 }
 
-async function awardClosedDraws(ctx: Hearth, keeper: Signer, period: number): Promise<number[]> {
+export async function awardClosedDraws(ctx: Hearth, keeper: Signer, period: number): Promise<number[]> {
   const awarded: number[] = [];
   for (let drawId = Math.max(1, period - 3); drawId <= period; drawId++) {
     const draw = await ctx.pool.drawOf(drawId);
@@ -369,7 +369,7 @@ async function awardClosedDraws(ctx: Hearth, keeper: Signer, period: number): Pr
   return awarded;
 }
 
-async function evaluateFully(ctx: Hearth, keeper: Signer, drawId: number): Promise<void> {
+export async function evaluateFully(ctx: Hearth, keeper: Signer, drawId: number): Promise<void> {
   if ((await ctx.vault.saverCount()) === 0n) {
     console.log(`draw ${drawId} has no savers to evaluate`);
     return;

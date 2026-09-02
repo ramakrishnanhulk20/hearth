@@ -196,10 +196,13 @@ exists.
 **4. Finalize.** After the window, whatever each tier offered and did not pay is folded
 into that tier's encrypted carry, which is added back to the tier's offer at every close.
 
-**5. Reconcile.** Each tier publishes its carry on its own cadence: the frequent tier every
-draw, the mid tier every 6, the grand tier every 24. Publishing a carry is what makes that
-tier's prize count public, so a long cadence means a jackpot is attributed to everybody
-eligible across a whole day rather than the handful eligible in one hour.
+**5. Reconcile.** Every tier publishes its carry at the finalize of every draw, and the
+verified cleartext goes back into that tier's public liquidity, so the pot accumulates
+where everyone can see it. Publishing a carry is also what makes that tier's prize count
+public, one draw later. The cadence is a per-tier constructor argument: raising it hides
+the count for that many draws, at the cost of the money nobody won sitting encrypted and
+the public prize dropping to one draw's share until the next reconcile. This deployment
+chose the visible jackpot, and says so in [limitations](docs/limitations.md).
 
 The winner test itself, for saver `u` in tier `t` of draw `p`, is public arithmetic:
 
@@ -327,9 +330,9 @@ naming every seam ourselves is worth more than a claim nobody can check.
 | The random seed for each draw | Public once the period ends | Everyone |
 | The yield harvested each draw | Public once the period ends | Everyone |
 | Each tier's prize size and offered plaintext liquidity | Public from the close | Everyone |
-| How many prizes the frequent tier paid | Public every draw | Everyone |
-| How many prizes the mid tier paid | Public every 6 draws | Everyone |
-| How many prizes the grand tier paid | Public every 24 draws | Everyone |
+| How many prizes the frequent tier paid | Public one draw later | Everyone |
+| How many prizes the mid tier paid | Public one draw later | Everyone |
+| How many prizes the grand tier paid | Public one draw later | Everyone |
 | The list of saver addresses | Public | Everyone |
 | When you deposited, withdrew, or were evaluated, and in which batch | Public | Everyone |
 | The unfunded counter | Public at finalization | Everyone |
@@ -365,8 +368,10 @@ an outsider needs in order to check that the draw was honest. That split is the 
 5. **The published prize counts are a slow measurement.** Each count is a constraint of the
    form "how many of these savers had a weight above their own published threshold", and
    constraints accumulate against a balance that never changes. The tier reconcile cadence
-   is the damper: publishing the grand tier's count once a day rather than once an hour
-   attributes a jackpot to a day of eligible savers.
+   is the dial that would damp it, and this deployment set it to one. Publishing a tier's
+   carry every draw is the same step that hands unwon money back to the public pot, so a
+   slower cadence would hide the count and the growing jackpot together. We kept the
+   jackpot visible and state the count as a residual.
 6. **The token layer is Zama's, not ours.** Confidential USDC is an upgradeable wrapper
    whose owner can appoint observers able to decrypt every amount that moves through the
    token, retroactively, and can deny-list addresses. That covers deposit amounts,
@@ -668,9 +673,9 @@ SponsoredYieldSource(IERC7984ERC20Wrapper asset, address recipient, uint64 rateP
 
 Deploy the vault, then the pool, then `vault.setPrizePool(pool)`, then the source with the
 pool as recipient, then `pool.setYieldSource(source)`, then sponsor it. The Sepolia tier
-set is grand count 1 at odds 1/24 with 40 shares reconciling every 24 draws, mid count 1 at
-odds 1/6 with 20 shares reconciling every 6, and frequent count 4 at odds 1 with 40 shares
-reconciling every draw. Utilisation is fixed at 50 percent, following PoolTogether V5. Full
+set is grand count 1 at odds 1/24 with 40 shares, mid count 1 at odds 1/6 with 20 shares,
+and frequent count 4 at odds 1 with 40 shares, and all three reconcile every draw.
+Utilisation is fixed at 50 percent, following PoolTogether V5. Full
 parameter meanings and a candidate mainnet set: [deploying](docs/operations/deploying.md).
 
 ---

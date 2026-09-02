@@ -37,9 +37,9 @@ type TierConfig = {
   reconcileEvery: number;
 };
 
-// The Sepolia set from DECISIONS.md: a grand prize that pays about daily, a mid tier, and four small
-// prizes every draw, with the grand and mid carries hidden behind a long reconcile cadence.
-const SEPOLIA_TIERS: TierConfig[] = [
+// The odds and shares of the Sepolia set, with the grand and mid carries hidden behind a long
+// reconcile cadence, which the deployment does not use but the mechanism has to support.
+const LONG_CADENCE_TIERS: TierConfig[] = [
   { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 24, shares: 40, reconcileEvery: 24 },
   { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 6, shares: 20, reconcileEvery: 6 },
   { prizeCount: 4, oddsNumerator: 1, oddsDenominator: 1, shares: 40, reconcileEvery: 1 },
@@ -69,7 +69,7 @@ describe("Hearth", () => {
   let dave: HardhatEthersSigner;
   let erin: HardhatEthersSigner;
 
-  async function deploy(tiers: TierConfig[] = SEPOLIA_TIERS, scaleBits = SCALE_BITS) {
+  async function deploy(tiers: TierConfig[] = LONG_CADENCE_TIERS, scaleBits = SCALE_BITS) {
     usdc = (await (await ethers.getContractFactory("TestUSDC")).deploy()) as unknown as TestUSDC;
     cusdc = (await (
       await ethers.getContractFactory("ConfidentialUSDC")
@@ -296,7 +296,7 @@ describe("Hearth", () => {
 
     const winnings = await series(savers, winningsOf);
     const totalWon = winnings.reduce((a, b) => a + b, 0n);
-    const mostOneSaverCanWin = prize.reduce((a, p, t) => a + p * BigInt(SEPOLIA_TIERS[t].prizeCount), 0n);
+    const mostOneSaverCanWin = prize.reduce((a, p, t) => a + p * BigInt(LONG_CADENCE_TIERS[t].prizeCount), 0n);
     for (const won of winnings) expect(won).to.be.at.most(mostOneSaverCanWin);
 
     const remaining = await remainderOf(drawId);
@@ -359,7 +359,7 @@ describe("Hearth", () => {
     expect(atClose.seed, "no seed exists yet, only its handle").to.equal(0n);
     for (let t = 0; t < 3; t++) {
       expect(BigInt(atClose.prize[t])).to.equal(
-        (BigInt(atClose.offered[t]) * 5_000n) / 10_000n / BigInt(SEPOLIA_TIERS[t].prizeCount),
+        (BigInt(atClose.offered[t]) * 5_000n) / 10_000n / BigInt(LONG_CADENCE_TIERS[t].prizeCount),
       );
     }
     expect(atClose.prize.reduce((a, p) => a + BigInt(p), 0n)).to.be.greaterThan(0n);
@@ -429,7 +429,7 @@ describe("Hearth", () => {
   });
 
   it("moves the published scale up to the aggregate when it starts far below", async () => {
-    await deploy(SEPOLIA_TIERS, 20);
+    await deploy(LONG_CADENCE_TIERS, 20);
     await fund([alice], [usd(10_000)]);
 
     let drawId = 0;
@@ -447,7 +447,7 @@ describe("Hearth", () => {
   });
 
   it("brings the published scale down when it starts far above", async () => {
-    await deploy(SEPOLIA_TIERS, 60);
+    await deploy(LONG_CADENCE_TIERS, 60);
     await fund([alice], [usd(10_000)]);
 
     let drawId = 0;
@@ -583,7 +583,7 @@ describe("Hearth", () => {
 
   it("publishes each tier's carry on its own cadence and books it back once", async () => {
     await deploy(
-      SEPOLIA_TIERS.map((tier, index) => ({ ...tier, reconcileEvery: index === 0 ? 2 : 1 })),
+      LONG_CADENCE_TIERS.map((tier, index) => ({ ...tier, reconcileEvery: index === 0 ? 2 : 1 })),
       SCALE_BITS,
     );
     await fund([alice, bob], [usd(4_000), usd(6_000)]);
@@ -856,16 +856,16 @@ describe("Hearth", () => {
 
   it("refuses a tier configuration or a scale the pool cannot run", async () => {
     const factory = await ethers.getContractFactory("HearthPrizePool");
-    const bad = SEPOLIA_TIERS.map((tier) => ({ ...tier }));
+    const bad = LONG_CADENCE_TIERS.map((tier) => ({ ...tier }));
     bad[1].reconcileEvery = 0;
     await expect(
       factory.deploy(vaultAddress, cusdcAddress, bad, SCALE_BITS, owner.address),
     ).to.be.revertedWithCustomError(pool, "InvalidTier");
     await expect(
-      factory.deploy(vaultAddress, cusdcAddress, SEPOLIA_TIERS, 0, owner.address),
+      factory.deploy(vaultAddress, cusdcAddress, LONG_CADENCE_TIERS, 0, owner.address),
     ).to.be.revertedWithCustomError(pool, "InvalidScaleBits");
     await expect(
-      factory.deploy(vaultAddress, cusdcAddress, SEPOLIA_TIERS, 121, owner.address),
+      factory.deploy(vaultAddress, cusdcAddress, LONG_CADENCE_TIERS, 121, owner.address),
     ).to.be.revertedWithCustomError(pool, "InvalidScaleBits");
   });
 });

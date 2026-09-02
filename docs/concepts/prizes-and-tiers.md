@@ -18,8 +18,8 @@ flow into it:
   weights. The integer remainder of that split, the few base units that do not divide
   evenly, goes to the grand tier rather than being dropped. A harvest booked at the award
   of draw `p` is offered at the next close, not at draw `p`'s own.
-- **Reconciled carry.** Whatever the tiers offered in earlier draws and did not pay out
-  comes back when that tier reconciles.
+- **Reconciled carry.** Whatever a tier offered in an earlier draw and nobody won comes
+  back when that tier reconciles, which on Sepolia is one draw later.
 
 Each tier also holds a second pot, the **carry**, and that one is encrypted. It is the
 running total of everything the tier offered and nobody won, and it is added to the tier's
@@ -50,13 +50,14 @@ then move money between tiers to make the win bigger.
 
 | Tier | Prizes per draw (`count`) | Odds | Shares | Reconciles every | What it feels like |
 | --- | --- | --- | --- | --- | --- |
-| Grand | 1 | 1 in 24 | 40 | 24 draws | Rare and large |
-| Mid | 1 | 1 in 6 | 20 | 6 draws | A few times a day |
+| Grand | 1 | 1 in 24 | 40 | 1 draw | Rare and large |
+| Mid | 1 | 1 in 6 | 20 | 1 draw | A few times a day |
 | Frequent | 4 | 1 in 1 | 40 | 1 draw | Four prizes every draw |
 
 Total shares are 100, so the grand tier takes 40 percent of every harvest, the mid tier 20
 percent and the frequent tier 40 percent. A period on Sepolia is one hour, so 1 in 24
-works out at about once a day and 1 in 6 at about every six hours.
+works out at about once a day and 1 in 6 at about every six hours. Every tier reconciles
+every draw, which is a choice with a cost on both sides; it has its own section below.
 
 ### What those settings produce
 
@@ -82,6 +83,15 @@ somewhere between the figures above and twice them, depending on where the pool'
 sits inside its bracket. A pool near the top of a bracket pays close to the table. A pool
 that has just crossed a power of two pays fewer, larger prizes for a while.
 
+One reason the table describes the live deployment rather than an ideal: every tier
+reconciles every draw. What a tier offered and nobody won is published at the finalize of
+that draw and booked straight back into its public liquidity, so a tier's liquidity at rest
+really does settle where the table says, and the pot the app shows is the pot the tier is
+carrying. Under a slower cadence the same money would still be offered and still be
+winnable, but it would sit in the encrypted carry between reconciles, and the public
+liquidity, which is what sizes the prize, would be only the harvest booked since that
+tier's last reconcile. The next section is that trade in full.
+
 To put a number on it, suppose the Sepolia source drips 10 USDC per period. Then the grand
 prize sits near 96 USDC and lands about once a day, the mid prize near 12 USDC about every
 six hours, and four prizes of about 1 USDC land in every draw, with each of those figures
@@ -93,7 +103,7 @@ These are constructor arguments, chosen with PoolTogether V5's odds formula in t
 config. A mainnet deployment with a daily period would use different ones; see
 [deploying](../operations/deploying.md).
 
-## The reconcile cadence, and why it is not every draw
+## The reconcile cadence, and what raising it costs
 
 Reconciling a tier publishes its carry, and the carry is exactly the money that tier
 offered and nobody won. Subtract it from what was offered, divide by the prize size, and
@@ -101,21 +111,41 @@ you know how many prizes that tier paid. That number is a real disclosure: it is
 measurement of the encrypted balances, of the form "how many of these savers had a weight
 above their own published threshold".
 
-If the grand tier reconciled every draw, that measurement would name a jackpot winner out
-of the small set of savers who were even eligible for it in that one draw. With odds of 1
-in 24, that is roughly four percent of the pool per draw.
+`reconcileEvery[t]` is the dial on that disclosure, and it is a constructor argument per
+tier. Raising it hides the count for that many draws and then publishes one number for the
+whole span. Set the grand tier to 24 and its count becomes a daily figure, and the people
+it could be are everybody who was eligible at any point in that day rather than the
+roughly four percent of the pool eligible in a single draw. On a 1 in 24 tier that
+difference is not cosmetic: a per-draw count names a jackpot winner out of a small set.
 
-So each tier reconciles on its own cadence instead. The grand tier reconciles every 24
-draws, which on Sepolia is once a day. The count that becomes public is then the count
-across a whole day, and the people it could be are everybody who was eligible at any point
-in that day, which is most of the pool. The mid tier reconciles every 6 draws for the same
-reason. The frequent tier reconciles every draw, because at four prizes a draw the count
-carries almost no information about any individual.
+The price of raising it is the jackpot itself. A close moves all of a tier's public
+liquidity into the draw and leaves the tier at zero, and that money only comes back at a
+reconcile. So with a cadence of 24, on 23 draws out of every 24 the grand tier's public
+liquidity is just the harvest booked since the last reconcile, the published prize is
+sized off that one draw's share, and the accumulated pot shows up in the open only on the
+reconcile draw. The money is not idle in the meantime, because the encrypted carry is
+added to the tier's offer at every close and can be won throughout. It is invisible,
+though, and a jackpot nobody can watch grow is not really a jackpot.
 
-The cost of the cadence is that money sits in the encrypted carry longer before it counts
-toward a public prize size. It is never idle: the carry is added to the tier's offer at
-every close, so it can be won the whole time. The plaintext jackpot the app shows is the
-booked liquidity; the carry is the part it does not yet show.
+A hidden prize count and a visible, accumulating jackpot cannot both hold. **This
+deployment chose the visible jackpot.** All three tiers run at `reconcileEvery = 1`, so
+each tier's carry is published at the finalize of the draw it came from, verified on chain
+against the handle the vault published, and booked back into public liquidity by
+`reconcile`. The pot accumulates in the open, the way PoolTogether's does, and how many
+prizes each tier paid becomes public one draw later, also the way PoolTogether's does.
+Never who won, in either case.
+
+That makes the count above a disclosed residual rather than a mitigated one. The reasoning
+is unchanged and still true: a per-draw count on a 1 in 24 tier is a measurement over the
+small set of savers eligible in that draw, and it accumulates against a balance that never
+moves. It is written up in [what stays private](../security/what-stays-private.md) and
+carried in the [limitations list](../limitations.md). Two things still limit it. The
+counts are coarse, since nothing finer than a whole number of prizes is ever published.
+And the thresholds cannot be aimed at a suspected balance, because the seed is drawn
+inside the coprocessor and revealed only once its period is over.
+
+A deployment that would rather have the slower measurement than the visible pot sets the
+dial higher and takes the trade in the other direction. It is one redeploy.
 
 ## Over-subscription: when a tier pays more than it planned
 

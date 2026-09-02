@@ -12,7 +12,8 @@ Once per pass, in this order:
 
 1. **Finalize** every draw whose two-period window has ended and that nobody has finalized. This
    folds each tier's unpaid prize money into that tier's encrypted carry and publishes the carry
-   of any tier whose reconcile cadence is due.
+   of any tier whose reconcile cadence is due. On the live deployment every tier is due every
+   draw, so a finalize normally publishes all three.
 2. **Reconcile** every tier the vault has published a carry for: fetch the KMS-signed cleartext
    of that carry from the Zama relayer and book it back into the tier's plaintext liquidity.
 3. **Close** the draw the pool names in `closableDraw()`, while its close deadline is still ahead.
@@ -75,7 +76,7 @@ address and nothing else.
 
 The keeper needs Sepolia ETH on its own address. It prints the balance at boot and complains
 below 0.02 ETH. A ten-saver pool costs roughly eleven million gas per draw across close, award,
-three evaluation batches, finalize and reconcile.
+three evaluation batches, finalize and one reconcile per tier.
 
 ## Running it
 
@@ -116,18 +117,22 @@ Every line is one fact. Times are UTC.
 ```
 09:14:02 hearth keeper: live, keeper 0x7099..., vault 0x..., pool 0x..., batch 4, poll 30s, no gas cap
 09:14:03 keeper balance 0.412 ETH
-09:14:04 tier reconcile cadence: grand every 24 draws, mid every 6 draws, frequent every draw
+09:14:04 tier reconcile cadence: grand every draw, mid every draw, frequent every draw
 09:14:04 evaluating 4 savers per call, the vault allows up to 8
 09:14:05 period 43, watching draws from 39 upward
 09:14:07 finalized draw 39 (gas 412,882)
-09:14:08 the frequent tier is due, asking the relayer for its carry
-09:14:19 reconciled the frequent tier: 1.60 USDC back into the prize liquidity (gas 208,114)
-09:14:22 closed draw 41 (gas 1,204,331)
-09:14:23 draw 41 is waiting for its award: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC
-09:14:24 draw 41: asking the relayer for the seed, the scale, the empty flag and the harvest
-09:14:38 awarded draw 41: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC, harvest 3.60 USDC (gas 431,220)
-09:14:52 evaluated draw 41: 4 of 9 savers done (gas 8,110,220)
-09:15:23 nothing to do: period 43, draw 41 has 8 of 9 savers evaluated
+09:14:08 the grand tier is due, asking the relayer for its carry
+09:14:16 reconciled the grand tier: 24.80 USDC back into the prize liquidity (gas 208,114)
+09:14:17 the mid tier is due, asking the relayer for its carry
+09:14:25 reconciled the mid tier: 4.20 USDC back into the prize liquidity (gas 208,114)
+09:14:26 the frequent tier is due, asking the relayer for its carry
+09:14:34 reconciled the frequent tier: 1.60 USDC back into the prize liquidity (gas 208,114)
+09:14:37 closed draw 41 (gas 1,204,331)
+09:14:38 draw 41 is waiting for its award: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC
+09:14:39 draw 41: asking the relayer for the seed, the scale, the empty flag and the harvest
+09:14:53 awarded draw 41: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC, harvest 3.60 USDC (gas 431,220)
+09:15:07 evaluated draw 41: 4 of 9 savers done (gas 8,110,220)
+09:15:38 nothing to do: period 43, draw 41 has 8 of 9 savers evaluated
 ```
 
 What each kind of line means:
@@ -143,7 +148,8 @@ What each kind of line means:
 - `awarded draw N` means the seed and the scale are public and every saver's outcome is now fixed.
 - `evaluated draw N: 4 of 9 savers done` is progress through the walk. Repeat until it reaches
   `9 of 9`.
-- `finalized draw N` closed the books on that draw and may have published a tier's carry.
+- `finalized draw N` closed the books on that draw and published the carry of every tier due to
+  reconcile, which on the live deployment is all three.
 - `reconciled the X tier` turned an encrypted carry back into prize money the next draw can offer.
 - `draw N had no savers` or `draw N missed its window` means the money went back to the pool. No
   yield and no liquidity is lost either way.

@@ -80,12 +80,17 @@ It is the fraction of a tier's plaintext liquidity used to size each prize.
 
 Two of those deserve a word.
 
-`reconcileEvery` is a privacy setting, not a gas setting. Publishing a tier's carry makes
-that tier's prize count public, and a count over one draw points at the small set of savers
-eligible in that draw. Setting it higher spreads the count over a span in which nearly
-everybody was eligible at some point. Set it to 1 only for a tier whose count is large
-enough to carry no individual information, which on Sepolia means the frequent tier at four
-prizes a draw. See limitation 14.
+`reconcileEvery` is a privacy setting, not a gas setting, and it trades against how the
+prize pot looks. Publishing a tier's carry makes that tier's prize count public, and a
+count over one draw points at the small set of savers eligible in that draw. Setting it
+higher spreads the count over a span in which nearly everybody was eligible at some point.
+What that costs is the visible jackpot: a close moves all of a tier's public liquidity
+into the draw and it comes back only at a reconcile, so a tier at a cadence of 24
+publishes a prize sized off one draw's harvest share on 23 draws out of 24, with the
+accumulated pot showing in the open only on the reconcile draw. The money is offered and
+winnable the whole time inside the encrypted carry; it is just invisible. Sepolia runs all
+three tiers at 1 for that reason and states the per-draw count as a residual. See
+limitation 14.
 
 `initialScaleBits` only has to be close. The tracker compares the real total against five
 powers of two around the current guess at every close and corrects itself by up to three
@@ -113,8 +118,8 @@ undone.
 | Window | 2 hours (two periods) | 2 days |
 | Close deadline | 1 hour 30 minutes after the period ends | 1 day 12 hours after |
 | Per-saver cap | About 5 billion USDC | About 213 million USDC |
-| Grand tier | count 1, odds 1/24, shares 40, reconcile every 24 | count 1, odds `{{MAINNET_GRAND_ODDS}}`, shares `{{MAINNET_GRAND_SHARES}}`, reconcile every `{{MAINNET_GRAND_RECONCILE}}` |
-| Mid tier | count 1, odds 1/6, shares 20, reconcile every 6 | count 1, odds `{{MAINNET_MID_ODDS}}`, shares `{{MAINNET_MID_SHARES}}`, reconcile every `{{MAINNET_MID_RECONCILE}}` |
+| Grand tier | count 1, odds 1/24, shares 40, reconcile every draw | count 1, odds `{{MAINNET_GRAND_ODDS}}`, shares `{{MAINNET_GRAND_SHARES}}`, reconcile every `{{MAINNET_GRAND_RECONCILE}}` |
+| Mid tier | count 1, odds 1/6, shares 20, reconcile every draw | count 1, odds `{{MAINNET_MID_ODDS}}`, shares `{{MAINNET_MID_SHARES}}`, reconcile every `{{MAINNET_MID_RECONCILE}}` |
 | Frequent tier | count 4, odds 1, shares 40, reconcile every draw | count 4, odds 1, shares `{{MAINNET_FREQUENT_SHARES}}`, reconcile every draw |
 | Utilisation | 50 percent | 50 percent |
 | Yield source | `SponsoredYieldSource` | `ConfidentialVaultYieldSource` over Zama's batcher |
@@ -127,8 +132,10 @@ deployment would use.
 The mainnet column is a candidate, not a deployment. The rule for filling it is the same
 one that produced the Sepolia column: pick how many draws you want between grand prizes and
 set the grand tier's odds to one over that number, then set shares so the resulting prize
-sizes read sensibly against the yield the source actually earns, then set each tier's
-reconcile cadence to span enough draws that its prize count names nobody. A daily period
+sizes read sensibly against the yield the source actually earns, then decide each tier's
+reconcile cadence by weighing a prize count that names nobody against a pot savers can
+watch accumulate. Sepolia took the second; a mainnet deployment may take the first, and the
+paragraph above says what each side costs. A daily period
 with grand odds of 1 in 365 gives an annual grand prize, which is the shape V5 uses.
 
 ## Deployed addresses

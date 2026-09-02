@@ -30,7 +30,7 @@ const CLOSED = 1n;
 const AWARDED = 2n;
 const SKIPPED = 4n;
 
-const SEPOLIA_TIERS = [
+const LONG_CADENCE_TIERS = [
   { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 24, shares: 40, reconcileEvery: 24 },
   { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 6, shares: 20, reconcileEvery: 6 },
   { prizeCount: 4, oddsNumerator: 1, oddsDenominator: 1, shares: 40, reconcileEvery: 1 },
@@ -150,7 +150,7 @@ describe("Hearth invariants", () => {
     ).deploy(
       vaultAddress,
       cusdcAddress,
-      SEPOLIA_TIERS,
+      LONG_CADENCE_TIERS,
       bitsFor(aggregate),
       owner.address,
     )) as unknown as HearthPrizePool;
@@ -299,7 +299,7 @@ describe("Hearth invariants", () => {
       const status = (await pool.drawParams(drawId)).status;
       const settled = await vault.finalized(drawId);
       // A harvest lands in the pool at the close and is booked into the tiers at the award, so between
-      // the two it belongs to no tier and no draw. The architecture's invariant omits this term; without
+      // the two it belongs to no tier and no draw. The architecture's invariant names this term; without
       // it the pool looks over-funded for exactly as long as an award is outstanding.
       if (status === CLOSED) booked += harvestAtClose.get(drawId)!;
       // A draw that is finalized and past its award holds nothing and owes nothing, so it drops out of

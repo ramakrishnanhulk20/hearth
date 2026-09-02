@@ -248,13 +248,21 @@ narrowed by those counts. A saver who deposits or withdraws resets their own unk
 and the thresholds are not choosable by an attacker, because the seed is drawn inside the
 coprocessor and revealed only after its period has closed.
 
-**What we did about it:** each tier reconciles on its own cadence rather than every draw.
-On Sepolia the grand tier reconciles every 24 draws and the mid tier every 6, so their
-counts are published once a day and once every six hours instead of hourly. That cuts the
-measurement rate on the two tiers whose counts would otherwise be most identifying, and it
-means a jackpot is attributed to everyone eligible across a whole day rather than the
-handful eligible in one draw. The cost is that money spends longer in the encrypted carry
-before it counts toward a public prize size, though it can be won the whole time.
+**What we did about it: nothing, and here is why.** The contract has a dial for exactly
+this. `reconcileEvery[t]` is how many draws pass between publications of a tier's carry,
+and raising it on the grand tier would publish one count a day instead of one an hour, so
+a jackpot would be attributed to everyone eligible across the day rather than the handful
+eligible in one draw. The fairness run showed what that costs. A close moves all of a
+tier's public liquidity into the draw and it comes back only at a reconcile, so at a
+cadence of 24 the grand tier's public liquidity is one draw's harvest share on 23 draws
+out of 24, and the prize size is taken off that, with the accumulated pot showing in the
+open only on the reconcile draw. The money is offered and winnable throughout, sitting in
+the encrypted carry, but nobody can watch the jackpot grow.
+
+A hidden count and a visible, accumulating jackpot cannot both hold, and this deployment
+chose the visible jackpot. All three tiers run at `reconcileEvery = 1`, so the measurement
+above runs at one count per tier per draw. The dial is a constructor argument and a
+deployment that values the slower measurement more than the visible pot sets it higher.
 
 ## Not a limitation, but worth stating plainly
 

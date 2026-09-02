@@ -152,7 +152,7 @@ Now notice what an observer sees at the end of all that. They can compute all th
 themselves, because `R`, `M`, the thresholds and the addresses are public. What they
 cannot do is fill in the right-hand column, because the weights are encrypted, and they
 cannot recover the 1,000 either, because only the 1,024 was published. After the tier
-reconciles they learn how many prizes it paid. They never learn to whom.
+reconciles, one draw later, they learn how many prizes it paid. They never learn to whom.
 
 ## Why splitting your wallet gains nothing
 

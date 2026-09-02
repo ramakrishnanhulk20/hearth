@@ -22,9 +22,9 @@ ourselves is worth more than a claim nobody can check.
 | The random seed for each draw | Public once the period ends | Everyone |
 | The yield harvested each draw | Public once the period ends | Everyone |
 | Each tier's prize size and offered plaintext liquidity | Public from the close | Everyone |
-| How many prizes the frequent tier paid | Public every draw | Everyone |
-| How many prizes the mid tier paid | Public every 6 draws | Everyone |
-| How many prizes the grand tier paid | Public every 24 draws | Everyone |
+| How many prizes the frequent tier paid | Public one draw later | Everyone |
+| How many prizes the mid tier paid | Public one draw later | Everyone |
+| How many prizes the grand tier paid | Public one draw later | Everyone |
 | The list of saver addresses | Public | Everyone |
 | When you deposited, withdrew, or were evaluated, and in which batch | Public | Everyone |
 | The unfunded counter | Public at finalization | Everyone |
@@ -42,8 +42,8 @@ draw was honest. That split is the design.
 An observer with a full archive node and unlimited patience can build:
 
 - The complete list of savers and the exact block each one acted in.
-- Every draw's seed, bracket, harvest and prize sizes, and each tier's prize count on that
-  tier's own cadence.
+- Every draw's seed, bracket, harvest and prize sizes, and each tier's prize count, one
+  draw after the draw it belongs to.
 - Every threshold every address had to beat. They can literally compute your ladder.
 - The pool's total holdings in confidential USDC as an encrypted handle, which they cannot
   read.
@@ -161,11 +161,25 @@ narrowing over.
 Two things limit the rate. The counts are coarse: nothing finer than a whole number of
 prizes is ever disclosed. And the thresholds are not choosable by an attacker, because the
 seed is drawn inside the coprocessor and revealed only after its period has closed, so
-nobody can aim a query at a suspected balance. The reconcile cadence is the third damper
-and the deliberate one: reconciling the grand tier every 24 draws and the mid tier every 6
-cuts the measurement rate on the two tiers whose counts would otherwise be most
-identifying, and it means a jackpot payout is attributed to everyone eligible across a
-whole day rather than to the small set eligible in one draw.
+nobody can aim a query at a suspected balance.
+
+A third damper was available, and this deployment gave it up on purpose.
+`reconcileEvery[t]` sets how many draws pass between publications of a tier's carry.
+Raising it publishes one count per span instead of one per draw, so a jackpot is
+attributed to everyone eligible across that span. What it costs is the jackpot itself: a
+close moves all of a tier's public liquidity into the draw, and that money comes back only
+at a reconcile, so at a cadence of 24 the grand tier's public liquidity is one draw's
+harvest share on 23 draws out of 24, the published prize is sized off that, and the
+accumulated pot appears in the open only on the reconcile draw. The money is offered and
+winnable the whole time inside the encrypted carry. Nobody can see it.
+
+So all three tiers run at `reconcileEvery = 1`. The pot accumulates in public, each tier's
+count becomes public one draw later, and the measurement above runs at its full rate of
+one count per tier per draw. On the grand tier that means a payout points at the savers
+eligible in that one draw, roughly four percent of the pool, rather than at a day of them.
+This is a disclosed residual, not a mitigated one, and it is limitation 14. The cadence is
+still a constructor argument, so a deployment that wants the slower measurement more than
+the visible pot can have it.
 
 ## Rule 5: the token layer is Zama's, not ours
 

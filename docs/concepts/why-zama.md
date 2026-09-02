@@ -131,7 +131,7 @@ verifies that signature on chain with `FHE.checkSignatures` before acting on the
 This is what turns "we say the seed was 12345" into a number the contract itself refuses
 to accept without proof. Hearth uses it once per draw for the seed, the scale count, the
 non-empty flag and the harvest together at award time, and again for a tier's carry
-whenever that tier is due to reconcile, which for the grand tier is once every 24 draws.
+whenever that tier is due to reconcile, which on Sepolia is every tier at every draw.
 Every proof is bound to its handles in a fixed order, so nothing can be shuffled or
 replayed into a different draw or a different tier.
 

@@ -79,9 +79,10 @@ Draw lifecycle, all steps permissionless:
    stored and allowed to that saver, and the encrypted total credited in the batch is
    pulled from the prize pool.
 4. `finalizeDraw(p)`, after the window. The vault folds each tier's encrypted remainder
-   into that tier's encrypted carry. Tiers reconcile on their own cadence: a tier is due at
-   the finalization of every draw whose id is a multiple of `reconcileEvery[t]`, unless a
-   publication is still pending. When due, the vault marks its carry publicly decryptable and
+   into that tier's encrypted carry. A tier is due at the finalization of every draw whose
+   id is a multiple of `reconcileEvery[t]`, unless a publication is still pending. On
+   Sepolia every tier runs at `reconcileEvery = 1`, so all three are due at every
+   finalization. When due, the vault marks its carry publicly decryptable and
    records which draw published it; `reconcile(tier, carry, proof)` on the pool verifies the
    cleartext against that handle, books it into the tier's plaintext liquidity, and the vault
    subtracts it from the carry (which may have grown since) and clears the pending flag. A
@@ -238,9 +239,11 @@ draw that is `Empty`, `Skipped` or not yet awarded.
   encrypted acceptance is allowed to the token for the transaction.
 - Invariants, checked in tests: vault token balance equals total principal plus total
   unclaimed winnings; pool token balance equals plaintext liquidity plus every encrypted
-  carry plus liquidity offered and not yet finalized; every tier's remainder is between
-  zero and what was offered; paid equals credited; nobody withdraws more than principal
-  plus winnings.
+  carry plus liquidity offered and not yet finalized plus harvests received at close and
+  not yet booked by an award, since the source transfers at the close and the award is what
+  splits the amount across the tiers, so between the two it belongs to no tier and no draw;
+  every tier's remainder is between zero and what was offered; paid equals credited; nobody
+  withdraws more than principal plus winnings.
 - Public decryption proofs are bound to handle order: `[seed, scaleCount, nonEmpty,
   harvested]` for the award and one carry handle per reconciliation. The draw state
   machine is the replay guard: each step succeeds once per draw and per tier.
@@ -253,12 +256,17 @@ to the grand tier, into a plaintext `liquidity[t]`. At close, for each tier:
 `carry[t]`, and `prize[t] = liquidity[t] * UTILISATION / count[t]` from the plaintext part
 only, so prize sizes stay public and the encrypted carry only ever adds capacity.
 
-Tiers reconcile on their own cadence. The frequent tier reconciles every draw. The mid
-and grand tiers reconcile every 6 and every 24 draws respectively, so the count of prizes
-they paid becomes public only over a span in which nearly every saver was eligible at
-some point, rather than naming a jackpot winner out of the two percent of savers eligible
-in one draw. The plaintext jackpot shown in the app is the booked liquidity; the encrypted
-carry is the part it does not yet show.
+Every tier reconciles every draw. What a tier offered and nobody won is published as that
+tier's carry at the finalization of the same draw, verified on chain, and booked back into
+the tier's plaintext liquidity by `reconcile`, so the next close offers it again and the
+pot accumulates in the open. `reconcileEvery[t]` is the dial on that: raising it hides how
+many prizes a tier paid for that many draws, at the cost of the money nobody won sitting
+in the encrypted carry in the meantime, which drops the tier's public liquidity, and so
+its published prize size, to the harvest booked since its last reconcile. A hidden count
+and a visible, accumulating jackpot cannot both hold, and this deployment chose the
+visible jackpot. The residual is that a per-draw count on a 1 in 24 tier measures the
+small set of savers eligible in that one draw; it is disclosed in the threat model rather
+than damped.
 
 Grand-tier odds are measured over one period. V5 measures them over the tier's whole
 accrual window, so a large holder who joins for a single period takes a full proportional
@@ -266,10 +274,10 @@ shot at the accumulated pot. This is a stated deviation; the cheap fix, an accum
 balance-seconds since the last grand payout, is noted for a later version.
 
 Tier parameters (count, odds, shares, reconcile cadence) are constructor arguments.
-Sepolia, at a one-hour period: grand count 1, odds 1/24, shares 40, reconcile every 24;
-mid count 1, odds 1/6, shares 20, reconcile every 6; frequent count 4, odds 1, shares
-40, reconcile every draw. With a harvest of H per period the grand prize settles near
-10 H and pays about daily; the frequent tier pays up to four prizes near 0.1 H each draw.
+Sepolia, at a one-hour period: grand count 1, odds 1/24, shares 40; mid count 1, odds 1/6,
+shares 20; frequent count 4, odds 1, shares 40; all three reconcile every draw. With a
+harvest of H per period the grand prize settles near 10 H and pays about daily; the
+frequent tier pays up to four prizes near 0.1 H each draw.
 
 ## 7. Yield source
 
@@ -331,19 +339,20 @@ the credit of every evaluated draw, and therefore whether they won a given draw.
 
 Public by design: the list of saver addresses and when each deposited, withdrew or was
 evaluated, and in which batch; the per-draw seed, the scale of the aggregate (its power
-of two), the harvest, each tier's prize size and offered liquidity; how many prizes the
-frequent tier paid, once per draw, and how many the mid and grand tiers paid, once per
-6 and per 24 draws; sponsor amounts; the amount wrapped into or unwrapped out of
-confidential USDC, which is a public ERC-20 movement at the token layer.
+of two), the harvest, each tier's prize size and offered liquidity; how many prizes each
+tier paid, one draw later, never to whom; sponsor amounts; the amount wrapped into or
+unwrapped out of confidential USDC, which is a public ERC-20 movement at the token layer.
 
 Inferable, and named as such: a saver whose balance an observer can pin, for example
 because they wrapped exactly what they deposited seconds earlier, has a public outcome
 in every draw, because thresholds are public; the app keeps wrap and deposit as separate
 steps and offers round wrap amounts for this reason. Cumulative winnings become a public
 lower bound for an address that wraps in and unwraps out in full. A balance that never
-changes is narrowed slowly by the published prize counts over many draws. When the
-grand tier pays, the winner is one of the savers eligible for it during the reconcile
-span, roughly the whole pool over a day, not one saver out of a draw.
+changes is narrowed slowly by the published prize counts over many draws. Because every
+tier reconciles every draw, that narrowing runs at one count per tier per draw, and when
+the grand tier pays, the winner is one of the savers eligible for it in that single draw,
+roughly four percent of the pool. That is the cost of an accumulating pot anyone can see,
+and it is named here rather than left for a reader to find.
 
 Anonymity set: with one saver the scale of the aggregate is that saver's weight to
 within a factor of two; with two, each can bound the other. The app states this below
@@ -470,8 +479,10 @@ missing events and views, the claim presentation.
 Resolved in the 3 September review of the second draft: the exact aggregate leak
 (replaced by the scale), prize sizes fixed after the seed (moved to close), a last-block
 close stranding a draw (close deadline plus returned liquidity), self-evaluation as a
-winner tell (fixed walk order), jackpot winners identifiable from per-draw counts (tier
-reconcile cadence), withdrawals assuming a clamping token (clamp to the vault balance),
+winner tell (fixed walk order), jackpot winners identifiable from per-draw counts (the
+reconcile cadence, which the fairness run then showed costs the visible jackpot, so the
+deployment sets it back to every draw and discloses the count as a residual, section 6),
+withdrawals assuming a clamping token (clamp to the vault balance),
 the cap check wrapping, a reverting yield source stalling closes, unbounded tier
 configuration, and the missing threshold view.
 

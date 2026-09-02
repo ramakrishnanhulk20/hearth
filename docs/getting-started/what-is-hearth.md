@@ -88,8 +88,8 @@ are verified.
 
 - Hidden: every individual saver's weight, the pool's exact total, and every individual
   result.
-- Public: the seed, the bracket, the yield collected, each tier's prize size, and, when a
-  tier reconciles, how many prizes it paid.
+- Public: the seed, the bracket, the yield collected, each tier's prize size, and, one
+  draw later when the tier reconciles, how many prizes it paid.
 
 ### 3. Claim
 
@@ -153,7 +153,7 @@ Short version, in full in [what stays private](../security/what-stays-private.md
 
 - Who the savers are, and when each of them deposited, withdrew or was evaluated.
 - The bracket the pool's total fell in each period, the seed, and the yield collected.
-- Each tier's prize size, and how many prizes it paid, on that tier's own cadence.
+- Each tier's prize size, and how many prizes it paid, published one draw later.
 - The amount you wrapped into or out of confidential USDC.
 - With one saver, the published bracket is that saver's weight to within a factor of two.
   With two, each can bound the other. Privacy here needs three or more savers and the app

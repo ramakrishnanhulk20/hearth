@@ -38,9 +38,11 @@ saves savers the trouble, not a role the pool depends on for safety.
    liquidity, the vault subtracts it from the carry (which may have grown since it was
    published), and `TierReconciled` is emitted.
 
-Step 6 does not run for every tier every draw. On Sepolia the frequent tier is due every
-draw, the mid tier every 6 and the grand tier every 24. The reason is privacy, not gas,
-and it is explained in [prizes and tiers](../concepts/prizes-and-tiers.md).
+On Sepolia every tier is due every draw, so step 6 runs up to three times after each
+finalize. The cadence is a per-tier constructor argument and the keeper reads it from the
+chain rather than assuming it, so a deployment that publishes a tier's carry less often
+needs no keeper change. Why this one publishes all three every draw is in
+[prizes and tiers](../concepts/prizes-and-tiers.md).
 
 ## The ordering rule
 
@@ -128,7 +130,7 @@ Costs per draw, from the live deployment.
 | Award | 1 | `{{GAS_AWARD}}` |
 | Evaluate | `ceil(savers / {{MAX_BATCH}})` | `{{GAS_EVALUATE_BATCH}}` |
 | Finalize | 1 | `{{GAS_FINALIZE}}` |
-| Reconcile | 0 to 3, depending on which tiers are due | `{{GAS_RECONCILE}}` |
+| Reconcile | 3, one per tier, since every tier is due every draw | `{{GAS_RECONCILE}}` |
 
 At `{{SAVER_COUNT_EXAMPLE}}` savers that is `{{GAS_PER_DRAW}}` gas per draw, or about
 `{{ETH_PER_DRAW}}` at `{{GAS_PRICE_ASSUMPTION}}`. On a one-hour period that is 24 draws a

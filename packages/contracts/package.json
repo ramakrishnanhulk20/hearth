@@ -21,7 +21,9 @@
     "draw:local": "hardhat hearth:draw --network localhost",
     "draw:sepolia": "hardhat hearth:draw --network sepolia",
     "prove:local": "hardhat hearth:prove --network localhost",
-    "prove:sepolia": "hardhat hearth:prove --network sepolia"
+    "prove:sepolia": "hardhat hearth:prove --network sepolia",
+    "audit:local": "hardhat hearth:audit --network localhost",
+    "audit:sepolia": "hardhat hearth:audit --network sepolia"
   },
   "dependencies": {
     "@openzeppelin/confidential-contracts": "0.5.3",

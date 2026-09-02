@@ -86,10 +86,14 @@ arrived, never a number the source reports about itself.
 ## 11. What can somebody watching the chain learn about me?
 
 That you are a saver, which block you deposited or withdrew in, and which evaluation batch
-you were in. Not your balance, not your odds, not whether you won. Three seams are worth
+you were in. Not your balance, not your odds, not whether you won. Four seams are worth
 knowing. The published bracket is close to personal information when there are fewer than
 three savers. If somebody can pin your balance, usually by watching a public wrap that is
 followed by a deposit of the same size, then your result in every draw is public arithmetic
-from then on, because thresholds are public by design. And wrapping in and unwrapping out in
-full publishes a lower bound on everything you have won. All three are covered in
+from then on, because thresholds are public by design. Wrapping in and unwrapping out in
+full publishes a lower bound on everything you have won. And each tier publishes how many
+prizes it paid, one draw later, which is a coarse measurement of the encrypted balances and
+slowly narrows a balance that never moves. We publish that count every draw because it is
+the same step that returns unwon money to the public pot, which is what lets the jackpot
+accumulate where you can watch it. All four are covered in
 [what stays private](security/what-stays-private.md).

@@ -39,7 +39,7 @@ published in Zama's address reference and are not ours to choose: mock USDC
 | `{{GAS_AWARD}}` | Gas for `awardDraw` with the four-handle proof | Live Sepolia receipt |
 | `{{GAS_FINALIZE}}` | Gas for `finalizeDraw` | Live Sepolia receipt |
 | `{{GAS_RECONCILE}}` | Gas for `reconcile`, per tier | Live Sepolia receipt |
-| `{{GAS_PER_DRAW}}` | Total gas for one full draw at `{{SAVER_COUNT_EXAMPLE}}` savers | Sum of the above. State whether the draw quoted was one where all three tiers reconciled or only the frequent tier. |
+| `{{GAS_PER_DRAW}}` | Total gas for one full draw at `{{SAVER_COUNT_EXAMPLE}}` savers | Sum of the above, with three reconciles, since every tier is due every draw. |
 | `{{SAVER_COUNT_EXAMPLE}}` | The saver count the budget line is quoted at | Choose the seeded demo pool size |
 | `{{GAS_PRICE_ASSUMPTION}}` | The gas price the ETH figures assume, in gwei | State it, do not hide it |
 | `{{ETH_PER_DRAW}}` | ETH per draw at that gas price | Derived |
@@ -53,7 +53,7 @@ published in Zama's address reference and are not ours to choose: mock USDC
 | `{{SPONSOR_RATE}}` | `ratePerSecond` on the live source, plus the same figure as USDC per period so a reader can use it | Constructor argument or `RateChanged` |
 | `{{MAINNET_GRAND_ODDS}}` | Candidate grand-tier odds at a daily period | Design choice, not deployed |
 | `{{MAINNET_GRAND_SHARES}}` | Candidate grand-tier shares | Design choice, not deployed |
-| `{{MAINNET_GRAND_RECONCILE}}` | Candidate grand-tier reconcile cadence, in draws | Design choice, not deployed. Pick a span over which nearly every saver was eligible at least once. |
+| `{{MAINNET_GRAND_RECONCILE}}` | Candidate grand-tier reconcile cadence, in draws | Design choice, not deployed. A span over which nearly every saver was eligible at least once hides the count, at the cost of the pot only becoming visible on the reconcile draw. Sepolia runs 1. |
 | `{{MAINNET_MID_ODDS}}` | Candidate mid-tier odds | Design choice, not deployed |
 | `{{MAINNET_MID_SHARES}}` | Candidate mid-tier shares | Design choice, not deployed |
 | `{{MAINNET_MID_RECONCILE}}` | Candidate mid-tier reconcile cadence, in draws | Design choice, not deployed |
@@ -63,8 +63,8 @@ published in Zama's address reference and are not ours to choose: mock USDC
 
 These six come from one real Sepolia draw, chosen after deployment. Pick a draw that
 actually paid at least one prize, so the example is not degenerate. The prize count is
-only public once the tier in question has reconciled, so for the grand tier that means
-waiting for the end of its 24-draw span.
+only public once the tier in question has reconciled, which on this deployment is the draw
+after the one being quoted.
 
 | Token | Value |
 | --- | --- |

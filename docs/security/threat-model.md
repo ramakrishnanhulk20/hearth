@@ -44,7 +44,10 @@ draw, and the equation has nothing left to solve. The full statement is rule 1 o
   unwraps out in full, because both movements are public at the token layer.
 - **A static balance is narrowed slowly.** The published prize counts are a small
   measurement of the balance distribution and they accumulate against a saver whose
-  balance never changes.
+  balance never changes. Every tier publishes its count one draw later, so the measurement
+  runs once per tier per draw. The cadence that would slow it down is a constructor dial
+  this deployment set to one, because the same step is what returns unwon money to the
+  public pot and keeps the jackpot visible. Limitation 14.
 - The behavioural residual: withdrawing only after draws you won, over many draws.
 
 ## 2. A whale
@@ -297,7 +300,7 @@ numbers are pasted into the README.
 | An over-subscribed tier clamps rather than overpaying | Force more winners than the tier can fund and check that paid never exceeds offered. |
 | A proof cannot be replayed | Resubmit an award proof against a different draw. Expect a revert. |
 | Nobody withdraws more than they own | Property test: for every account, withdrawals never exceed principal plus winnings. |
-| Money is conserved | Property test: vault token balance equals total principal plus total unclaimed winnings, and pool token balance equals plaintext liquidity plus every encrypted carry plus liquidity offered and not yet finalized. |
+| Money is conserved | Property test: vault token balance equals total principal plus total unclaimed winnings, and pool token balance equals plaintext liquidity plus every encrypted carry plus liquidity offered and not yet finalized plus harvests received at close and not yet booked by an award. That last term is the harvest between the close that receives it and the award that splits it across the tiers, when it belongs to no tier and no draw. |
 
 ## What this threat model does not cover
 

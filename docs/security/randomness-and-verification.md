@@ -57,7 +57,7 @@ randomness and no off-chain generator.
 | Whether the period was non-empty | At close | Distinguishes an empty draw from a real one |
 | The harvest for the draw | At close | It is the money that funds later prizes |
 | Each tier's prize size and its plaintext offered liquidity | At close | Needed to check what a win pays |
-| Each tier's carry | At finalization, but only on that tier's own cadence | Needed to check how many prizes the tier paid |
+| Each tier's carry | At the finalization of every draw, since every tier reconciles every draw | Needed to check how many prizes the tier paid |
 | The unfunded counter | At finalization | Proves the pool funded every credit the vault wrote |
 
 Two things are deliberately **not** on that list. The pool's exact total time-weighted
