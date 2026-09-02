@@ -161,3 +161,8 @@ marked as such.
   weights, results and the winner; the per-draw count becomes public one draw later, as it is on
   PoolTogether. The cadence stays a constructor argument and a documented dial. Ram can overrule by
   one redeploy.
+- 2026-09-03: the operator tasks and the keeper decrypt through `@zama-fhe/sdk` 3.5.1, the current
+  Zama SDK line, not the legacy `@zama-fhe/relayer-sdk` 0.4.x. Against the live Sepolia KMS every
+  user decryption through the legacy line, 0.4.1 and 0.4.4 alike, failed in share reconstruction
+  three times running; the same handle decrypted in four seconds through the current SDK. The
+  Hardhat plugin keeps its own legacy copy for the local mock, which never talks to the real KMS.
