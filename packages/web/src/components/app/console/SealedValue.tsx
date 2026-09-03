@@ -75,7 +75,7 @@ export function SealedValue({
           </>
         )}
 
-        {shown && unit && <span className="text-[12.5px] text-faint">{unit}</span>}
+        {shown && unit && <span className="text-[12.5px] text-muted">{unit}</span>}
 
         {eye && (
           <RevealEye
@@ -95,6 +95,9 @@ export function SealedValue({
 /**
  * The eye itself, so every sealed figure and every sealed balance line offers the same control
  * with the same words to a screen reader.
+ *
+ * It carries the weight of a control rather than a caption. At the faintest tone it sat quieter
+ * on the dark card than the caveat line underneath it, and it is the only way into the figure.
  */
 export function RevealEye({
   scope,
@@ -117,7 +120,7 @@ export function RevealEye({
       disabled={disabled || working}
       aria-label={scope.open ? `Hide ${label}` : `Reveal ${label}`}
       title={scope.open ? "Seal it again" : "Reveal, one signature, no gas"}
-      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-faint transition-colors hover:bg-hover hover:text-parchment disabled:opacity-50"
+      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-flameInk disabled:opacity-50"
     >
       {working ? <Spinner size={15} /> : scope.open ? <EyeOffIcon size={17} /> : <EyeIcon size={17} />}
     </button>
@@ -147,7 +150,7 @@ export function RevealNote({ scope }: { scope: RevealScope }) {
     <span
       role="status"
       aria-live="polite"
-      className={`text-[12px] leading-snug ${state.kind === "working" ? "text-muted" : "text-bad"} ${
+      className={`text-[12.5px] leading-snug ${state.kind === "working" ? "text-muted" : "text-bad"} ${
         text === null ? "" : "mt-1"
       }`}
     >

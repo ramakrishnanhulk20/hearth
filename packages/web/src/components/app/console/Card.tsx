@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 
 /**
- * The console's only container: white, one hairline, no shadow.
+ * The console's only container: a raised dark panel on the near-black ground.
  *
- * Depth is carried by the border alone. Stacked shadows on a light surface read as a template,
- * and the reference this console follows uses none.
+ * Depth comes from the fill, one hairline and the light across the top edge, never from a stack
+ * of drop shadows. A card that glows at its top edge reads as a lit object in the room the
+ * landing page builds; a card sitting on a shadow reads as a template.
  */
 export function Card({
   label,
@@ -27,7 +28,7 @@ export function Card({
   const border = tone === "accent" ? "border-flame/45" : "border-hairline";
 
   return (
-    <section className={`rounded-card border bg-surface ${border} ${className}`}>
+    <section className={`panel-glare rounded-card border bg-surface ${border} ${className}`}>
       {(label || pill) && (
         <div className="flex items-center justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-5">
           {label && <h2 className="text-[13.5px] font-semibold text-parchment">{label}</h2>}
@@ -52,18 +53,18 @@ export function CardPill({
 }) {
   const skin =
     tone === "flame"
-      ? "border-flame/50 bg-flame/15 text-parchment"
+      ? "border-flame/45 bg-flame/[0.10] text-flameInk"
       : tone === "good"
-        ? "border-good/40 text-good"
+        ? "border-good/40 bg-good/[0.08] text-good"
         : tone === "warn"
-          ? "border-warn/40 text-warn"
+          ? "border-warn/40 bg-warn/[0.08] text-warn"
           : tone === "bad"
-            ? "border-bad/40 text-bad"
+            ? "border-bad/40 bg-bad/[0.08] text-bad"
             : "border-hairline text-muted";
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-medium ${skin}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12.5px] font-medium ${skin}`}
     >
       {icon}
       {children}

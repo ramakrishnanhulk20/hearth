@@ -22,7 +22,7 @@ export default function Loading() {
           fill="rgb(var(--flame-ink))"
         />
       </svg>
-      <p className="text-[13px] tracking-wide text-faint">Lighting the hearth</p>
+      <p className="text-[13px] tracking-wide text-muted">Lighting the hearth</p>
     </div>
   );
 }

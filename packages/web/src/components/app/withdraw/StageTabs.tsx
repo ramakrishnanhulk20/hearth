@@ -55,10 +55,13 @@ export function StageTabs({
     <div
       role="tablist"
       aria-label="Withdraw stages"
-      className="flex gap-1 rounded-xl border border-hairline bg-surface p-1"
+      className="flex gap-1 rounded-xl border border-hairline bg-raised p-1"
     >
       {ORDER.map((key, index) => {
         const here = key === stage;
+        // The stage you are on is lit, not filled. A solid accent block behind the label would sit
+        // at the same strength as the marker inside it and as the button at the bottom of the
+        // panel, and this console says where you are by lighting a row rather than painting it.
         return (
           <button
             key={key}
@@ -73,13 +76,15 @@ export function StageTabs({
             tabIndex={here ? 0 : -1}
             onClick={() => onChange(key)}
             onKeyDown={onKeyDown}
-            className={`flex flex-1 items-center justify-center gap-2.5 rounded-lg px-2.5 py-2.5 text-[13.5px] transition-colors ${
-              here ? "bg-flame/25 font-medium text-parchment" : "text-muted hover:bg-hover hover:text-parchment"
+            className={`flex flex-1 items-center justify-center gap-2.5 rounded-lg border px-2.5 py-2.5 text-[13.5px] transition-colors ${
+              here
+                ? "border-flame/45 bg-flame/[0.10] font-medium text-flameInk"
+                : "border-transparent text-muted hover:bg-hover hover:text-parchment"
             }`}
           >
             <span
-              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11.5px] tabular-nums ${
-                here ? "bg-flameFill text-onFlame" : "border border-hairline text-faint"
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12.5px] tabular-nums ${
+                here ? "bg-flameFill text-onFlame shadow-ember" : "border border-hairline text-muted"
               }`}
             >
               {index + 1}

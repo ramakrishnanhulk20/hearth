@@ -163,13 +163,18 @@ export function DepositFlow() {
               ? `${formatAmount(saver.usdc)} USDC in your wallet.`
               : "Your wallet balance has not come back from the chain yet."}
           </p>
-          <PrimaryButton
-            onClick={() => money.mint(FAUCET_AMOUNT, refresh)}
-            disabled={acting}
-            busy={money.busy && money.label === "Get test USDC"}
-          >
-            Get test USDC
-          </PrimaryButton>
+          {/* The only step with no field above it, so the button has no column width to match and
+              is capped to its own words instead. Every other primary control on this screen sits
+              under a full-width amount card and lines up with it. */}
+          <div className="sm:max-w-[20rem]">
+            <PrimaryButton
+              onClick={() => money.mint(FAUCET_AMOUNT, refresh)}
+              disabled={acting}
+              busy={money.busy && money.label === "Get test USDC"}
+            >
+              Get test USDC
+            </PrimaryButton>
+          </div>
           <p className={CARD_NOTE}>
             Zama&apos;s mock USDC has an open mint capped at one million tokens a call. It is worth
             nothing, so ask for more than you need.
@@ -226,7 +231,12 @@ export function DepositFlow() {
             note={rateNote}
           />
 
-          <p className={`rounded-xl border border-flame/45 bg-flame/[0.09] px-4 py-3.5 ${CARD_NOTE}`}>
+          {/* An outlined tint is how the console says "status", and the low gas warning above
+              already owns that shape. This is the accent speaking, so it takes the rail's ember
+              treatment instead: a lit edge with the wash falling away from it. */}
+          <p
+            className={`rounded-r-xl border-l-2 border-l-flame bg-gradient-to-r from-flame/[0.12] via-flame/[0.04] to-flame/0 px-4 py-3.5 ${CARD_NOTE}`}
+          >
             This is why shielding and depositing are two buttons and not one. Shield a round number, at
             a time of your choosing, and deposit part of it later. Anyone who can pin your balance can
             compute whether you won in every draw from then on, because the thresholds are public by
@@ -353,7 +363,7 @@ export function DepositFlow() {
       </ConnectPrompt>
 
       {lowGas && (
-        <p className={`rounded-xl border border-warn/40 bg-warn/[0.09] px-4 py-3.5 ${CARD_NOTE}`}>
+        <p className={`panel-glare rounded-card border border-warn/45 bg-warn/[0.08] px-5 py-4 ${CARD_NOTE}`}>
           This wallet holds almost no Sepolia ETH, so a transaction will fail before it is sent. Any
           Sepolia faucet tops it up: the Google Cloud Web3 faucet, Alchemy&apos;s or Chainlink&apos;s.
           A tenth of an ETH is far more than enough.

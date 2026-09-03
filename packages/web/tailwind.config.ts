@@ -15,6 +15,7 @@ const config: Config = {
         hairlineStrong: "var(--hairline-strong)",
         hover: "var(--hover)",
         seal: "var(--seal)",
+        scrim: "var(--scrim)",
         parchment: "var(--text)",
         muted: "var(--muted)",
         faint: "var(--faint)",
@@ -39,6 +40,11 @@ const config: Config = {
       boxShadow: {
         glass: "0 2px 32px 0 rgba(0,0,0,0.40), inset 0 1px 0 0 rgba(255,255,255,0.05)",
         flame: "0 0 60px -12px rgba(249,209,0,0.45)",
+        // The close glow a small lit object carries: a step marker, a chip. The flame shadow is
+        // sized for a hero button and swallows anything under about forty pixels.
+        ember: "0 0 16px -3px rgba(249,209,0,0.5)",
+        // What lifts a menu off a panel the same colour as itself.
+        popover: "0 18px 44px -14px rgba(0,0,0,0.9)",
       },
       letterSpacing: {
         tightest: "-0.045em",

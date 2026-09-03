@@ -3,6 +3,9 @@
  *
  * Printing a zero here would be inventing a number, and the difference between "the pool holds
  * nothing" and "we have not heard from the chain" is the whole point of the screen.
+ *
+ * It carries the body tone rather than the faintest one. This word is the answer to the question
+ * the figure was asking, and an answer nobody can read is worse than the zero it replaced.
  */
 export function Unknown({
   reason = "This has not come back from the chain yet.",
@@ -17,7 +20,7 @@ export function Unknown({
 }) {
   return (
     <span
-      className={`text-faint ${scale === "figure" ? "text-[0.62em] font-normal tracking-normal" : ""}`}
+      className={`text-muted ${scale === "figure" ? "text-[0.62em] font-normal tracking-normal" : ""}`}
       title={reason}
     >
       unknown

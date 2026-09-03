@@ -51,9 +51,14 @@ export function StepRail({ steps }: { steps: RunStep[] }) {
                   <Chip step={step} />
                 </div>
                 <p className={`mt-1.5 max-w-[62ch] ${CARD_PROSE}`}>{step.does}</p>
+                {/* Finalize, reconcile and close can all be ready at once, so the flame is spent on
+                    the one step that is actually next and the others carry the body tone. Four
+                    yellow paragraphs on a black card is four steps claiming to be the one.
+                    Ready and waiting share that body tone because the chip beside the title is
+                    what tells them apart, and the sentence itself is something to read. */}
                 <p
                   className={`mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ${
-                    step.availability.kind === "ready" ? "text-flameInk" : "text-faint"
+                    step.due ? "text-flameInk" : "text-muted"
                   }`}
                 >
                   {step.availability.kind === "unknown"
@@ -75,26 +80,36 @@ export function StepRail({ steps }: { steps: RunStep[] }) {
   );
 }
 
+/**
+ * The due step is the lit one and every other marker is an outline, which is how the console marks
+ * the current thing on every other screen. The glow is the close one a 28px object needs; the
+ * hero-sized flame shadow spreads past a marker this small and reads as a smudge.
+ */
 function Marker({ index, step }: { index: number; step: RunStep }) {
   const ready = step.availability.kind === "ready";
   const skin = step.due
-    ? "bg-flameFill text-onFlame"
+    ? "border-transparent bg-flameFill text-onFlame shadow-ember"
     : ready
-      ? "border border-flame/60 text-flameInk"
-      : "border border-hairline text-faint";
+      ? "border-flame/45 bg-flame/[0.10] text-flameInk"
+      : "border-hairline text-muted";
 
   return (
     <span
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12.5px] font-semibold tabular-nums ${skin}`}
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[12.5px] font-semibold tabular-nums ${skin}`}
     >
       {index}
     </span>
   );
 }
 
+/**
+ * A step that can be sent but is not the one the pool wants next takes the colder green, so the
+ * five states are told apart at a glance without a second warm colour arguing with the flame.
+ * Not yet and unknown stay quiet, because neither is something a reader can act on.
+ */
 function Chip({ step }: { step: RunStep }) {
   if (step.due) return <CardPill tone="flame">due now</CardPill>;
-  if (step.availability.kind === "ready") return <CardPill>ready</CardPill>;
+  if (step.availability.kind === "ready") return <CardPill tone="good">ready</CardPill>;
   if (step.availability.kind === "unknown") return <CardPill>unknown</CardPill>;
   return <CardPill>not yet</CardPill>;
 }
@@ -102,14 +117,22 @@ function Chip({ step }: { step: RunStep }) {
 /**
  * Smaller than the console's one primary button on purpose: five of those stacked would each
  * claim to be the action of the screen, and only one of them is ever the next thing to send.
+ *
+ * Off keeps a fill and an edge, the same as the primary control, because most of these five are
+ * off most of the time and an edgeless tint on a near-black card is a control nobody can find.
+ * The border sits on all three states so a row does not shift height as a step comes due. Five
+ * off buttons is the ordinary state of this screen, so their names stay readable.
  */
 function StepButton({ step }: { step: RunStep }) {
   const off = step.blocked !== null || step.busy || !step.onRun;
+  // Each state names its own border colour and the shape carries only the width. Tailwind emits
+  // border-transparent after the token colours, so a transparent border on the shape would win
+  // over every one of these and the two edges below would never draw.
   const skin = off
-    ? "bg-hairline text-faint cursor-not-allowed"
+    ? "cursor-not-allowed border-hairline bg-hover text-muted"
     : step.due
-      ? "bg-flameFill text-onFlame hover:brightness-[0.94]"
-      : "border border-hairlineStrong text-parchment hover:bg-hover";
+      ? "border-transparent bg-flameFill text-onFlame hover:shadow-ember"
+      : "border-hairlineStrong text-parchment hover:bg-hover";
 
   return (
     <button
@@ -117,7 +140,7 @@ function StepButton({ step }: { step: RunStep }) {
       onClick={step.onRun}
       disabled={off}
       aria-label={step.headline}
-      className={`flex h-10 w-full items-center justify-center gap-2 rounded-[10px] px-5 text-[12px] font-semibold uppercase tracking-[0.09em] transition-colors sm:w-[132px] ${skin}`}
+      className={`flex h-10 w-full items-center justify-center gap-2 rounded-lg border px-5 text-[13px] font-semibold transition-all duration-200 sm:w-[132px] ${skin}`}
     >
       {step.busy && <Spinner size={13} />}
       {step.buttonLabel}

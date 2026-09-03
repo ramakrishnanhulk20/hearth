@@ -289,8 +289,12 @@ export function DrawCard({
                 </p>
               )}
 
+              {/* Green on the near-black card advances where it receded on white, so seventy
+                  characters of it outweighed the flame on the claim button beside it. The success
+                  keeps the two places the console puts a status colour, the pill and the note under
+                  the button, and the sentence explaining where the money went reads as prose. */}
               {claimed && (
-                <p className="mt-3 max-w-[70ch] text-[13.5px] leading-relaxed text-good">
+                <p className={`mt-3 max-w-[70ch] ${CARD_PROSE}`}>
                   Claimed. That amount went to your wallet, out of winnings first. The draw keeps the
                   figure as its record.
                 </p>

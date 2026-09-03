@@ -37,8 +37,8 @@ export type ActionNoteProps = {
 /**
  * Where an action has got to, under the control that started it.
  *
- * The console draws its own rather than using the shared PhaseNote, which paints itself on a
- * near-black translucent panel built for the landing page and would sit as a dark slab here.
+ * The console draws its own rather than using the shared PhaseNote, which paints itself on the
+ * landing page's translucent glass and would sit inside a console card as a second panel.
  *
  * The live region is mounted whatever the action is doing, empty included, because a screen
  * reader only announces a region that was already in the page when its text changed.
@@ -70,7 +70,7 @@ export function ActionNote({ tone, text, hash, onDismiss }: ActionNoteProps) {
             <button
               type="button"
               onClick={onDismiss}
-              className="shrink-0 text-[12px] text-faint transition-colors hover:text-parchment"
+              className="shrink-0 text-[12.5px] text-muted transition-colors hover:text-parchment"
             >
               Dismiss
             </button>

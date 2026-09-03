@@ -28,7 +28,7 @@ export function Stat({
         >
           {value}
         </span>
-        {unit && <span className="text-[12.5px] text-faint">{unit}</span>}
+        {unit && <span className="text-[12.5px] text-muted">{unit}</span>}
       </p>
       {note && <p className={`mt-2 ${CARD_NOTE}`}>{note}</p>}
     </div>

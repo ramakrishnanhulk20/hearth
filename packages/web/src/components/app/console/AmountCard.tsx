@@ -28,7 +28,7 @@ function FieldCard({
   note?: ReactNode;
 }) {
   return (
-    <section className="rounded-card border border-hairline bg-surface px-5 py-5 sm:px-6">
+    <section className="panel-glare rounded-card border border-hairline bg-surface px-5 py-5 sm:px-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-[13.5px] font-semibold text-parchment">{label}</h2>
         <TokenPill token={token} onClick={onTokenClick} />

@@ -13,6 +13,8 @@
     --hairline-strong: rgba(255, 255, 255, 0.24);
     --hover: rgba(255, 255, 255, 0.04);
     --seal: rgba(255, 255, 255, 0.13);
+    /* What covers the page behind the console drawer on a narrow screen. */
+    --scrim: rgba(0, 0, 0, 0.72);
 
     --text: rgba(255, 255, 255, 0.82);
     --muted: rgba(255, 255, 255, 0.54);
@@ -35,79 +37,65 @@
   }
 
   /*
-   * The console under /app. Same token names as the dark pages, light values, so a component
-   * written against the tokens works on both without a second styling path.
+   * The console under /app.
    *
-   * The split is deliberate. The landing page sells and is cinematic; the console is where money
-   * moves and wants to be quiet and legible, the way a product console usually differs from the
-   * marketing site in front of it.
+   * Everything it does not name here it inherits from :root, so the console and the landing are
+   * one palette and this block is exactly the list of places a working screen has to differ from
+   * a page you scroll through once. The flame tokens, the status colours and the grain are all
+   * absent on purpose: they are already what the console wants.
    */
   [data-surface="console"] {
-    --bg: #efefef;
-    --surface: #ffffff;
-    --raised: #f7f7f7;
+    /* The ground comes up a hair off pure black. White type on true black smears when you read it
+       for minutes, and the console runs at 12.5px where the landing runs at display sizes. */
+    --bg: #080808;
+    /* Cards then have to climb with it, so a panel stands off the console ground by as much as a
+       landing panel stands off the black. The warmth in the last digit is the same warmth the
+       landing lays under its glass panels. */
+    --surface: #191816;
+    --raised: #100f0d;
 
-    --hairline: rgba(17, 19, 24, 0.11);
-    --hairline-soft: rgba(17, 19, 24, 0.07);
-    --hairline-strong: rgba(17, 19, 24, 0.2);
-    --hover: rgba(17, 19, 24, 0.04);
-    --seal: rgba(17, 19, 24, 0.16);
+    /* Edges and hovers, one step firmer. A console screen carries a dozen card edges, five nav
+       rows and a rail, and each has to hold on its own at a glance. */
+    --hairline: rgba(255, 255, 255, 0.11);
+    --hairline-soft: rgba(255, 255, 255, 0.07);
+    --hairline-strong: rgba(255, 255, 255, 0.26);
+    --hover: rgba(255, 255, 255, 0.055);
 
-    --text: rgba(17, 19, 24, 0.92);
-    --muted: rgba(17, 19, 24, 0.58);
-    --faint: rgba(17, 19, 24, 0.42);
+    /* The asterisks standing in for a sealed figure. Denser than the landing's seal, because here
+       they have to read as a value covered on purpose rather than one that failed to arrive, and
+       still well under the 0.88 a revealed figure carries. */
+    --seal: rgba(255, 255, 255, 0.34);
 
-    --flame: 249 209 0;
-    --flame-fill: 249 209 0;
-    --flame-soft: 254 244 197;
-    /* Yellow text on white cannot be read, so the foreground flame darkens to amber here while
-       the fill stays the brand yellow. */
-    --flame-ink: 140 95 0;
-    --ember: 176 104 8;
-    --on-flame: 26 22 0;
-    --good: 21 122 60;
-    --bad: 184 32 32;
-    --warn: 163 97 8;
+    /* All three text weights lift. Grey that reads on white goes dim on black, and these carry
+       13.5px prose, 12.5px caveats and 11px labels rather than a hero line. At these values even
+       the faintest clears 4.5:1 against the card. */
+    --text: rgba(255, 255, 255, 0.88);
+    --muted: rgba(255, 255, 255, 0.62);
+    --faint: rgba(255, 255, 255, 0.46);
 
-    --grain-opacity: 0;
-    color-scheme: light;
-  }
+    /* The landing's red lands at 4:1 on the console card, under the bar for the 12.5px error
+       lines this surface prints. Lifted until it clears it. */
+    --bad: 240 96 92;
 
-  /* The yellow focus ring disappears on the light surface, so the console rings in amber. */
-  [data-surface="console"] :focus-visible {
-    outline-color: rgb(var(--flame-ink) / 0.85);
+    position: relative;
+    isolation: isolate;
   }
 
   /*
-   * A dark island inside the console. Only the interim /app page uses it, to keep the old
-   * single-page panels readable while the five screens are built. Delete this block and the
-   * wrapper in src/app/app/page.tsx together with those panels.
+   * The grain the landing wears, on the console's ground only.
+   *
+   * It sits above the ground and below every card, rather than over the whole page the way the
+   * landing lays it, because texture across a column of 12.5px figures is texture across the
+   * numbers somebody came here to read.
    */
-  [data-surface="stage"] {
-    --bg: #000000;
-    --surface: #141414;
-    --raised: #0c0c0c;
-
-    --hairline: rgba(255, 255, 255, 0.1);
-    --hairline-soft: rgba(255, 255, 255, 0.06);
-    --hairline-strong: rgba(255, 255, 255, 0.24);
-    --hover: rgba(255, 255, 255, 0.04);
-    --seal: rgba(255, 255, 255, 0.13);
-
-    --text: rgba(255, 255, 255, 0.82);
-    --muted: rgba(255, 255, 255, 0.54);
-    --faint: rgba(255, 255, 255, 0.34);
-
-    --flame-soft: 252 228 114;
-    --flame-ink: 249 209 0;
-    --ember: 250 168 53;
-    --on-flame: 14 14 14;
-    --good: 62 175 90;
-    --bad: 221 50 50;
-    --warn: 232 156 42;
-
-    --grain-opacity: 0.05;
-    color-scheme: dark;
+  [data-surface="console"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   html {
@@ -120,9 +108,10 @@
   }
 
   /* The console does not reach the edges of the page it sits on, so the page itself takes the
-     console grey. Without this, a rubber-band scroll under /app shows the landing page's black. */
+     console ground. Without this, a rubber-band scroll under /app shows pure black under a
+     surface that is not quite pure black. */
   body:has([data-surface="console"]) {
-    --bg: #efefef;
+    --bg: #080808;
   }
 
   ::selection {
@@ -164,6 +153,48 @@
     border-radius: inherit;
     pointer-events: none;
     background: radial-gradient(130% 72% at 50% -14%, rgba(255, 244, 224, 0.1), transparent 58%);
+  }
+
+  /*
+   * The console panel skin, worn with bg-surface: a soft light laid across the top edge so a card
+   * reads as a lit surface standing off the black rather than a rectangle painted on it. It is a
+   * background image and not a pseudo element, so it needs nothing from the markup underneath.
+   */
+  .panel-glare {
+    background-image: linear-gradient(180deg, rgba(255, 248, 235, 0.055), rgba(255, 248, 235, 0) 46%);
+  }
+
+  /*
+   * The lit row: how the console says where you are.
+   *
+   * A solid accent pill is what every other app does with an active row, and it spends the whole
+   * accent on a label. A hearth lights a thing instead of painting it, so the row gets an ember
+   * bar at its edge, a wash falling away from it, and its icon catching the light.
+   */
+  .ember-lit {
+    position: relative;
+    background-image: linear-gradient(
+      90deg,
+      rgb(var(--flame) / 0.15),
+      rgb(var(--flame) / 0.04) 58%,
+      transparent
+    );
+  }
+
+  .ember-lit::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
+    background: rgb(var(--flame));
+    box-shadow: 0 0 10px 1px rgb(var(--flame) / 0.5);
+  }
+
+  .ember-lit svg {
+    filter: drop-shadow(0 0 7px rgb(var(--flame) / 0.45));
   }
 
   /* Film grain over the whole page, so flat panels read as a photographed surface. */
@@ -223,7 +254,8 @@
     transition-duration: 0.001ms !important;
   }
 
-  .grain::after {
+  .grain::after,
+  [data-surface="console"]::before {
     display: none;
   }
 }

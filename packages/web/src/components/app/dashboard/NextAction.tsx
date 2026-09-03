@@ -18,8 +18,11 @@ export function NextAction({ step }: { step: NextStep }) {
       <p className={CAP_LABEL}>Next</p>
       <p className="mt-2.5 text-[19px] font-semibold leading-snug text-parchment">{step.title}</p>
       <p className="mt-2 max-w-[68ch] text-[13.5px] leading-relaxed text-muted">{step.detail}</p>
+      {/* The one place the console's primary control is not the foot of a form, so it is capped
+          to something the width of its own words. Run edge to edge here and a bar of flame wider
+          than the sentence explaining it is the first and loudest thing on the app. */}
       {step.cta !== null && (
-        <div className="mt-5">
+        <div className="mt-5 sm:max-w-[20rem]">
           <Control step={step} />
         </div>
       )}

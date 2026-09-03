@@ -82,7 +82,10 @@ export function PoolNow({ pool, now }: { pool: PoolState; now: number }) {
         />
       </div>
 
-      <div className="mt-8 border-t border-hairlineSoft pt-5">
+      {/* This rule opens a second block of content rather than attaching a note, so it carries the
+          card's own edge weight. At the softer hairline it read at exactly the strength of the
+          three row dividers below it and the table lost its top edge on the near-black card. */}
+      <div className="mt-8 border-t border-hairline pt-5">
         <div className={`grid grid-cols-[1fr_auto] items-baseline gap-x-6 pb-1 sm:grid-cols-[1fr_auto_auto] ${CAP_LABEL}`}>
           <span>Tier</span>
           <span className="hidden text-right sm:block">Chance</span>
@@ -96,18 +99,24 @@ export function PoolNow({ pool, now }: { pool: PoolState; now: number }) {
           >
             <span className="min-w-0 text-[13.5px] text-parchment">
               {TIER_NAMES[index]}
-              <span className="ml-2 text-[12px] text-faint">
+              <span className="ml-2 text-[12.5px] text-muted">
                 {tier.known
                   ? `${tier.prizeCount} prize${tier.prizeCount === 1 ? "" : "s"} a draw`
                   : "prize count unknown"}
               </span>
+              {/* The ember and not the flame. Everywhere else in the console the flame marks a
+                  control, a link or the row you are standing on, and a carry is none of those. At
+                  full flame it was the loudest thing in the table and pulled the eye off the prize
+                  figure the row exists to show. */}
               {tier.carryPending && (
-                <span className="ml-2 text-[12px] text-flameInk">
+                <span className="ml-2 text-[12.5px] text-ember">
                   carry from draw {tier.carryPublishedAt} waiting
                 </span>
               )}
             </span>
-            <span className="hidden text-right text-[13px] tabular-nums text-faint sm:block">
+            {/* Odds are a figure, and the faintest tone is where this console puts labels. On the
+                dark card that read as a column switched off rather than a column of data. */}
+            <span className="hidden text-right text-[13px] tabular-nums text-muted sm:block">
               {tier.known ? (
                 oddsLabel(tier.oddsNumerator, tier.oddsDenominator)
               ) : (

@@ -55,7 +55,7 @@ export function WithdrawScreen() {
   return (
     <div className="flex flex-col gap-4">
       {unshield.pending && (
-        <div className="rounded-card border border-warn/45 bg-warn/[0.08] px-5 py-5 sm:px-6">
+        <div className="panel-glare rounded-card border border-warn/45 bg-warn/[0.08] px-5 py-5 sm:px-6">
           <p className="text-[13.5px] font-semibold text-parchment">
             An unshield was submitted and never finished.
           </p>

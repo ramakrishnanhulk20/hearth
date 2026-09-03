@@ -12,8 +12,11 @@ import { WalletChip } from "./WalletChip";
  * The frame every screen under /app sits in: the rail on the left, the warnings and then one
  * task on the right.
  *
- * The rail is a floating card rather than a full-height column so the grey page shows around it,
- * which is what keeps a light console from reading as a wall of white.
+ * The rail is a floating panel rather than a full-height column so the ground and its grain show
+ * around it, which is what stops the console reading as one flat dark slab.
+ *
+ * It wears the card radius rather than one of its own, because to a reader it is the same object
+ * as the panels beside it: a lit surface standing off the black.
  */
 export function ConsoleShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -27,13 +30,13 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100svh]">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[278px] p-3.5 lg:block">
-        <div className="h-full overflow-y-auto rounded-[18px] border border-hairlineSoft bg-surface px-3.5 py-4">
+        <div className="panel-glare h-full overflow-y-auto rounded-card border border-hairline bg-surface px-3.5 py-4">
           <Sidebar />
         </div>
       </aside>
 
       <div className="sticky top-0 z-30 bg-ink px-3 pb-2 pt-3 lg:hidden">
-        <div className="flex items-center gap-2 rounded-[14px] border border-hairlineSoft bg-surface px-2.5 py-2.5">
+        <div className="panel-glare flex items-center gap-2 rounded-card border border-hairline bg-surface px-2.5 py-2.5">
           <button
             type="button"
             onClick={() => setOpenedAt(pathname)}
@@ -143,18 +146,18 @@ function Drawer({
         aria-hidden
         tabIndex={-1}
         onClick={onClose}
-        className="absolute inset-0 h-full w-full cursor-default bg-[rgba(17,19,24,0.35)]"
+        className="absolute inset-0 h-full w-full cursor-default bg-scrim"
       />
       <div
         ref={panelRef}
-        className="absolute inset-y-0 left-0 flex w-[278px] max-w-[86vw] flex-col overflow-y-auto border-r border-hairline bg-surface px-3.5 py-4"
+        className="panel-glare absolute inset-y-0 left-0 flex w-[278px] max-w-[86vw] flex-col overflow-y-auto border-r border-hairline bg-surface px-3.5 py-4"
       >
         <div className="mb-2 flex justify-end">
           <button
             type="button"
             onClick={onClose}
             aria-label="Close the console menu"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-hover hover:text-parchment"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-parchment"
           >
             <CloseIcon size={17} />
           </button>

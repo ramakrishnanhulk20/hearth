@@ -55,7 +55,7 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
         type="button"
         onClick={() => injected && connect({ connector: injected })}
         disabled={isPending || !injected}
-        className="w-full rounded-xl bg-flameFill px-3 py-2.5 text-[13.5px] font-semibold text-onFlame transition-colors hover:brightness-[0.94] disabled:opacity-50"
+        className="w-full rounded-lg bg-flameFill px-3 py-2.5 text-[13.5px] font-semibold text-onFlame transition-all duration-200 hover:shadow-ember disabled:opacity-50"
       >
         {isPending ? "Connecting" : injected ? "Connect wallet" : "No wallet found"}
       </button>
@@ -68,7 +68,7 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
         type="button"
         onClick={() => switchChain({ chainId: sepolia.id })}
         disabled={switching}
-        className="w-full rounded-xl border border-bad/45 bg-bad/[0.08] px-3 py-2.5 text-[13px] font-medium text-bad transition-colors hover:bg-bad/[0.14]"
+        className="w-full rounded-lg border border-bad/45 bg-bad/[0.08] px-3 py-2.5 text-[13px] font-medium text-bad transition-colors hover:bg-bad/[0.14]"
       >
         {switching ? "Switching" : `Switch to ${NETWORK}`}
       </button>
@@ -88,16 +88,18 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
           aria-expanded={menuOpen}
           aria-haspopup="menu"
           aria-label="Wallet options"
-          className="-mr-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-faint transition-colors hover:bg-hover hover:text-parchment"
+          className="-mr-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-parchment"
         >
           <MoreIcon size={16} />
         </button>
       </div>
 
+      {/* A popover the colour of the rail it opens over needs its edge and its shadow to do the
+          separating, so both are stronger here than anywhere else in the console. */}
       {menuOpen && (
         <div
           role="menu"
-          className={`absolute right-0 z-50 w-full min-w-[180px] overflow-hidden rounded-xl border border-hairline bg-surface py-1 shadow-[0_12px_36px_-16px_rgba(17,19,24,0.35)] ${
+          className={`panel-glare absolute right-0 z-50 w-full min-w-[180px] overflow-hidden rounded-xl border border-hairlineStrong bg-surface py-1 shadow-popover ${
             placement === "down" ? "top-[calc(100%+6px)]" : "bottom-[calc(100%+6px)]"
           }`}
         >

@@ -28,8 +28,10 @@ export function PageHeader({
         </h1>
         {right && <div className="shrink-0 pt-1">{right}</div>}
       </div>
-      {subtitle && <p className="mt-2.5 max-w-[64ch] text-[14.5px] leading-relaxed text-muted">{subtitle}</p>}
-      <div className="mt-5 h-px w-full bg-hairline" />
+      {subtitle && <p className="mt-2.5 max-w-[64ch] text-[14px] leading-relaxed text-muted">{subtitle}</p>}
+      {/* The rule fades out to the right rather than running edge to edge, so the header ends
+          where the reading does instead of drawing a box line under it. */}
+      <div className="mt-5 h-px w-full bg-gradient-to-r from-hairlineStrong via-hairline to-transparent" />
     </header>
   );
 }

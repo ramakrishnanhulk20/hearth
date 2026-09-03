@@ -43,9 +43,11 @@ export function SealedLine({
         {!scope.open ? (
           <>
             <span className="sr-only">{spoken}, encrypted</span>
+            {/* The same size as the figure it stands in for, so pressing the eye swaps one for
+                the other without the line changing height under the pointer. */}
             <span
               aria-hidden
-              className="font-display text-[16px] leading-none tracking-[0.14em] text-seal"
+              className="font-display text-[15px] leading-none tracking-[0.14em] text-seal"
               style={{ fontWeight: 620 }}
             >
               ******

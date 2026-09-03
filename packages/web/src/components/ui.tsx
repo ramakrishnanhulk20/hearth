@@ -212,7 +212,8 @@ export function AmountField({
   /**
    * "plain" drops the framing and enlarges the digits, for the console cards that supply their
    * own border, label and ticker. The input, its validation and its accessible name are the same
-   * in both, so the two never drift apart.
+   * in both, so the two never drift apart. Only its own max button differs in voice: the console
+   * spends capitals and tracking on labels, so a control there is written in sentence case.
    */
   variant?: "boxed" | "plain";
 }) {
@@ -254,7 +255,7 @@ export function AmountField({
               onClick={onMax}
               disabled={disabled}
               aria-label={name ? `${maxLabel ?? "Max"}: ${name}` : undefined}
-              className="shrink-0 rounded-md border border-hairline px-2.5 py-1 text-[11px] font-medium uppercase tracking-label text-muted transition-colors hover:border-hairlineStrong hover:text-parchment"
+              className="shrink-0 rounded-lg border border-hairline px-2.5 py-1 text-[12.5px] font-medium text-muted transition-colors hover:border-hairlineStrong hover:text-parchment"
             >
               {maxLabel ?? "Max"}
             </button>

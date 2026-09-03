@@ -50,7 +50,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         href="/"
         aria-label="Hearth, home"
         onClick={onNavigate}
-        className="mb-6 inline-flex px-2.5 pt-1.5"
+        className="mb-6 inline-flex px-3.5 pt-1.5"
       >
         <Wordmark size={19} />
       </Link>
@@ -64,18 +64,26 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               href={item.href}
               onClick={onNavigate}
               aria-current={here ? "page" : undefined}
-              className={`flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-[13.5px] transition-colors ${
+              className={`group flex items-center gap-3 rounded-lg py-2.5 pl-3.5 pr-2.5 text-[13.5px] transition-colors ${
                 here
-                  ? "bg-flame/25 font-medium text-parchment"
+                  ? "ember-lit font-medium text-flameInk"
                   : "text-muted hover:bg-hover hover:text-parchment"
               }`}
             >
-              <span className={here ? "text-flameInk" : "text-faint"}>{item.icon}</span>
+              <span
+                className={
+                  here ? "text-flameInk" : "text-faint transition-colors group-hover:text-muted"
+                }
+              >
+                {item.icon}
+              </span>
               <span className="min-w-0 flex-1 truncate">{item.label}</span>
               {item.chip && (
                 <span
                   title={item.chip.title}
-                  className="shrink-0 rounded-full border border-hairline px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.06em] text-muted"
+                  className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.06em] ${
+                    here ? "border-flame/45 text-flameInk" : "border-hairline text-muted"
+                  }`}
                 >
                   {item.chip.text}
                 </span>
@@ -87,15 +95,15 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="flex-1" />
 
-      <div className="mt-6 flex flex-col gap-0.5 border-t border-hairlineSoft pt-3">
+      <div className="mt-6 flex flex-col gap-0.5 border-t border-hairline pt-3">
         {SECONDARY.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             onClick={onNavigate}
-            className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] text-muted transition-colors hover:bg-hover hover:text-parchment"
+            className="group flex items-center gap-3 rounded-lg py-2 pl-3.5 pr-2.5 text-[13px] text-muted transition-colors hover:bg-hover hover:text-parchment"
           >
-            <span className="text-faint">{item.icon}</span>
+            <span className="text-faint transition-colors group-hover:text-muted">{item.icon}</span>
             {item.label}
           </Link>
         ))}

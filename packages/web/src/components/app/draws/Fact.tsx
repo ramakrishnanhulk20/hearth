@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CAP_LABEL } from "@/components/app/console";
+import { CAP_LABEL, CARD_NOTE } from "@/components/app/console";
 
 /**
  * One small figure inside a draw card.
@@ -21,7 +21,7 @@ export function Fact({
     <div className="min-w-0">
       <dt className={CAP_LABEL}>{label}</dt>
       <dd className="mt-1.5 text-[14px] leading-snug tabular-nums text-parchment">{value}</dd>
-      {note && <dd className="mt-1 text-[12px] leading-snug text-faint">{note}</dd>}
+      {note && <dd className={`mt-1 ${CARD_NOTE}`}>{note}</dd>}
     </div>
   );
 }
