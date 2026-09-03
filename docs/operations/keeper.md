@@ -138,7 +138,10 @@ At 5 savers that is `8,456,388` gas per draw, or about
 `0.0085 ETH` at 1 gwei, the Sepolia base fee at deployment. On a one-hour period that is 24 draws a
 day and `0.2030 ETH` per day; on a daily period it is `0.0085 ETH`.
 
-Per-saver evaluation is `708,836 (the marginal cost of one more saver in a batch; a batch of one costs 1,291,192)` gas and `3,674,128 on the mock coprocessor's price table (the live coprocessor does not report compute units in a receipt)` compute units. The
+One more saver in a batch costs `708,836` gas on Sepolia, and a batch carrying a single
+saver costs `1,291,192`, since the fixed part of the call is paid either way. In compute
+units a saver is `3,674,128` on the mock coprocessor's price table, which is where that
+figure is readable, because a live receipt does not report compute units. The
 batch size `4` is set from that measurement against Zama's published Sepolia
 limits of 20,000,000 compute units per transaction with 5,000,000 in sequential depth.
 `evaluate` accepts any count, so if Zama reprices an operation the keeper can drop to a

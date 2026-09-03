@@ -736,7 +736,92 @@ parameter meanings and a candidate mainnet set: [deploying](docs/operations/depl
 ## Tests
 
 ```
-{{TEST_OUTPUT}}
+  Hearth fairness
+  239 scored draws in 74s, frequent tier paid 601 of 956 nominal prizes (W/M 0.6344, expected 606.5)
+  saver 0 stake 51.61% won 302 frequent prizes, share 50.25%, expected 313.0
+  saver 1 stake 25.81% won 154 frequent prizes, share 25.62%, expected 156.5
+  saver 2 stake 12.90% won 85 frequent prizes, share 14.14%, expected 78.3
+  saver 3 stake 6.45% won 40 frequent prizes, share 6.66%, expected 39.1
+  saver 4 stake 3.23% won 20 frequent prizes, share 3.33%, expected 19.6
+  grand 4 prizes / 31.2 USDC, mid 25 / 247.533, frequent 601 / 3656.931005, credited 3935.664005
+  tier 0 prize size ranged 7.774 to 841.8865 USDC across the sample
+  tier 1 prize size ranged 3.887 to 357.60725 USDC across the sample
+  tier 2 prize size ranged 1.95 to 8.996772 USDC across the sample
+  grand tier paid 4 against 6.32 expected, inside [0, 18]; mid tier 25 against 25.27, inside [9, 46]
+    ✔ pays each saver a share of the prizes that tracks their share of the pool (74735ms)
+    ✔ never pays a saver for a period that ended before they arrived (397ms)
+
+  Hearth
+    ✔ runs deposit, close, award, evaluate, finalize, reconcile and withdraw with the books balanced (1503ms)
+    ✔ fixes prize sizes at the close, before the seed exists, and the award leaves them alone (152ms)
+    ✔ walks the saver list from the seed in fixed batches, once per saver (645ms)
+    ✔ skips a saver who joined after the draw's period without any encrypted work (271ms)
+    ✔ moves the published scale up to the aggregate when it starts far below (744ms)
+    ✔ brings the published scale down when it starts far above (646ms)
+    ✔ hands a period with no savers back to the tiers and keeps the carry (426ms)
+    ✔ books the harvest and hands back the liquidity of an award that missed its window (151ms)
+    ✔ refuses a close after the deadline and still allows one at the start of the last period (108ms)
+    ✔ publishes each tier's carry on its own cadence and books it back once (410ms)
+    ✔ matches an off-chain mirror of every threshold, and pays what the mirror says (666ms)
+    ✔ lets a saver read their own weight and credit and keeps a stranger out (273ms)
+    ✔ keeps closing when the yield source reverts, and books that draw as a zero harvest (111ms)
+    ✔ proves a harvest of nothing when no yield source is wired (120ms)
+    ✔ weights a mid-period deposit by the fraction of the period it was present (225ms)
+    ✔ keeps three observations, so a draw can still be weighed two periods later (157ms)
+    ✔ refuses a deposit that would exceed the per-saver cap by refunding it (73ms)
+    ✔ pauses deposits and draw closing but never withdrawals (241ms)
+    ✔ reports the closable draw to the upkeep and closes exactly that one (72ms)
+    ✔ stops a batch at the coprocessor budget and resumes from the cursor (464ms)
+    ✔ rejects a forged award proof (146ms)
+    ✔ refuses a tier configuration or a scale the pool cannot run
+
+  Hearth invariants
+  period  1                                                 vault 1650.00 liquidity 0.00 carry 0.00
+  period  2  draw 1 awarded 2/6 evaluated                   vault 2161.00 liquidity 120.80 carry 0.00
+  period  3  draw 2 awarded 6/6 evaluated W/M 0.859         vault 2301.58 liquidity 120.00 carry 0.00
+  period  4  draw 3 closed, award held back W/M 0.588 draw 1 finalized vault 2138.58 liquidity 0.00 carry 0.00
+  period  5  draw 4 awarded 6/6 evaluated draw 2 finalized  vault 1673.12 liquidity 156.04 carry 72.48
+  period  6  draw 5 awarded 6/6 evaluated W/M 0.580 draw 3 skipped vault 1613.01 liquidity 360.20 carry 0.00
+  period  7  draw 6 awarded 2/6 evaluated W/M 0.910 draw 4 finalized vault 1976.04 liquidity 119.60 carry 0.00
+  period  8   W/M 0.866 draw 5 finalized                    vault 2548.07 liquidity 182.72 carry 144.36
+  period  9  draw 8 awarded 2/6 evaluated draw 6 finalized  vault 2913.94 liquidity 348.06 carry 144.08
+  period 10  draw 9 awarded 6/6 evaluated W/M 0.657         vault 2611.12 liquidity 120.40 carry 0.00
+  period 11  draw 10 awarded 2/6 evaluated W/M 0.754 draw 8 finalized vault 2677.16 liquidity 188.95 carry 216.12
+  period 12  draw 11 awarded 2/6 evaluated W/M 0.641 draw 9 finalized vault 2867.27 liquidity 204.22 carry 324.10
+  period 13  draw 12 awarded 6/6 evaluated W/M 0.655 draw 10 finalized vault 3089.98 liquidity 149.90 carry 72.24
+  period 14  draw 13 awarded 6/6 evaluated W/M 0.709 draw 11 finalized vault 3392.99 liquidity 207.89 carry 287.88
+  period 15  draw 14 awarded 6/6 evaluated W/M 0.750 draw 12 finalized vault 4043.93 liquidity 327.33 carry 264.12
+  period 16  draw 15 awarded 6/6 evaluated W/M 0.822 draw 13 finalized vault 3637.70 liquidity 158.81 carry 144.12
+  period 17  draw 16 awarded 6/6 evaluated W/M 0.976 draw 14 finalized vault 4250.44 liquidity 171.36 carry 359.88
+  period 18  draw 17 awarded 6/6 evaluated W/M 0.852 draw 15 finalized vault 4922.00 liquidity 156.59 carry 444.30
+  period 19  draw 18 awarded 2/6 evaluated W/M 0.506 draw 16 finalized vault 4396.40 liquidity 185.40 carry 216.00
+  period 20  draw 19 awarded 2/6 evaluated W/M 0.591 draw 17 finalized vault 4471.99 liquidity 169.16 carry 432.12
+  period 21  draw 20 awarded 2/6 evaluated W/M 0.549 draw 18 finalized vault 4502.60 liquidity 329.40 carry 360.12
+  period 22  draw 21 awarded 6/6 evaluated W/M 0.557 draw 19 finalized vault 4171.51 liquidity 219.12 carry 288.12
+  period 23  draw 22 awarded 2/6 evaluated W/M 0.565 draw 20 finalized vault 4455.29 liquidity 180.47 carry 503.88
+  period 24  draw 23 awarded 6/6 evaluated W/M 0.515 draw 21 finalized vault 5047.65 liquidity 221.30 carry 588.42
+  period 25  draw 24 awarded 6/6 evaluated W/M 0.549 draw 22 finalized vault 5374.24 liquidity 230.14 carry 360.12
+  period 26  draw 25 awarded 6/6 evaluated W/M 0.622 draw 23 finalized vault 3995.38 liquidity 174.36 carry 575.64
+  period 27  draw 26 awarded 6/6 evaluated W/M 0.656 draw 24 finalized vault 4447.68 liquidity 855.53 carry 0.00
+  211 checks over 27 periods, deposited 8893.00 USDC, withdrew 9915.74, credited 1022.74, 24s
+    ✔ keeps every balance, remainder and carry accounted for under a random sequence of actions (23827ms)
+
+  libraries
+    Periods
+      ✔ counts periods from one, starting at the first timestamp
+      ✔ puts anything before the first timestamp in period zero
+      ✔ bounds a period so that its end is the next period's start
+
+  SponsoredYieldSource
+    ✔ books exactly what the wrapper mints when sponsored
+    ✔ refuses an empty sponsorship
+    ✔ accrues at the rate and never beyond the sponsored balance
+    ✔ only the recipient may harvest, and the harvest lands in its confidential balance (140ms)
+    ✔ returns an encrypted zero without reverting when nothing has accrued
+    ✔ settles accrual at the old rate before a rate change
+    ✔ keeps an owner forever
+
+  35 passing (2m)
 ```
 
 The suite runs against Zama's mock coprocessor through the Hardhat plugin, so every
@@ -809,8 +894,10 @@ it is `0.0085 ETH`. Whoever sends the transactions pays. Nothing on chain
 caps evaluation, so the keeper caps its own spend, and any saver can push the walk further
 from the app.
 
-Evaluating one saver is `708,836 (the marginal cost of one more saver in a batch; a batch of one costs 1,291,192)` gas and `3,674,128 on the mock coprocessor's price table (the live coprocessor does not report compute units in a receipt)` homomorphic compute
-units. Zama caps one transaction on Sepolia at 20,000,000 compute units with 5,000,000 of
+One more saver in a batch costs `708,836` gas, measured live on Sepolia; a batch that
+carries only one saver costs `1,291,192`, because the fixed part of the call is paid either
+way. In homomorphic compute units a saver is `3,674,128` on the mock coprocessor's price
+table, which is the only place the figure is readable: a live receipt does not report them. Zama caps one transaction on Sepolia at 20,000,000 compute units with 5,000,000 of
 sequential depth. The batch size was measured against the coprocessor's price table on the
 Sepolia tier set at 748,032 units of fixed cost per call plus 3,674,128 per saver, which
 puts four savers at 15,444,544 units and five at 19,118,672. Hearth budgets 18,000,000 and
