@@ -35,9 +35,11 @@ Updated 3 September 2026, 06:00 UTC, after the finishing audit and its fix pass.
 
 ## Blocked on Ram
 
-- Look at localhost:3000: the hero, /app with a Sepolia wallet, /lab and "Open the seal",
-  /verify, /docs. Every write path is proven by the operator tasks and by selector checks, not
-  yet by a click in a browser, so one real deposit, reveal, claim and withdraw is worth doing.
+- Look at localhost:3000: the hero, then the console at /app with a Sepolia wallet connected,
+  walking Deposit, the eye on the dashboard, My draws and Withdraw. Also /lab and "Open the
+  seal", /verify and /docs. Every write path is proven by the operator tasks and by selector
+  checks against the deployed bytecode, not yet by a click in a browser, so one real deposit,
+  reveal, claim and withdraw is the last gap in the evidence.
 - One thing nobody has painted yet: the landing page with prefers-reduced-motion on.
 - Two design calls made in his absence, each reversible by one redeploy: every tier reconciles
   every draw (a visible accumulating jackpot, with per-draw prize counts public a draw later),

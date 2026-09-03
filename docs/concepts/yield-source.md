@@ -197,4 +197,4 @@ It does not cover the yield source's effect on the leakage table, which is in
 [what stays private](../security/what-stays-private.md). It does not benchmark the Morpho
 vault's yield, which is somebody else's number and changes daily. And it does not claim
 the adapter is running: on Sepolia the sponsored source is what is attached, and the
-pool panel on `/app` names it.
+"The pool right now" card on the dashboard names it.
