@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-
   :root {
     --bg: #000000;
     --surface: #141414;
@@ -24,64 +23,21 @@
     --flame-soft: 252 228 114;
     --ember: 250 168 53;
     --on-flame: 14 14 14;
-    --good: 10 148 41;
+    --good: 62 175 90;
     --bad: 221 50 50;
+    --warn: 232 156 42;
 
     --grain-opacity: 0.05;
     color-scheme: dark;
   }
 
-  :root[data-theme="light"] {
-    --bg: #ececec;
-    --surface: #ffffff;
-    --raised: #f4f4f4;
-
-    --hairline: rgba(0, 0, 0, 0.1);
-    --hairline-soft: rgba(0, 0, 0, 0.06);
-    --hairline-strong: rgba(0, 0, 0, 0.22);
-    --hover: rgba(0, 0, 0, 0.04);
-    --seal: rgba(0, 0, 0, 0.16);
-
-    --text: rgba(0, 0, 0, 0.84);
-    --muted: rgba(0, 0, 0, 0.56);
-    --faint: rgba(0, 0, 0, 0.44);
-
-    --flame: 150 114 0;
-    --flame-fill: 249 209 0;
-    --flame-soft: 200 152 0;
-    --ember: 200 130 20;
-    --on-flame: 14 14 14;
-
-    --grain-opacity: 0.03;
-    color-scheme: light;
-  }
-
-  .force-dark {
-    --bg: #000000;
-    --surface: #141414;
-    --raised: #0c0c0c;
-    --hairline: rgba(255, 255, 255, 0.1);
-    --hairline-soft: rgba(255, 255, 255, 0.06);
-    --hairline-strong: rgba(255, 255, 255, 0.24);
-    --hover: rgba(255, 255, 255, 0.04);
-    --seal: rgba(255, 255, 255, 0.13);
-    --text: rgba(255, 255, 255, 0.82);
-    --muted: rgba(255, 255, 255, 0.54);
-    --faint: rgba(255, 255, 255, 0.34);
-    --flame: 249 209 0;
-    --flame-soft: 252 228 114;
-    color-scheme: dark;
-  }
-
   html {
-
     scroll-behavior: auto;
   }
 
   body {
     @apply bg-ink text-parchment font-sans antialiased;
     overscroll-behavior-y: none;
-    transition: background-color 0.4s ease;
   }
 
   ::selection {
@@ -90,13 +46,12 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--hairline-strong);
+    outline: 2px solid rgb(var(--flame) / 0.7);
     outline-offset: 2px;
   }
 }
 
 @layer components {
-
   .label {
     @apply inline-flex items-center gap-2.5 font-sans text-[11px] uppercase tracking-label text-faint;
   }
@@ -110,6 +65,7 @@
     @apply rounded-card border border-hairlineSoft bg-surface shadow-glass;
   }
 
+  /* The panel skin: a warm dark fill with a light glare across the top edge. */
   .glass-fill {
     position: relative;
     overflow: hidden;
@@ -124,9 +80,20 @@
     pointer-events: none;
     background: radial-gradient(130% 72% at 50% -14%, rgba(255, 244, 224, 0.1), transparent 58%);
   }
+
+  /* Film grain over the whole page, so flat panels read as a photographed surface. */
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 }
 
-@keyframes lantern-flicker {
+@keyframes flame-flicker {
   0%,
   100% {
     opacity: 0.5;
@@ -142,9 +109,9 @@
   }
 }
 
-.lantern-flame {
+.flame-core {
   transform-origin: center;
-  animation: lantern-flicker 1.15s ease-in-out infinite;
+  animation: flame-flicker 1.15s ease-in-out infinite;
 }
 
 @keyframes fade-rise {
@@ -169,5 +136,9 @@
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+
+  .grain::after {
+    display: none;
   }
 }

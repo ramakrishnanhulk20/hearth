@@ -1,9 +1,9 @@
-import { StoryLanding } from "@/components/story/StoryLanding";
-import { readPoolStats } from "@/lib/chain/pool";
+import { Landing } from "@/components/story/Landing";
+import { readPoolStats } from "@/lib/chain/read";
 
 export const revalidate = 30;
 
 export default async function HomePage() {
   const stats = await readPoolStats();
-  return <StoryLanding stats={stats} />;
+  return <Landing stats={stats} />;
 }

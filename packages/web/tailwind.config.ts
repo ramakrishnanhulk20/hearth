@@ -3,7 +3,6 @@ import type { Config } from "tailwindcss";
 const channel = (name: string) => `rgb(var(${name}) / <alpha-value>)`;
 
 const config: Config = {
-  darkMode: ["selector", '[data-theme="dark"]'],
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
@@ -26,6 +25,7 @@ const config: Config = {
         onFlame: channel("--on-flame"),
         good: channel("--good"),
         bad: channel("--bad"),
+        warn: channel("--warn"),
       },
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],

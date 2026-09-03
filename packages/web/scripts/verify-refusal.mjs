@@ -1,4 +1,9 @@
-// Confirms the classification the hero uses is the one the protocol actually produces.
+// Confirms that the refusal the landing page shows is the one Zama's protocol actually produces,
+// and that the page's split between "refused" and "unreachable" matches it.
+//
+//   node scripts/verify-refusal.mjs 0x<handle>
+//
+// A saver's principal handle is on the landing page, or read confidentialBalanceOf on the vault.
 import { ZamaSDK } from "@zama-fhe/sdk";
 import { createConfig } from "@zama-fhe/sdk/viem";
 import { sepolia as fheSepolia } from "@zama-fhe/sdk/chains";
@@ -22,5 +27,5 @@ try {
   const detail = error?.cause?.message ?? error?.message ?? String(error);
   const refused = /not allowed for (public )?decryption|unauthori|not entitled|acl/i.test(detail);
   console.log("cause  :", detail.split("\n")[0]);
-  console.log("verdict:", refused ? "REFUSED (hero shows the refusal)" : "UNREACHABLE (hero shows a service problem)");
+  console.log("verdict:", refused ? "REFUSED (the page shows the refusal)" : "UNREACHABLE (the page shows a service problem)");
 }

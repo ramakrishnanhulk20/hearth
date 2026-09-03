@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Inter } from "next/font/google";
-import { LocaleProvider } from "@/i18n/LocaleProvider";
 import "./globals.css";
 
 const display = Archivo({
@@ -16,30 +15,33 @@ const sans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Lantern, prize savings nobody can see inside",
+  metadataBase: new URL("https://hearth.vercel.app"),
+  title: {
+    default: "Hearth, prize savings nobody can see inside",
+    template: "%s | Hearth",
+  },
   description:
-    "No-loss prize savings on Ethereum, with deposits, balances and winnings encrypted on chain. Win prizes drawn from yield, withdraw your principal whenever you like, and let nobody see how much you hold or what you won.",
+    "Confidential no-loss prize savings on the Zama Protocol. Deposits, balances and winnings stay encrypted on chain, prizes are drawn from yield with odds proportional to your time-weighted balance, and principal comes back in full whenever you ask.",
   openGraph: {
-    title: "Lantern",
-    description: "Prize savings nobody can see inside.",
+    title: "Hearth",
+    description: "Confidential no-loss prize savings on the Zama Protocol.",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hearth",
+    description: "Confidential no-loss prize savings on the Zama Protocol.",
   },
 };
 
 export const viewport: Viewport = {
-
-  themeColor: "#000000",
+  themeColor: "#050505",
 };
-
-const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('lantern-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${display.variable} ${sans.variable}`}>
-      <body>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-        <LocaleProvider>{children}</LocaleProvider>
-      </body>
+    <html lang="en" className={`${display.variable} ${sans.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }

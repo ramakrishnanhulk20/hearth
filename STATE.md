@@ -43,17 +43,36 @@ Updated 3 September 2026, during the Sepolia deployment.
   JavaScript numbers where the legacy one returned bigints, which broke the draw's scale count
   until the coercions were widened.
 
+- App rewired from Lantern to Hearth in `packages/web`. Dependencies moved to Next 16.3.4,
+  React 19.2.8, wagmi 3.7.7, viem 2.56.3 and `@zama-fhe/sdk` 3.5.1, which takes
+  `npm audit --omit=dev` from 27 findings to zero; the 37 that `npm audit` still lists are all
+  in the Hardhat toolchain, which is never shipped. Routes: `/` the scroll story, `/app` the
+  console, `/verify` (no wallet), `/lab` the draw ceremony, `/how`, `/docs` as an index.
+  ABIs generated from the artifacts, addresses from three env variables, the asset and its
+  underlying read on chain. English only, and the ten locale files are gone; see `DECISIONS.md`.
+  Typecheck, lint and a production build against `.next-verify` are all clean.
+
 ## Next
 
 - Run the keeper through at least two draws, prove-it output, attack scripts run live,
   threat model finalised, README numbers.
-- Then the app rewire, the docs route, the README numbers, and the submission package.
+- The `/docs` route rendering the markdown with a sidebar, mermaid and search.
+- Then the README numbers and the submission package.
 
 ## Blocked on Ram
 
-Nothing right now. Coming up on his list: 25 LINK from the Chainlink faucet if he wants
-the Automation redundancy registered, the Vercel deploy, the video, the X post, and the
-push to GitHub when he says so.
+Look at these on `localhost:3000` before anything is deployed, since visual calls are his:
+
+1. `/` the landing story, and the closing panel with the live grand prize and saver count.
+2. `/app` connected to a wallet on Sepolia, so the deposit, reveal, draw and withdraw
+   states can be walked with real money. No transaction has been sent from the browser
+   yet; every write path is untested against a live wallet.
+3. `/lab`, the draw ceremony. It is the signature moment and it is not linked from the nav.
+4. `/verify` with an address pasted in.
+
+Also on his list: 25 LINK from the Chainlink faucet if he wants the Automation redundancy
+registered, the Vercel deploy (`submission/vercel.md` has the new env list, and three old
+variables to delete), the video, the X post, and the push to GitHub when he says so.
 
 ## Live addresses
 

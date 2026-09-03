@@ -203,3 +203,51 @@ marked as such.
   75 USDC after seven, two, one, two and four redraws. Twenty redraws are budgeted because a prove
   run makes ten decryptions in a row. The keeper only ever decrypts publicly, which carries no
   transport key pair, so it keeps the plain ask-again path for the same signal.
+- 2026-09-03: the web package moved to Next 16.3.4, React 19.2.8, wagmi 3.7.7, viem 2.56.3 and
+  `@zama-fhe/sdk` 3.5.1. `npm audit --omit=dev` at the root went from 27 findings (23 moderate,
+  4 high) to zero: every one of them was in this package's tree, in next/postcss/sharp and in the
+  wagmi 2 connector stack (walletconnect, reown, metamask, ws, uuid). What `npm audit` still
+  reports is 37 findings entirely inside the Hardhat toolchain, a dev dependency of the contracts
+  package that is never built or shipped. Two knock-on changes: Next 16 runs Turbopack by default
+  and refuses to start with a `webpack` key in the config, so the alias list that stubbed out
+  wagmi 2's optional peers is gone with the connectors that needed it; and `postprocessing` had to
+  be installed explicitly, because it is a peer of `@react-three/postprocessing` that the old
+  webpack resolver found by accident and Turbopack correctly does not.
+- 2026-09-03: the app reads the confidential asset from `vault.asset()` and the public token from
+  `asset.underlying()` rather than from the environment. `NEXT_PUBLIC_HEARTH_VAULT`,
+  `_POOL` and `_SOURCE` are the only addresses configured, so the app cannot be pointed at a token
+  the vault would refuse, and a redeploy that changes the asset needs no environment change. It
+  costs one extra round trip at load, which the browser makes once and caches for ever.
+- 2026-09-03: the app's ABIs are generated from the compiled Hardhat artifacts by
+  `packages/web/scripts/generate-abis.mjs`, not hand copied. The script names the functions and
+  events the app uses and fails loudly when the artifact no longer has one, so a contract rename
+  breaks the build rather than the running app. Only the used entries are emitted: a full
+  `HearthVault` ABI as a TypeScript `as const` costs seconds of type inference on every check.
+- 2026-09-03: the token-layer banner reads `observerCount()`, `observers()`, `paused()` and
+  `isBlocked(me)` on Zama's cUSDCMock, plus the ERC-1967 implementation slot, instead of watching
+  for `ObserverAdded`, `Paused` and `Upgraded` events. State is true whatever block range the app
+  happens to look at, an event scan is only true for the window it covers, and the free public
+  node the browser talks to caps that window well below a day. The implementation is compared
+  against 0xAe37b998d453E1FaBE85DD46cf04295ca4A3af04, the one whose source was read line by line
+  on 2 September, so an upgrade is reported as an upgrade rather than passing unnoticed.
+- 2026-09-03: keeper health is measured as the age of the newest draw-lifecycle event, not as the
+  age of a configured keeper address's last transaction. The keeper's address is derived from the
+  recovery phrase at run time and is not recorded anywhere the app can read, and "is anybody
+  advancing the draws" is the question the banner is actually for. The `/api/activity` route reads
+  the logs on the server with the private endpoint and reports the sender of the newest one, so
+  the address is discovered rather than configured.
+- 2026-09-03: the app is English only. The ten locale files were regenerated from the old Lantern
+  copy and none of it survives the rename; the spec allowed keeping them only if all ten were
+  regenerated from the final English text, and machine translating roughly nine hundred new words
+  of privacy wording into nine languages without a speaker to check it would put wrong claims on
+  screen in nine places. `src/i18n` and the language picker are removed rather than left as a
+  one-language shell. Restoring them means reinstating the provider and translating the copy in
+  the components, which is a day of work with a translator and not less.
+- 2026-09-03: one `useActions` instance drives every button in the console and one status note
+  reports it, pinned above the fold. A wallet signs one transaction at a time, so two instances
+  would let the page claim two things were in flight, and a note next to each panel would show the
+  same transaction twice when a claim is pressed in the draw list and lands in the withdraw panel.
+- 2026-09-03: the `/docs` route ships as an index of the sixteen documentation pages with their
+  summaries rather than rendering the markdown. The rendered site with a sidebar, mermaid and
+  search is its own unit; a nav link that 404s is worse than a map, and a map is honest about
+  where the pages are.

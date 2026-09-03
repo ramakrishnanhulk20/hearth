@@ -1,94 +1,126 @@
 "use client";
 
-import { useZamaSDK } from "@/components/app/Providers";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { Address, Hex } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 import { readContract, waitForTransactionReceipt } from "wagmi/actions";
-import { ADDRESSES, CONFIDENTIAL_ABI, ERC20_ABI, POOL_ABI } from "@/lib/chain/contracts";
+import { CONFIDENTIAL_ASSET_ABI, HEARTH_POOL_ABI, HEARTH_VAULT_ABI } from "@/lib/chain/abis";
+import { ERC20_ABI } from "@/lib/chain/tokenAbi";
 import { wagmiConfig } from "@/lib/chain/wagmi";
-import { useMessages } from "@/i18n/LocaleProvider";
-import type { Messages } from "@/i18n";
+import { decryptPublic, toBigint, toBoolean } from "@/lib/zama/decrypt";
+import { routeError, type RoutedError } from "@/lib/zama/errors";
+import { useZamaSDK } from "@/components/app/Providers";
+import type { HearthConfig } from "./useHearth";
 
 export type Phase =
   | { kind: "idle" }
   | { kind: "encrypting" }
+  | { kind: "decrypting"; note: string }
   | { kind: "signing" }
   | { kind: "mining"; hash: Hex }
-  | { kind: "done" }
-  | { kind: "error"; message: string };
+  | { kind: "done"; hash: Hex | null }
+  | { kind: "error"; error: RoutedError };
 
-function readable(error: unknown, e: Messages["errors"]): string {
-  const anyError = error as { shortMessage?: string; cause?: { message?: string }; message?: string };
-  const raw = anyError.shortMessage ?? anyError.cause?.message ?? anyError.message ?? e.generic;
-  if (/user rejected|rejected the request|denied/i.test(raw)) return e.rejected;
-  if (/insufficient funds/i.test(raw)) return e.noGas;
-  if (/chain mismatch|does not match/i.test(raw)) return e.wrongChain;
-  return raw.length > 160 ? `${raw.slice(0, 157)}…` : raw;
-}
+export type Action = {
+  phase: Phase;
+  /** What the current or last run was called, so the note can name it. */
+  label: string;
+  busy: boolean;
+  reset: () => void;
+};
 
-export function useActions() {
+type Setter = (phase: Phase) => void;
+
+const NOT_CONNECTED: RoutedError = {
+  message: "Connect a wallet first.",
+  remedy: "connect",
+  retryable: false,
+};
+
+/**
+ * Every write the app makes, each one reporting the same four stages: encrypting, signing,
+ * mining, done. The draw steps are here too, because closing, awarding, evaluating, finalizing
+ * and reconciling are permissionless and the app offers all five to anybody.
+ */
+export function useActions(config: HearthConfig) {
   const sdk = useZamaSDK();
   const { address } = useAccount();
-  const m = useMessages();
-
   const { writeContractAsync } = useWriteContract();
-  const [phase, setPhase] = useState<Phase>({ kind: "idle" });
-  const [label, setLabel] = useState<string>("");
 
-  const run = useCallback(
-    async (
-      name: string,
-      steps: (set: (p: Phase) => void) => Promise<void>,
-      onDone?: () => void,
-    ) => {
-      setLabel(name);
-      try {
-        await steps(setPhase);
-        setPhase({ kind: "done" });
-        onDone?.();
-      } catch (error) {
-        setPhase({ kind: "error", message: readable(error, m.errors) });
-      }
-    },
-    [m.errors],
-  );
+  const [phase, setPhase] = useState<Phase>({ kind: "idle" });
+  const [label, setLabel] = useState("");
+  const running = useRef(false);
 
   const reset = useCallback(() => setPhase({ kind: "idle" }), []);
 
-  async function send(
-    set: (p: Phase) => void,
-    request: Parameters<typeof writeContractAsync>[0],
-  ): Promise<void> {
-    set({ kind: "signing" });
-    const hash = await writeContractAsync(request);
-    set({ kind: "mining", hash });
-    await waitForTransactionReceipt(wagmiConfig, { hash });
-  }
+  const run = useCallback(
+    async (name: string, steps: (set: Setter) => Promise<Hex | null>, onDone?: () => void) => {
+      if (running.current) return;
+      running.current = true;
+      setLabel(name);
+      try {
+        const hash = await steps(setPhase);
+        setPhase({ kind: "done", hash });
+        onDone?.();
+      } catch (error) {
+        setPhase({ kind: "error", error: routeError(error) });
+      } finally {
+        running.current = false;
+      }
+    },
+    [],
+  );
 
-  async function encrypt(contractAddress: Address, value: bigint) {
-    if (!address || !sdk) throw new Error(m.errors.connectFirst);
-    const { encryptedValues, inputProof } = await sdk.encrypt({
-      values: [{ type: "euint64", value }],
-      contractAddress,
-      userAddress: address,
-    });
-    return { handle: encryptedValues[0], proof: inputProof };
-  }
+  const send = useCallback(
+    async (set: Setter, request: Parameters<typeof writeContractAsync>[0]): Promise<Hex> => {
+      set({ kind: "signing" });
+      const hash = await writeContractAsync(request);
+      set({ kind: "mining", hash });
+      await waitForTransactionReceipt(wagmiConfig, { hash });
+      return hash;
+    },
+    [writeContractAsync],
+  );
+
+  const encrypt = useCallback(
+    async (set: Setter, contractAddress: Address, amount: bigint) => {
+      if (!address || !sdk) throw Object.assign(new Error(NOT_CONNECTED.message), { code: "WALLET_NOT_CONNECTED" });
+      set({ kind: "encrypting" });
+      const { encryptedValues, inputProof } = await sdk.encrypt({
+        values: [{ type: "euint64", value: amount }],
+        contractAddress,
+        userAddress: address,
+      });
+      return { handle: encryptedValues[0], proof: inputProof };
+    },
+    [address, sdk],
+  );
+
+  const needAddresses = useCallback(() => {
+    if (!config.vault || !config.pool || !config.asset || !config.underlying) {
+      throw new Error("The Hearth addresses are not configured, so nothing can be sent.");
+    }
+    return {
+      vault: config.vault,
+      pool: config.pool,
+      asset: config.asset,
+      underlying: config.underlying,
+    };
+  }, [config]);
+
+  const action: Action = { phase, label, busy: phase.kind !== "idle" && phase.kind !== "done" && phase.kind !== "error", reset };
 
   return {
-    phase,
-    label,
-    reset,
-    busy: phase.kind !== "idle" && phase.kind !== "done" && phase.kind !== "error",
+    ...action,
 
-    getTokens: (amount: bigint, onDone?: () => void) =>
+    mint: (amount: bigint, onDone?: () => void) =>
       run(
-        m.phase.getTokens,
+        "Get test USDC",
         async (set) => {
-          if (!address) throw new Error(m.errors.connectFirst);
-          await send(set, {
-            address: ADDRESSES.testUsdc,
+          const { underlying } = needAddresses();
+          if (!address) throw new Error(NOT_CONNECTED.message);
+          return send(set, {
+            address: underlying,
             abi: ERC20_ABI,
             functionName: "mint",
             args: [address, amount],
@@ -97,22 +129,30 @@ export function useActions() {
         onDone,
       ),
 
-    wrap: (amount: bigint, allowance: bigint, onDone?: () => void) =>
+    approve: (amount: bigint, onDone?: () => void) =>
       run(
-        m.phase.wrapping,
+        "Approve the wrapper",
         async (set) => {
-          if (!address) throw new Error(m.errors.connectFirst);
-          if (allowance < amount) {
-            await send(set, {
-              address: ADDRESSES.testUsdc,
-              abi: ERC20_ABI,
-              functionName: "approve",
-              args: [ADDRESSES.confidentialUsdc, amount],
-            });
-          }
-          await send(set, {
-            address: ADDRESSES.confidentialUsdc,
-            abi: CONFIDENTIAL_ABI,
+          const { underlying, asset } = needAddresses();
+          return send(set, {
+            address: underlying,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [asset, amount],
+          });
+        },
+        onDone,
+      ),
+
+    wrap: (amount: bigint, onDone?: () => void) =>
+      run(
+        "Wrap into confidential USDC",
+        async (set) => {
+          const { asset } = needAddresses();
+          if (!address) throw new Error(NOT_CONNECTED.message);
+          return send(set, {
+            address: asset,
+            abi: CONFIDENTIAL_ASSET_ABI,
             functionName: "wrap",
             args: [address, amount],
           });
@@ -122,46 +162,15 @@ export function useActions() {
 
     deposit: (amount: bigint, onDone?: () => void) =>
       run(
-        m.phase.depositing,
+        "Deposit",
         async (set) => {
-          set({ kind: "encrypting" });
-          const { handle, proof } = await encrypt(ADDRESSES.confidentialUsdc, amount);
-          await send(set, {
-            address: ADDRESSES.confidentialUsdc,
-            abi: CONFIDENTIAL_ABI,
+          const { asset, vault } = needAddresses();
+          const { handle, proof } = await encrypt(set, asset, amount);
+          return send(set, {
+            address: asset,
+            abi: CONFIDENTIAL_ASSET_ABI,
             functionName: "confidentialTransferAndCall",
-            args: [ADDRESSES.pool, handle, proof, "0x"],
-          });
-        },
-        onDone,
-      ),
-
-    addToLantern: (amount: bigint, allowance: bigint, onDone?: () => void) =>
-      run(
-        m.phase.depositing,
-        async (set) => {
-          if (!address) throw new Error(m.errors.connectFirst);
-          if (allowance < amount) {
-            await send(set, {
-              address: ADDRESSES.testUsdc,
-              abi: ERC20_ABI,
-              functionName: "approve",
-              args: [ADDRESSES.confidentialUsdc, amount],
-            });
-          }
-          await send(set, {
-            address: ADDRESSES.confidentialUsdc,
-            abi: CONFIDENTIAL_ABI,
-            functionName: "wrap",
-            args: [address, amount],
-          });
-          set({ kind: "encrypting" });
-          const { handle, proof } = await encrypt(ADDRESSES.confidentialUsdc, amount);
-          await send(set, {
-            address: ADDRESSES.confidentialUsdc,
-            abi: CONFIDENTIAL_ABI,
-            functionName: "confidentialTransferAndCall",
-            args: [ADDRESSES.pool, handle, proof, "0x"],
+            args: [vault, handle, proof, "0x"],
           });
         },
         onDone,
@@ -169,13 +178,13 @@ export function useActions() {
 
     withdraw: (amount: bigint, onDone?: () => void) =>
       run(
-        m.phase.withdrawing,
+        "Withdraw",
         async (set) => {
-          set({ kind: "encrypting" });
-          const { handle, proof } = await encrypt(ADDRESSES.pool, amount);
-          await send(set, {
-            address: ADDRESSES.pool,
-            abi: POOL_ABI,
+          const { vault } = needAddresses();
+          const { handle, proof } = await encrypt(set, vault, amount);
+          return send(set, {
+            address: vault,
+            abi: HEARTH_VAULT_ABI,
             functionName: "withdraw",
             args: [handle, proof],
           });
@@ -183,32 +192,134 @@ export function useActions() {
         onDone,
       ),
 
-    claim: (onDone?: () => void) =>
+    withdrawAll: (onDone?: () => void) =>
       run(
-        m.phase.claiming,
+        "Withdraw everything",
         async (set) => {
-          await send(set, { address: ADDRESSES.pool, abi: POOL_ABI, functionName: "claim", args: [] });
+          const { vault } = needAddresses();
+          return send(set, { address: vault, abi: HEARTH_VAULT_ABI, functionName: "withdrawAll", args: [] });
         },
         onDone,
       ),
 
-    runDraw: (onDone?: () => void) =>
+    closeDraw: (drawId: number, onDone?: () => void) =>
       run(
-        m.phase.runningDraw,
+        `Close draw ${drawId}`,
         async (set) => {
-          const pool = { address: ADDRESSES.pool, abi: POOL_ABI } as const;
-          const phaseNow = await readContract(wagmiConfig, { ...pool, functionName: "phase" });
+          const { pool } = needAddresses();
+          return send(set, { address: pool, abi: HEARTH_POOL_ABI, functionName: "closeDraw", args: [drawId] });
+        },
+        onDone,
+      ),
 
-          if (Number(phaseNow) === 0) {
-            await send(set, { ...pool, functionName: "openDraw", args: [] });
+    /**
+     * Asks the key management service for the four handles a close published, then hands the
+     * cleartexts and the proof back to the pool. The order is fixed: awardDraw re-encodes
+     * [seed, scale count, non-empty, harvest] and checks the signature over that encoding, so any
+     * other order makes the on-chain check revert.
+     */
+    awardDraw: (drawId: number, onDone?: () => void) =>
+      run(
+        `Award draw ${drawId}`,
+        async (set) => {
+          const { pool } = needAddresses();
+          if (!sdk) throw new Error(NOT_CONNECTED.message);
+          const draw = await readContract(wagmiConfig, {
+            address: pool,
+            abi: HEARTH_POOL_ABI,
+            functionName: "drawOf",
+            args: [drawId],
+          });
+          if (Number(draw.status) !== 1) {
+            throw new Error(`Draw ${drawId} is not waiting for its award, so there is nothing to send.`);
           }
 
-          for (let guard = 0; guard < 64; guard++) {
-            const phase = await readContract(wagmiConfig, { ...pool, functionName: "phase" });
-            if (Number(phase) === 0) break;
-            const chunk = await readContract(wagmiConfig, { ...pool, functionName: "maxChunk" });
-            await send(set, { ...pool, functionName: "scanChunk", args: [chunk] });
-          }
+          set({ kind: "decrypting", note: "asking Zama's key management service for the seed" });
+          const published = await decryptPublic(
+            sdk,
+            [draw.seedHandle, draw.scaleHandle, draw.nonEmptyHandle, draw.harvestHandle] as Hex[],
+            {
+              onNote: (note) =>
+                set({
+                  kind: "decrypting",
+                  note:
+                    note === "sealing"
+                      ? "the seed is published but not decryptable yet, asking again"
+                      : "asking Zama's key management service for the seed",
+                }),
+            },
+          );
+
+          return send(set, {
+            address: pool,
+            abi: HEARTH_POOL_ABI,
+            functionName: "awardDraw",
+            args: [
+              drawId,
+              toBigint(published.values[0]),
+              Number(toBigint(published.values[1])),
+              toBoolean(published.values[2]),
+              toBigint(published.values[3]),
+              published.proof,
+            ],
+          });
+        },
+        onDone,
+      ),
+
+    evaluate: (drawId: number, count: bigint, onDone?: () => void) =>
+      run(
+        `Advance draw ${drawId}`,
+        async (set) => {
+          const { vault } = needAddresses();
+          return send(set, {
+            address: vault,
+            abi: HEARTH_VAULT_ABI,
+            functionName: "evaluate",
+            args: [drawId, count],
+          });
+        },
+        onDone,
+      ),
+
+    finalizeDraw: (drawId: number, onDone?: () => void) =>
+      run(
+        `Finalize draw ${drawId}`,
+        async (set) => {
+          const { vault } = needAddresses();
+          return send(set, {
+            address: vault,
+            abi: HEARTH_VAULT_ABI,
+            functionName: "finalizeDraw",
+            args: [drawId],
+          });
+        },
+        onDone,
+      ),
+
+    reconcile: (tier: number, onDone?: () => void) =>
+      run(
+        `Reconcile tier ${tier}`,
+        async (set) => {
+          const { vault, pool } = needAddresses();
+          if (!sdk) throw new Error(NOT_CONNECTED.message);
+          const [handle, , pending] = await readContract(wagmiConfig, {
+            address: vault,
+            abi: HEARTH_VAULT_ABI,
+            functionName: "publishedCarry",
+            args: [tier],
+          });
+          if (!pending) throw new Error("That tier has no published carry waiting, so there is nothing to reconcile.");
+
+          set({ kind: "decrypting", note: "asking for the tier's unpaid liquidity" });
+          const published = await decryptPublic(sdk, [handle as Hex]);
+
+          return send(set, {
+            address: pool,
+            abi: HEARTH_POOL_ABI,
+            functionName: "reconcile",
+            args: [tier, toBigint(published.values[0]), published.proof],
+          });
         },
         onDone,
       ),

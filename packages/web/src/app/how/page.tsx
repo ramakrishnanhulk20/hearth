@@ -1,15 +1,46 @@
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { LanguagePicker } from "@/components/LanguagePicker";
-import { useMessages } from "@/i18n/LocaleProvider";
+import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
+import { SmoothScroll } from "@/components/SmoothScroll";
+
+export const metadata: Metadata = {
+  title: "How it works",
+  description:
+    "Deposit confidential USDC, keep your balance encrypted, win prizes drawn from yield with odds set by your time-weighted balance, and withdraw whenever you like.",
+};
+
+const STEPS = [
+  {
+    title: "Wrap, then deposit",
+    body: "Turn plain test USDC into confidential USDC, then put part of it into the pool. Wrapping is public and depositing is not, which is exactly why they are two buttons: doing both in one click publishes the size of your deposit to anyone reading the chain.",
+  },
+  {
+    title: "Your odds are your average balance",
+    body: "Not your balance at the moment of the draw, your balance across the whole period. Deposit five minutes before the period ends and you get one twelfth of the odds of having held the same amount all period. That is what stops somebody flashing a big balance in just before each draw and taking the prize.",
+  },
+  {
+    title: "The draw closes, and a seed is drawn",
+    body: "Prize sizes are fixed first, before any random number exists. Then the seed is generated as a ciphertext inside Zama's coprocessor, so nobody sees it when it is drawn and there is no second roll. When the period is over the seed is published with a signature the contract checks on chain.",
+  },
+  {
+    title: "Everyone's result is already decided",
+    body: "From the moment the seed is verified, the thresholds are public numbers anyone can recompute and the weights can no longer change. Evaluation just writes down what is already true, walking the saver list from a point the seed picked. Nobody chooses who is evaluated or in what order.",
+  },
+  {
+    title: "You look, and only you",
+    body: "Press Reveal and sign a message. That signature proves to Zama's relayer that you control the address, and it hands back the plaintext of values the contract granted you: your principal, your winnings, your weight and your credit for each draw. It costs no gas and writes nothing.",
+  },
+  {
+    title: "Take it out whenever",
+    body: "Withdrawals pay from winnings first, then principal, in one confidential transfer clamped on chain to what you hold. A claim is the same call with the same shape as any other withdrawal, so there is no transaction type that names the winners.",
+  },
+];
 
 export default function HowItWorksPage() {
-  const m = useMessages();
-
   return (
-    <main className="force-dark relative min-h-[100svh] overflow-hidden bg-ink">
+    <main className="grain relative min-h-[100svh] bg-ink">
+      <SmoothScroll />
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0"
@@ -20,103 +51,104 @@ export default function HowItWorksPage() {
         }}
       />
 
-      <header className="relative z-20 mx-auto flex w-full max-w-[70rem] items-center justify-between px-6 py-6 lg:px-8">
-        <Link href="/" className="group flex items-center gap-3" aria-label="Lantern, home">
-          <LanternGlyph size={18} />
-          <span className="font-display text-[18px] tracking-[-0.02em] text-parchment" style={{ fontWeight: 680 }}>
-            Lantern
-          </span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/app"
-            prefetch
-            className="rounded-lg bg-flameFill px-4 py-2 text-sm font-medium text-onFlame transition-transform duration-200 hover:scale-[1.03]"
-          >
-            {m.nav.openApp}
-          </Link>
-          <LanguagePicker />
-        </div>
-      </header>
+      <div className="relative z-10">
+        <SiteHeader />
 
-      <div className="relative z-10 mx-auto w-full max-w-[52rem] px-6 pb-28 lg:px-8">
-        <section className="fade-rise pt-10 text-center sm:pt-16">
-          <p className="label mb-5 justify-center">A one-minute guide</p>
-          <h1
-            className="mx-auto max-w-[16ch] font-display text-[clamp(2.4rem,6.5vw,4.4rem)] leading-[0.98] tracking-tightest text-white"
-            style={{ fontWeight: 720 }}
-          >
-            How Lantern works
-          </h1>
-          <p className="mx-auto mt-5 max-w-[46ch] text-[16px] leading-relaxed text-white/60">
-            Save money together, win a prize at random, and never lose your deposit. The money is
-            invisible. The fairness is not.
-          </p>
-        </section>
-
-        <section className="mt-16 flex flex-col gap-3 sm:mt-20">
-          <Step
-            n={1}
-            title="Put money in your lantern"
-            body="Add any amount you like. The moment it lands it turns private, so only you can ever see how much is inside."
-          />
-          <Step
-            n={2}
-            title="Everyone saves together"
-            body="Your lantern joins thousands of others in one pool. Every lantern glows, and not one of them can be read from the outside."
-          />
-          <Step
-            n={3}
-            title="A winner is drawn, in secret"
-            body="Anyone can run the draw. One saver wins the prize, with better odds the more they have saved. The winner stays secret, even from the person who ran it, so it cannot be rigged."
-          />
-          <Step
-            n={4}
-            title="Peek to see if you won"
-            body="Only you can look inside your own lantern. If your balance went up, you won. Nobody else is ever told a thing."
-          />
-          <Step
-            n={5}
-            title="Take your money out, anytime"
-            body="Your savings are always yours. Withdraw in full whenever you want. You never lose your deposit; the prize was only ever a bonus on top."
-            last
-          />
-        </section>
-
-        <section className="fade-rise mt-20 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Panel title="What stays private" note="readable only by you" tone="private">
-            <li>How much you have saved</li>
-            <li>Your odds of winning</li>
-            <li>Whether you won</li>
-            <li>How much anyone has won</li>
-          </Panel>
-          <Panel title="What is public" note="so the pool can be trusted" tone="public">
-            <li>The prize on offer</li>
-            <li>That a draw happened</li>
-            <li>The wallets that joined</li>
-            <li>That the draw was fair</li>
-          </Panel>
-        </section>
-
-        <section className="fade-rise mt-20 text-center">
-          <p className="mx-auto max-w-[40ch] text-[15px] leading-relaxed text-white/55">
-            You can watch a whole draw happen and still not say who won. That is the point, and it is
-            the one thing only Zama&rsquo;s encryption makes possible.
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <Link
-              href="/app"
-              prefetch
-              className="inline-flex items-center gap-2 rounded-lg bg-flameFill px-7 py-4 text-[15px] font-medium text-onFlame transition-transform duration-200 hover:scale-[1.02]"
+        <div className="mx-auto w-full max-w-[52rem] px-4 pb-24 sm:px-6">
+          <section className="fade-rise pt-10 text-center sm:pt-16">
+            <p className="label mb-5 justify-center">A two-minute guide</p>
+            <h1
+              className="mx-auto max-w-[16ch] font-display text-[clamp(2.1rem,6.5vw,4.4rem)] leading-[0.98] tracking-tightest text-parchment"
+              style={{ fontWeight: 720 }}
             >
-              {m.nav.openApp}
-              <span aria-hidden>&rarr;</span>
-            </Link>
-            <Link href="/" className="text-[14px] text-white/55 transition-colors hover:text-white">
-              Back to home
-            </Link>
-          </div>
-        </section>
+              How Hearth works
+            </h1>
+            <p className="mx-auto mt-5 max-w-[46ch] text-[16px] leading-relaxed text-muted">
+              Save together, win a prize paid out of yield, and never lose your deposit. The money is
+              invisible. The fairness is not.
+            </p>
+          </section>
+
+          <section className="mt-14 flex flex-col gap-3 sm:mt-20">
+            {STEPS.map((step, index) => (
+              <Step
+                key={step.title}
+                n={index + 1}
+                title={step.title}
+                body={step.body}
+                last={index === STEPS.length - 1}
+              />
+            ))}
+          </section>
+
+          <section className="fade-rise mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Panel title="Encrypted, readable only by you" note="your own values" tone="private">
+              <li>Your principal</li>
+              <li>Your unclaimed winnings</li>
+              <li>Your time-weighted balance in every draw</li>
+              <li>What each draw paid you, so whether you won</li>
+            </Panel>
+            <Panel title="Public, so the pool can be trusted" note="anyone can check" tone="public">
+              <li>The seed of each draw, and its signature</li>
+              <li>The bracket the draw ran against</li>
+              <li>Each tier&apos;s prize size and liquidity</li>
+              <li>How many prizes a tier paid, one draw later</li>
+              <li>Which addresses deposited, and when</li>
+            </Panel>
+          </section>
+
+          <section className="fade-rise mt-12 rounded-panel border border-hairline bg-[rgba(10,10,10,0.5)] p-5 sm:p-6">
+            <h2 className="label">Named honestly: what leaks</h2>
+            <ul className="mt-4 flex flex-col gap-3 text-[13.5px] leading-relaxed text-muted">
+              <li>
+                <span className="text-parchment">Wrapping and unwrapping are public.</span> Turning a
+                public token into a confidential one is by definition a public act. If somebody can pin
+                your balance, usually by watching a public wrap followed by a deposit of the same size,
+                then your result in every draw from then on is public arithmetic, because the thresholds
+                are public by design.
+              </li>
+              <li>
+                <span className="text-parchment">Below three savers the bracket is nearly personal.</span>{" "}
+                With one saver it is that saver&apos;s weight to within a factor of two. The app says so
+                on the page when it happens.
+              </li>
+              <li>
+                <span className="text-parchment">Each tier publishes how many prizes it paid,</span> one
+                draw later, never to whom. That is the same step that returns unwon money to the public
+                pot, which is what lets the jackpot accumulate where you can watch it. It slowly narrows
+                a balance that never moves.
+              </li>
+              <li>
+                <span className="text-parchment">The token is Zama&apos;s, and it is upgradeable.</span>{" "}
+                Its owner can appoint observers able to decrypt every amount that moves through the
+                token, retroactively. Hearth&apos;s own ledger is not readable by them, and the app
+                shows a banner if an observer is ever appointed.
+              </li>
+            </ul>
+          </section>
+
+          <section className="fade-rise mt-12 text-center">
+            <p className="mx-auto max-w-[42ch] text-[15px] leading-relaxed text-muted">
+              You can watch a whole draw happen and still not say who won. That is the point, and it is
+              the one thing only fully homomorphic encryption makes possible.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                href="/app"
+                prefetch
+                className="inline-flex items-center gap-2 rounded-lg bg-flameFill px-6 py-3.5 text-[15px] font-medium text-onFlame transition-transform duration-200 hover:scale-[1.02]"
+              >
+                Open the pool
+                <span aria-hidden>&rarr;</span>
+              </Link>
+              <Link href="/verify" className="text-[14px] text-muted transition-colors hover:text-parchment">
+                Check a draw yourself
+              </Link>
+            </div>
+          </section>
+        </div>
+
+        <SiteFooter />
       </div>
     </main>
   );
@@ -124,22 +156,23 @@ export default function HowItWorksPage() {
 
 function Step({ n, title, body, last = false }: { n: number; title: string; body: string; last?: boolean }) {
   return (
-    <div className="fade-rise relative flex gap-5" style={{ animationDelay: `${n * 90}ms` }}>
-      
+    <div className="fade-rise relative flex gap-4 sm:gap-5" style={{ animationDelay: `${n * 80}ms` }}>
       <div className="relative flex flex-col items-center">
-        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-flame/25 bg-flame/[0.06]">
-          <span className="font-display text-[17px] text-flame" style={{ fontWeight: 660 }}>
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-flame/25 bg-flame/[0.06] sm:h-12 sm:w-12">
+          <span className="font-display text-[15px] text-flame sm:text-[17px]" style={{ fontWeight: 660 }}>
             {n}
           </span>
         </div>
         {!last && <div className="mt-1 w-px flex-1 bg-gradient-to-b from-flame/25 to-transparent" />}
       </div>
 
-      <div className={`glass-fill relative overflow-hidden rounded-panel border border-hairline p-5 ${last ? "" : "mb-3"} flex-1`}>
-        <h2 className="font-display text-[19px] tracking-tight text-parchment" style={{ fontWeight: 640 }}>
+      <div
+        className={`glass-fill relative overflow-hidden rounded-panel border border-hairline p-4 sm:p-5 ${last ? "" : "mb-3"} flex-1`}
+      >
+        <h2 className="font-display text-[17px] tracking-tight text-parchment sm:text-[19px]" style={{ fontWeight: 640 }}>
           {title}
         </h2>
-        <p className="mt-2 text-[14.5px] leading-relaxed text-white/60">{body}</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-muted">{body}</p>
       </div>
     </div>
   );
@@ -157,31 +190,22 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <div className="glass-fill relative overflow-hidden rounded-panel border border-hairline p-6">
-      <div className="mb-4 flex items-baseline justify-between gap-3">
+    <div className="glass-fill relative overflow-hidden rounded-panel border border-hairline p-5 sm:p-6">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-display text-[16px] tracking-tight text-parchment" style={{ fontWeight: 640 }}>
           {title}
         </h3>
-        <span className={`text-[11px] uppercase tracking-label ${tone === "private" ? "text-flame" : "text-white/40"}`}>
+        <span className={`text-[11px] uppercase tracking-label ${tone === "private" ? "text-flame" : "text-faint"}`}>
           {note}
         </span>
       </div>
       <ul
-        className={`list-disc space-y-2.5 pl-[1.1rem] text-[14px] text-white/65 ${
+        className={`list-disc space-y-2.5 pl-[1.1rem] text-[14px] text-muted ${
           tone === "private" ? "marker:text-flame/60" : "marker:text-white/30"
         }`}
       >
         {children}
       </ul>
     </div>
-  );
-}
-
-function LanternGlyph({ size = 18 }: { size?: number }) {
-  return (
-    <span className="relative block" style={{ height: size, width: (size * 13) / 18 }} aria-hidden>
-      <span className="absolute inset-x-0 bottom-0 top-[3px] rounded-[3px] border border-flame/70 bg-flame/15" />
-      <span className="absolute left-1/2 top-0 h-[5px] w-[7px] -translate-x-1/2 rounded-t-full border border-b-0 border-flame/70" />
-    </span>
   );
 }

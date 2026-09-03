@@ -6,6 +6,11 @@ and no second URL to keep in sync.
 
 Ram does the clicking. This page is the exact list of what to click and what to paste.
 
+The app runs Next 16 with Turbopack, React 19.2, wagmi 3 and viem 2.56. `npm audit
+--omit=dev` at the repository root reports no findings; everything `npm audit` still lists
+is in the Hardhat toolchain, which is a dev dependency of the contracts package and is
+never built or shipped.
+
 ---
 
 ## Project settings
@@ -30,32 +35,28 @@ obvious to point at.
 
 ## Environment variables
 
-Set each of these for Production, Preview and Development. The five names below are exactly
-the keys in `packages/web/.env.local` today, plus one the code reads and the file does not
-define.
+Set each of these for Production, Preview and Development. The six names below are exactly
+the keys the app reads, and `packages/web/.env.example` is the same list with comments.
 
 | Variable | Public in the browser | Where its value comes from |
 | --- | --- | --- |
-| `SEPOLIA_RPC_URL` | No | Your own Sepolia endpoint, from Alchemy, Infura or another provider. The hero reads chain state on the server and ships the numbers inside the HTML, so this endpoint never reaches a browser and cannot be lifted out of the bundle. If it is unset the app falls back to a shared public node, which is fine for a demo and slow under load |
+| `SEPOLIA_RPC_URL` | No | Your own Sepolia endpoint, from Alchemy, Infura or another provider. The landing page and the `/api/activity` route read the chain on the server and ship the numbers inside the HTML, so this endpoint never reaches a browser and cannot be lifted out of the bundle. It also has to answer `eth_getLogs` over a few thousand blocks, which the free public node refuses. If it is unset the app falls back to that public node and the draw history goes quiet |
+| `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Yes | Optional. The wallet reads use it, and fall back to `https://ethereum-sepolia-rpc.publicnode.com` when it is unset. Anything set here is visible in the browser bundle, so it must be an endpoint you are happy to publish, never the private one above |
 | `NEXT_PUBLIC_CHAIN_ID` | Yes | `11155111` for Ethereum Sepolia. The app defaults to it if unset |
-| `NEXT_PUBLIC_LANTERN_POOL` | Yes | The deployed pool address, from the deploy script output. See the rename note below |
-| `NEXT_PUBLIC_CONFIDENTIAL_USDC` | Yes | Zama's confidential USDC on Sepolia: `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639`. Published in Zama's own address reference, not ours to choose |
-| `NEXT_PUBLIC_TEST_USDC` | Yes | Zama's mock USDC on Sepolia: `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF`. This is the token the app's "Get test USDC" button mints from |
-| `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Yes | Optional. The wallet connection uses it, and falls back to the same shared public node when it is unset. Anything set here is visible in the browser bundle, so it must be an endpoint you are happy to publish, never the private one above |
+| `NEXT_PUBLIC_HEARTH_VAULT` | Yes | `0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52`, from `packages/contracts/deployments/sepolia/hearth.json` |
+| `NEXT_PUBLIC_HEARTH_POOL` | Yes | `0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2`, same file |
+| `NEXT_PUBLIC_HEARTH_SOURCE` | Yes | `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91`, same file |
+
+The confidential asset and its underlying ERC-20 are deliberately **not** environment
+variables any more. The app reads `vault.asset()` and then `asset.underlying()` on chain, so
+it can never be pointed at a token the vault would refuse. The old
+`NEXT_PUBLIC_LANTERN_POOL`, `NEXT_PUBLIC_CONFIDENTIAL_USDC` and `NEXT_PUBLIC_TEST_USDC` are
+gone; delete them from the Vercel project if they are already set.
 
 Anything prefixed `NEXT_PUBLIC_` is compiled into the browser bundle and is readable by
 anybody who opens the page. Nothing secret belongs behind that prefix. No private key, no
 seed phrase and no relayer credential is read by the app at all: the deployer's key and the
 keeper's key live on Ram's machine and on the keeper host, never on Vercel.
-
-### The rename note
-
-`NEXT_PUBLIC_LANTERN_POOL` still carries the project's previous name and still points at a
-single pool contract. Hearth has three: the vault, the prize pool and the yield source. The
-app rewire is milestone 6 in `PLAN.md` and it will replace that one variable with the
-addresses the new contracts need. Set the current name now if you are deploying before the
-rewire lands, and re-read this page afterwards, because the variable list is the one thing
-here that is going to change.
 
 ---
 
@@ -66,7 +67,9 @@ here that is going to change.
 2. Open it on a phone. Every page has to work at 375 pixels wide.
 3. Connect a wallet on Sepolia and walk the two-minute judge path from the README, on the
    deployed site rather than on localhost. A judge will do exactly that and nothing else.
-4. Check the documentation pages render on the deployed site, including the Mermaid
-   diagrams, which are the part most likely to break in a production build.
-5. Give the project a custom domain only if you already own one. A `vercel.app` URL is
+4. Open `/verify` and paste a saver's address. The thresholds come from a contract call, so
+   if they render, the deployed app is talking to the deployed vault.
+5. Open `/lab`. It is the draw ceremony, deliberately not linked from the navigation, and it
+   is the page worth screenshotting for the submission.
+6. Give the project a custom domain only if you already own one. A `vercel.app` URL is
    fine and the submission form accepts it.
