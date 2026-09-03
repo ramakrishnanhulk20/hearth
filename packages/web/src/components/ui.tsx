@@ -13,15 +13,15 @@ export function HearthMark({ size = 18 }: { size?: number }) {
       <path
         d="M4 21V9.5A5.5 5.5 0 0 1 9.5 4h5A5.5 5.5 0 0 1 20 9.5V21"
         fill="none"
-        stroke="rgb(var(--flame) / 0.75)"
+        stroke="rgb(var(--flame-ink) / 0.75)"
         strokeWidth="1.6"
         strokeLinecap="round"
       />
-      <path d="M2.6 21h18.8" stroke="rgb(var(--flame) / 0.75)" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M2.6 21h18.8" stroke="rgb(var(--flame-ink) / 0.75)" strokeWidth="1.6" strokeLinecap="round" />
       <path
         className="flame-core"
         d="M12 10.2c1.9 1.3 2.8 2.6 2.8 4a2.8 2.8 0 0 1-5.6 0c0-1.4.9-2.7 2.8-4z"
-        fill="rgb(var(--flame))"
+        fill="rgb(var(--flame-ink))"
       />
     </svg>
   );
@@ -44,8 +44,8 @@ export function Wordmark({ size = 18 }: { size?: number }) {
 export function Spinner({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden className="shrink-0">
-      <circle cx="12" cy="12" r="9" fill="none" stroke="rgb(var(--flame) / 0.2)" strokeWidth="3" />
-      <path d="M21 12a9 9 0 0 0-9-9" fill="none" stroke="rgb(var(--flame))" strokeWidth="3" strokeLinecap="round">
+      <circle cx="12" cy="12" r="9" fill="none" stroke="rgb(var(--flame-ink) / 0.2)" strokeWidth="3" />
+      <path d="M21 12a9 9 0 0 0-9-9" fill="none" stroke="rgb(var(--flame-ink))" strokeWidth="3" strokeLinecap="round">
         <animateTransform
           attributeName="transform"
           type="rotate"
@@ -112,7 +112,7 @@ export function Figure({
       <p className="mt-1.5 flex items-baseline gap-1.5">
         <span
           className={`font-display text-[24px] leading-none tabular-nums tracking-tight sm:text-[26px] ${
-            accent ? "text-flame" : "text-parchment"
+            accent ? "text-flameInk" : "text-parchment"
           }`}
           style={{ fontWeight: 620 }}
         >
@@ -165,7 +165,7 @@ export function Button({
       ? "bg-flameFill text-onFlame hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-8px_rgba(249,209,0,0.6)]"
       : tone === "quiet"
         ? "text-faint hover:text-parchment"
-        : "border border-hairline text-parchment hover:-translate-y-0.5 hover:border-flame/45 hover:bg-flame/[0.06] hover:text-flame";
+        : "border border-hairline text-parchment hover:-translate-y-0.5 hover:border-flame/45 hover:bg-flame/[0.06] hover:text-flameInk";
 
   if (href) {
     return (
@@ -198,6 +198,7 @@ export function AmountField({
   disabled = false,
   problem,
   suffix = "USDC",
+  variant = "boxed",
 }: {
   /** What this field is for. Four of these sit on one page, so the placeholder cannot name them. */
   name?: string;
@@ -208,8 +209,61 @@ export function AmountField({
   disabled?: boolean;
   problem?: string | null;
   suffix?: string;
+  /**
+   * "plain" drops the framing and enlarges the digits, for the console cards that supply their
+   * own border, label and ticker. The input, its validation and its accessible name are the same
+   * in both, so the two never drift apart.
+   */
+  variant?: "boxed" | "plain";
 }) {
   const problemId = useId();
+
+  const input = (
+    <input
+      inputMode="decimal"
+      value={value}
+      disabled={disabled}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder="0.00"
+      aria-label={name}
+      aria-invalid={problem ? true : undefined}
+      aria-describedby={problem ? problemId : undefined}
+      className={
+        variant === "plain"
+          ? "w-full min-w-0 bg-transparent font-display text-[34px] leading-none tabular-nums tracking-tight text-parchment outline-none placeholder:text-faint disabled:opacity-60 sm:text-[40px]"
+          : "w-full min-w-0 bg-transparent font-display text-[20px] tabular-nums tracking-tight text-parchment outline-none placeholder:text-parchment/25 sm:text-[22px]"
+      }
+      style={{ fontWeight: variant === "plain" ? 600 : 560 }}
+    />
+  );
+
+  const problemLine = problem ? (
+    <p id={problemId} className="mt-2 text-[12.5px] leading-snug text-bad">
+      {problem}
+    </p>
+  ) : null;
+
+  if (variant === "plain") {
+    return (
+      <div>
+        <div className="flex items-center gap-3">
+          {input}
+          {onMax && (
+            <button
+              type="button"
+              onClick={onMax}
+              disabled={disabled}
+              aria-label={name ? `${maxLabel ?? "Max"}: ${name}` : undefined}
+              className="shrink-0 rounded-md border border-hairline px-2.5 py-1 text-[11px] font-medium uppercase tracking-label text-muted transition-colors hover:border-hairlineStrong hover:text-parchment"
+            >
+              {maxLabel ?? "Max"}
+            </button>
+          )}
+        </div>
+        {problemLine}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -219,36 +273,21 @@ export function AmountField({
         }`}
       >
         <span className="text-[16px] text-faint">$</span>
-        <input
-          inputMode="decimal"
-          value={value}
-          disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="0.00"
-          aria-label={name}
-          aria-invalid={problem ? true : undefined}
-          aria-describedby={problem ? problemId : undefined}
-          className="w-full min-w-0 bg-transparent font-display text-[20px] tabular-nums tracking-tight text-parchment outline-none placeholder:text-parchment/25 sm:text-[22px]"
-          style={{ fontWeight: 560 }}
-        />
+        {input}
         {onMax && (
           <button
             type="button"
             onClick={onMax}
             disabled={disabled}
             aria-label={name ? `${maxLabel ?? "Max"}: ${name}` : undefined}
-            className="shrink-0 rounded-md border border-hairline px-2 py-1 text-[11px] uppercase tracking-label text-faint transition-colors hover:border-flame/45 hover:text-flame"
+            className="shrink-0 rounded-md border border-hairline px-2 py-1 text-[11px] uppercase tracking-label text-faint transition-colors hover:border-flame/45 hover:text-flameInk"
           >
             {maxLabel ?? "Max"}
           </button>
         )}
         <span className="shrink-0 text-[13px] text-faint">{suffix}</span>
       </div>
-      {problem && (
-        <p id={problemId} className="mt-2 text-[12.5px] leading-snug text-bad">
-          {problem}
-        </p>
-      )}
+      {problemLine}
     </div>
   );
 }
@@ -345,7 +384,7 @@ export function PhaseNote({
                 href={txUrl(hash)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1 inline-block text-[12px] text-flame/80 underline-offset-2 hover:underline"
+                className="mt-1 inline-block text-[12px] text-flameInk underline-offset-2 hover:underline"
               >
                 View the transaction on Etherscan
               </a>
@@ -384,7 +423,7 @@ export function Row({ label, value, note }: { label: string; value: ReactNode; n
 export function Pill({ children, tone = "quiet" }: { children: ReactNode; tone?: "quiet" | "flame" | "good" | "bad" }) {
   const skin =
     tone === "flame"
-      ? "border-flame/40 text-flame"
+      ? "border-flame/40 text-flameInk"
       : tone === "good"
         ? "border-good/40 text-good"
         : tone === "bad"

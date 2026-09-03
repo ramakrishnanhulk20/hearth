@@ -63,7 +63,7 @@ export function Banners({
 
       {token.paused && (
         <Banner tone="bad" title="The confidential USDC token is paused.">
-          Wrapping, transferring and unwrapping are all stopped at the token layer. Hearth&apos;s own
+          Shielding, transferring and unshielding are all stopped at the token layer. Hearth&apos;s own
           contracts are unaffected, but nothing can move until Zama unpauses it.
         </Banner>
       )}
@@ -92,7 +92,7 @@ export function Banners({
               href={addressUrl(observer)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-flame/80 underline-offset-2 hover:underline"
+              className="text-flameInk underline-offset-2 hover:underline"
             >
               {shortAddress(observer)}{" "}
             </a>
@@ -118,7 +118,7 @@ export function Banners({
 
       {noKeeperAtAll && (
         <Banner tone="warn" title="No draw has been advanced in the last few hours.">
-          Every step of a draw is callable by anyone, and the draw panel below offers all of them.
+          Every step of a draw is callable by anyone. Run a draw, in the sidebar, offers all five.
           A stalled keeper costs draws, never money.
         </Banner>
       )}
@@ -132,20 +132,20 @@ export function Banners({
               href={txUrl(keeper.tx)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[12px] text-flame/80 underline-offset-2 hover:underline"
+              className="text-[12px] text-flameInk underline-offset-2 hover:underline"
             >
               See it on Etherscan
             </a>
           }
         >
           {keeper.from ? `Sent by ${shortAddress(keeper.from)}. ` : ""}Nobody has to wait for a keeper:
-          the draw panel below closes, awards, evaluates, finalizes and reconciles from your own wallet.
+          Run a draw closes, awards, evaluates, finalizes and reconciles from your own wallet.
         </Banner>
       )}
 
       {activityError && (
         <Banner tone="info" title="The draw history is unavailable.">
-          {activityError} The live state above still comes straight from the chain.
+          {activityError} Every figure on the screens themselves still comes straight from the chain.
         </Banner>
       )}
     </div>

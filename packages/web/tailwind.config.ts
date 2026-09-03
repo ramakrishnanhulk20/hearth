@@ -21,6 +21,7 @@ const config: Config = {
         flame: channel("--flame"),
         flameFill: channel("--flame-fill"),
         flameSoft: channel("--flame-soft"),
+        flameInk: channel("--flame-ink"),
         ember: channel("--ember"),
         onFlame: channel("--on-flame"),
         good: channel("--good"),

@@ -5,6 +5,7 @@ import type { Address, Hex } from "viem";
 import { useAccount, useBalance, useReadContracts } from "wagmi";
 import { HEARTH_POOL_ABI, HEARTH_SOURCE_ABI, HEARTH_VAULT_ABI, CONFIDENTIAL_ASSET_ABI } from "@/lib/chain/abis";
 import { CHAIN_ID, HEARTH, MIN_ANONYMITY_SET } from "@/lib/chain/addresses";
+import { useHydrated } from "./useHydrated";
 import { ERC20_ABI, REVIEWED_IMPLEMENTATION, TOKEN_GOVERNANCE_ABI } from "@/lib/chain/tokenAbi";
 import type { Activity } from "@/app/api/activity/route";
 
@@ -154,7 +155,8 @@ export function usePoolState(): PoolState {
   const { vault, pool, source } = HEARTH;
   const enabled = vault !== null && pool !== null && source !== null;
 
-  const { data, refetch, isLoading, isError } = useReadContracts({
+  const hydrated = useHydrated();
+  const { data: liveData, refetch, isLoading, isError } = useReadContracts({
     query: { enabled, refetchInterval: 12_000 },
     contracts: enabled
       ? [
@@ -180,6 +182,10 @@ export function usePoolState(): PoolState {
         ]
       : [],
   });
+
+  // wagmi can answer from cache before React finishes hydrating, and the server had no
+  // answer at all, so the first client render has to look like the server's.
+  const data = hydrated ? liveData : undefined;
 
   const period = Number(value<number>(data as never, 0, 0));
   const closable = Number(value<number>(data as never, 6, 0));
@@ -249,11 +255,11 @@ export function usePoolState(): PoolState {
         harvestable: landed(data as never, 18),
       },
       isLoading,
-      unavailable: !isLoading && data === undefined,
+      unavailable: hydrated && !isLoading && data === undefined,
       isError,
       refetch: () => void refetch(),
     };
-  }, [data, timing, period, closable, isLoading, isError, refetch]);
+  }, [data, timing, period, closable, isLoading, isError, refetch, hydrated]);
 }
 
 export type SaverState = {
@@ -283,7 +289,8 @@ export function useSaverState(config: HearthConfig): SaverState {
 
   const enabled = connected && config.vault !== null && config.asset !== null && config.underlying !== null;
 
-  const { data, refetch, isLoading, isError } = useReadContracts({
+  const hydrated = useHydrated();
+  const { data: liveData, refetch, isLoading, isError } = useReadContracts({
     query: { enabled, refetchInterval: 12_000 },
     contracts:
       enabled && config.vault && config.asset && config.underlying
@@ -299,6 +306,10 @@ export function useSaverState(config: HearthConfig): SaverState {
         : [],
   });
 
+  // wagmi can answer from cache before React finishes hydrating, and the server had no
+  // answer at all, so the first client render has to look like the server's.
+  const data = hydrated ? liveData : undefined;
+
   return useMemo(
     () => ({
       address: address ?? null,
@@ -313,11 +324,11 @@ export function useSaverState(config: HearthConfig): SaverState {
       winningsHandle: handle(value<unknown>(data as never, 5, null)),
       firstObservationAt: Number(value<number>(data as never, 6, 0)),
       isLoading,
-      unavailable: connected && !isLoading && data === undefined,
+      unavailable: hydrated && connected && !isLoading && data === undefined,
       isError,
       refetch: () => void refetch(),
     }),
-    [address, connected, isConnected, chainId, eth, data, isLoading, isError, refetch],
+    [address, connected, isConnected, chainId, eth, data, isLoading, isError, refetch, hydrated],
   );
 }
 
@@ -381,7 +392,8 @@ export function useDraws(period: number): DrawsState {
 
   const enabled = vault !== null && pool !== null && ids.length > 0;
 
-  const { data, refetch, isLoading, isError } = useReadContracts({
+  const hydrated = useHydrated();
+  const { data: liveData, refetch, isLoading, isError } = useReadContracts({
     query: { enabled, refetchInterval: 12_000 },
     contracts:
       enabled && vault && pool
@@ -401,6 +413,10 @@ export function useDraws(period: number): DrawsState {
           ])
         : [],
   });
+
+  // wagmi can answer from cache before React finishes hydrating, and the server had no
+  // answer at all, so the first client render has to look like the server's.
+  const data = hydrated ? liveData : undefined;
 
   const draws = useMemo(() => {
     type RawDraw = {
@@ -456,7 +472,7 @@ export function useDraws(period: number): DrawsState {
   return {
     draws,
     isLoading,
-    unavailable: enabled && !isLoading && data === undefined,
+    unavailable: hydrated && enabled && !isLoading && data === undefined,
     isError,
     refetch: () => void refetch(),
   };

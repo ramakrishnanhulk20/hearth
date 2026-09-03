@@ -21,6 +21,85 @@
     --flame: 249 209 0;
     --flame-fill: 249 209 0;
     --flame-soft: 252 228 114;
+    /* The flame when it has to work as a foreground: a link, an outline, a spinner arc. On the
+       dark pages that is the flame itself, which is why this is the same yellow here. */
+    --flame-ink: 249 209 0;
+    --ember: 250 168 53;
+    --on-flame: 14 14 14;
+    --good: 62 175 90;
+    --bad: 221 50 50;
+    --warn: 232 156 42;
+
+    --grain-opacity: 0.05;
+    color-scheme: dark;
+  }
+
+  /*
+   * The console under /app. Same token names as the dark pages, light values, so a component
+   * written against the tokens works on both without a second styling path.
+   *
+   * The split is deliberate. The landing page sells and is cinematic; the console is where money
+   * moves and wants to be quiet and legible, the way a product console usually differs from the
+   * marketing site in front of it.
+   */
+  [data-surface="console"] {
+    --bg: #efefef;
+    --surface: #ffffff;
+    --raised: #f7f7f7;
+
+    --hairline: rgba(17, 19, 24, 0.11);
+    --hairline-soft: rgba(17, 19, 24, 0.07);
+    --hairline-strong: rgba(17, 19, 24, 0.2);
+    --hover: rgba(17, 19, 24, 0.04);
+    --seal: rgba(17, 19, 24, 0.16);
+
+    --text: rgba(17, 19, 24, 0.92);
+    --muted: rgba(17, 19, 24, 0.58);
+    --faint: rgba(17, 19, 24, 0.42);
+
+    --flame: 249 209 0;
+    --flame-fill: 249 209 0;
+    --flame-soft: 254 244 197;
+    /* Yellow text on white cannot be read, so the foreground flame darkens to amber here while
+       the fill stays the brand yellow. */
+    --flame-ink: 140 95 0;
+    --ember: 176 104 8;
+    --on-flame: 26 22 0;
+    --good: 21 122 60;
+    --bad: 184 32 32;
+    --warn: 163 97 8;
+
+    --grain-opacity: 0;
+    color-scheme: light;
+  }
+
+  /* The yellow focus ring disappears on the light surface, so the console rings in amber. */
+  [data-surface="console"] :focus-visible {
+    outline-color: rgb(var(--flame-ink) / 0.85);
+  }
+
+  /*
+   * A dark island inside the console. Only the interim /app page uses it, to keep the old
+   * single-page panels readable while the five screens are built. Delete this block and the
+   * wrapper in src/app/app/page.tsx together with those panels.
+   */
+  [data-surface="stage"] {
+    --bg: #000000;
+    --surface: #141414;
+    --raised: #0c0c0c;
+
+    --hairline: rgba(255, 255, 255, 0.1);
+    --hairline-soft: rgba(255, 255, 255, 0.06);
+    --hairline-strong: rgba(255, 255, 255, 0.24);
+    --hover: rgba(255, 255, 255, 0.04);
+    --seal: rgba(255, 255, 255, 0.13);
+
+    --text: rgba(255, 255, 255, 0.82);
+    --muted: rgba(255, 255, 255, 0.54);
+    --faint: rgba(255, 255, 255, 0.34);
+
+    --flame-soft: 252 228 114;
+    --flame-ink: 249 209 0;
     --ember: 250 168 53;
     --on-flame: 14 14 14;
     --good: 62 175 90;
@@ -38,6 +117,12 @@
   body {
     @apply bg-ink text-parchment font-sans antialiased;
     overscroll-behavior-y: none;
+  }
+
+  /* The console does not reach the edges of the page it sits on, so the page itself takes the
+     console grey. Without this, a rubber-band scroll under /app shows the landing page's black. */
+  body:has([data-surface="console"]) {
+    --bg: #efefef;
   }
 
   ::selection {
