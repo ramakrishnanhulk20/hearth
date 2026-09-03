@@ -48,10 +48,11 @@ withdrawal of savings.
 
 ## 7. Who triggers the draws, and what happens if they stop?
 
-We run a keeper script, and Chainlink Automation covers the close step as backup, but every
-step of a draw is callable by anyone, including you from the app. Closing has a deadline of
-its own, half a period before the window ends, so that a close can never land too late for
-the award to follow it. If nothing runs, that draw is skipped: its liquidity stays in the
+We run a keeper script. The pool also implements Chainlink's automation interface, so a
+time-based upkeep could cover the close step, though none is registered on the demo pool
+yet. Either way, every step of a draw is callable by anyone, including you from the app.
+Closing has a deadline of its own, half a period before the window ends, so that a close
+can never land too late for the award to follow it. If nothing runs, that draw is skipped: its liquidity stays in the
 tiers for the next draw, the yield is booked whenever a late award lands, and deposits and
 withdrawals keep working. A stalled keeper costs draws, never money.
 

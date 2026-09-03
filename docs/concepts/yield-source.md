@@ -95,7 +95,8 @@ the one promise the product cannot break. Verifying the transfer removes the who
 ## Mainnet: Zama's Confidential Vault
 
 Zama ships a protocol whose entire job is earning yield on confidential balances, and it
-is the natural mainnet source. `ConfidentialVaultYieldSource` is the adapter.
+is the natural mainnet source. `ConfidentialVaultYieldSource` is the adapter in that
+design. What follows is its specification, not a contract in this repository.
 
 The design is a batcher sitting between confidential tokens and an ordinary ERC-4626
 yield vault. An ERC-4626 vault only accepts public transfers, so a lone depositor would
@@ -151,9 +152,9 @@ only depositor.
 | ERC-4626 vault (idle) | `0x6AB54988261AEC573a2CA13cF802d3B1114f864C` |
 | Mock USDC | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` |
 
-Because the Sepolia vault is idle, the adapter is documented and tested against the
-batcher interface rather than wired to the live pool. Saying it is live when it earns
-nothing would be a lie a judge could check in a minute.
+Because the Sepolia vault is idle, the adapter is specified here against Zama's published
+batcher interface and is not written yet. Saying it is live when it earns nothing would be
+a lie a judge could check in a minute.
 
 ### What plugging it in means in practice
 
@@ -164,10 +165,11 @@ stuck waiting for Zama's operator, and claims never expire.
 
 That rhythm is slower than the sponsored source's instant drip, which is why the keeper
 runs the redemption ahead of time rather than inside `harvest`. The pool's contract never
-waits: it asks the adapter for whatever has already been claimed back. What remains as
-real work in taking this live is the keeper side of it, deciding how often to start a
-redemption and how much of the position to redeem, and that is a policy choice with no
-on-chain consequence if it is late.
+waits: it asks the adapter for whatever has already been claimed back. What remains as real
+work in taking this live is the adapter contract itself, which this repository specifies but
+does not implement, and the keeper side of it, deciding how often to start a redemption and
+how much of the position to redeem, which is a policy choice with no on-chain consequence if
+it is late.
 
 ### What Hearth would inherit
 

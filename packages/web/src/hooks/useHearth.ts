@@ -17,6 +17,14 @@ function value<T>(data: readonly Entry[] | undefined, index: number, fallback: T
   return entry && entry.status === "success" ? (entry.result as T) : fallback;
 }
 
+/**
+ * Whether one call in a multicall actually answered. A batch can come back with some entries
+ * failed, so a screen that only watches the batch's isLoading would print a fallback as a fact.
+ */
+function landed(data: readonly Entry[] | undefined, index: number): boolean {
+  return data?.[index]?.status === "success";
+}
+
 function handle(raw: unknown): Hex | null {
   const asHex = raw as Hex | undefined;
   if (!asHex || /^0x0*$/.test(asHex)) return null;
@@ -87,16 +95,31 @@ export function useHearthConfig(): HearthConfig {
 }
 
 export type Tier = {
+  /** False until this tier's `tierOf` read lands, which leaves the five fields under it unknown. */
+  known: boolean;
   prizeCount: number;
   oddsNumerator: bigint;
   oddsDenominator: bigint;
   shares: number;
   reconcileEvery: number;
-  liquidity: bigint;
-  /** What one prize in this tier would be worth if a draw closed right now. */
-  nextPrize: bigint;
+  /** Null until this tier's `liquidity` read lands. */
+  liquidity: bigint | null;
+  /** What one prize in this tier would be worth if a draw closed right now, null until both land. */
+  nextPrize: bigint | null;
   carryPending: boolean;
   carryPublishedAt: number;
+};
+
+/** Which pool reads answered. A false here means the field beside it is a fallback, not a fact. */
+export type PoolKnown = {
+  period: boolean;
+  savers: boolean;
+  scaleBits: boolean;
+  lastClosedDraw: boolean;
+  closableDraw: boolean;
+  sponsorBalance: boolean;
+  ratePerSecond: boolean;
+  harvestable: boolean;
 };
 
 export type PoolState = {
@@ -113,10 +136,15 @@ export type PoolState = {
   sponsorBalance: bigint;
   ratePerSecond: bigint;
   harvestable: bigint;
-  totalLiquidity: bigint;
+  /** Null while any tier's liquidity is unread, since a partial sum is not the pool's liquidity. */
+  totalLiquidity: bigint | null;
   /** True while the published bracket is close to personal information. */
   thinAnonymitySet: boolean;
+  known: PoolKnown;
   isLoading: boolean;
+  /** Nothing on screen came from the chain: the batch is not in flight and it returned nothing. */
+  unavailable: boolean;
+  isError: boolean;
   refetch: () => void;
 };
 
@@ -126,7 +154,7 @@ export function usePoolState(): PoolState {
   const { vault, pool, source } = HEARTH;
   const enabled = vault !== null && pool !== null && source !== null;
 
-  const { data, refetch, isLoading } = useReadContracts({
+  const { data, refetch, isLoading, isError } = useReadContracts({
     query: { enabled, refetchInterval: 12_000 },
     contracts: enabled
       ? [
@@ -169,27 +197,28 @@ export function usePoolState(): PoolState {
 
   return useMemo(() => {
     type RawTier = { prizeCount: number; oddsNumerator: bigint; oddsDenominator: bigint; shares: number; reconcileEvery: number };
-    const empty: RawTier = { prizeCount: 1, oddsNumerator: 1n, oddsDenominator: 1n, shares: 1, reconcileEvery: 1 };
 
     const tiers: Tier[] = [0, 1, 2].map((index) => {
-      const raw = value<RawTier>(data as never, 10 + index, empty);
-      const liquidity = value<bigint>(data as never, 7 + index, 0n);
+      const raw = value<RawTier | undefined>(data as never, 10 + index, undefined);
+      const liquidity = landed(data as never, 7 + index) ? value<bigint>(data as never, 7 + index, 0n) : null;
       const carry = value<readonly [Hex, number, boolean]>(data as never, 13 + index, ["0x0" as Hex, 0, false]);
-      const count = BigInt(raw.prizeCount === 0 ? 1 : raw.prizeCount);
+      const count = raw && raw.prizeCount > 0 ? BigInt(raw.prizeCount) : null;
       return {
-        prizeCount: Number(raw.prizeCount),
-        oddsNumerator: raw.oddsNumerator,
-        oddsDenominator: raw.oddsDenominator,
-        shares: Number(raw.shares),
-        reconcileEvery: Number(raw.reconcileEvery),
+        known: raw !== undefined,
+        prizeCount: Number(raw?.prizeCount ?? 0),
+        oddsNumerator: raw?.oddsNumerator ?? 0n,
+        oddsDenominator: raw?.oddsDenominator ?? 0n,
+        shares: Number(raw?.shares ?? 0),
+        reconcileEvery: Number(raw?.reconcileEvery ?? 0),
         liquidity,
-        nextPrize: (liquidity * UTILISATION_BPS) / 10_000n / count,
+        nextPrize: liquidity !== null && count !== null ? (liquidity * UTILISATION_BPS) / 10_000n / count : null,
         carryPublishedAt: Number(carry[1]),
         carryPending: Boolean(carry[2]),
       };
     });
 
     const savers = Number(value<bigint>(data as never, 1, 0n));
+    const liquidities = tiers.map((tier) => tier.liquidity);
 
     return {
       period,
@@ -205,12 +234,26 @@ export function usePoolState(): PoolState {
       sponsorBalance: value<bigint>(data as never, 16, 0n),
       ratePerSecond: value<bigint>(data as never, 17, 0n),
       harvestable: value<bigint>(data as never, 18, 0n),
-      totalLiquidity: tiers.reduce((total, tier) => total + tier.liquidity, 0n),
+      totalLiquidity: liquidities.every((amount) => amount !== null)
+        ? liquidities.reduce((total: bigint, amount) => total + (amount as bigint), 0n)
+        : null,
       thinAnonymitySet: savers > 0 && savers < MIN_ANONYMITY_SET,
+      known: {
+        period: landed(data as never, 0),
+        savers: landed(data as never, 1),
+        scaleBits: landed(data as never, 4),
+        lastClosedDraw: landed(data as never, 5),
+        closableDraw: landed(data as never, 6),
+        sponsorBalance: landed(data as never, 16),
+        ratePerSecond: landed(data as never, 17),
+        harvestable: landed(data as never, 18),
+      },
       isLoading,
+      unavailable: !isLoading && data === undefined,
+      isError,
       refetch: () => void refetch(),
     };
-  }, [data, timing, period, closable, isLoading, refetch]);
+  }, [data, timing, period, closable, isLoading, isError, refetch]);
 }
 
 export type SaverState = {
@@ -226,6 +269,9 @@ export type SaverState = {
   winningsHandle: Hex | null;
   firstObservationAt: number;
   isLoading: boolean;
+  /** Nothing on screen came from the chain: the batch is not in flight and it returned nothing. */
+  unavailable: boolean;
+  isError: boolean;
   refetch: () => void;
 };
 
@@ -237,7 +283,7 @@ export function useSaverState(config: HearthConfig): SaverState {
 
   const enabled = connected && config.vault !== null && config.asset !== null && config.underlying !== null;
 
-  const { data, refetch, isLoading } = useReadContracts({
+  const { data, refetch, isLoading, isError } = useReadContracts({
     query: { enabled, refetchInterval: 12_000 },
     contracts:
       enabled && config.vault && config.asset && config.underlying
@@ -267,9 +313,11 @@ export function useSaverState(config: HearthConfig): SaverState {
       winningsHandle: handle(value<unknown>(data as never, 5, null)),
       firstObservationAt: Number(value<number>(data as never, 6, 0)),
       isLoading,
+      unavailable: connected && !isLoading && data === undefined,
+      isError,
       refetch: () => void refetch(),
     }),
-    [address, connected, isConnected, chainId, eth, data, isLoading, refetch],
+    [address, connected, isConnected, chainId, eth, data, isLoading, isError, refetch],
   );
 }
 
@@ -278,6 +326,8 @@ export type DrawStatus = (typeof DRAW_STATUS)[number];
 
 export type DrawView = {
   drawId: number;
+  /** False until this draw's `drawOf` read lands. Every field below it is a fallback until then. */
+  known: boolean;
   status: DrawStatus;
   seed: bigint;
   scaleBits: number;
@@ -308,7 +358,16 @@ export type DrawView = {
 /** How many finished periods the app keeps on screen. Two are in a window, the rest is history. */
 export const RECENT_DRAWS = 4;
 
-export function useDraws(period: number): { draws: DrawView[]; isLoading: boolean; refetch: () => void } {
+export type DrawsState = {
+  draws: DrawView[];
+  isLoading: boolean;
+  /** No draw read answered: the batch is not in flight and it returned nothing. */
+  unavailable: boolean;
+  isError: boolean;
+  refetch: () => void;
+};
+
+export function useDraws(period: number): DrawsState {
   const { vault, pool } = HEARTH;
   const { address } = useAccount();
   const me = (address ?? NOBODY) as Address;
@@ -322,7 +381,7 @@ export function useDraws(period: number): { draws: DrawView[]; isLoading: boolea
 
   const enabled = vault !== null && pool !== null && ids.length > 0;
 
-  const { data, refetch, isLoading } = useReadContracts({
+  const { data, refetch, isLoading, isError } = useReadContracts({
     query: { enabled, refetchInterval: 12_000 },
     contracts:
       enabled && vault && pool
@@ -363,6 +422,7 @@ export function useDraws(period: number): { draws: DrawView[]; isLoading: boolea
       const walk = value<readonly [number, number]>(data as never, base + 3, [0, 0]);
       return {
         drawId,
+        known: raw !== undefined,
         status: DRAW_STATUS[Number(raw?.status ?? 0)] ?? "none",
         seed: raw?.seed ?? 0n,
         scaleBits: Number(raw?.scaleBits ?? 0),
@@ -393,7 +453,13 @@ export function useDraws(period: number): { draws: DrawView[]; isLoading: boolea
     });
   }, [ids, data, address]);
 
-  return { draws, isLoading, refetch: () => void refetch() };
+  return {
+    draws,
+    isLoading,
+    unavailable: enabled && !isLoading && data === undefined,
+    isError,
+    refetch: () => void refetch(),
+  };
 }
 
 export type TokenLayer = {

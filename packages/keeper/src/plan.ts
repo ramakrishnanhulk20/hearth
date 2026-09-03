@@ -92,19 +92,30 @@ export function isSettled(draw: DrawSnapshot, period: number): boolean {
 }
 
 /**
- * Decides everything a tick will send, in the order it will send it.
+ * The first half of a pass: every draw whose window has ended and that nobody has finalized.
  *
- * Finalize and reconcile run before the close, because a finalize folds a tier's unpaid prize
- * money into its carry and a reconcile turns that carry back into plaintext liquidity. Doing
- * both first means the money is offered again in the very next draw instead of sitting out one.
+ * It is planned and sent on its own because finalizing is what publishes a tier's carry, and the
+ * rest of the pass has to see that carry before it decides anything.
  */
-export function planTick(snapshot: TickSnapshot): Action[] {
+export function planFinalizes(snapshot: TickSnapshot): Action[] {
   const actions: Action[] = [];
-  const draws = [...snapshot.draws].sort((a, b) => a.drawId - b.drawId);
-
-  for (const draw of draws) {
+  for (const draw of ordered(snapshot)) {
     if (needsFinalize(draw, snapshot.now)) actions.push({ kind: "finalize", drawId: draw.drawId });
   }
+  return actions;
+}
+
+/**
+ * The second half of a pass, planned from a snapshot whose `pendingCarries` were read after the
+ * finalizes landed.
+ *
+ * Reconcile comes before the close because `HearthVault.openDraw` leaves a tier's carry out of the
+ * draw entirely while it is pending, so money a finalize has just published is neither offered nor
+ * winnable until the reconcile clears the flag.
+ */
+export function planAfterFinalizes(snapshot: TickSnapshot): Action[] {
+  const actions: Action[] = [];
+  const draws = ordered(snapshot);
 
   for (const tier of snapshot.pendingCarries) {
     actions.push({ kind: "reconcile", tier });
@@ -127,6 +138,18 @@ export function planTick(snapshot: TickSnapshot): Action[] {
   }
 
   return actions;
+}
+
+/**
+ * Both halves in the order a pass sends them, from a single snapshot. The keeper plans them from
+ * two reads instead (see `Keeper.tick`), so this is the order of a pass, not the shape of one read.
+ */
+export function planTick(snapshot: TickSnapshot): Action[] {
+  return [...planFinalizes(snapshot), ...planAfterFinalizes(snapshot)];
+}
+
+function ordered(snapshot: TickSnapshot): DrawSnapshot[] {
+  return [...snapshot.draws].sort((a, b) => a.drawId - b.drawId);
 }
 
 /** The lowest draw the next tick still has to read. */

@@ -20,7 +20,7 @@ flowchart LR
     Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
     Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
     Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
-    Keeper["Keeper script<br/>+ Chainlink time-based upkeep"]
+    Keeper["Keeper script<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
     Relayer["Zama relayer + KMS"]
 
     Saver -- "wrap" --> cUSDC
@@ -298,13 +298,13 @@ moment. Sources that earn asynchronously prepare that amount ahead of time.
   sponsorship is a donation to the prize pool and cannot be withdrawn; only the owner can
   change the rate. Yield that accrues while the pool has no savers is paid to the first
   draws that have any.
-- `ConfidentialVaultYieldSource` (mainnet path): the pool's confidential USDC is joined
-  into Zama's Confidential Vault deposit batcher and held as confidential shares. The
-  keeper periodically requests a redemption of the growth through the redeem batcher
-  (join, dispatch, finalize, claim, each permissionless), so that by the next `harvest`
-  the redeemed confidential USDC is already sitting in the adapter; `harvest` then
-  transfers it. On Sepolia the staging vault is idle, so the adapter is documented and
-  tested against the batcher interface, not wired to the live pool.
+- `ConfidentialVaultYieldSource` (mainnet path, specified but not built): the pool's
+  confidential USDC is joined into Zama's Confidential Vault deposit batcher and held as
+  confidential shares. The keeper periodically requests a redemption of the growth through
+  the redeem batcher (join, dispatch, finalize, claim, each permissionless), so that by the
+  next `harvest` the redeemed confidential USDC is already sitting in the adapter; `harvest`
+  then transfers it. On Sepolia the staging vault is idle, so the adapter is specified
+  against Zama's published batcher interface and is not implemented here.
 
 ## 8. Randomness and verifiability
 
@@ -346,8 +346,8 @@ unwrapped out of confidential USDC, which is a public ERC-20 movement at the tok
 Inferable, and named as such: a saver whose balance an observer can pin, for example
 because they wrapped exactly what they deposited seconds earlier, has a public outcome
 in every draw, because thresholds are public; the app keeps wrap and deposit as separate
-steps and offers round wrap amounts for this reason. Cumulative winnings become a public
-lower bound for an address that wraps in and unwraps out in full. A balance that never
+steps and tells the saver at that step to wrap a round number for this reason. Cumulative
+winnings become a public lower bound for an address that wraps in and unwraps out in full. A balance that never
 changes is narrowed slowly by the published prize counts over many draws. Because every
 tier reconciles every draw, that narrowing runs at one count per tier per draw, and when
 the grand tier pays, the winner is one of the savers eligible for it in that single draw,
@@ -418,12 +418,16 @@ flowchart TD
     Pool --> FHE
     Pool --> IYield["IYieldSource"]
     IYield --> Sponsored["SponsoredYieldSource"]
-    IYield --> CV["ConfidentialVaultYieldSource"]
-    CV --> Batcher["Zama DepositVaultBatcherConfidential"]
+    IYield -.-> CV["ConfidentialVaultYieldSource (mainnet design, not built)"]
+    CV -.-> Batcher["Zama DepositVaultBatcherConfidential (mainnet design, not built)"]
     Pool --> Auto["IAutomationCompatible"]
     Vault --> OZ["OpenZeppelin Ownable2Step, Pausable, ReentrancyGuard"]
     Pool --> OZ
 ```
+
+Solid edges are contracts in this repository. The two dotted nodes are the mainnet yield
+path: the adapter is specified against Zama's published batcher interface and no adapter
+contract is written here.
 
 ## 13. Events, views and constructors
 

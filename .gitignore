@@ -39,7 +39,15 @@ yarn-error.log*
 reference/
 CLAUDE.md
 AGENT-RETROS.md
+.claude/
 packages/contracts-fair/
 packages/contracts/deployments/localhost/
 packages/contracts-audit/
 packages/contracts-slither/
+
+# one-off local chain reads, never part of the product
+scratch-*
+
+# next dev regenerates this agent-rules file on every run, and it arrives with em-dashes.
+# It is not ours and does not belong in a public repo.
+AGENTS.md

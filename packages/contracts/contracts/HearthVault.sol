@@ -199,12 +199,13 @@ contract HearthVault is
         emit PrizePoolSet(address(prizePool_));
     }
 
-    /// @notice Stops new deposits and draw closing. Withdrawals and evaluation are never paused.
+    /// @notice Stops new deposits. Withdrawals, evaluation and finalization are never paused. Draw
+    ///         closing is stopped by the prize pool's own pause, which is a separate lever.
     function pause() external onlyOwner {
         _pause();
     }
 
-    /// @notice Lets deposits and draw closing resume.
+    /// @notice Lets deposits resume.
     function unpause() external onlyOwner {
         _unpause();
     }

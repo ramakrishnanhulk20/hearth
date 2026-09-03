@@ -247,8 +247,8 @@ marked as such.
   reports it, pinned above the fold. A wallet signs one transaction at a time, so two instances
   would let the page claim two things were in flight, and a note next to each panel would show the
   same transaction twice when a claim is pressed in the draw list and lands in the withdraw panel.
-- 2026-09-03: the `/docs` route ships as an index of the sixteen documentation pages with their
-  summaries rather than rendering the markdown. The rendered site with a sidebar, mermaid and
+- 2026-09-03, superseded on 3 September (see below): the `/docs` route ships as an index of
+  the sixteen documentation pages with their summaries rather than rendering the markdown. The rendered site with a sidebar, mermaid and
   search is its own unit; a nav link that 404s is worse than a map, and a map is honest about
   where the pages are.
 - 2026-09-03: the reveal store is one cache with one state per panel. The balance panel and every
@@ -259,3 +259,9 @@ marked as such.
   first shape and it was wrong on the judge path: with "what you hold" open, every draw card read
   as open too, so it showed sealed bars with no button to press. Values are keyed by owner as well
   as by handle, so a wallet switch cannot read the previous account's plaintexts.
+- 2026-09-03: the `/docs` route renders the markdown tree itself.
+  `packages/web/src/lib/docs/content.ts` reads the table under "## Pages" in `docs/README.md` as
+  the running order and the grouping, `app/docs/[...slug]/page.tsx` static-generates a route per
+  slug, `DocsNav.tsx` carries the sidebar and the search box with the "/" shortcut, `Outline.tsx`
+  the per-page outline and `DocBody.tsx` the mermaid diagrams. The index page stays as the entry
+  point. One source for the pages means the site cannot drift from the files in the repository.

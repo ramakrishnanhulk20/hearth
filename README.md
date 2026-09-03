@@ -147,8 +147,9 @@ the one a transparent chain cannot offer. Full argument in
 - `evaluate` takes a count, never a list of addresses. The walk starts at a point that
   draw's seed decides, so nobody can pick themselves, and pressing the button says nothing
   about whether you won.
-- A keeper script runs the whole cycle, and Chainlink Automation covers the close step,
-  which is the only step needing no off-chain data and the only one with a deadline.
+- A keeper script runs the whole cycle. The pool implements Chainlink's automation
+  interface for the close step, the only step needing no off-chain data and the only one
+  with a deadline, though no upkeep is registered on the demo pool yet.
 - A stalled keeper costs the pool a draw, never money. Liquidity that was never offered
   stays in its tier, and a late award still books the yield.
 
@@ -204,6 +205,31 @@ the count for that many draws, at the cost of the money nobody won sitting encry
 the public prize dropping to one draw's share until the next reconcile. This deployment
 chose the visible jackpot, and says so in [limitations](docs/limitations.md).
 
+### Seven draws on Sepolia, read from the pool
+
+Every figure here came from `drawParams(drawId)` on the deployed pool
+`0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2`, read on 3 September 2026. The three prize
+columns are that draw's `prize[tier]` in USDC and the bracket is its `scaleBits`.
+
+| Draw | Status | Grand | Mid | Frequent | Bracket |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Awarded | 0.00 | 0.00 | 0.00 | 2^42 |
+| 2 | Awarded | 3.56 | 1.78 | 0.89 | 2^43 |
+| 3 | Awarded | 3.91 | 1.95 | 0.98 | 2^43 |
+| 4 | Awarded | 4.00 | 2.00 | 1.00 | 2^43 |
+| 5 | Awarded | 7.59 | 3.79 | 1.34 | 2^43 |
+| 6 | Awarded | 8.96 | 4.48 | 1.75 | 2^43 |
+| 7 | Awarded | 10.43 | 5.21 | 2.23 | 2^43 |
+
+Three things are readable off that table without taking our word for anything. Draw 1
+offers nothing, because a close fixes prize sizes from the liquidity already sitting in the
+tiers, and the first close is the transaction that takes the first harvest: that money only
+reaches the tiers when draw 1 is awarded, so draw 2 is the first draw with anything to put
+up. The step up between draws 4 and 5 is prize money nobody won being folded back by
+reconcile and put up again, which is what an every-draw reconcile cadence buys. And the bracket moved from `2^42` to `2^43` between draws 1 and 2
+and has stayed there since, which is the encrypted scale tracker correcting itself upward
+as the pool filled, with the pool's exact total weight never published at any point.
+
 The winner test itself, for saver `u` in tier `t` of draw `p`, is public arithmetic:
 
 ```
@@ -234,7 +260,7 @@ flowchart LR
     Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
     Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
     Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
-    Keeper["Keeper script<br/>+ Chainlink time-based upkeep"]
+    Keeper["Keeper script<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
     Relayer["Zama relayer + KMS"]
 
     Saver -- "wrap" --> cUSDC
@@ -298,12 +324,16 @@ flowchart TD
     Pool --> FHE
     Pool --> IYield["IYieldSource"]
     IYield --> Sponsored["SponsoredYieldSource"]
-    IYield --> CV["ConfidentialVaultYieldSource"]
-    CV --> Batcher["Zama DepositVaultBatcherConfidential"]
+    IYield -.-> CV["ConfidentialVaultYieldSource (mainnet design, not built)"]
+    CV -.-> Batcher["Zama DepositVaultBatcherConfidential (mainnet design, not built)"]
     Pool --> Auto["IAutomationCompatible"]
     Vault --> OZ["OpenZeppelin Ownable2Step, Pausable, ReentrancyGuard"]
     Pool --> OZ
 ```
+
+Solid edges are contracts in this repository. The two dotted nodes are the mainnet yield
+path: the adapter is specified against Zama's published batcher interface and no adapter
+contract is written here.
 
 ---
 
@@ -358,8 +388,8 @@ an outsider needs in order to check that the draw was honest. That split is the 
    USDC is a public ERC-20 movement. We measured the correlation on our own earlier
    deployment: reading Sepolia blocks 11528000 to 11618500, three of five deposits sat two
    to four blocks after a public wrap of exactly 100 USDC by the same address. Hearth keeps
-   wrap and deposit as separate steps, offers round wrap amounts, and warns at the step
-   where it matters. It cannot remove the seam.
+   wrap and deposit as separate steps, tells you to wrap a round number, and warns at the
+   step where it matters. It cannot remove the seam.
 4. **Round-tripping through the wrapper publishes a lower bound on lifetime winnings.**
    For an address whose only confidential USDC counterparty is Hearth, the public unwrapped
    total minus the public wrapped total is a lower bound on everything ever won, and it
@@ -448,20 +478,21 @@ out of somebody's principal, which is the one promise the product cannot break.
 ### On mainnet: Zama's Confidential Vault
 
 Zama ships a protocol whose whole job is earning yield on confidential balances, and it is
-the natural mainnet source. `ConfidentialVaultYieldSource` is the adapter. A batcher sits
-between confidential tokens and an ordinary ERC-4626 yield vault: it pools many encrypted
-deposits, decrypts only the sum, makes one public deposit, and hands confidential shares
-back. The adapter joins the deposit batcher with the pool's confidential USDC and holds
-shares. The keeper walks a redemption through the redeem batcher's four stages ahead of
-time, so that by the next `harvest` the redeemed confidential USDC is already sitting in
-the adapter. Every one of those four stages is permissionless.
+the natural mainnet source. `ConfidentialVaultYieldSource` is the adapter in that design,
+specified here and not yet written. A batcher sits between confidential tokens and an
+ordinary ERC-4626 yield vault: it pools many encrypted deposits, decrypts only the sum,
+makes one public deposit, and hands confidential shares back. The adapter joins the deposit
+batcher with the pool's confidential USDC and holds shares. The keeper walks a redemption
+through the redeem batcher's four stages ahead of time, so that by the next `harvest` the
+redeemed confidential USDC is already sitting in the adapter. Every one of those four
+stages is permissionless.
 
-Because Sepolia's vault is idle, the adapter is documented and tested against the batcher
-interface rather than wired to the live pool. Saying it is live when it earns nothing would
-be a claim a judge could check in a minute. What Hearth would inherit on mainnet, stated
-plainly: vault risk in full from the third-party ERC-4626 vault, batch confidentiality
-rather than pool confidentiality, and the batcher owner's bounded powers over batch age and
-pausing. Detail and addresses: [yield source](docs/concepts/yield-source.md).
+Because Sepolia's vault is idle, the adapter is specified against Zama's published batcher
+interface and is not implemented in this repository. Saying it is live when it earns
+nothing would be a claim a judge could check in a minute. What Hearth would inherit on
+mainnet, stated plainly: vault risk in full from the third-party ERC-4626 vault, batch
+confidentiality rather than pool confidentiality, and the batcher owner's bounded powers
+over batch age and pausing. Detail and addresses: [yield source](docs/concepts/yield-source.md).
 
 ---
 
@@ -854,13 +885,23 @@ performed rather than stubbed out. What it covers, one line per test:
 - The Chainlink upkeep reports the closable draw and closes exactly that one.
 - A forged award proof is rejected, and a tier configuration or a scale the pool cannot run
   is refused at deployment.
+- Winners per tier over 239 scored draws track the stated odds and each saver's share of
+  the pool (`test/Fairness.ts`).
+- Every balance, remainder and carry stays accounted for under a random sequence of 27
+  periods of deposits, withdrawals and draw actions (`test/Invariants.ts`).
 - The period arithmetic and the sponsored source have their own files.
 
-Not covered. The property and invariant tests are milestone 2 in `PLAN.md` and are not
-written yet: conservation of funds as a property rather than as one worked example, no
-withdrawal above principal plus winnings, tier payouts never above liquidity, and the
-distribution of winners per tier over many draws against the stated odds. Nor does this
-suite touch the live relayer, the live key management service, real gas, real coprocessor
+Not covered. The property and invariant runs are samples, not exhaustive proof: one
+randomised sequence of 27 periods and one run of 240 draws, 239 of them scored, so they
+bound behaviour rather than prove it. There is no Foundry invariant campaign and no formal
+verification. The invariant walk does not reach deposits above the per-saver cap, the pause
+path, a hostile token, or the amounts the winner test decides, which it treats as
+arbitrary. The fairness run does not reach the statistical quality of
+`FHE.randEuint64` itself, since the mock draws the seed, so it measures the winner test
+given a seed rather than the seed, and it does not reach savers who move their balance
+mid-run, reconcile cadences other than the one it runs, or the over-subscription clamp
+actually biting, which five savers cannot force at this tier set. Nor does this suite
+touch the live relayer, the live key management service, real gas, real coprocessor
 prices, nonce behaviour under a reorg, or anything Zama's own contracts do internally.
 Those belong to the Sepolia deployment and the prove-it command. The keeper has its own
 suite, described in [packages/keeper/README.md](packages/keeper/README.md), which touches
@@ -884,15 +925,20 @@ Figures are live Sepolia receipts at 1 gwei, the Sepolia base fee at deployment,
 | --- | --- | --- |
 | Close | 1 | `1,422,474` |
 | Award | 1 | `435,578` |
-| Evaluate | `ceil(savers / 4)` | `3,417,699` |
+| Evaluate, a full batch of 4 | `floor(savers / 4)`, here 1 | `3,417,699` |
+| Evaluate, the last partial batch | 0 or 1, here 1 carrying one saver | `1,291,192` for one saver, plus `708,836` for each extra |
 | Finalize | 1 | `509,463` |
-| Reconcile | 0 to 3, depending on which tiers are due | `459,994` |
+| Reconcile | 3 on this deployment, one per tier, since all three reconcile every draw | `459,994` |
 
-A whole draw is `8,456,388` gas, about `0.0085 ETH`. At a one-hour period that
-is 24 draws a day and `0.2030 ETH`; at the daily period a mainnet deployment would use
-it is `0.0085 ETH`. Whoever sends the transactions pays. Nothing on chain
-caps evaluation, so the keeper caps its own spend, and any saver can push the walk further
-from the app.
+A whole draw at 5 savers is `8,456,388` gas, about `0.0085 ETH`. That total is the rows
+above summed at the counts in the middle column: one close, one award, a full evaluate
+batch of 4, a second evaluate batch carrying the fifth saver, one finalize and three
+reconciles. At a one-hour period that is 24 draws a day and `0.2030 ETH`; at the daily
+period a mainnet deployment would use it is `0.0085 ETH`. Whoever sends the transactions
+pays. Nothing on chain
+caps evaluation, so the keeper caps the gas price it will pay rather than the work it will
+do: above `KEEPER_MAX_FEE_GWEI` it sends nothing at all that tick, and below it the keeper
+runs the walk to the end. Any saver can push the walk further from the app.
 
 One more saver in a batch costs `708,836` gas, measured live on Sepolia; a batch that
 carries only one saver costs `1,291,192`, because the fixed part of the call is paid either
@@ -917,7 +963,8 @@ hearth/
 │   │   │                 interfaces, the Periods library, mocks
 │   │   ├── deploy/       repeatable deployment
 │   │   ├── test/         the mock-coprocessor suite
-│   │   └── scripts/      one-off chain reads
+│   │   └── tasks/        deploy, seed, status, draw, the prove-it command and the
+│   │                     executed attack scripts
 │   ├── web/              the Next.js app and the documentation site it serves
 │   └── keeper/           the script that drives draws, with its own suite and pm2 config
 ├── docs/                 the written record: getting started, concepts, security, operations
@@ -940,7 +987,7 @@ hearth/
 | Base libraries | `@openzeppelin/contracts` (Ownable2Step, Pausable, ReentrancyGuard, SafeERC20) | ^5.6.1 |
 | Language | Solidity | 0.8.27 |
 | Contract tooling | Hardhat, `@fhevm/hardhat-plugin`, `@fhevm/mock-utils`, hardhat-deploy, TypeChain, solhint | 2.28.6, 0.4.2, 0.4.2, 0.11.45, 8.3.2, 6.2.1 |
-| Local FHE mock | `@zama-fhe/relayer-sdk`, required by the Hardhat plugin and used only by the local simulator | 0.4.4 |
+| Local FHE mock | `@zama-fhe/relayer-sdk`, required by the Hardhat plugin and used only by the local simulator | 0.4.1, the exact version `@fhevm/hardhat-plugin` 0.4.2 checks for |
 | Encryption and decryption client | `@zama-fhe/sdk` in the operator tasks, the keeper and the app | 3.5.1 |
 | App | Next.js App Router, React, Tailwind, wagmi, viem | 16.3.4, 19.2.8, 3.4.17, 3.7.7, 2.56.3 |
 | App motion | Framer Motion, React Three Fiber, drei, postprocessing, Lenis | 13.2.0, 9.7.0, 10.7.8, 3.1.1, 1.3.26 |
@@ -1043,4 +1090,4 @@ MIT. See [LICENSE](LICENSE).
   [prizes and tiers](docs/concepts/prizes-and-tiers.md) and in `ARCHITECTURE.md` section 14.
   No PoolTogether code is used: their implementation is GPL-3 and this repository is MIT,
   so every line here is written fresh.
-- **Chainlink**, for the Automation interface that covers the close step.
+- **Chainlink**, for the Automation interface the pool implements for the close step.

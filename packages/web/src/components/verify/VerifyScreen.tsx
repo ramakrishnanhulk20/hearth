@@ -23,7 +23,13 @@ export function VerifyScreen() {
 
 function Verify() {
   const pool = usePoolState();
-  const { draws } = useDraws(pool.period);
+  const {
+    draws,
+    isLoading: drawsLoading,
+    unavailable: drawsUnavailable,
+    isError: drawsError,
+    refetch: refetchDraws,
+  } = useDraws(pool.period);
   const { activity, error: activityError } = useActivity();
   const [selected, setSelected] = useState<number | null>(null);
   const [typed, setTyped] = useState("");
@@ -32,6 +38,19 @@ function Verify() {
   const draw = awarded.find((item) => item.drawId === selected) ?? awarded[0] ?? null;
 
   const address = isAddress(typed.trim()) ? (typed.trim() as Address) : null;
+
+  // A missed read leaves period at 0, which empties the draw list. Saying "no draw has been closed"
+  // off that would be a claim about the chain the page has not read, so the reads gate the sentence.
+  // A dead endpoint does not surface as isError: wagmi returns a batch of per-call failures, so the
+  // batch looks answered. Only the per-call known flags tell a real zero from a read that never ran.
+  const poolAnswered = !pool.isLoading && !pool.unavailable;
+  const poolFailed = pool.isError || (poolAnswered && !pool.known.period);
+  const drawsExpected = poolAnswered && !poolFailed && pool.period > 1;
+  const drawsAnswered = drawsExpected && !drawsLoading && !drawsUnavailable;
+  const drawsFailed =
+    drawsExpected && (drawsError || (drawsAnswered && !draws.every((item) => item.known)));
+  const unreachable = poolFailed || drawsFailed;
+  const reading = !unreachable && (!poolAnswered || (drawsExpected && !drawsAnswered));
 
   return (
     <div className="grain relative min-h-[100svh] bg-ink">
@@ -52,18 +71,51 @@ function Verify() {
           to disagree with the first.
         </p>
 
-        {!CONFIGURED && (
+        {!CONFIGURED ? (
           <div className="mt-6">
             <Banner tone="bad" title="Hearth is not configured.">
               The vault and pool addresses have to be set for this page to read anything.
             </Banner>
           </div>
-        )}
-
-        {awarded.length === 0 ? (
+        ) : unreachable ? (
+          <div className="mt-6">
+            <Banner
+              tone="bad"
+              title="Could not reach Sepolia."
+              action={
+                <Button
+                  tone="primary"
+                  size="small"
+                  onClick={() => {
+                    pool.refetch();
+                    refetchDraws();
+                  }}
+                >
+                  Try again
+                </Button>
+              }
+            >
+              This page reads the vault and the pool over an RPC endpoint, and that read failed, so it
+              has nothing to show. The draws themselves are on chain either way.
+            </Banner>
+          </div>
+        ) : reading ? (
+          <ReadingDraws />
+        ) : awarded.length === 0 ? (
           <p className="mt-8 text-[14px] text-muted">
-            No draw has been closed yet, so there is nothing to check. The first one appears once period 1
-            is over and somebody closes it.
+            {draws.length === 0 ? (
+              <>
+                No draw has been closed yet, so there is nothing to check. The first one appears once
+                period 1 is over and somebody closes it.
+              </>
+            ) : draws.length === 1 ? (
+              <>Draw {draws[0].drawId} has not been closed yet, so there is nothing to check.</>
+            ) : (
+              <>
+                Draws {draws[draws.length - 1].drawId} to {draws[0].drawId} have not been closed, so
+                there is nothing to check here. Anything older is on the explorer.
+              </>
+            )}
           </p>
         ) : (
           <>
@@ -101,6 +153,31 @@ function Verify() {
       </main>
 
       <SiteFooter />
+    </div>
+  );
+}
+
+/** Held in place of the draw list until the reads land, so an empty page never reads as an empty chain. */
+function ReadingDraws() {
+  return (
+    <div aria-busy="true">
+      <div className="mt-6 flex flex-wrap gap-2">
+        {[0, 1, 2, 3].map((slot) => (
+          <div
+            key={slot}
+            className="h-[38px] w-[86px] animate-pulse rounded-lg border border-hairline bg-[rgba(255,255,255,0.03)]"
+          />
+        ))}
+      </div>
+      <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
+        {[0, 1].map((column) => (
+          <div key={column} className="flex flex-col gap-4">
+            <div className="h-[300px] animate-pulse rounded-panel border border-hairline bg-[rgba(255,255,255,0.02)]" />
+            <div className="h-[190px] animate-pulse rounded-panel border border-hairline bg-[rgba(255,255,255,0.02)]" />
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 text-[13px] text-faint">Reading the draws from Sepolia.</p>
     </div>
   );
 }

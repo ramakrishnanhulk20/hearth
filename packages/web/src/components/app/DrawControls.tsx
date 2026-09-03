@@ -50,6 +50,15 @@ export function DrawControls({
         tier&apos;s carry, and reconciling publishes it and puts it back on offer.
       </p>
 
+      {/* Gated on the connection alone. The wrong network already has its own banner above, and
+          saying it twice reads as two different problems. */}
+      {!saver.connected && (
+        <p className="mt-3 text-[12.5px] leading-relaxed text-muted">
+          Connect a wallet on Sepolia and any of these five is yours to run. None of them needs
+          permission from us.
+        </p>
+      )}
+
       <div className="mt-4 flex flex-col gap-2.5">
         <Step
           title={closable > 0 ? `Close draw ${closable}` : "Close a draw"}

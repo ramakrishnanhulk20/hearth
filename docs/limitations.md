@@ -121,9 +121,20 @@ unset.
 **What it does not reach:** Hearth's own ledger. Principal, winnings, per-draw weights and
 per-draw credits live in the vault, and the token holds no access rights on them.
 
-**One product consequence:** an evaluation batch that contained a single saver would make
-that batch's funding transfer that saver's exact prize, under the observer assumption. The
-keeper advances the walk in real batches for that reason as well as for gas.
+**One product consequence, and the live pool hits it every draw:** a batch's funding
+transfer carries the total credited to everybody in that batch, so a batch of one carries
+one saver's exact prize, under the observer assumption. The walk's last batch holds a
+single saver whenever the saver count is not a multiple of the batch size. On the live pool
+that is five savers at a batch size of 4 (`KEEPER_BATCH`, `packages/keeper/src/config.ts`),
+so every draw ends with a batch of one, and the `Evaluated` event in that same transaction
+names the saver it belongs to.
+
+No minimum batch can fix this, because `evaluate(uint32,uint256)`
+(`packages/contracts/contracts/HearthVault.sol`) is permissionless and takes the batch size
+from the caller, so any observer can force a batch of one whatever the keeper does. We
+record it as an accepted residual: it only bites under the observer assumption, and live
+`observerCount()` is 0. The contract-side fix, deferred: accumulate credits per draw and
+send one funding transfer at finalize, or pad every batch total.
 
 **The alternative we rejected:** writing our own confidential token. That swaps a known,
 audited, Zama-operated contract for one we grade ourselves.
@@ -141,9 +152,11 @@ offered liquidity and marks the draw `Skipped`.
 the harvest is booked by a late award, and deposits and withdrawals are unaffected
 throughout.
 
-**What reduces it:** every step is permissionless, the app exposes them, and Chainlink
-Automation covers the close step, which is the only step needing no off-chain data and the
-only one with a deadline.
+**What reduces it:** every step is permissionless and the app exposes them, so any saver
+can push a draw along. The pool also implements Chainlink's automation interface for the
+close step, which is the only step needing no off-chain data and the only one with a
+deadline, but no upkeep is registered on the demo pool, so today the keeper and the app are
+the whole of it.
 
 ## 9. Yield on Sepolia is sponsored, not earned
 
@@ -177,10 +190,10 @@ and every tier, computed with no decryption at all, and in every later draw too,
 winnings never enter the odds. Even a loose upper bound proves a definite loss in any tier
 whose threshold sits above it.
 
-**What Hearth does:** keeps wrap and deposit as separate steps, offers round wrap amounts
-so a wrap is a bucket rather than an exact figure, warns at the deposit step, and lets a
-saver hold a standing confidential balance so a deposit comes out of an accumulation of
-unknown composition.
+**What Hearth does:** keeps wrap and deposit as separate steps, tells you at the wrap step
+to use a round number so the wrap is a bucket rather than an exact figure, warns at the
+deposit step, and lets a saver hold a standing confidential balance so a deposit comes out
+of an accumulation of unknown composition.
 
 **What Hearth cannot do:** remove it. There is no confidential way to convert a public
 token, and there is no way to make a threshold private without making the draw

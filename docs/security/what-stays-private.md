@@ -112,10 +112,10 @@ public arithmetic.
 Even a loose bound bites. An observer holding only an upper bound on your balance proves a
 definite loss in any tier whose threshold sits above that bound.
 
-What the app does about it: keeps wrap and deposit as separate steps, offers round wrap
-amounts so a wrap is a bucket rather than an exact deposit, encourages holding a standing
-confidential balance so a deposit is drawn from an accumulation of unknown composition,
-and warns at the deposit step in one line. What no contract change can do is make a
+What the app does about it: keeps wrap and deposit as separate steps, tells you at the wrap
+step to use a round number so a wrap is a bucket rather than an exact deposit, encourages
+holding a standing confidential balance so a deposit is drawn from an accumulation of
+unknown composition, and warns at the deposit step in one line. What no contract change can do is make a
 threshold private, because a private threshold is an uncheckable draw.
 
 ## Rule 3: the wrap seam, both directions
@@ -143,9 +143,10 @@ bound, and it becomes exact once the address has emptied out.
 Unwrapping to a fresh address does not help, because the confidential transfer to that
 address is itself the link.
 
-What Hearth does: separate steps, a warning at the wrap step, round denominations offered
-at both wrap and unwrap, and the suggestion to leave a standing confidential balance
-behind. What Hearth cannot do: remove any of it.
+What Hearth does: separate steps, a warning at the wrap step, a line at both the wrap and
+the unwrap step telling you to move a round number, and the suggestion to leave a standing
+confidential balance behind. The amount is yours to type either way; the app does not offer
+a set of denominations. What Hearth cannot do: remove any of it.
 
 ## Rule 4: the published prize counts are a slow measurement
 
@@ -207,8 +208,11 @@ September 2026 gives three facts that matter for privacy:
 Note the precise scope of item 1. There is no per-saver prize transfer in Hearth, so there
 is no per-winner payout for an observer to read. What moves at the token layer is one
 funding transfer per evaluation batch, from the pool to the vault, carrying the total
-credited to everybody in that batch. That is a reason to keep batches from containing a
-single saver in practice: a batch of one makes that total one saver's exact prize.
+credited to everybody in that batch. A batch of one makes that total one saver's exact
+prize, and the live five-saver pool at a batch size of 4 ends every walk with a batch of
+one. `evaluate` is permissionless and takes its batch size from the caller, so no minimum
+batch can be enforced. [Limitation 7](../limitations.md) records it as an accepted residual
+and names the contract-side fix.
 
 What an observer at the token layer would not get is Hearth's own ledger. Your principal,
 your winnings, your weight and your credit live in the vault's storage, and the token has

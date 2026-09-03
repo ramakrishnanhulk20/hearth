@@ -24,9 +24,12 @@ Once per pass, in this order:
 5. **Evaluate** every awarded draw whose window is still open, advancing the walk in batches until
    the cursor reaches the end of the saver list.
 
-Finalize and reconcile run before the close on purpose. A tier's leftover prize money only
-becomes offerable liquidity once it has been folded into the carry and reconciled, so doing both
-first means that money is back in the very next draw rather than sitting out a round.
+The pass runs in two halves, and the split is after step 1. Finalizing is what publishes a tier's
+carry, and `HearthVault.openDraw` leaves a carry out of the draw entirely while it is pending, so
+the keeper sends its finalizes, reads the three carries again, and plans the rest of the pass from
+that second read. Without the second read a carry published in this pass would wait for the next
+one, which is after the close it belongs in front of, and that tier's money would sit out a whole
+draw. It costs three `eth_call`s on a pass that finalizes, and nothing on a pass that does not.
 
 The pass is idempotent. Nothing to do means one log line and a sleep. Every call is simulated
 with `eth_call` before it is signed, so a race that another caller already won costs an RPC round
@@ -54,7 +57,7 @@ addresses. Everything else has a default.
 
 | Variable | Where it usually lives | Meaning |
 |---|---|---|
-| `RECOVERY_PHRASE` | `packages/contracts/.env` | Your seed phrase. The keeper signs with account 2 of it (`m/44'/60'/0'/0/1`), the same account Hardhat calls `keeper`. Account 1 is the deployer and is left alone. |
+| `RECOVERY_PHRASE` | `packages/contracts/.env` | Your seed phrase. The keeper signs with account 2 of it (`m/44'/60'/0'/0/1`), the same account Hardhat calls `keeper`. Account 1 is the deployer and is left alone. `MNEMONIC` is read as an alias, for a machine that already sets that name. |
 | `SEPOLIA_RPC_URL` | `packages/contracts/.env` | Your Sepolia endpoint. Defaults to a shared public node, which is fine for a demo and slow under load. |
 | `HEARTH_VAULT` | `packages/keeper/.env` | Deployed `HearthVault`. |
 | `HEARTH_POOL` | `packages/keeper/.env` | Deployed `HearthPrizePool`. |
@@ -68,6 +71,7 @@ addresses. Everything else has a default.
 | `KEEPER_MAX_PRIORITY_FEE_GWEI` | | Tip. Default 1 gwei when a cap is set. |
 | `KEEPER_GAS_LIMIT` | | A hard gas limit per transaction. Unset lets the node estimate, which is what you want. |
 | `KEEPER_CONFIRMATIONS` | | Blocks waited after each send. Default 1. |
+| `KEEPER_CHAIN_ID` | | The chain the keeper expects. Default 11155111. Checked against the node's own chain id at boot, so a wrong `SEPOLIA_RPC_URL` fails at startup rather than sending to the wrong network. |
 | `KEEPER_DRY_RUN` | | Same as `--dry-run`. |
 | `KEEPER_RELAYER_ATTEMPTS` etc. | | Relayer patience. Default 8 tries, 3s doubling to 45s, 120s per request. |
 
@@ -75,8 +79,27 @@ Nothing about the phrase or the private key is ever printed. The boot line shows
 address and nothing else.
 
 The keeper needs Sepolia ETH on its own address. It prints the balance at boot and complains
-below 0.02 ETH. A ten-saver pool costs roughly eleven million gas per draw across close, award,
-three evaluation batches, finalize and one reconcile per tier.
+below 0.02 ETH. A ten-saver pool costs about `12,582,923` gas per draw: close `1,422,474`, award
+`435,578`, two full evaluation batches at `3,417,699` and a third carrying the last two savers at
+`2,000,028`, finalize `509,463`, and one reconcile per tier at `459,994`. Those are the measured
+Sepolia receipts, listed step by step in [the keeper page](../../docs/operations/keeper.md).
+
+## What a pass asks the endpoint for
+
+Every read is its own `eth_call`. At the default `KEEPER_LOOKBACK_DRAWS` of 4 a pass makes up to
+28 requests: one block read, four pool and vault reads, one `drawOf` per draw in the lookback plus
+four more for each draw that is awarded, and three `publishedCarry` reads. A pass that finalizes
+reads those three carries a second time, and every transaction adds its own simulation and a
+confirming read, so a busy pass is above 28 and a resting one well below it. At the default 30
+second poll that is roughly 56 requests a minute from the keeper alone.
+
+They are not batched on purpose. Sending the independent reads together would not reduce the
+number of requests at all, only burst them harder, which is worse against a rate limit.
+
+Give the keeper its own endpoint rather than sharing the app's. The app polls the same contracts
+from every open tab, and one shared free-tier key runs out under both. When it does the keeper
+logs `tick failed while reading the chain` with the endpoint's own code, and tries again next
+pass: nothing is lost, but draws land late.
 
 ## Running it
 
@@ -123,20 +146,20 @@ Every line is one fact. Times are UTC.
 09:14:02 hearth keeper: live, keeper 0x7099..., vault 0x..., pool 0x..., batch 4, poll 30s, no gas cap
 09:14:03 keeper balance 0.412 ETH
 09:14:04 tier reconcile cadence: grand every draw, mid every draw, frequent every draw
-09:14:04 evaluating 4 savers per call, the vault allows up to 8
+09:14:04 evaluating 4 savers per call, the vault allows up to 4
 09:14:05 period 43, watching draws from 39 upward
-09:14:07 finalized draw 39 (gas 412,882)
+09:14:07 finalized draw 39 (gas 509,463)
 09:14:08 the grand tier is due, asking the relayer for its carry
-09:14:16 reconciled the grand tier: 24.80 USDC back into the prize liquidity (gas 208,114)
+09:14:16 reconciled the grand tier: 24.80 USDC back into the prize liquidity (gas 459,994)
 09:14:17 the mid tier is due, asking the relayer for its carry
-09:14:25 reconciled the mid tier: 4.20 USDC back into the prize liquidity (gas 208,114)
+09:14:25 reconciled the mid tier: 4.20 USDC back into the prize liquidity (gas 459,994)
 09:14:26 the frequent tier is due, asking the relayer for its carry
-09:14:34 reconciled the frequent tier: 1.60 USDC back into the prize liquidity (gas 208,114)
-09:14:37 closed draw 41 (gas 1,204,331)
+09:14:34 reconciled the frequent tier: 1.60 USDC back into the prize liquidity (gas 459,994)
+09:14:37 closed draw 41 (gas 1,422,474)
 09:14:38 draw 41 is waiting for its award: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC
 09:14:39 draw 41: asking the relayer for the seed, the scale, the empty flag and the harvest
-09:14:53 awarded draw 41: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC, harvest 3.60 USDC (gas 431,220)
-09:15:07 evaluated draw 41: 4 of 9 savers done (gas 8,110,220)
+09:14:53 awarded draw 41: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC, harvest 3.60 USDC (gas 435,578)
+09:15:07 evaluated draw 41: 4 of 9 savers done (gas 3,417,699)
 09:15:38 nothing to do: period 43, draw 41 has 8 of 9 savers evaluated
 ```
 
@@ -155,11 +178,16 @@ What each kind of line means:
   `9 of 9`.
 - `finalized draw N` closed the books on that draw and published the carry of every tier due to
   reconcile, which on the live deployment is all three.
-- `reconciled the X tier` turned an encrypted carry back into prize money the next draw can offer.
+- `reconciled the X tier` turned an encrypted carry back into prize money, in time for the close
+  later in the same pass.
 - `draw N had no savers` or `draw N missed its window` means the money went back to the pool. No
   yield and no liquidity is lost either way.
 - `gas is 41 gwei, above the 20 gwei cap, so nothing is sent this tick` means the keeper is
   waiting for a cheaper block. Nothing is stuck; the next pass tries again.
+- `tick failed while reading the chain: exceeded maximum retry limit (SERVER_ERROR, 429 Too Many
+  Requests)` is the endpoint, not the contracts. A tick fails while reading, before any
+  transaction is built, so nothing was half sent and the next pass starts over. The part in
+  brackets is the endpoint's own verdict and is how you tell a rate limit from a broken call.
 - `... was refused before sending: NothingToClose` means somebody else did that step first. That
   is the system working as designed, not a fault.
 - Anything on stderr is worth a look. Everything else is routine.
@@ -211,6 +239,10 @@ touches a network, a wallet or the relayer.
 - **The tick planner** against a synthetic chain state: which draws get closed, awarded,
   evaluated, finalized and reconciled, and the order the actions come out in, including the rule
   that finalize and reconcile run before the close.
+- **A whole tick** driven against a stub chain that behaves like the vault: a carry that only
+  becomes pending because this pass finalized is still reconciled before this pass closes the next
+  draw, the carries are read a second time only when a finalize actually ran, and a close the
+  endpoint refuses leaves the finalize and the reconciles sent and names the endpoint in the log.
 - **The walk arithmetic**: batch sizing, the last short batch, a walk that has not started yet
   falling back to the current saver list, a cursor past the end never reporting negative work, and
   a full walk covering every saver exactly once.

@@ -20,7 +20,6 @@ grep -rno '{{[A-Z_0-9]*}}' docs
 | `{{DEPLOY_BLOCK}}` | Block number of the vault deployment | Deploy receipt |
 | `{{FIRST_PERIOD_AT}}` | The `firstPeriodAt` immutable, as a unix timestamp and a readable date | Constructor argument |
 | `{{APP_URL}}` | The live app URL judges connect a wallet to | Vercel deployment |
-| `{{CHAINLINK_UPKEEP_ID}}` | The registered time-based upkeep id, or "not registered" | Chainlink Automation |
 
 Zama's own Sepolia addresses are written literally, not as placeholders, because they are
 published in Zama's address reference and are not ours to choose: mock USDC
@@ -86,6 +85,7 @@ after the one being quoted.
 | Token | Why it is gone |
 | --- | --- |
 | `{{AGGREGATE_EXAMPLE}}` | The pool's exact total weight is no longer published. Replaced by `{{BRACKET_EXAMPLE}}`. |
+| `{{CHAINLINK_UPKEEP_ID}}` | No upkeep is registered. The pages that mentioned one now say in words that the pool implements the interface and nothing is registered against it. |
 
 ## Added by the README draft
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import type { Phase } from "@/hooks/useActions";
 import { txUrl } from "@/lib/chain/addresses";
@@ -190,6 +190,7 @@ export function Button({
 }
 
 export function AmountField({
+  name,
   value,
   onChange,
   onMax,
@@ -198,6 +199,8 @@ export function AmountField({
   problem,
   suffix = "USDC",
 }: {
+  /** What this field is for. Four of these sit on one page, so the placeholder cannot name them. */
+  name?: string;
   value: string;
   onChange: (next: string) => void;
   onMax?: () => void;
@@ -206,6 +209,8 @@ export function AmountField({
   problem?: string | null;
   suffix?: string;
 }) {
+  const problemId = useId();
+
   return (
     <div>
       <div
@@ -220,6 +225,9 @@ export function AmountField({
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
           placeholder="0.00"
+          aria-label={name}
+          aria-invalid={problem ? true : undefined}
+          aria-describedby={problem ? problemId : undefined}
           className="w-full min-w-0 bg-transparent font-display text-[20px] tabular-nums tracking-tight text-parchment outline-none placeholder:text-parchment/25 sm:text-[22px]"
           style={{ fontWeight: 560 }}
         />
@@ -228,6 +236,7 @@ export function AmountField({
             type="button"
             onClick={onMax}
             disabled={disabled}
+            aria-label={name ? `${maxLabel ?? "Max"}: ${name}` : undefined}
             className="shrink-0 rounded-md border border-hairline px-2 py-1 text-[11px] uppercase tracking-label text-faint transition-colors hover:border-flame/45 hover:text-flame"
           >
             {maxLabel ?? "Max"}
@@ -235,7 +244,11 @@ export function AmountField({
         )}
         <span className="shrink-0 text-[13px] text-faint">{suffix}</span>
       </div>
-      {problem && <p className="mt-2 text-[12.5px] leading-snug text-bad">{problem}</p>}
+      {problem && (
+        <p id={problemId} className="mt-2 text-[12.5px] leading-snug text-bad">
+          {problem}
+        </p>
+      )}
     </div>
   );
 }
@@ -301,50 +314,57 @@ export function PhaseNote({
   onDismiss: () => void;
   remedyButton?: ReactNode;
 }) {
-  if (phase.kind === "idle") return null;
-
   const working = phase.kind === "encrypting" || phase.kind === "signing" || phase.kind === "mining" || phase.kind === "decrypting";
   const text =
-    phase.kind === "error"
-      ? phase.error.message
-      : phase.kind === "decrypting"
-        ? `${label}: ${phase.note}`
-        : `${label}: ${PHASE_TEXT[phase.kind] ?? phase.kind}`;
+    phase.kind === "idle"
+      ? null
+      : phase.kind === "error"
+        ? phase.error.message
+        : phase.kind === "decrypting"
+          ? `${label}: ${phase.note}`
+          : `${label}: ${PHASE_TEXT[phase.kind] ?? phase.kind}`;
   const colour = phase.kind === "done" ? "text-good" : phase.kind === "error" ? "text-bad" : "text-muted";
   const hash = phase.kind === "mining" ? phase.hash : phase.kind === "done" ? phase.hash : null;
 
+  // The wrapper stays in the page while the action is idle, empty. A live region that is inserted
+  // with its text already in it is announced unreliably, and this line is the only thing telling a
+  // screen reader that a wallet prompt is waiting.
   return (
-    <div className="mt-4 flex flex-col gap-2 rounded-lg border border-hairlineSoft bg-[rgba(10,10,10,0.68)] px-4 py-3 backdrop-blur-md sm:flex-row sm:items-start">
-      {working && (
-        <span className="mt-0.5 hidden sm:block">
-          <Spinner size={14} />
-        </span>
+    <div role="status" aria-live="polite" aria-atomic="true">
+      {text !== null && (
+        <div className="mt-4 flex flex-col gap-2 rounded-lg border border-hairlineSoft bg-[rgba(10,10,10,0.68)] px-4 py-3 backdrop-blur-md sm:flex-row sm:items-start">
+          {working && (
+            <span className="mt-0.5 hidden sm:block">
+              <Spinner size={14} />
+            </span>
+          )}
+          <div className="flex-1">
+            <p className={`text-[13px] leading-relaxed ${colour}`}>{text}</p>
+            {hash && (
+              <a
+                href={txUrl(hash)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block text-[12px] text-flame/80 underline-offset-2 hover:underline"
+              >
+                View the transaction on Etherscan
+              </a>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
+            {remedyButton}
+            {(phase.kind === "done" || phase.kind === "error") && (
+              <button
+                type="button"
+                onClick={onDismiss}
+                className="text-[12px] text-faint transition-colors hover:text-parchment"
+              >
+                Dismiss
+              </button>
+            )}
+          </div>
+        </div>
       )}
-      <div className="flex-1">
-        <p className={`text-[13px] leading-relaxed ${colour}`}>{text}</p>
-        {hash && (
-          <a
-            href={txUrl(hash)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-block text-[12px] text-flame/80 underline-offset-2 hover:underline"
-          >
-            View the transaction on Etherscan
-          </a>
-        )}
-      </div>
-      <div className="flex shrink-0 items-center gap-3">
-        {remedyButton}
-        {(phase.kind === "done" || phase.kind === "error") && (
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="text-[12px] text-faint transition-colors hover:text-parchment"
-          >
-            Dismiss
-          </button>
-        )}
-      </div>
     </div>
   );
 }

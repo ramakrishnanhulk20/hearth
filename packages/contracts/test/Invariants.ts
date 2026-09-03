@@ -1,5 +1,5 @@
 // Book-keeping invariants under a seeded pseudo-random sequence of actions. Six savers deposit and
-// withdraw random amounts across fourteen periods while the draw lifecycle runs beside them: closes,
+// withdraw random amounts across twenty-seven periods while the draw lifecycle runs beside them: closes,
 // awards, partial and complete evaluation walks, evaluation a period late but still inside the window,
 // finalization, per-tier reconciliation, one draw whose close never lands, and one award that lands
 // after its window and so is Skipped. After every action the run re-derives, from the mock's clear-text
@@ -13,8 +13,8 @@
 // the coprocessor and is different every run. That is the point: these invariants hold for every seed.
 // Does not cover: the live relayer or KMS, statistical fairness of the winner test (Fairness.ts), gas or
 // compute-unit budgets, deposits above the per-saver cap, the pause path, a hostile token, a saver whose
-// kept history runs out inside a draw's window (three slots make that unreachable in fourteen periods),
-// and the exact amounts the winner test decides, which this file treats as arbitrary.
+// kept history runs out inside a draw's window (three slots shift at most once per period, which makes
+// that unreachable), and the exact amounts the winner test decides, which this file treats as arbitrary.
 import { FhevmType } from "@fhevm/hardhat-plugin";
 import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
@@ -43,8 +43,10 @@ const OPENING_STAKES = [usd(400), usd(350), usd(300), usd(250), usd(200), usd(15
 const PERIODS = 27;
 
 // Draw 7's close never happens, so it stays None and its period pays nothing. Seven is picked because it
-// is a multiple of no tier's cadence, so skipping it costs no reconciliation. Draw 3 is closed on time
-// and awarded three periods later, after its window, so it is Skipped and hands its liquidity back.
+// is a multiple of neither the grand tier's 24 nor the mid tier's 6, so skipping it costs no long cadence
+// reconciliation, and the frequent tier's carry is simply published at draw 8 instead. Draw 3 is closed
+// on time and awarded three periods later, after its window, so it is Skipped and hands its liquidity
+// back.
 const NEVER_CLOSED = 7;
 const AWARDED_LATE = 3;
 

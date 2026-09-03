@@ -5,7 +5,16 @@ import type { KeeperConfig, LoadedKeeper } from "./config.js";
 import { describeConfig } from "./config.js";
 import { group, gwei, line, problem, usdc } from "./log.js";
 import type { Action, DrawSnapshot, TickSnapshot } from "./plan.js";
-import { DrawStatus, TIER_COUNT, TIER_NAMES, awardHandles, nextScanFrom, planTick, walkTotal } from "./plan.js";
+import {
+  DrawStatus,
+  TIER_COUNT,
+  TIER_NAMES,
+  awardHandles,
+  nextScanFrom,
+  planAfterFinalizes,
+  planFinalizes,
+  walkTotal,
+} from "./plan.js";
 import type { Decryptor } from "./relayer.js";
 import { asBigint, connectRelayer, readAward } from "./relayer.js";
 
@@ -46,7 +55,12 @@ export class Keeper {
   private stopped = false;
   private wake: (() => void) | null = null;
 
-  private constructor(
+  /**
+   * `connect` is the entry point for a real run: it builds the provider and the contracts and runs
+   * the boot checks. This takes them ready made, which is how the tick test drives a whole pass
+   * against a stub chain with no network and no wallet.
+   */
+  constructor(
     config: KeeperConfig,
     provider: JsonRpcProvider,
     pool: Contract,
@@ -114,7 +128,11 @@ export class Keeper {
       try {
         await this.tick();
       } catch (error) {
-        problem(`tick failed: ${this.revertText(error)}`);
+        // Everything a tick can throw out of is a read: the state, the fee data, the carries.
+        // A transaction that fails is caught next to the action it belongs to, so nothing here
+        // was ever half sent. What the operator needs is the endpoint's own verdict, which
+        // ethers keeps in `code` and hides from the sentence.
+        problem(`tick failed while reading the chain: ${this.causeText(error)}`);
       }
       if (this.stopped) break;
       await this.sleep(this.config.pollMs);
@@ -124,22 +142,40 @@ export class Keeper {
 
   async tick(): Promise<void> {
     const { snapshot, rows } = await this.readState();
-    const actions = planTick(snapshot);
+    const finalizes = planFinalizes(snapshot);
+    const rest = planAfterFinalizes(snapshot);
     this.scanFrom = nextScanFrom(this.scanFrom, snapshot.draws, snapshot.period);
 
-    if (actions.length === 0) {
+    if (finalizes.length === 0 && rest.length === 0) {
       line(`nothing to do: period ${snapshot.period}${this.watching(snapshot)}`);
       return;
     }
 
     if (!this.config.dryRun && !(await this.gasIsAffordable())) return;
 
+    await this.performAll(finalizes, rows);
+    if (this.stopped) return;
+
+    // A dry run sends nothing, so nothing has moved and the opening read still holds. After a
+    // real finalize it does not: finalizeDraw publishes the carry of every tier whose cadence is
+    // due, and openDraw leaves a pending carry out of the draw entirely. Planning the reconciles
+    // from the opening read would put them one pass behind the close they belong in front of,
+    // and that tier's money would sit out a whole draw. Three eth_calls buy it back.
+    if (finalizes.length === 0 || this.config.dryRun) {
+      await this.performAll(rest, rows);
+      return;
+    }
+    const settled: TickSnapshot = { ...snapshot, pendingCarries: await this.readPendingCarries() };
+    await this.performAll(planAfterFinalizes(settled), rows);
+  }
+
+  private async performAll(actions: readonly Action[], rows: Map<number, DrawRow>): Promise<void> {
     for (const action of actions) {
       if (this.stopped) return;
       try {
         await this.perform(action, rows);
       } catch (error) {
-        problem(`${this.describe(action)} failed: ${this.revertText(error)}`);
+        problem(`${this.describe(action)} failed: ${this.causeText(error)}`);
       }
     }
   }
@@ -163,7 +199,7 @@ export class Keeper {
       }
       line(`tier reconcile cadence: ${cadence.join(", ")}`);
     } catch (error) {
-      problem(`could not read the tier reconcile cadence: ${this.revertText(error)}`);
+      problem(`could not read the tier reconcile cadence: ${this.causeText(error)}`);
     }
 
     // The vault stops a batch at MAX_BATCH savers that need encrypted work, whatever count asks
@@ -250,11 +286,7 @@ export class Keeper {
     const rows = new Map<number, DrawRow>();
     for (const id of [...ids].sort((a, b) => a - b)) rows.set(id, await this.readDraw(id));
 
-    const pendingCarries: number[] = [];
-    for (let tier = 0; tier < TIER_COUNT; tier++) {
-      const carry = (await this.read(this.vault, "publishedCarry", [tier])) as unknown[];
-      if (carry[2] === true) pendingCarries.push(tier);
-    }
+    const pendingCarries = await this.readPendingCarries();
 
     const snapshot: TickSnapshot = {
       now: block.timestamp,
@@ -267,6 +299,16 @@ export class Keeper {
       batchSize: this.config.batchSize,
     };
     return { snapshot, rows };
+  }
+
+  /** The tiers holding a published carry that no reconcile has consumed yet. */
+  private async readPendingCarries(): Promise<number[]> {
+    const pending: number[] = [];
+    for (let tier = 0; tier < TIER_COUNT; tier++) {
+      const carry = (await this.read(this.vault, "publishedCarry", [tier])) as unknown[];
+      if (carry[2] === true) pending.push(tier);
+    }
+    return pending;
   }
 
   private async readDraw(drawId: number): Promise<DrawRow> {
@@ -418,7 +460,7 @@ export class Keeper {
     try {
       await fn.staticCall(...args, { from: this.config.keeperAddress });
     } catch (error) {
-      problem(`${what} was refused before sending: ${this.revertText(error)}`);
+      problem(`${what} was refused before sending: ${this.causeText(error)}`);
       return null;
     }
 
@@ -438,12 +480,32 @@ export class Keeper {
     return receipt;
   }
 
-  /** Turns an ethers failure into the contract's own error name wherever the ABI can name it. */
-  private revertText(error: unknown): string {
+  /**
+   * Turns an ethers failure into the contract's own error name wherever the ABI can name it, and
+   * otherwise into the sentence plus the endpoint's own verdict.
+   *
+   * The second half is what lets an operator tell a rate limit from a bug. A read that fails comes
+   * back as "exceeded maximum retry limit" and nothing else, which reads the same whether the node
+   * throttled us or the call was wrong; ethers keeps the difference in `code` and in the HTTP
+   * status. The request URL is deliberately left out, because it carries the API key.
+   */
+  private causeText(error: unknown): string {
+    const named = this.namedRevert(error);
+    if (named !== null) return named;
+
+    const shaped = error as { code?: unknown; info?: { responseStatus?: unknown } };
+    const parts: string[] = [];
+    if (typeof shaped.code === "string" && shaped.code !== "") parts.push(shaped.code);
+    const status = shaped.info?.responseStatus;
+    if (typeof status === "string" && status !== "") parts.push(status);
+
+    const text = this.plainText(error);
+    return parts.length === 0 ? text : `${text} (${parts.join(", ")})`;
+  }
+
+  private namedRevert(error: unknown): string | null {
     const shaped = error as {
       revert?: { name?: string; args?: readonly unknown[] } | null;
-      shortMessage?: string;
-      message?: string;
       data?: string;
       info?: { error?: { data?: string } };
       error?: { data?: string };
@@ -459,6 +521,11 @@ export class Keeper {
         if (parsed !== null) return withArgs(parsed.name, parsed.args);
       }
     }
+    return null;
+  }
+
+  private plainText(error: unknown): string {
+    const shaped = error as { shortMessage?: string; message?: string };
     return shaped.shortMessage ?? shaped.message ?? String(error);
   }
 }

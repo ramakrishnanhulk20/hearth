@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Panel, Button, Pill, SealedBars, Spinner } from "@/components/ui";
 import { EVALUATE_BATCH, TIER_NAMES } from "@/lib/chain/addresses";
 import { countdown, formatAmount, formatUtc } from "@/lib/format";
 import type { useActions } from "@/hooks/useActions";
-import { drawScope, type Reveal } from "@/hooks/useReveal";
+import { BALANCE_SCOPE, drawScope, type Reveal } from "@/hooks/useReveal";
 import type { DrawView, HearthConfig, SaverState } from "@/hooks/useHearth";
 
 /**
@@ -78,6 +79,9 @@ function DrawCard({
   // One scope per draw, so this card opens and seals on its own and says nothing about what any
   // other panel on the page is showing.
   const view = reveal.scope(drawScope(draw.drawId));
+  // The draw's credit handle never changes, so the card would keep offering the same claim after
+  // it has been paid. The chain would honour a second press as a second withdrawal.
+  const [claimed, setClaimed] = useState(false);
   const mine = draw.mine;
   const weight = mine ? view.read(mine.weightHandle) : null;
   const credit = mine ? view.read(mine.creditHandle) : null;
@@ -192,7 +196,13 @@ function DrawCard({
               </div>
 
               {!opened && (
-                <Button size="small" tone="ghost" busy={view.state.kind === "working"} onClick={askMine}>
+                <Button
+                  size="small"
+                  tone="ghost"
+                  disabled={saver.wrongNetwork}
+                  busy={view.state.kind === "working"}
+                  onClick={askMine}
+                >
                   Reveal my result
                 </Button>
               )}
@@ -216,16 +226,32 @@ function DrawCard({
                 <span className="text-[12px] text-bad">{view.state.error.message}</span>
               )}
 
-              {opened && credit !== null && credit > 0n && (
+              {opened && !claimed && credit !== null && credit > 0n && (
                 <Button
                   size="small"
                   tone="primary"
                   disabled={money.busy || saver.wrongNetwork}
                   busy={money.busy && money.label === "Withdraw"}
-                  onClick={() => money.withdraw(credit, refresh)}
+                  onClick={() =>
+                    money.withdraw(credit, () => {
+                      setClaimed(true);
+                      // Both scopes are stale the moment the claim lands: this credit is spent,
+                      // and the balance panel's principal and winnings handles have changed.
+                      view.hide();
+                      reveal.scope(BALANCE_SCOPE).hide();
+                      refresh();
+                    })
+                  }
                 >
                   Claim {formatAmount(credit)} USDC
                 </Button>
+              )}
+
+              {claimed && (
+                <span className="text-[12.5px] leading-relaxed text-good">
+                  Claimed. That amount went to your wallet, out of winnings first. The draw keeps the
+                  figure as its record.
+                </span>
               )}
 
               {opened && weight !== null && (
@@ -236,7 +262,7 @@ function DrawCard({
             </div>
           )}
 
-          {opened && credit !== null && credit > 0n && (
+          {opened && !claimed && credit !== null && credit > 0n && (
             <p className="mt-2 text-[12.5px] leading-relaxed text-faint">
               Claiming is an ordinary withdrawal for exactly that amount. On chain it has the same
               shape as any other withdrawal, which is what stops a claim naming the winner.

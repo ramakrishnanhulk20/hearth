@@ -15,11 +15,15 @@ flowchart TD
     Pool --> FHE
     Pool --> IYield["IYieldSource"]
     IYield --> Sponsored["SponsoredYieldSource"]
-    IYield --> CV["ConfidentialVaultYieldSource"]
+    IYield -.-> CV["ConfidentialVaultYieldSource (mainnet design, not built)"]
     Pool --> Auto["IAutomationCompatible"]
     Vault --> OZ["OpenZeppelin Ownable2Step, Pausable, ReentrancyGuard"]
     Pool --> OZ
 ```
+
+Solid edges are contracts in this repository. The dotted node is the mainnet yield path:
+the adapter is specified against Zama's published batcher interface and no adapter contract
+is written here, so only `SponsoredYieldSource` is deployed below.
 
 The vault and the pool each need the other, so one of the two links is made after
 deployment rather than in a constructor. That is why there are five steps below and not
@@ -181,5 +185,6 @@ owner powers.
 
 It does not cover running the pool after deployment, which is
 [the keeper](keeper.md). It does not cover mainnet operational readiness: the Confidential
-Vault adapter is documented and tested against the batcher interface, not wired to a live
-pool, and taking it live is described in [yield source](../concepts/yield-source.md).
+Vault adapter is specified against Zama's published batcher interface and is not implemented
+in this repository, and taking it live is described in
+[yield source](../concepts/yield-source.md).

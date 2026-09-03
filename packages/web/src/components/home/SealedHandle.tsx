@@ -101,6 +101,13 @@ export function SealedHandle({ handle, owner }: { handle: Hex | null; owner: Add
               That is a network problem rather than a refusal, so it proves nothing either way. Worth
               trying again in a moment.
             </p>
+            <button
+              type="button"
+              onClick={attempt}
+              className="mt-3 w-full rounded-lg border border-hairline px-4 py-3 text-[14px] text-parchment transition-colors duration-200 hover:border-flame/50 hover:bg-flame/[0.06] hover:text-flame"
+            >
+              Try again
+            </button>
           </div>
         )}
 

@@ -48,9 +48,14 @@ delegated the remaining choices; each is logged in `DECISIONS.md`.
 |---|---|---|
 | 0 | Planning files, git hooks, first local commit | A deliberately bad commit is rejected by the hooks |
 | 1 | `HearthVault`, `HearthPrizePool`, `IYieldSource`, `SponsoredYieldSource` compiled with NatSpec | Unit tests pass on the mock for deposit, withdraw, TWAB, close, award with proof, evaluate, finalize, reconcile, pause, ownership |
-| 2 | Property tests | Conservation of funds, no withdrawal above principal plus winnings, tier payouts never exceed liquidity, a flash deposit gets zero weight, expected winners per tier match the odds over many draws |
+| 2 | Property tests | Conservation of funds, no withdrawal above principal plus winnings, tier payouts never exceed liquidity, a flash deposit gets zero weight, expected winners per tier match the odds over many draws. Closed by `packages/contracts/test/Invariants.ts` and `packages/contracts/test/Fairness.ts` |
 | 3 | Static analysis | solhint clean with a committed config; slither run or its absence justified in `DECISIONS.md` |
 | 4 | Sepolia deployment | One repeatable deploy script, contracts verified on Etherscan, five funded saver wallets seeded, two draws run by the keeper, prove-it command output pasted in the README |
 | 5 | Self-audit | Threat model written; attack scripts executed live: stranger decryption refused, flash deposit weight zero, fake registrations cannot stall a draw, over-subscribed tier clamps, replayed proof rejected |
 | 6 | App rewired | Rename, separate wrap from deposit, reveal balance and winnings, withdraw pays winnings first, draw ceremony and verify page, every error state, mobile at 375px |
 | 7 | Docs and submission package | Hand-built docs site, README in the Aruvi shape, video script, X post draft, Vercel settings, `STATE.md` handoff list |
+
+Milestone 2 closed on 3 September 2026. The invariant walk and the fairness run are in the
+repository and their output is pasted in the README, so the "not written yet" wording that
+this table used to justify is out of date wherever it survives. `STATE.md` carries what has
+closed since and what is still open.

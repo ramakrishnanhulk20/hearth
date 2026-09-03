@@ -11,7 +11,7 @@ Updated 3 September 2026, 01:00 UTC, after the first live draws.
 - Git hooks installed and proven; `RECOVERY_PHRASE` wired in; ten Sepolia accounts derive
   from it: index 0 deploys, 1 keeps, 2 to 6 are the demo savers, 6 also proves.
 - Contracts, third pass: `HearthVault`, `HearthPrizePool`, `SponsoredYieldSource`; 35 tests
-  green on the mock including the fairness run (240 scored draws) and the invariant walk
+  green on the mock including the fairness run (240 draws, 239 scored) and the invariant walk
   (27 periods); solhint clean; slither's 85 results explained on
   `docs/security/static-analysis.md`; executed attack scripts, 10 of 12 rows locally.
 - Every tier reconciles every draw so the jackpot accumulates in public; docs follow.

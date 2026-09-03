@@ -58,9 +58,15 @@ Both jobs become available at the same instant. Draw `p`'s window ends at the en
 period `p+2`, and draw `p+2` becomes closable at the start of period `p+3`, so the keeper
 does the finalize and any due reconciles first, then the close.
 
-Nothing breaks if the order slips. An unreconciled carry is still added to its tier's
-offer at every close, so the money can still be won; it just does not raise the public
-prize size until it is reconciled. Nothing is lost either way.
+Nothing is lost if the order slips, but which way it slips matters. Close before the
+finalize and the tier's carry is not pending yet, so `openDraw` folds it into the offer and
+that money can still be won; it just does not raise the published prize size, which
+`closeDraw` fixes from plaintext liquidity alone. Finalize, then close, then reconcile, and
+the carry is pending: `openDraw` leaves a pending carry out of the draw entirely, so that
+money is neither offered nor winnable until the reconcile clears the flag. On Sepolia every
+tier is due at every finalize, so this is the ordinary case, and it is why the keeper reads
+the carries again after its finalizes and reconciles before it closes. Nothing is lost
+either way: the first close after a reconcile folds all of it back in.
 
 ## What happens when the keeper is down
 
@@ -72,7 +78,7 @@ handled:
 | Close never happens, or happens after `closeDeadline` and reverts | The draw stays `None` and is skipped. Its liquidity was never moved, so it stays in the tiers and is offered next draw. The harvest is collected by the next close. |
 | Award never happens inside the window | A late award still books the harvest, still returns the offered liquidity to the tiers, and marks the draw `Skipped`. No yield and no liquidity disappear. |
 | The walk does not reach every saver | Savers the walk missed get nothing from that draw. Their share of the offer folds into the tier's carry at finalization and is offered again. This is the one case where a real saver loses something they might have won, and it is limitation 2. |
-| Finalize or reconcile is late | The tiers hold less plaintext liquidity for a while, so prize sizes are smaller. The carry still adds capacity throughout, and it all comes back whenever somebody calls the two steps. |
+| Finalize or reconcile is late | The tiers hold less plaintext liquidity for a while, so prize sizes are smaller. A carry that a finalize published and no reconcile has cleared sits out of every close until the reconcile lands. Nothing is lost: the first close after a reconcile folds all of it back in. |
 
 A stalled keeper costs the pool draws, not money. Deposits and withdrawals keep working
 throughout, because the pause path never touches them and a stalled draw does not lock
@@ -116,8 +122,8 @@ on-chain automation network cannot fetch any of that, so pretending it could wou
 theatre.
 
 The upkeep is optional. It needs LINK in a registered upkeep account, and it is redundancy
-rather than the primary path. not registered yet, the keeper alone runs the demo pool records the registration if one is
-live.
+rather than the primary path. No upkeep is registered yet, so the keeper alone runs the demo
+pool.
 
 We declare the two-function interface locally instead of adding the whole Chainlink
 contracts package and its dependencies for two selectors.
@@ -130,7 +136,8 @@ Costs per draw, from the live deployment.
 | --- | --- | --- |
 | Close | 1 | `1,422,474` |
 | Award | 1 | `435,578` |
-| Evaluate | `ceil(savers / 4)` | `3,417,699` |
+| Evaluate, a full batch of 4 | `floor(savers / 4)`, here 1 | `3,417,699` |
+| Evaluate, the last partial batch | 0 or 1, here 1 carrying one saver | `1,291,192` for one saver, plus `708,836` for each extra |
 | Finalize | 1 | `509,463` |
 | Reconcile | 3, one per tier, since every tier is due every draw | `459,994` |
 

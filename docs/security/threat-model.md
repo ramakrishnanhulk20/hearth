@@ -105,9 +105,14 @@ zero, and the list is never pruned.
 
 **Not stopped:** the keeper's cost per draw grows with the saver list, which is
 append-only. A griefer cannot change anybody's odds, but they can make evaluating everybody
-expensive. The keeper's answer is a spend cap of its own: it advances the walk until its
-per-draw budget is used. Nothing on chain caps evaluation, so the honest consequence is
-that in a heavily griefed pool the walk may not reach every real saver inside the window.
+expensive. The keeper's answer is a fee ceiling, not a budget. `KEEPER_MAX_FEE_GWEI` makes
+it sit out a whole tick while the network fee is above the cap (`gasIsAffordable` in
+`packages/keeper/src/keeper.ts`), and below the cap it keeps sending until the cursor
+reaches the end of the walk. Savers with no observation before the period are skipped from
+plaintext timestamps at no encrypted cost, so padding the list costs the keeper gas rather
+than costing savers their prizes. Nothing on chain caps evaluation, so the honest
+consequence is that if gas stays above the ceiling in a heavily griefed pool, the walk may
+not reach every real saver inside the window.
 Two things soften it. The walk starts at a different point every draw, derived from that
 draw's seed, so nobody is systematically last. And anyone can advance the walk further
 from the app, which costs gas and reveals nothing about who is asking. See
@@ -140,6 +145,15 @@ simply to stop working.
   money is lost or stranded.
 - **The keeper cannot change an outcome.** Winner selection is fixed the moment the seed
   and the bracket are verified. Evaluation writes down an existing result.
+
+**Tested by accident, 3 September 2026.** The pm2 daemon died with the terminal process
+that started it at 03:45 UTC, and nobody noticed until 04:52, so the keeper was off for 67
+minutes. On restart it finalized draw 4 straight away and closed draw 6 at 04:53. Period 6
+had ended at 04:00, so that close was 53 minutes late against a deadline of 05:30, the
+middle of the second following period. No draw was lost, no liquidity was stranded, and
+nobody had to intervene beyond restarting the process. This is the "a stalled keeper costs
+draws, never money" claim in [the FAQ](../faq.md) and in the bullets above, run for real
+rather than argued.
 
 **Not stopped:**
 
@@ -205,9 +219,13 @@ ours.
   amounts already on chain, so monitoring for the appointment and exiting is not a
   defence. The scope is every deposit amount, every withdrawal payout, the pool's own
   token balance, and the one prize-funding transfer per evaluation batch. There is no
-  per-winner payout to read, because Hearth has no per-saver prize transfer; a batch that
-  contained a single saver would, however, make that batch's total that saver's exact
-  prize. Live state that day: `observerCount()` was 0 and `observers()` was empty.
+  per-winner payout to read, because Hearth has no per-saver prize transfer. A batch that
+  holds a single saver does make that batch's total that saver's exact prize, and the live
+  five-saver pool at a batch size of 4 produces one such batch every draw. `evaluate` takes
+  its batch size from the caller and is permissionless, so no minimum batch can be enforced;
+  [limitation 7](../limitations.md) records it as an accepted residual and names the
+  contract-side fix. Live state that day: `observerCount()` was 0 and `observers()` was
+  empty.
 - A deny list. A blocked address cannot deposit, withdraw or unwrap, because each is a
   token transfer with that address on one side.
 - A pauser role, live set to the zero address, so pausing is currently disabled.
@@ -274,9 +292,9 @@ them. Six of the eight findings below were reproduced in running code.
 | 3 | **A public bit every draw.** A house ticket's winnings handle was re-published as publicly decryptable in every draw, leaking whether the house won, which with one real saver named the winner. | Executed on the mock over 16 draws, and confirmed on Sepolia across three settled draws. | There is no house ticket. The only publicly decryptable values are the seed, the scale count, the non-empty flag, the harvest, the tier carries and the unfunded counter. None is per-saver. |
 | 4 | **Not publicly verifiable.** The pool's total was never published, so an outsider could not check the draw at all. | Read from the deployed source and confirmed live. | The seed and the bracket are published with a KMS proof verified on chain, and every threshold is recomputable by anyone from those two numbers. |
 | 5 | **Yield booked from a report.** Reserve top-ups were booked from the amount passed in, while the wrapper mints `amount / rate()`. Latent on Sepolia only because the rate happened to be 1. | Executed against an 18-decimal test token, where the rate is a million million. | The pool books only the KMS-verified amount the source actually transferred. |
-| 6 | **Free registration griefing.** A wallet that never held the token could register itself, and an operator could register other wallets with one reused encrypted zero. | Executed. | Registration is still open, by construction. Fake savers carry zero weight, change nobody's odds and are skipped in plaintext. The only cost is keeper gas, which the keeper bounds itself. |
+| 6 | **Free registration griefing.** A wallet that never held the token could register itself, and an operator could register other wallets with one reused encrypted zero. | Executed. | Registration is still open, by construction. Fake savers carry zero weight, change nobody's odds and are skipped in plaintext. The only cost is keeper gas, and what the keeper bounds is the gas price it will pay, not the work it will do. |
 | 7 | **The wrap seam, unmitigated.** The app wrapped and deposited in one flow. | Measured live: three of five deposits sat two to four blocks after a public 100 USDC wrap. | Wrap and deposit are separate steps and the app explains why. The seam is reduced, not removed, and is limitation 10. |
-| 8 | **No keeper.** Draws were permissionless but nobody ran them: the live pool sat 26 hours with an openable draw. | Read live from the chain. | A keeper script runs every step, Chainlink Automation covers the close step as redundancy, and any saver can advance a draw from the app. |
+| 8 | **No keeper.** Draws were permissionless but nobody ran them: the live pool sat 26 hours with an openable draw. | Read live from the chain. | A keeper script runs every step and any saver can advance a draw from the app. The pool implements Chainlink's automation interface for the close step as further redundancy, though no upkeep is registered yet. |
 
 Two further design changes came out of the 3 September review and are not in that table,
 because the old design did not get far enough to have them: publishing the exact aggregate

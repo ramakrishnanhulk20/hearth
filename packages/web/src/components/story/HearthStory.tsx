@@ -3,7 +3,8 @@
 import { AdaptiveDpr, Environment, Lightformer, Preload, Scroll, ScrollControls, useScroll } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import * as THREE from "three";
 import type { PoolStats } from "@/lib/chain/read";
@@ -140,7 +141,111 @@ function World() {
   );
 }
 
+/** The six captions, written once and laid out twice: over the scene, or stacked in a still page. */
+const CAPTIONS: { page: number; align: "left" | "right"; body: React.ReactNode }[] = [
+  {
+    page: 0,
+    align: "left",
+    body: (
+      <>
+        <p className="label mb-5">Confidential prize savings</p>
+        <h2
+          className="max-w-[16ch] font-display text-[clamp(2.2rem,6vw,5rem)] leading-[0.95] tracking-tightest text-white"
+          style={{ fontWeight: 740 }}
+        >
+          One hearth. Lit only for the person who keeps it.
+        </h2>
+      </>
+    ),
+  },
+  {
+    page: 1,
+    align: "left",
+    body: (
+      <>
+        <p className="label mb-5">You deposit</p>
+        <h2
+          className="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
+          style={{ fontWeight: 740 }}
+        >
+          You fill it, and the amount seals shut.
+        </h2>
+        <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed text-white/55">
+          The amount is encrypted in your browser and stays a ciphertext on chain. From here on the
+          number is yours alone, and Zama&apos;s access control list is what enforces that.
+        </p>
+        <Ciphertext />
+      </>
+    ),
+  },
+  {
+    page: 3,
+    align: "right",
+    body: (
+      <>
+        <h2
+          className="ml-auto max-w-[18ch] text-right font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
+          style={{ fontWeight: 740 }}
+        >
+          And it is one of many.
+        </h2>
+        <p className="ml-auto mt-4 max-w-[36ch] text-right text-[15px] leading-relaxed text-white/55">
+          Every saver&apos;s balance burns and not one of them can be read from outside. The pool never
+          publishes its exact total either, only the power of two it sits under, because the exact
+          total would give away a lone mover&apos;s deposit.
+        </p>
+      </>
+    ),
+  },
+  {
+    page: 4,
+    align: "left",
+    body: (
+      <>
+        <p className="label mb-5">The draw</p>
+        <h2
+          className="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
+          style={{ fontWeight: 740 }}
+        >
+          A seed nobody can see, drawn inside the coprocessor.
+        </h2>
+        <p className="mt-4 max-w-[36ch] text-[15px] leading-relaxed text-white/55">
+          Prize sizes are fixed before the seed exists, so nobody can read a seed, work out that they
+          won, and make the win bigger. When the period ends the seed is published with a signature
+          the contract checks on chain.
+        </p>
+      </>
+    ),
+  },
+  {
+    page: 6,
+    align: "right",
+    body: (
+      <>
+        <p className="label mb-5 justify-end">The win</p>
+        <h2
+          className="ml-auto max-w-[18ch] text-right font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
+          style={{ fontWeight: 740 }}
+        >
+          One hearth burns brighter.
+        </h2>
+        <p className="ml-auto mt-4 max-w-[38ch] text-right text-[15px] leading-relaxed text-white/55">
+          Odds are proportional to the balance held across the whole period, so a deposit made just
+          before the draw earns only the fraction of the period it was there. The prize lands in an
+          encrypted winnings balance, and a claim is an ordinary withdrawal.
+        </p>
+      </>
+    ),
+  },
+];
+
 export function HearthStory({ stats }: { stats?: PoolStats | null }) {
+  const reduced = useReducedMotion();
+
+  // A reader who has asked for reduced motion gets the same words with no WebGL context, no camera
+  // flight and no scroll hijack.
+  if (reduced) return <StillStory stats={stats ?? null} />;
+
   return (
     <div className="h-[100svh] w-full bg-[#050505]">
       <Canvas
@@ -156,74 +261,11 @@ export function HearthStory({ stats }: { stats?: PoolStats | null }) {
         <ScrollControls pages={PAGES} damping={0.25}>
           <World />
           <Scroll html style={{ width: "100%" }}>
-            <Caption page={0}>
-              <p className="label mb-5">Confidential prize savings</p>
-              <h2
-                className="max-w-[16ch] font-display text-[clamp(2.2rem,6vw,5rem)] leading-[0.95] tracking-tightest text-white"
-                style={{ fontWeight: 740 }}
-              >
-                One hearth. Lit only for the person who keeps it.
-              </h2>
-            </Caption>
-
-            <Caption page={1}>
-              <p className="label mb-5">You deposit</p>
-              <h2
-                className="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
-                style={{ fontWeight: 740 }}
-              >
-                You fill it, and the amount seals shut.
-              </h2>
-              <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed text-white/55">
-                The amount is encrypted in your browser and stays a ciphertext on chain. From here on
-                the number is yours alone, and Zama&apos;s access control list is what enforces that.
-              </p>
-              <Ciphertext />
-            </Caption>
-
-            <Caption page={3} align="right">
-              <h2
-                className="ml-auto max-w-[18ch] text-right font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
-                style={{ fontWeight: 740 }}
-              >
-                And it is one of many.
-              </h2>
-              <p className="ml-auto mt-4 max-w-[36ch] text-right text-[15px] leading-relaxed text-white/55">
-                Every saver&apos;s balance burns and not one of them can be read from outside. The pool
-                never publishes its exact total either, only the power of two it sits under, because the
-                exact total would give away a lone mover&apos;s deposit.
-              </p>
-            </Caption>
-
-            <Caption page={4}>
-              <p className="label mb-5">The draw</p>
-              <h2
-                className="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
-                style={{ fontWeight: 740 }}
-              >
-                A seed nobody can see, drawn inside the coprocessor.
-              </h2>
-              <p className="mt-4 max-w-[36ch] text-[15px] leading-relaxed text-white/55">
-                Prize sizes are fixed before the seed exists, so nobody can read a seed, work out that
-                they won, and make the win bigger. When the period ends the seed is published with a
-                signature the contract checks on chain.
-              </p>
-            </Caption>
-
-            <Caption page={6} align="right">
-              <p className="label mb-5 justify-end">The win</p>
-              <h2
-                className="ml-auto max-w-[18ch] text-right font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
-                style={{ fontWeight: 740 }}
-              >
-                One hearth burns brighter.
-              </h2>
-              <p className="ml-auto mt-4 max-w-[38ch] text-right text-[15px] leading-relaxed text-white/55">
-                Odds are proportional to the balance held across the whole period, so a deposit made
-                just before the draw earns only the fraction of the period it was there. The prize
-                lands in an encrypted winnings balance, and a claim is an ordinary withdrawal.
-              </p>
-            </Caption>
+            {CAPTIONS.map((caption) => (
+              <Caption key={caption.page} page={caption.page} align={caption.align}>
+                {caption.body}
+              </Caption>
+            ))}
           </Scroll>
         </ScrollControls>
         <AdaptiveDpr pixelated />
@@ -235,20 +277,62 @@ export function HearthStory({ stats }: { stats?: PoolStats | null }) {
   );
 }
 
+function StillStory({ stats }: { stats: PoolStats | null }) {
+  return (
+    <div className="relative w-full bg-[#050505]">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0"
+        style={{
+          background:
+            "radial-gradient(60% 55% at 72% 42%, rgba(249,183,64,0.16), transparent 60%)," +
+            "radial-gradient(50% 60% at 20% 70%, rgba(249,209,0,0.06), transparent 65%)," +
+            "#050505",
+        }}
+      />
+
+      <div className="relative mx-auto flex w-full max-w-[92rem] flex-col gap-20 px-6 pb-20 pt-32 lg:gap-28 lg:px-16">
+        {CAPTIONS.map((caption) => (
+          <section key={caption.page} className={caption.align === "right" ? "text-right" : ""}>
+            {caption.body}
+          </section>
+        ))}
+
+        <section className="grid grid-cols-1 items-end gap-8 border-t border-white/10 pt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)]">
+          <CloseContent stats={stats} />
+        </section>
+      </div>
+
+      <StoryFooter />
+    </div>
+  );
+}
+
 function CloseOverlay({ stats }: { stats: PoolStats | null }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inner = useRef<HTMLDivElement | null>(null);
   const foot = useRef<HTMLElement | null>(null);
-  const grand = stats?.nextPrize[0] ?? null;
 
   useEffect(() => {
     let frame = 0;
+    let hidden: boolean | null = null;
     const loop = () => {
       const shown = THREE.MathUtils.clamp((closeSignal.current - 0.85) / 0.1, 0, 1);
       if (ref.current) ref.current.style.opacity = String(shown);
-      const events = shown > 0.5 ? "auto" : "none";
-      if (inner.current) inner.current.style.pointerEvents = events;
-      if (foot.current) foot.current.style.pointerEvents = events;
+      const next = shown <= 0.5;
+      if (next !== hidden) {
+        hidden = next;
+        // Opacity alone leaves the links and the demo button in the tab order while the scene is
+        // still playing. inert takes the whole subtree out of it, and out of hit testing.
+        if (ref.current) {
+          ref.current.inert = next;
+          if (next) ref.current.setAttribute("aria-hidden", "true");
+          else ref.current.removeAttribute("aria-hidden");
+        }
+        const events = next ? "none" : "auto";
+        if (inner.current) inner.current.style.pointerEvents = events;
+        if (foot.current) foot.current.style.pointerEvents = events;
+      }
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
@@ -256,73 +340,97 @@ function CloseOverlay({ stats }: { stats: PoolStats | null }) {
   }, []);
 
   return (
-    <div ref={ref} className="pointer-events-none fixed inset-0 z-40 flex items-center opacity-0" style={{ opacity: 0 }}>
+    <div
+      ref={ref}
+      inert
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-40 flex items-center opacity-0"
+      style={{ opacity: 0 }}
+    >
       <div
         ref={inner}
         // Scrolls inside itself on a short viewport rather than sliding under the fixed header and
         // the footer, which is what a laptop at 617 pixels of height was doing.
         className="pointer-events-none mx-auto grid max-h-[100svh] w-full max-w-[92rem] grid-cols-1 items-end gap-8 overflow-y-auto px-6 pb-24 pt-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)] lg:px-16"
       >
-        <div>
-          <p className="label mb-5">Try it</p>
-          <h2
-            className="max-w-[15ch] font-display text-[clamp(2.2rem,7vw,6rem)] leading-[0.9] tracking-tightest text-white"
-            style={{ fontWeight: 760 }}
-          >
-            Save in the dark.
-          </h2>
-          <p className="mt-5 max-w-[40ch] text-[16px] leading-relaxed text-white/60">
-            Deposit test USDC on Sepolia, run a draw yourself, and check that only you can read your own
-            balance. It costs nothing but a little test ETH.
-          </p>
-
-          <div className="mt-8 flex flex-wrap items-center gap-5">
-            <Link
-              href="/app"
-              prefetch
-              className="group inline-flex items-center gap-2.5 rounded-lg bg-flameFill px-6 py-3.5 text-[15px] font-medium text-onFlame transition-transform duration-200 hover:scale-[1.02]"
-            >
-              Open the pool
-              <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">
-                &rarr;
-              </span>
-            </Link>
-            {grand !== null && grand > 0n && (
-              <span className="text-[14px] text-white/55">
-                <span className="font-display tabular-nums text-flame" style={{ fontWeight: 620 }}>
-                  {formatAmount(grand)} USDC
-                </span>{" "}
-                grand prize next draw
-              </span>
-            )}
-            {stats && (
-              <span className="text-[14px] tabular-nums text-white/45">
-                {stats.savers} saver{stats.savers === 1 ? "" : "s"} · period {stats.period}
-              </span>
-            )}
-          </div>
-          {stats === null && (
-            <p className="mt-4 max-w-[42ch] text-[13px] leading-relaxed text-white/40">
-              Sepolia is not answering right now, so the live figures are missing. The pool is
-              unaffected: it lives on chain, not here.
-            </p>
-          )}
-        </div>
-
-        <SealedHandle handle={stats?.sealedHandle ?? null} owner={stats?.sealedOwner ?? null} />
+        <CloseContent stats={stats} />
       </div>
 
-      <StoryFooter footRef={foot} />
+      <StoryFooter footRef={foot} pinned />
     </div>
   );
 }
 
-function StoryFooter({ footRef }: { footRef: React.MutableRefObject<HTMLElement | null> }) {
+function CloseContent({ stats }: { stats: PoolStats | null }) {
+  const grand = stats?.nextPrize[0] ?? null;
+
+  return (
+    <>
+      <div>
+        <p className="label mb-5">Try it</p>
+        <h2
+          className="max-w-[15ch] font-display text-[clamp(2.2rem,7vw,6rem)] leading-[0.9] tracking-tightest text-white"
+          style={{ fontWeight: 760 }}
+        >
+          Save in the dark.
+        </h2>
+        <p className="mt-5 max-w-[40ch] text-[16px] leading-relaxed text-white/60">
+          Deposit test USDC on Sepolia, run a draw yourself, and check that only you can read your own
+          balance. It costs nothing but a little test ETH.
+        </p>
+
+        <div className="mt-8 flex flex-wrap items-center gap-5">
+          <Link
+            href="/app"
+            prefetch
+            className="group inline-flex items-center gap-2.5 rounded-lg bg-flameFill px-6 py-3.5 text-[15px] font-medium text-onFlame transition-transform duration-200 hover:scale-[1.02]"
+          >
+            Open the pool
+            <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">
+              &rarr;
+            </span>
+          </Link>
+          {grand !== null && grand > 0n && (
+            <span className="text-[14px] text-white/55">
+              <span className="font-display tabular-nums text-flame" style={{ fontWeight: 620 }}>
+                {formatAmount(grand)} USDC
+              </span>{" "}
+              grand prize next draw
+            </span>
+          )}
+          {stats && (
+            <span className="text-[14px] tabular-nums text-white/45">
+              {stats.savers} saver{stats.savers === 1 ? "" : "s"} · period {stats.period}
+            </span>
+          )}
+        </div>
+        {stats === null && (
+          <p className="mt-4 max-w-[42ch] text-[13px] leading-relaxed text-white/40">
+            Sepolia is not answering right now, so the live figures are missing. The pool is
+            unaffected: it lives on chain, not here.
+          </p>
+        )}
+      </div>
+
+      <SealedHandle handle={stats?.sealedHandle ?? null} owner={stats?.sealedOwner ?? null} />
+    </>
+  );
+}
+
+function StoryFooter({
+  footRef,
+  pinned = false,
+}: {
+  footRef?: React.MutableRefObject<HTMLElement | null>;
+  pinned?: boolean;
+}) {
   return (
     <footer
       ref={footRef}
-      style={{ pointerEvents: "none" }}
-      className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-black/25 px-6 py-4 backdrop-blur-sm lg:px-16"
+      style={pinned ? { pointerEvents: "none" } : undefined}
+      className={`border-t border-white/10 bg-black/25 px-6 py-4 backdrop-blur-sm lg:px-16 ${
+        pinned ? "absolute inset-x-0 bottom-0" : "relative"
+      }`}
     >
       <div className="mx-auto flex max-w-[92rem] flex-col items-center justify-between gap-3 text-[13px] sm:flex-row">
         <span className="text-white/45">Hearth, confidential no-loss prize savings</span>
@@ -350,22 +458,54 @@ function StoryFooter({ footRef }: { footRef: React.MutableRefObject<HTMLElement 
   );
 }
 
+const HEX = "0123456789abcdef";
+/** Fixed, so the reduced motion page shows a ciphertext instead of a strobing one. */
+const SEALED_SAMPLE = "0x7d41f0a9c26be835";
+
 /** The deposit amount counting up, then turning into the ciphertext handle it becomes on chain. */
 function Ciphertext() {
-  const [display, setDisplay] = useState<{ sealed: boolean; text: string }>({ sealed: false, text: "$0" });
+  const node = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => {
-    let frame = 0;
-    const loop = () => {
-      const progress = depositSignal.current;
-      if (progress < 0.9) {
-        setDisplay({ sealed: false, text: `$${Math.round((progress / 0.9) * 500).toLocaleString("en-US")}` });
-      } else {
-        setDisplay({
-          sealed: true,
-          text: "0x" + Array.from({ length: 16 }, () => "0123456789abcdef"[(Math.random() * 16) | 0]).join(""),
-        });
+    let shownText: string | null = null;
+    let shownSealed: boolean | null = null;
+
+    // Written straight to the node. React re-rendering this sixty times a second was competing
+    // with the scene for the same frame budget.
+    const write = (text: string, sealed: boolean) => {
+      const el = node.current;
+      if (!el) return;
+      if (text !== shownText) {
+        el.textContent = text;
+        shownText = text;
       }
+      if (sealed !== shownSealed) {
+        el.classList.toggle("text-flame/60", sealed);
+        el.classList.toggle("text-flame", !sealed);
+        shownSealed = sealed;
+      }
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      write(SEALED_SAMPLE, true);
+      return;
+    }
+
+    let frame = 0;
+    let scrambledAt = 0;
+    let text = "$0";
+    const loop = (now: number) => {
+      const progress = depositSignal.current;
+      const sealed = progress >= 0.9;
+      if (!sealed) {
+        text = `$${Math.round((progress / 0.9) * 500).toLocaleString("en-US")}`;
+      } else if (now - scrambledAt >= 90) {
+        // Eleven changes a second. At sixty it reads as a flicker rather than as a value nobody
+        // can pin down.
+        scrambledAt = now;
+        text = "0x" + Array.from({ length: 16 }, () => HEX[(Math.random() * 16) | 0]).join("");
+      }
+      write(text, sealed);
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
@@ -374,11 +514,10 @@ function Ciphertext() {
 
   return (
     <p
-      className={`mt-6 font-display text-[clamp(1.2rem,2.6vw,2rem)] tabular-nums tracking-tight transition-colors ${
-        display.sealed ? "text-flame/60" : "text-flame"
-      }`}
+      ref={node}
+      className="mt-6 font-display text-[clamp(1.2rem,2.6vw,2rem)] tabular-nums tracking-tight text-flame transition-colors"
     >
-      {display.text}
+      $0
     </p>
   );
 }

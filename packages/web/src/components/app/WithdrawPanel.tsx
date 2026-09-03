@@ -101,6 +101,7 @@ export function WithdrawPanel({
             <div className="mt-3 flex flex-col gap-2.5 sm:flex-row sm:items-start">
               <div className="flex-1">
                 <AmountField
+                  name="Amount to withdraw from the pool"
                   value={input}
                   onChange={setInput}
                   onMax={available !== null ? () => setInput(formatAmount(available)) : undefined}
@@ -155,7 +156,9 @@ export function WithdrawPanel({
               Two transactions, because the wrapper burns the encrypted amount and publishes it first,
               then releases the plain tokens once Zama&apos;s protocol has produced the cleartext and its
               proof. The amount is public, exactly like the amount you wrapped, and it is the first
-              transaction that publishes it.
+              transaction that publishes it. Your wallet also asks for a signature before the first
+              transaction, because the wrapper reads your confidential balance to check the amount.
+              That signature costs no gas.
             </p>
             <p className="mt-2 text-[12.5px] leading-relaxed text-faint">
               Worth knowing: wrap in and unwrap out in full and the difference between the two public
@@ -192,6 +195,7 @@ export function WithdrawPanel({
             <div className="mt-3 flex flex-col gap-2.5 sm:flex-row sm:items-start">
               <div className="flex-1">
                 <AmountField
+                  name="Amount of confidential USDC to unwrap"
                   value={unshieldInput}
                   onChange={setUnshieldInput}
                   disabled={!saver.connected || saver.wrongNetwork || unshield.busy}
@@ -210,31 +214,36 @@ export function WithdrawPanel({
               </Button>
             </div>
 
-            {unshield.stage.kind !== "idle" && (
-              <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-hairlineSoft bg-[rgba(10,10,10,0.68)] px-4 py-3">
-                {unshield.busy && <span className="mt-0.5"><Spinner size={14} /></span>}
-                <p
-                  className={`flex-1 text-[13px] leading-relaxed ${
-                    unshield.stage.kind === "failed" ? "text-bad" : unshield.stage.kind === "done" ? "text-good" : "text-muted"
-                  }`}
-                >
-                  {unshield.stage.kind === "unwrapping" && "Unwrap: confirm the first transaction in your wallet."}
-                  {unshield.stage.kind === "waiting" && "Unwrap submitted. Waiting for Zama's protocol to publish the cleartext and its proof."}
-                  {unshield.stage.kind === "finalizing" && "Finalizing: confirm the second transaction to release the plain USDC."}
-                  {unshield.stage.kind === "done" && "Unwrapped. The plain USDC is back in your wallet."}
-                  {unshield.stage.kind === "failed" && unshield.stage.error.message}
-                </p>
-                {(unshield.stage.kind === "done" || unshield.stage.kind === "failed") && (
-                  <button
-                    type="button"
-                    onClick={unshield.dismiss}
-                    className="text-[12px] text-faint transition-colors hover:text-parchment"
+            {/* Mounted at every stage, idle included, because a screen reader only announces a live
+                region that was already in the page when its text changed. */}
+            <div role="status" aria-live="polite" aria-atomic="true">
+              {unshield.stage.kind !== "idle" && (
+                <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-hairlineSoft bg-[rgba(10,10,10,0.68)] px-4 py-3">
+                  {unshield.busy && <span className="mt-0.5"><Spinner size={14} /></span>}
+                  <p
+                    className={`flex-1 text-[13px] leading-relaxed ${
+                      unshield.stage.kind === "failed" ? "text-bad" : unshield.stage.kind === "done" ? "text-good" : "text-muted"
+                    }`}
                   >
-                    Dismiss
-                  </button>
-                )}
-              </div>
-            )}
+                    {unshield.stage.kind === "unwrapping" &&
+                      "Unwrap: your wallet asks twice. First for a signature so the wrapper can read your confidential balance, which costs no gas, then for the unwrap transaction itself."}
+                    {unshield.stage.kind === "waiting" && "Unwrap submitted. Waiting for Zama's protocol to publish the cleartext and its proof."}
+                    {unshield.stage.kind === "finalizing" && "Finalizing: confirm the second transaction to release the plain USDC."}
+                    {unshield.stage.kind === "done" && "Unwrapped. The plain USDC is back in your wallet."}
+                    {unshield.stage.kind === "failed" && unshield.stage.error.message}
+                  </p>
+                  {(unshield.stage.kind === "done" || unshield.stage.kind === "failed") && (
+                    <button
+                      type="button"
+                      onClick={unshield.dismiss}
+                      className="text-[12px] text-faint transition-colors hover:text-parchment"
+                    >
+                      Dismiss
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -1,10 +1,11 @@
 // Covers the tick planner: which draws get closed, awarded, evaluated, finalized and reconciled
 // from a synthetic chain state, and the order those actions come out in.
-// Does not cover any RPC or relayer behaviour, gas caps, or what the contracts do once called.
+// Does not cover any RPC or relayer behaviour, gas caps, or what the contracts do once called, and
+// does not cover the keeper reading the carries again between the two phases, which is tick.test.ts.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { DrawSnapshot, TickSnapshot } from "../src/plan.js";
-import { DrawStatus, isSettled, nextScanFrom, planTick } from "../src/plan.js";
+import { DrawStatus, isSettled, nextScanFrom, planAfterFinalizes, planFinalizes, planTick } from "../src/plan.js";
 
 const HOUR = 3600;
 
@@ -114,23 +115,27 @@ test("reconciles every tier the vault has published a carry for", () => {
   ]);
 });
 
-test("puts finalize and reconcile ahead of the close, so the money is offered again at once", () => {
+test("the two phases split at the finalize, which is the point the carries change", () => {
   const past = draw(1, { status: DrawStatus.Awarded, walkLength: 4, cursor: 4, windowEndsAt: 3 * HOUR });
   const closed = draw(2, { status: DrawStatus.Closed });
   const open = draw(3, { status: DrawStatus.Awarded, walkLength: 4, cursor: 0, windowEndsAt: 9 * HOUR });
-  const plan = planTick(
-    snapshot({
-      now: 4 * HOUR,
-      period: 5,
-      closableDraw: 4,
-      closeDeadline: 6 * HOUR,
-      draws: [past, closed, open],
-      pendingCarries: [2],
-      saverCount: 4,
-    }),
+  const state = snapshot({
+    now: 4 * HOUR,
+    period: 5,
+    closableDraw: 4,
+    closeDeadline: 6 * HOUR,
+    draws: [past, closed, open],
+    pendingCarries: [2],
+    saverCount: 4,
+  });
+
+  assert.deepEqual(planFinalizes(state), [{ kind: "finalize", drawId: 1 }]);
+  assert.deepEqual(
+    planAfterFinalizes(state).map((action) => action.kind),
+    ["reconcile", "close", "award", "evaluate"],
   );
   assert.deepEqual(
-    plan.map((action) => action.kind),
+    planTick(state).map((action) => action.kind),
     ["finalize", "reconcile", "close", "award", "evaluate"],
   );
 });

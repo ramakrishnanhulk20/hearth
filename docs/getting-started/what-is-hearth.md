@@ -26,7 +26,7 @@ flowchart LR
     Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
     Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
     Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
-    Keeper["Keeper script<br/>+ Chainlink time-based upkeep"]
+    Keeper["Keeper script<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
     Relayer["Zama relayer + KMS"]
 
     Saver -- "wrap" --> cUSDC

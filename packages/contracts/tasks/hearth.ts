@@ -553,11 +553,20 @@ export async function warp(hre: HardhatRuntimeEnvironment, seconds: bigint): Pro
 
 export type DrawOutcome = { readonly closed: number | null; readonly awarded: number | null };
 
-/** Every step a keeper pass performs, in the order a single draw needs them. */
+/**
+ * Every step a keeper pass performs, in the order the keeper performs them.
+ *
+ * The finalizes come first and the reconciles read the carries they just published, because
+ * `HearthVault.openDraw` leaves a tier's carry out of the draw entirely while it is pending. Close
+ * before the reconcile and that money is neither offered nor winnable until the following draw.
+ */
 export async function driveDraw(ctx: Hearth, keeper: Signer): Promise<DrawOutcome> {
   const period = Number(await ctx.pool.currentPeriod());
-  let closed: number | null = null;
 
+  await finalizeWindows(ctx, keeper, period);
+  await reconcileCarries(ctx, keeper);
+
+  let closed: number | null = null;
   const closable = Number(await ctx.pool.closableDraw());
   if (closable === 0) {
     console.log(`nothing is closable in period ${period}, so this pass awards and evaluates what is already open`);
@@ -570,7 +579,6 @@ export async function driveDraw(ctx: Hearth, keeper: Signer): Promise<DrawOutcom
 
   const awarded = await awardClosedDraws(ctx, keeper, period);
   for (const drawId of awarded) await evaluateFully(ctx, keeper, drawId);
-  await finishWindows(ctx, keeper, period);
 
   return { closed, awarded: awarded.length > 0 ? awarded[awarded.length - 1] : null };
 }
@@ -656,7 +664,7 @@ async function newestOwnDraw(ctx: Hearth, address: string, period: number): Prom
   return unfunded;
 }
 
-async function finishWindows(ctx: Hearth, keeper: Signer, period: number): Promise<void> {
+async function finalizeWindows(ctx: Hearth, keeper: Signer, period: number): Promise<void> {
   for (let drawId = Math.max(1, period - RECENT_DRAWS); drawId <= period; drawId++) {
     const draw = await ctx.pool.drawOf(drawId);
     if (Number(draw.status) !== 2) continue;
@@ -664,7 +672,11 @@ async function finishWindows(ctx: Hearth, keeper: Signer, period: number): Promi
     if (BigInt(period) <= BigInt(drawId) + 2n) continue;
     await send(`finalized draw ${drawId}`, ctx.vault.connect(keeper).finalizeDraw(drawId));
   }
+}
 
+/** Reads the carries after the finalizes have landed, so a carry published moments ago is booked
+ * back into plaintext liquidity before the next close sizes its prizes. */
+async function reconcileCarries(ctx: Hearth, keeper: Signer): Promise<void> {
   for (let tier = 0; tier < TIER_NAMES.length; tier++) {
     const [handle, publishedAt, pending] = await ctx.vault.publishedCarry(tier);
     if (!pending) continue;

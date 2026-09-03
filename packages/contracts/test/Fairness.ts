@@ -1,17 +1,21 @@
 // Statistical fairness of the winner test, measured over a long run on the mock coprocessor. Five savers
-// with stakes in a 16:8:4:2:1 ratio hold still through 240 consecutive draws at the Sepolia tier set, a
-// 600 second period and a sponsored drip, and every draw is closed, awarded, evaluated to the end of its
-// walk, finalized and reconciled. The run measures how many prizes each saver wins against the binomial
-// expectation of their share, how many prizes the frequent tier pays against the aggregate's power-of-two
-// bracket, that nobody wins more prizes than a tier has, that the over-subscription clamp bites only when
-// a tier is claimed past its capacity, and that a saver who arrives after a period ended cannot win that
-// period's draw.
+// with stakes in a 16:8:4:2:1 ratio hold still through 240 consecutive draws at the Sepolia odds, shares
+// and prize counts behind a long reconcile cadence, a 600 second period and a sponsored drip, and every
+// draw is closed, awarded, evaluated to the end of its walk, finalized and reconciled. Every statistic
+// below is driven by the odds, the shares and the prize counts, which are the deployed ones. The cadence
+// drives only the prize sizes printed at the end of the run, and the deployment reconciles every tier
+// every draw, so those ranges are not the Sepolia ones.
+// The run measures how many prizes each saver wins against the binomial expectation of their share, how
+// many prizes the frequent tier pays against the aggregate's power-of-two bracket, that nobody wins more
+// prizes than a tier has, that the over-subscription clamp bites only when a tier is claimed past its
+// capacity, and that a saver who arrives after a period ended cannot win that period's draw.
 // Does not cover: the live relayer or KMS, the statistical quality of FHE.randEuint64 itself (the mock
-// draws it, so this measures the winner test given a seed, not the seed), tier sets other than Sepolia's,
-// savers who move their balance mid-run (stakes are held still on purpose so the aggregate stays in one
-// bracket and every draw is an independent identical trial), the clamp actually biting (five savers can
-// claim at most six of the frequent tier's eight prizes, which the run asserts rather than assumes), gas,
-// and every book-keeping invariant, which lives in Invariants.ts.
+// draws it, so this measures the winner test given a seed, not the seed), reconcile cadences other than
+// 24 / 6 / 1 and tier sets with different odds, shares or prize counts, savers who move their balance
+// mid-run (stakes are held still on purpose so the aggregate stays in one bracket and every draw is an
+// independent identical trial), the clamp actually biting (five savers can claim at most six of the
+// frequent tier's eight prizes, which the run asserts rather than assumes), gas, and every book-keeping
+// invariant, which lives in Invariants.ts.
 import { FhevmType } from "@fhevm/hardhat-plugin";
 import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
@@ -32,7 +36,9 @@ type TierConfig = {
   reconcileEvery: number;
 };
 
-const SEPOLIA_TIERS: TierConfig[] = [
+// The odds, shares and prize counts of the Sepolia set, with the grand and mid carries hidden behind a
+// long reconcile cadence, which the deployment does not use but the mechanism has to support.
+const LONG_CADENCE_TIERS: TierConfig[] = [
   { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 24, shares: 40, reconcileEvery: 24 },
   { prizeCount: 1, oddsNumerator: 1, oddsDenominator: 6, shares: 20, reconcileEvery: 6 },
   { prizeCount: 4, oddsNumerator: 1, oddsDenominator: 1, shares: 40, reconcileEvery: 1 },
@@ -137,7 +143,7 @@ describe("Hearth fairness", () => {
 
     pool = (await (
       await ethers.getContractFactory("HearthPrizePool")
-    ).deploy(vaultAddress, cusdcAddress, SEPOLIA_TIERS, scaleBits, owner.address)) as unknown as HearthPrizePool;
+    ).deploy(vaultAddress, cusdcAddress, LONG_CADENCE_TIERS, scaleBits, owner.address)) as unknown as HearthPrizePool;
     poolAddress = await pool.getAddress();
 
     source = (await (
@@ -451,7 +457,7 @@ describe("Hearth fairness", () => {
     }
 
     const seconds = Math.round((Date.now() - started) / 1000);
-    const nominal = scored * SEPOLIA_TIERS[2].prizeCount;
+    const nominal = scored * LONG_CADENCE_TIERS[2].prizeCount;
     const totalWon = won[2].reduce((a, b) => a + b, 0);
     const totalExpected = expectedWins[2].reduce((a, b) => a + b, 0);
     const totalVariance = variance[2].reduce((a, b) => a + b, 0);

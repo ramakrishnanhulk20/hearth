@@ -58,11 +58,11 @@ another.
 | 4 | 0:50 to 1:05 | `/app`, panel 2, "What you hold" | Click **Reveal**. Sign the message. Let the principal and winnings appear | "To read my own balance I sign a message. No gas, no transaction. The relayer answers me and nobody else." |
 | 5 | 1:05 to 1:32 | `/app`, right column, "Run the draw" | Click **Close**, confirm, then click **Award** on the same panel and confirm. Stay on the "asking Zama's key management service for the seed" line while it works | "Now the draw. Closing fixes the prize sizes and draws a seed inside the coprocessor. Awarding hands back the signed seed, and the contract checks that signature on chain." |
 | 6 | 1:32 to 1:55 | `/app`, panel 3, "Your draws", the newest awarded card | Click **Advance the draw** and confirm. Once the walk reaches you, click **Reveal my result**, then click the claim button, which carries your own amount and reads **Claim 1.00 USDC** or whatever you won, and confirm | "This walks the saver list from a point the seed picked, so I cannot aim it at myself. There is my result. Claiming is an ordinary withdrawal. No transaction names a winner." |
-| 7 | 1:55 to 2:10 | `/lab`, the draw ceremony | Click the newest **Draw** chip, then **Open the seal**. Let the seed, the bracket and the thresholds fall in | "The seed and the bracket are public. Anyone can recompute the threshold any address had to beat." |
-| 8 | 2:10 to 2:18 | `/verify` | Paste any saver's address into "Thresholds for an address". Let the numbers render | "Same numbers here, with no wallet at all." |
-| 9 | 2:18 to 2:30 | `/app`, panel 4, "Withdraw" | Click **All of it**. Confirm. Let the balance seal itself again | "My principal comes back whenever I ask, in full." |
-| 10 | 2:30 to 2:45 | The terminal, on the finished output of the prove-it command | Scroll to the last lines, where step 9 says the wallet grew by exactly what went in | "One command proves the whole thing against the live network. Deposit, decrypt, a stranger refused, withdraw to the unit. Contracts verified on Sepolia." |
-| 11 | 2:45 to 2:52 | You, on camera | Nothing | "Anyone can run it. The link is below." |
+| 7 | 1:55 to 2:05 | `/lab`, the draw ceremony | Click the newest **Draw** chip, then **Open the seal**. Let the seed, the bracket and the thresholds fall in | "The seed and the bracket are public. Anyone can recompute the threshold any address had to beat." |
+| 8 | 2:05 to 2:11 | `/verify` | Paste any saver's address into "Thresholds for an address". Let the numbers render | "Same numbers here, with no wallet at all." |
+| 9 | 2:11 to 2:23 | `/app`, panel 4, "Withdraw" | Click **All of it**. Confirm. Let the balance seal itself again | "My principal comes back whenever I ask, in full." |
+| 10 | 2:23 to 2:36 | The terminal, on the finished output of the prove-it command | Scroll to the last lines, where step 9 says the wallet grew by exactly what went in | "One command proves the whole thing against the live network. Deposit, decrypt, a stranger refused, withdraw to the unit. Contracts verified on Sepolia." |
+| 11 | 2:36 to 2:40 | You, on camera | Nothing | "Anyone can run it. The link is below." |
 
 ---
 

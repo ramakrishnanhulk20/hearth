@@ -5,10 +5,15 @@ import { TIER_NAMES } from "@/lib/chain/addresses";
 import { countdown, formatAmount, formatUtc, oddsLabel } from "@/lib/format";
 import type { PoolState } from "@/hooks/useHearth";
 
+/** What the panel prints in place of a number the chain has not given it yet. */
+const UNREAD = "...";
+
 /** The public half of Hearth: prize sizes, tier odds, the schedule and where the money comes from. */
 export function PoolPanel({ pool, now, periodLength }: { pool: PoolState; now: number; periodLength: number }) {
-  const perPeriod = pool.ratePerSecond * BigInt(periodLength);
-  const runway = perPeriod > 0n ? pool.sponsorBalance / perPeriod : null;
+  const perPeriod = pool.known.ratePerSecond ? pool.ratePerSecond * BigInt(periodLength) : null;
+  const runway =
+    perPeriod !== null && perPeriod > 0n && pool.known.sponsorBalance ? pool.sponsorBalance / perPeriod : null;
+  const grand = pool.tiers[0]?.nextPrize ?? null;
 
   return (
     <Panel title="The pool" hint="public to everyone">
@@ -16,14 +21,14 @@ export function PoolPanel({ pool, now, periodLength }: { pool: PoolState; now: n
         <Figure
           label="Grand prize next draw"
           accent
-          value={formatAmount(pool.tiers[0]?.nextPrize ?? 0n)}
+          value={grand === null ? UNREAD : formatAmount(grand)}
           unit="USDC"
         />
-        <Figure label="Savers" value={pool.savers.toLocaleString("en-US")} />
-        <Figure label="Period" value={pool.period.toLocaleString("en-US")} />
+        <Figure label="Savers" value={pool.known.savers ? pool.savers.toLocaleString("en-US") : UNREAD} />
+        <Figure label="Period" value={pool.known.period ? pool.period.toLocaleString("en-US") : UNREAD} />
         <Figure
           label="Ends in"
-          value={pool.periodEndsAt > 0 ? countdown(pool.periodEndsAt, now) : "..."}
+          value={pool.periodEndsAt > 0 ? countdown(pool.periodEndsAt, now) : UNREAD}
           note={pool.periodEndsAt > 0 ? formatUtc(pool.periodEndsAt) : undefined}
         />
       </div>
@@ -44,20 +49,20 @@ export function PoolPanel({ pool, now, periodLength }: { pool: PoolState; now: n
               <span className="text-[13.5px] text-parchment">
                 {TIER_NAMES[index]}
                 <span className="ml-2 text-[12px] text-faint">
-                  {tier.prizeCount} prize{tier.prizeCount === 1 ? "" : "s"} a draw
+                  {tier.known ? `${tier.prizeCount} prize${tier.prizeCount === 1 ? "" : "s"} a draw` : UNREAD}
                 </span>
                 {tier.carryPending && (
                   <span className="ml-2 text-[12px] text-flame/80">carry from draw {tier.carryPublishedAt} waiting</span>
                 )}
               </span>
               <span className="text-right text-[13.5px] tabular-nums text-parchment">
-                {formatAmount(tier.nextPrize)}
+                {tier.nextPrize === null ? UNREAD : formatAmount(tier.nextPrize)}
               </span>
               <span className="hidden text-right text-[13px] tabular-nums text-faint sm:block">
-                {oddsLabel(tier.oddsNumerator, tier.oddsDenominator)}
+                {tier.known ? oddsLabel(tier.oddsNumerator, tier.oddsDenominator) : UNREAD}
               </span>
               <span className="hidden text-right text-[13px] tabular-nums text-faint sm:block">
-                {formatAmount(tier.liquidity)}
+                {tier.liquidity === null ? UNREAD : formatAmount(tier.liquidity)}
               </span>
             </div>
           ))}
@@ -70,14 +75,20 @@ export function PoolPanel({ pool, now, periodLength }: { pool: PoolState; now: n
       </div>
 
       <div className="mt-5 border-t border-hairlineSoft pt-4">
-        <Row label="Draws run against a bracket of" value={`2^${pool.scaleBits}`} />
+        <Row
+          label="Draws run against a bracket of"
+          value={pool.known.scaleBits ? `2^${pool.scaleBits}` : UNREAD}
+        />
         <Row
           label="Prize money the sponsor still holds"
-          value={`${formatAmount(pool.sponsorBalance)} USDC`}
-          note={runway === null ? "the rate is zero" : `${runway.toString()} more draws`}
+          value={pool.known.sponsorBalance ? `${formatAmount(pool.sponsorBalance)} USDC` : UNREAD}
+          note={runway !== null ? `${runway.toString()} more draws` : perPeriod === 0n ? "the rate is zero" : undefined}
         />
-        <Row label="Released per draw" value={`${formatAmount(perPeriod)} USDC`} />
-        <Row label="Ready for the next harvest" value={`${formatAmount(pool.harvestable)} USDC`} />
+        <Row label="Released per draw" value={perPeriod === null ? UNREAD : `${formatAmount(perPeriod)} USDC`} />
+        <Row
+          label="Ready for the next harvest"
+          value={pool.known.harvestable ? `${formatAmount(pool.harvestable)} USDC` : UNREAD}
+        />
       </div>
       <p className="mt-3 text-[12.5px] leading-relaxed text-faint">
         On Sepolia the yield is a sponsor-funded balance dripping at a fixed rate, because no venue here

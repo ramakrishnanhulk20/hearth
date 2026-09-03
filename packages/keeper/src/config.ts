@@ -3,6 +3,8 @@ import { join, resolve } from "node:path";
 import dotenv from "dotenv";
 import { HDNodeWallet, Mnemonic, getAddress, isAddress, parseUnits } from "ethers";
 import { findRepoRoot } from "./abi.js";
+// Aliased because this file already has its own gwei(), the parser that reads the setting.
+import { gwei as formatGwei } from "./log.js";
 
 export class ConfigError extends Error {
   constructor(message: string) {
@@ -245,7 +247,7 @@ export function loadConfig(overrides: ConfigOverrides = {}): LoadedKeeper {
 
 /** A one line summary for the boot log. Holds no key and no phrase. */
 export function describeConfig(config: KeeperConfig): string {
-  const gas = config.maxFeePerGas === null ? "no gas cap" : `gas cap ${config.maxFeePerGas / 1_000_000_000n} gwei`;
+  const gas = config.maxFeePerGas === null ? "no gas cap" : `gas cap ${formatGwei(config.maxFeePerGas)} gwei`;
   const mode = config.dryRun ? "dry run" : "live";
   return (
     `${mode}, keeper ${config.keeperAddress}, vault ${config.vault}, pool ${config.pool}, ` +
