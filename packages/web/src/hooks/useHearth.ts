@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { Address, Hex } from "viem";
 import { useAccount, useBalance, useReadContracts } from "wagmi";
 import { HEARTH_POOL_ABI, HEARTH_SOURCE_ABI, HEARTH_VAULT_ABI, CONFIDENTIAL_ASSET_ABI } from "@/lib/chain/abis";
@@ -581,12 +581,40 @@ export function useActivity(): { activity: Activity | null; error: string | null
   return { activity, error };
 }
 
-/** A clock that ticks in the browser, so every countdown on the page moves together. */
+let clockSeconds = 0;
+const clockListeners = new Set<() => void>();
+let clockTimer: ReturnType<typeof setInterval> | null = null;
+
+function subscribeToClock(listener: () => void): () => void {
+  clockListeners.add(listener);
+  if (clockTimer === null) {
+    clockSeconds = Math.floor(Date.now() / 1000);
+    clockTimer = setInterval(() => {
+      clockSeconds = Math.floor(Date.now() / 1000);
+      for (const each of clockListeners) each();
+    }, 1000);
+  }
+  listener();
+  return () => {
+    clockListeners.delete(listener);
+    if (clockListeners.size === 0 && clockTimer !== null) {
+      clearInterval(clockTimer);
+      clockTimer = null;
+    }
+  };
+}
+
+const clockOnClient = (): number => clockSeconds;
+const clockOnServer = (): number => 0;
+
+/**
+ * One clock for every countdown on the page, and zero until the browser has started it.
+ *
+ * Seeding from Date.now() during render read the server's clock and then the browser's, which are
+ * never the same second, so every countdown rendered one string on the server and a different one
+ * on the client and React reported the mismatch. The server cannot know the viewer's clock, so it
+ * says so with a zero and `countdown` renders a placeholder for that one frame.
+ */
 export function useNow(): number {
-  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  return now;
+  return useSyncExternalStore(subscribeToClock, clockOnClient, clockOnServer);
 }

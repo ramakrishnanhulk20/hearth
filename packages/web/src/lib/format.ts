@@ -41,6 +41,9 @@ export function shortHandle(handle: string): string {
 
 /** A countdown a person can read at a glance, never a bare second count above a minute. */
 export function countdown(targetSeconds: number, nowSeconds: number): string {
+  // useNow answers zero until the browser's clock has started. A countdown against that would be
+  // a number of decades, so the one frame before it starts says nothing instead.
+  if (nowSeconds === 0) return "...";
   const left = Math.max(0, Math.floor(targetSeconds - nowSeconds));
   if (left === 0) return "now";
   if (left < 60) return `${left}s`;
