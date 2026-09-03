@@ -2,12 +2,15 @@
 
 ## 1. Where is the claim button?
 
-In the app, on that draw's card, beside your revealed result. Under the hood it is
+On "My draws" in the app, on that draw's card, under "Your result" once you have opened it
+with the eye. It appears only when that draw credited you something. Under the hood it is
 deliberately not a separate transaction: prizes are credited to your encrypted winnings
 balance during evaluation, and the claim button, which carries the amount, sends an
 ordinary withdrawal for it, which on chain looks exactly like any other withdrawal. In
 most prize protocols only winners have a reason to send a claim transaction, so the
-transaction list quietly names them; here there is no such transaction to watch for.
+transaction list quietly names them; here there is no such transaction to watch for. The
+same money comes out of the "Out of the vault" tab on Withdraw, because a claim is a
+withdrawal under another name.
 
 ## 2. Can I lose my principal?
 

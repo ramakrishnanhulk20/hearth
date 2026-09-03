@@ -91,18 +91,20 @@ a redundancy path underneath it.
 
 ## How a saver advances a draw themselves
 
-Every step above is permissionless, and the app exposes every one of them in its "Run the
-draw" panel:
+Every step above is permissionless, and the app exposes every one of them on its "Run a
+draw" screen, at `/app/run`, which is the sidebar row marked "Anyone". A card at the top
+names the step the pool is waiting for, and each of the five below it carries its own
+button, off with a stated reason when it is not that step's turn:
 
 - **Close**, then **Award.** Close fixes the prize sizes and draws the encrypted seed.
   Award fetches the four decryption proofs in the browser and sends the signed cleartexts
   back. The relayer call is the same one the keeper makes, and the SDK does it from the
   page.
 - **Advance.** Runs `evaluate(p, count)` for the draw currently open, advancing the shared
-  walk by a batch. The same call sits on your own draw card as "Advance the draw". This is
-  the button to press if the keeper is down and the walk has not reached you yet. It does
-  not let you pick yourself, and that is the feature: because nobody can single themselves
-  out, sending this transaction says nothing about whether you won.
+  walk by a batch. The same call sits on your own draw card on "My draws" as "Advance the
+  draw". This is the button to press if the keeper is down and the walk has not reached you
+  yet. It does not let you pick yourself, and that is the feature: because nobody can single
+  themselves out, sending this transaction says nothing about whether you won.
 - **Finalize** and **Reconcile.** Runs the two closing steps for any draw whose window has
   ended.
 

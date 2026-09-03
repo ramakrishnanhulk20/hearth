@@ -500,29 +500,39 @@ over batch age and pausing. Detail and addresses: [yield source](docs/concepts/y
 
 Nothing here needs us to be online. Every step of a draw is permissionless.
 
+The app is a console: a rail down the left with one task per screen. The path is a walk down
+that rail.
+
 1. Open {{APP_URL}}, follow **The pool** in the header to `/app`, and connect a wallet on
-   Sepolia.
-2. In the **Deposit** panel, click **Get test USDC**. That calls `mint` on Zama's mock USDC,
-   which has no owner check and a cap of one million tokens per call. A wallet that already
-   holds some sees the same button as **Get a million more**.
-3. Type an amount and click **Wrap**, then type an amount under **Deposit into the pool** and
-   click **Deposit**. The two steps are separate on purpose. The deposit amount is encrypted
-   before it leaves your browser. That first button reads **Approve** until the wrapper's
-   allowance covers the amount you typed.
-4. In **What you hold**, click **Reveal** and sign the message. Your principal appears in the
-   browser only. That signature is not a transaction.
-5. In the **Run the draw** panel, press **Close**, then **Award**, to close and award the last
+   Sepolia. **Dashboard** opens with a block marked **Next** naming the one thing your wallet
+   is up to, and a button that goes straight to it.
+2. **Deposit** in the sidebar. It opens on whichever of its three steps your wallet is
+   actually up to. Step 1 is **Get test USDC**, and its button says the same. That calls
+   `mint` on Zama's mock USDC, which has no owner check and a cap of one million tokens per
+   call. A wallet that already holds some finds step 1 already done, with **Get a million
+   more** on it.
+3. Step 2 is **Shield your USDC**: type an amount and press **Shield**. That button reads
+   **Approve the wrapper** until the wrapper's allowance covers the amount you typed. Step 3
+   is **Deposit into the vault**: type an amount and press **Deposit**. The two are separate
+   steps on purpose. The deposit amount is encrypted before it leaves your browser.
+4. Back on **Dashboard**, press the eye beside **Principal** in **What you hold** and sign the
+   message. Your principal and your unclaimed winnings both appear, in the browser only. One
+   eye opens both. That signature is not a transaction.
+5. **Run a draw** in the sidebar, the row marked **Anyone**. **What the pool is waiting for**
+   names the step that is due. Press **Close**, then **Award**, to close and award the last
    finished period yourself, or watch the keeper do it. Award fetches the four decryption
    proofs in the browser and sends the signed cleartexts back to the pool.
-6. Press **Advance** once. Then, on that draw's card under **Your draws**, press **Reveal my
-   result**. Your weight and credit for that draw appear, and the balance you opened in step
-   4 stays open; the one signature serves both.
+6. Press **Advance** once on that same screen. Then open **My draws** and press the eye beside
+   **Your prize**, under **Your result** on that draw's card. Your weight and credit for that
+   draw appear, and the balance you opened in step 4 stays open; the one signature serves
+   both.
 7. Open `/verify`. The public seed and bracket are there, **Thresholds for an address**
    recomputes your thresholds in front of you, and the comparison matches what the contract
    credited.
-8. On the draw card, click the claim button, which carries the amount, such as **Claim 1.00
-   USDC**, to withdraw your winnings. Or use **All of it** in the **Withdraw** panel to take
-   principal and winnings back in one transfer.
+8. On that same draw card, press the claim button, which carries the amount, such as **Claim
+   1.00 USDC**, to withdraw your winnings. Or open **Withdraw**, stay on the **Out of the
+   vault** tab, and press **Withdraw everything** to take principal and winnings back in one
+   transfer.
 
 ### The prove-it command
 

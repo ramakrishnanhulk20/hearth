@@ -93,16 +93,18 @@ are verified.
 
 ### 3. Claim
 
-There is no claim transaction, and that is the point. The app does have a claim button, and
-it carries the amount: it is an ordinary withdrawal of the winnings you just revealed, and
-on chain it looks exactly like any other withdrawal.
+There is no claim transaction, and that is the point. The app does have a claim button, on
+that draw's card on "My draws", and it carries the amount: it is an ordinary withdrawal of
+the winnings you just opened, and on chain it looks exactly like any other withdrawal.
 
 Winnings are credited to a separate encrypted balance inside the vault while the draw is
 being evaluated. Nothing you do makes that happen and nothing you do reveals it. To find
 out whether you won, you sign an EIP-712 message, a typed off-chain signature that proves
 you control your address, and Zama's relayer returns the plaintext of your own winnings
 to your browser. That signature never touches the chain, so it costs nothing and it
-leaves no trace.
+leaves no trace. Your balance on the dashboard and a draw's result each have their own
+eye, both can be open at the same time, and the signature from the first serves the
+second.
 
 - Hidden: everything. Reading your own winnings is an off-chain operation.
 - Public: nothing.

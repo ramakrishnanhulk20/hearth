@@ -32,9 +32,9 @@ is far more than enough.
 ## 2. Mint the test USDC
 
 Zama's mock USDC has a public `mint(address, uint256)` with no owner check, capped at one
-million tokens per call. The app exposes it as one button in the "Deposit" panel, labelled
-"Get test USDC" while your wallet holds none and "Get a million more" once it does. By
-hand it is:
+million tokens per call. The app exposes it as one button on the Deposit screen, on the
+first of its three steps, labelled "Get test USDC" while your wallet holds none and "Get a
+million more" once it does. By hand it is:
 
 ```
 USDCMock.mint(yourAddress, 1000000000)     // 1,000 USDC
@@ -53,8 +53,9 @@ USDCMock.approve(cUSDC, 1000000000)
 cUSDC.wrap(yourAddress, 1000000000)
 ```
 
-In the app those two calls are the "Approve" and "Wrap" buttons under that same heading.
-Approve only appears while the wrapper's allowance is short of the amount you typed.
+In the app those two calls are step 2 of Deposit, "Shield your USDC". The button reads
+"Shield", and "Approve the wrapper" while the wrapper's allowance is short of the amount
+you typed.
 
 You now hold 1,000 confidential USDC. From here on, your balance is a ciphertext handle
 and only you can read it.
@@ -105,7 +106,7 @@ So Hearth keeps them apart on purpose:
 
 The correlation weakens with time, with reuse of a standing balance, and with other
 people's wrapper traffic. Doing it in one click removes all three defences. The app shows
-the warning at the wrap step rather than hiding the trade-off.
+the warning on the shield step rather than hiding the trade-off.
 
 It is worth being blunt about what a pinned balance costs you, because it is more than the
 deposit amount. Thresholds are public by design, since they are what makes the draw
@@ -122,9 +123,10 @@ the decryption round trip and the award always have room. So a deposit you make 
 odds for the current period, and the result of that period lands within the next couple of
 hours.
 
-The app shows the current period, the time left, and the state of the last few draws. You
-do not have to do anything. If you want to push it along yourself, every step of a draw is
-callable by anyone; see [the keeper page](../operations/keeper.md).
+The dashboard shows the current period and the time left in "The pool right now", and "My
+draws" in the sidebar shows the state of the last few. You do not have to do anything. If
+you want to push it along yourself, every step of a draw is callable by anyone, and "Run a
+draw" in the sidebar has all five; see [the keeper page](../operations/keeper.md).
 
 Your odds for a period are based on your average balance across that whole period, not
 your balance at the end of it. Depositing five minutes before the period closes buys you
@@ -133,7 +135,10 @@ one twelfth of the odds of having held the same amount all period. That is delib
 
 ## 6. Reveal what you hold and what you won
 
-Click "Reveal" in the "What you hold" panel and sign the message your wallet shows you.
+Press the eye beside "Principal" in the "What you hold" card on the dashboard, and sign
+the message your wallet shows you. Sealed values are shown as asterisks until you do, and
+the eye is the only thing that opens them.
+
 That signature is EIP-712 user decryption: a typed off-chain signature that proves to
 Zama's relayer that you control the address, in exchange for the plaintext of values the
 contract has granted you access to. It is not a transaction. It costs no gas and writes
@@ -148,9 +153,11 @@ You can reveal four things about yourself:
 | Weight, per draw | Your time-weighted balance for that period, the number the winner test compared. |
 | Credit, per draw | What that draw paid you. Zero if you did not win. |
 
-The first two open from "Reveal" in "What you hold". The last two open from "Reveal my
-result" on that draw's card in "Your draws". Both can be open at once, one signature serves
-both, and "Seal it again" closes only the panel it sits in.
+The first two open together from the one eye in "What you hold", on the dashboard. The
+last two open together from the eye beside "Your prize", under "Your result" on that
+draw's card on "My draws". Your balance and a draw's result can be open at the same time,
+the signature from the first serves the second, and pressing an open eye seals only the
+card it sits in.
 
 The last two are what let you check the draw yourself: take your weight, take the public
 seed and the public bracket, recompute your thresholds, and confirm the credit matches.
@@ -166,15 +173,16 @@ address the contract has not granted, and that refusal is the enforcement, not a
 There is no claim transaction, only a claim button.
 
 Your prize is already in your winnings balance the moment the walk reaches you. Step 6 is
-how you learn about it. Once that draw's result is revealed, its card shows a claim button
-carrying the amount, such as "Claim 1.00 USDC"; pressing it sends an ordinary withdrawal
-for exactly that amount, and step 8 takes the rest home. On chain a claim and a withdrawal
-are the same call with the same shape, and that is what keeps a winner from standing out.
+how you learn about it. Once that draw's result is open, its card on "My draws" shows a
+claim button carrying the amount, such as "Claim 1.00 USDC"; pressing it sends an ordinary
+withdrawal for exactly that amount, and step 8 takes the rest home. On chain a claim and a
+withdrawal are the same call with the same shape, and that is what keeps a winner from
+standing out.
 
 There is nothing to press to be credited, either. Evaluation walks the saver list from a
-point that draw's seed decides, and the app's "Advance the draw" button moves that shared
-walk forward rather than picking you out of it. A saver who presses it is not telling
-anybody they won.
+point that draw's seed decides. The "Advance the draw" button on that draw's card, and
+"Advance" on the "Run a draw" screen, both move that shared walk forward rather than
+picking you out of it. A saver who presses either is not telling anybody they won.
 
 ## 8. Withdraw
 
@@ -182,7 +190,9 @@ anybody they won.
 vault.withdraw(encryptedAmount, inputProof)      // or vault.withdrawAll()
 ```
 
-In the app those are the "Withdraw" and "All of it" buttons in the "Withdraw" panel.
+In the app those are the "Withdraw" and "Withdraw everything" buttons on the Withdraw
+screen, on its "Out of the vault" tab. "All of it" beside the field is not a third call: it
+fills the field with everything you hold, once you have opened your balance.
 
 Withdrawals pay from winnings first, then from principal. The amount is clamped to the
 smaller of what you hold and what the vault holds, because a confidential transfer moves
@@ -196,9 +206,10 @@ draw already fixed for you does not change.
 ## 9. Unshield: unwrap back to public USDC
 
 Two calls, because unwrapping is asynchronous by design. First `unwrap`, then
-`finalizeUnwrap`. The app sends both from its "Unwrap" button, and offers "Finish it" if
-the second one was ever left undone. The exact argument lists are in Zama's wrapper, not
-ours.
+`finalizeUnwrap`. The app sends both from the "Unshield" button on the Withdraw screen's
+"Back to plain USDC" tab. If the second one is ever left undone, a warning card sits above
+the two tabs until you press "Finish the unshield" on it. The exact argument lists are in
+Zama's wrapper, not ours.
 
 The first call burns the encrypted amount and marks it for public decryption. The second
 releases the plaintext tokens once Zama's protocol has produced the cleartext and its
@@ -214,16 +225,23 @@ balance behind.
 
 ## The two-minute judge path
 
+The app is a console with a rail down the left, one task per screen, so the path is a walk
+down that rail.
+
 1. Open {{APP_URL}}, follow "The pool" in the header to `/app`, and connect a wallet on
-   Sepolia.
-2. In "Deposit", click "Get test USDC", then "Wrap", then "Deposit".
-3. Click "Reveal" in "What you hold" and sign: your principal appears, in the browser only.
-4. In "Run the draw", press "Close", then "Award", to close and award the last finished
-   period yourself, or watch the keeper do it.
-5. Press "Advance", then "Reveal my result" on that draw's card: your weight and credit for
-   that draw appear.
+   Sepolia. The dashboard opens with a block marked "Next" naming the one thing to do.
+2. "Deposit" in the sidebar, which opens on whichever of its three steps your wallet is up
+   to. Click "Get test USDC", then "Shield", then "Deposit".
+3. Back on the dashboard, press the eye beside "Principal" in "What you hold" and sign:
+   your principal and your winnings both appear, in the browser only.
+4. "Run a draw" in the sidebar, the row marked "Anyone". Press "Close", then "Award", to
+   close and award the last finished period yourself, or watch the keeper do it.
+5. Press "Advance" on the same screen. Then open "My draws" and press the eye under "Your
+   result" on that draw's card: your weight and credit for that draw appear, and the
+   balance from step 3 stays open on one signature.
 6. Open `/verify`: the public seed and bracket are there, "Thresholds for an address"
    recomputes your thresholds in front of you, and the comparison matches.
-7. Click "All of it" in "Withdraw". Principal and any winnings come back in one transfer.
+7. "Withdraw" in the sidebar, "Out of the vault" tab, "Withdraw everything". Principal and
+   any winnings come back in one transfer.
 
 Nothing in that path needs us to be online. Every step of the draw is permissionless.

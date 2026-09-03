@@ -89,10 +89,10 @@ What remains is a much smaller version of the same thing.
 - **Three or more.** Any split consistent with the bracket is possible, and the set grows
   with every additional saver.
 
-The app states this whenever the pool has fewer than three savers. Zama's own
-documentation makes the same point about their batcher, in the same words: "the sum of one
-value is the value." A bracket is a weaker version of that sentence, not an escape from
-it.
+The app states this above every screen whenever the pool has fewer than three savers.
+Zama's own documentation makes the same point about their batcher, in the same words: "the
+sum of one value is the value." A bracket is a weaker version of that sentence, not an
+escape from it.
 
 ## Rule 2: a balance an observer can pin has no draw privacy at all
 
@@ -112,11 +112,12 @@ public arithmetic.
 Even a loose bound bites. An observer holding only an upper bound on your balance proves a
 definite loss in any tier whose threshold sits above that bound.
 
-What the app does about it: keeps wrap and deposit as separate steps, tells you at the wrap
-step to use a round number so a wrap is a bucket rather than an exact deposit, encourages
-holding a standing confidential balance so a deposit is drawn from an accumulation of
-unknown composition, and warns at the deposit step in one line. What no contract change can do is make a
-threshold private, because a private threshold is an uncheckable draw.
+What the app does about it: keeps shielding and depositing as separate steps of the Deposit
+screen, and on the shield step tells you in one paragraph to use a round number so a shield
+is a bucket rather than an exact deposit, to shield at a time of your choosing, and to
+deposit part of it later, so a deposit is drawn from an accumulation of unknown
+composition. What no contract change can do is make a threshold private, because a private
+threshold is an uncheckable draw.
 
 ## Rule 3: the wrap seam, both directions
 
@@ -143,10 +144,11 @@ bound, and it becomes exact once the address has emptied out.
 Unwrapping to a fresh address does not help, because the confidential transfer to that
 address is itself the link.
 
-What Hearth does: separate steps, a warning at the wrap step, a line at both the wrap and
-the unwrap step telling you to move a round number, and the suggestion to leave a standing
-confidential balance behind. The amount is yours to type either way; the app does not offer
-a set of denominations. What Hearth cannot do: remove any of it.
+What Hearth does: separate steps, a warning on the shield step of Deposit, a line on that
+step and again on the "Back to plain USDC" tab of Withdraw telling you to move a round
+number, and the suggestion to leave a standing confidential balance behind. The amount is
+yours to type either way; the app does not offer a set of denominations. What Hearth cannot
+do: remove any of it.
 
 ## Rule 4: the published prize counts are a slow measurement
 
