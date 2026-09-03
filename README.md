@@ -982,9 +982,6 @@ hearth/
 │   └── keeper/           the script that drives draws, with its own suite and pm2 config
 ├── docs/                 the written record: getting started, concepts, security, operations
 ├── ARCHITECTURE.md       the implementation specification, with the three diagrams
-├── DECISIONS.md          one line per design decision, with the reason
-├── PLAN.md               milestones, each ending in a proof gate
-├── STATE.md              what is done, what is next, what is waiting on a human
 └── README.md
 ```
 

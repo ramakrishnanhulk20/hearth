@@ -45,6 +45,3 @@ packages/contracts-slither/
 # one-off local chain reads, never part of the product
 scratch-*
 
-
-# Launch prep: video script, post drafts. Working notes, not part of the product.
-submission/

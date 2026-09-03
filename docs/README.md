@@ -34,4 +34,3 @@ is the same design explained for the people who use it and the people who audit 
 
 | File | What it is |
 | --- | --- |
-| [PLACEHOLDERS.md](PLACEHOLDERS.md) | Every placeholder token used in these pages and where its value comes from after deployment. |

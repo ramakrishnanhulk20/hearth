@@ -7,8 +7,8 @@ import { Marked, type Tokens } from "marked";
 import { renderLog, renderMarkdown } from "./markdown";
 import type { DocEntry, DocPage, DocSection, DocsIndex, SearchRow } from "./types";
 
-/** Pages listed in the index whose bodies are working notes rather than documentation. */
-const NOT_PUBLISHED = new Set(["PLACEHOLDERS.md"]);
+/** An index row can outlive its page, so a row with no file on disk is skipped rather than fatal. */
+const NOT_PUBLISHED = new Set<string>();
 
 const ATTACKS_DIR = "security/attacks";
 const ATTACKS_SECTION = "Attack logs";

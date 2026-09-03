@@ -117,8 +117,8 @@ export function readAward(values: readonly ClearValue[]): AwardValues {
  * Wraps one SDK instance so that decryptions are serialised and retried.
  *
  * Serialised because the coprocessor event cursor is shared per instance, and two overlapping
- * requests make the second one read a block range the first already consumed (DECISIONS.md,
- * 3 September). Retried because a handle published seconds ago is not decryptable yet.
+ * requests make the second one read a block range the first already consumed. Retried because a
+ * handle published seconds ago is not decryptable yet.
  */
 export function createDecryptor(source: DecryptSource, options: DecryptorOptions): Decryptor {
   let queue: Promise<unknown> = Promise.resolve();
