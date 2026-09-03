@@ -121,12 +121,18 @@ draw is here:
 
 | Field | Value |
 | --- | --- |
-| Draw | `{{DRAW_ID_EXAMPLE}}` |
-| Seed `R` | `{{SEED_EXAMPLE}}` |
-| Bracket `M` | `{{BRACKET_EXAMPLE}}` |
-| Harvest | `{{HARVEST_EXAMPLE}}` |
-| Tier prize sizes | `{{PRIZES_EXAMPLE}}` |
-| Prizes paid per tier | `{{PAID_EXAMPLE}}` |
+| Draw | `2, the period from 23:00 to 00:00 UTC on 2 September 2026` |
+| Seed `R` | `5625525180683981523` |
+| Bracket `M` | `2^43, which is 8,796,093,022,208 balance-seconds` |
+| Harvest | `19.531380 USDC` |
+| Tier prize sizes | `3.559644 / 1.779822 / 0.889911 USDC, grand / mid / frequent` |
+| Prizes paid per tier | `0 / 0 / 5, against a funded capacity of 2 / 2 / 8` |
+
+Read from the chain: the seed and the bracket come from the pool's `DrawAwarded` event,
+the prize sizes and the offered liquidity from `drawParams(2)`, and the prizes paid from the
+three `TierReconciled` events for that draw, since what a tier offered and did not pay is
+exactly the carry it published. The grand and mid tiers paid nothing in this draw and handed
+their whole offer back, which is what a 1 in 24 and a 1 in 6 tier do most of the time.
 
 The app's verify panel does this arithmetic in the browser for any address you type in. It
 has no privileged access; it is the same public inputs and the same formula.
