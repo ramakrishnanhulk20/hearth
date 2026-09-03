@@ -135,8 +135,8 @@ the one a transparent chain cannot offer. Full argument in
 
 - `withdraw` and `withdrawAll` are the only exits. They pay winnings first, then principal.
 - There is no claim function. Prizes are credited to a separate encrypted winnings balance
-  during evaluation, so the app's "Claim prize" button sends an ordinary withdrawal that
-  looks exactly like every other withdrawal.
+  during evaluation, so the app's claim button, which carries the amount, sends an ordinary
+  withdrawal that looks exactly like every other withdrawal.
 - Principal is never locked. Deposits and withdrawals keep working while a draw is running
   and while the contracts are paused.
 
@@ -469,22 +469,29 @@ pausing. Detail and addresses: [yield source](docs/concepts/yield-source.md).
 
 Nothing here needs us to be online. Every step of a draw is permissionless.
 
-1. Open {{APP_URL}} and connect a wallet on Sepolia.
-2. Click **Get test USDC**. That calls `mint` on Zama's mock USDC, which has no owner check
-   and a cap of one million tokens per call.
-3. Click **Shield**, then **Deposit**. The two steps are separate on purpose. The deposit
-   amount is encrypted before it leaves your browser.
-4. Click **Reveal** and sign the message. Your principal appears in the browser only. That
-   signature is not a transaction.
-5. Open the draw panel and press **Advance draw** to close and award the last finished
-   period yourself, or watch the keeper do it. The button runs the close, fetches the four
-   decryption proofs in the browser, and sends the award.
-6. Press **Advance evaluation** once, then **Reveal** again. Your weight and credit for that
-   draw appear.
-7. Open the verify panel. The public seed and bracket are there, your thresholds are
-   recomputed in front of you, and the comparison matches what the contract credited.
-8. Click **Claim prize** to withdraw your winnings, or **Withdraw all** to take principal
-   and winnings back in one transfer.
+1. Open {{APP_URL}}, follow **The pool** in the header to `/app`, and connect a wallet on
+   Sepolia.
+2. In the **Deposit** panel, click **Get test USDC**. That calls `mint` on Zama's mock USDC,
+   which has no owner check and a cap of one million tokens per call. A wallet that already
+   holds some sees the same button as **Get a million more**.
+3. Type an amount and click **Wrap**, then type an amount under **Deposit into the pool** and
+   click **Deposit**. The two steps are separate on purpose. The deposit amount is encrypted
+   before it leaves your browser. That first button reads **Approve** until the wrapper's
+   allowance covers the amount you typed.
+4. In **What you hold**, click **Reveal** and sign the message. Your principal appears in the
+   browser only. That signature is not a transaction.
+5. In the **Run the draw** panel, press **Close**, then **Award**, to close and award the last
+   finished period yourself, or watch the keeper do it. Award fetches the four decryption
+   proofs in the browser and sends the signed cleartexts back to the pool.
+6. Press **Advance** once. Then, on that draw's card under **Your draws**, press **Reveal my
+   result**. If your balance is still open from step 4, press **Seal it again** first, because
+   the app keeps one reveal open at a time. Your weight and credit for that draw appear.
+7. Open `/verify`. The public seed and bracket are there, **Thresholds for an address**
+   recomputes your thresholds in front of you, and the comparison matches what the contract
+   credited.
+8. On the draw card, click the claim button, which carries the amount, such as **Claim 1.00
+   USDC**, to withdraw your winnings. Or use **All of it** in the **Withdraw** panel to take
+   principal and winnings back in one transfer.
 
 ### The prove-it command
 
@@ -848,8 +855,8 @@ hearth/
 | Contract tooling | Hardhat, `@fhevm/hardhat-plugin`, `@fhevm/mock-utils`, hardhat-deploy, TypeChain, solhint | 2.28.6, 0.4.2, 0.4.2, 0.11.45, 8.3.2, 6.2.1 |
 | Local FHE mock | `@zama-fhe/relayer-sdk`, required by the Hardhat plugin and used only by the local simulator | 0.4.4 |
 | Encryption and decryption client | `@zama-fhe/sdk` in the operator tasks, the keeper and the app | 3.5.1 |
-| App | Next.js App Router, React, Tailwind, wagmi, viem | 15.5, 19, 3.4.17, 2.19.5, 2.55.8 |
-| App motion | React Three Fiber, drei, postprocessing, Lenis | 9.7, 10.7.8, 3.1.1, 1.3.26 |
+| App | Next.js App Router, React, Tailwind, wagmi, viem | 16.3.4, 19.2.8, 3.4.17, 3.7.7, 2.56.3 |
+| App motion | Framer Motion, React Three Fiber, drei, postprocessing, Lenis | 13.2.0, 9.7.0, 10.7.8, 3.1.1, 1.3.26 |
 | Keeper | Node 20 with its own test runner, ethers 6.16.0, run under pm2 for a demo | No framework |
 | Automation | Chainlink time-based upkeep, interface declared locally | Two selectors, no package |
 

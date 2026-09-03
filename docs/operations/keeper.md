@@ -85,17 +85,19 @@ a redundancy path underneath it.
 
 ## How a saver advances a draw themselves
 
-Every step above is permissionless, and the app exposes the ones a saver would want:
+Every step above is permissionless, and the app exposes every one of them in its "Run the
+draw" panel:
 
-- **Advance draw.** Runs close, then fetches the four decryption proofs in the browser,
-  then awards. The relayer call is the same one the keeper makes, and the SDK does it from
-  the page.
-- **Advance evaluation.** Runs `evaluate(p, count)` for the draw currently open,
-  advancing the shared walk by a batch. This is the button to press if the keeper is down
-  and the walk has not reached you yet. It does not let you pick yourself, and that is the
-  feature: because nobody can single themselves out, sending this transaction says nothing
-  about whether you won.
-- **Finalize and reconcile.** Runs the two closing steps for any draw whose window has
+- **Close**, then **Award.** Close fixes the prize sizes and draws the encrypted seed.
+  Award fetches the four decryption proofs in the browser and sends the signed cleartexts
+  back. The relayer call is the same one the keeper makes, and the SDK does it from the
+  page.
+- **Advance.** Runs `evaluate(p, count)` for the draw currently open, advancing the shared
+  walk by a batch. The same call sits on your own draw card as "Advance the draw". This is
+  the button to press if the keeper is down and the walk has not reached you yet. It does
+  not let you pick yourself, and that is the feature: because nobody can single themselves
+  out, sending this transaction says nothing about whether you won.
+- **Finalize** and **Reconcile.** Runs the two closing steps for any draw whose window has
   ended.
 
 None of these need our permission, our keys or our servers to be up.
@@ -148,8 +150,8 @@ and the keeper does not stop part way either; what it enforces is a fee ceiling
 honest consequence is stated in the [threat model](../security/threat-model.md): a pool
 padded with worthless addresses costs the keeper more gas per draw, not the savers their
 prizes, because addresses with no observation before the period are skipped without any
-encrypted work. If the keeper is down, anyone can press "Advance evaluation", and because
-the walk starts at a different point every draw, nobody sits permanently at the back.
+encrypted work. If the keeper is down, anyone can press "Advance", and because the walk
+starts at a different point every draw, nobody sits permanently at the back.
 
 ## Running it
 

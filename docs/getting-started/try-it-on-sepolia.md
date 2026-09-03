@@ -32,7 +32,8 @@ is far more than enough.
 ## 2. Mint the test USDC
 
 Zama's mock USDC has a public `mint(address, uint256)` with no owner check, capped at one
-million tokens per call. The app exposes it as one button labelled "Get test USDC". By
+million tokens per call. The app exposes it as one button in the "Deposit" panel, labelled
+"Get test USDC" while your wallet holds none and "Get a million more" once it does. By
 hand it is:
 
 ```
@@ -51,6 +52,9 @@ numbers anybody can read. Wrapping is two calls:
 USDCMock.approve(cUSDC, 1000000000)
 cUSDC.wrap(yourAddress, 1000000000)
 ```
+
+In the app those two calls are the "Approve" and "Wrap" buttons under that same heading.
+Approve only appears while the wrapper's allowance is short of the amount you typed.
 
 You now hold 1,000 confidential USDC. From here on, your balance is a ciphertext handle
 and only you can read it.
@@ -129,10 +133,11 @@ one twelfth of the odds of having held the same amount all period. That is delib
 
 ## 6. Reveal what you hold and what you won
 
-Click "Reveal" and sign the message your wallet shows you. That signature is EIP-712 user
-decryption: a typed off-chain signature that proves to Zama's relayer that you control
-the address, in exchange for the plaintext of values the contract has granted you access
-to. It is not a transaction. It costs no gas and writes nothing to the chain.
+Click "Reveal" in the "What you hold" panel and sign the message your wallet shows you.
+That signature is EIP-712 user decryption: a typed off-chain signature that proves to
+Zama's relayer that you control the address, in exchange for the plaintext of values the
+contract has granted you access to. It is not a transaction. It costs no gas and writes
+nothing to the chain.
 
 You can reveal four things about yourself:
 
@@ -142,6 +147,10 @@ You can reveal four things about yourself:
 | Winnings | Prize money credited to you and not yet withdrawn. |
 | Weight, per draw | Your time-weighted balance for that period, the number the winner test compared. |
 | Credit, per draw | What that draw paid you. Zero if you did not win. |
+
+The first two open from "Reveal" in "What you hold". The last two open from "Reveal my
+result" on that draw's card in "Your draws", and only one of the two is open at a time, so
+"Seal it again" closes the first before the second will offer itself.
 
 The last two are what let you check the draw yourself: take your weight, take the public
 seed and the public bracket, recompute your thresholds, and confirm the credit matches.
@@ -157,13 +166,13 @@ address the contract has not granted, and that refusal is the enforcement, not a
 There is no claim transaction, only a claim button.
 
 Your prize is already in your winnings balance the moment the walk reaches you. Step 6 is
-how you learn about it. Once your winnings are revealed, the app shows "Claim prize";
-pressing it sends an ordinary withdrawal for exactly that amount, and step 8 takes the
-rest home. On chain a claim and a withdrawal are the same call with the same shape, and
-that is what keeps a winner from standing out.
+how you learn about it. Once that draw's result is revealed, its card shows a claim button
+carrying the amount, such as "Claim 1.00 USDC"; pressing it sends an ordinary withdrawal
+for exactly that amount, and step 8 takes the rest home. On chain a claim and a withdrawal
+are the same call with the same shape, and that is what keeps a winner from standing out.
 
 There is nothing to press to be credited, either. Evaluation walks the saver list from a
-point that draw's seed decides, and the app's "Advance evaluation" button moves that shared
+point that draw's seed decides, and the app's "Advance the draw" button moves that shared
 walk forward rather than picking you out of it. A saver who presses it is not telling
 anybody they won.
 
@@ -172,6 +181,8 @@ anybody they won.
 ```
 vault.withdraw(encryptedAmount, inputProof)      // or vault.withdrawAll()
 ```
+
+In the app those are the "Withdraw" and "All of it" buttons in the "Withdraw" panel.
 
 Withdrawals pay from winnings first, then from principal. The amount is clamped to the
 smaller of what you hold and what the vault holds, because a confidential transfer moves
@@ -185,8 +196,9 @@ draw already fixed for you does not change.
 ## 9. Unshield: unwrap back to public USDC
 
 Two calls, because unwrapping is asynchronous by design. First `unwrap`, then
-`finalizeUnwrap`. The app sends both and the exact argument lists are in Zama's wrapper,
-not ours.
+`finalizeUnwrap`. The app sends both from its "Unwrap" button, and offers "Finish it" if
+the second one was ever left undone. The exact argument lists are in Zama's wrapper, not
+ours.
 
 The first call burns the encrypted amount and marks it for public decryption. The second
 releases the plaintext tokens once Zama's protocol has produced the cleartext and its
@@ -202,14 +214,16 @@ balance behind.
 
 ## The two-minute judge path
 
-1. Open {{APP_URL}} and connect a wallet on Sepolia.
-2. Click "Get test USDC", then "Shield", then "Deposit".
-3. Click "Reveal" and sign: your principal appears, in the browser only.
-4. Open the draw panel and press "Advance draw" to close and award the last finished
+1. Open {{APP_URL}}, follow "The pool" in the header to `/app`, and connect a wallet on
+   Sepolia.
+2. In "Deposit", click "Get test USDC", then "Wrap", then "Deposit".
+3. Click "Reveal" in "What you hold" and sign: your principal appears, in the browser only.
+4. In "Run the draw", press "Close", then "Award", to close and award the last finished
    period yourself, or watch the keeper do it.
-5. Reveal again: your weight and credit for that draw appear.
-6. Open the verify panel: the public seed and bracket are there, your thresholds are
-   recomputed in front of you, and the comparison matches.
-7. Click "Withdraw all". Principal and any winnings come back in one transfer.
+5. Press "Advance", then "Seal it again" and "Reveal my result" on that draw's card: your
+   weight and credit for that draw appear.
+6. Open `/verify`: the public seed and bracket are there, "Thresholds for an address"
+   recomputes your thresholds in front of you, and the comparison matches.
+7. Click "All of it" in "Withdraw". Principal and any winnings come back in one transfer.
 
 Nothing in that path needs us to be online. Every step of the draw is permissionless.

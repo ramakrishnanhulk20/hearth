@@ -252,8 +252,9 @@ result.
 ## Rule 7: the behavioural residual
 
 Hearth has no claim transaction, so there is no winner-shaped action to watch for.
-Learning that you won is an off-chain signature that touches nothing, and the app's "Claim
-prize" button sends an ordinary withdrawal that looks like every other withdrawal.
+Learning that you won is an off-chain signature that touches nothing, and the app's claim
+button, which carries the amount, sends an ordinary withdrawal that looks like every other
+withdrawal.
 
 The residual is what you do next. A saver who withdraws immediately after every draw they
 won, and never otherwise, hands an observer a statistical hint over time. It is weak, it
