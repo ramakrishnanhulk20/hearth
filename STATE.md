@@ -1,78 +1,57 @@
 # State
 
-Updated 3 September 2026, during the Sepolia deployment.
+Updated 3 September 2026, 01:00 UTC, after the first live draws.
 
 ## Done
 
 - Intake complete: program, docs, PoolTogether V5, Sepolia yield venues, fourteen
   rivals, executed audit of the previous contract. Evidence under `reference/`.
-- Design in `ARCHITECTURE.md`, revised after two adversarial reviews (one on the spec, one
-  on the spec plus the first draft); every decision in `DECISIONS.md`; milestones in
-  `PLAN.md`.
-- Git hooks installed and proven; repo identity set; `RECOVERY_PHRASE` wired in; ten
-  Sepolia accounts derive from it, the first is the deployer with 8.28 ETH.
-- Contracts, third pass: `HearthVault`, `HearthPrizePool`, `SponsoredYieldSource`,
-  interfaces and libraries compile and lint clean; 32 tests green on the mock; batch limit
-  measured at four savers per evaluation on the Sepolia tiers.
-- Keeper package built with 59 offline tests; documentation pages (19) written to the
-  third design; README and submission drafts written with placeholders; MIT licence.
-- Deploy script, network config and operator tasks (spread gas, seed, status, draw,
-  verify, prove) built and run end to end on a local node twice; the prove-it command
-  leaves the pool as it found it and recomputes its own credit from the public thresholds.
-  Account roles: index 0 deploys, 1 keeps, 2 to 6 are the demo savers, 6 also proves.
-- Static analysis: solhint clean; slither run in a plugin-free copy, 85 results in five
-  families, every one explained on `docs/security/static-analysis.md`; npm audit read,
-  28 production findings all in the web package's dependency tree, to be cleared by the
-  web upgrade in the app milestone.
-- `fhe:ship` builds against `@fhevm/solidity` 0.13.2, since the Hardhat plugin 0.4.2
-  rejects 0.13.3 on a text check.
-- Fairness (240 scored draws) and invariant (27 periods, 211 checks) tests green; the whole
-  contract suite is 35 tests. Executed attack scripts: 10 of the 12 threat-model rows run
-  locally and pass, transcript under `docs/security/attacks`.
-- Every tier now reconciles every draw so the jackpot accumulates in public; docs follow.
-- Sepolia deployed and verified (addresses below), 10,000 USDC sponsored at 20 an hour, all
-  five demo savers in with 1,200 / 600 / 300 / 150 / 75 USDC.
-- Operator tasks and keeper migrated off the legacy `@zama-fhe/relayer-sdk` onto
-  `@zama-fhe/sdk` 3.5.1. Live on Sepolia: every saver reads back their own principal
-  (1,200 / 600 / 300 / 150 / 75 USDC), a fresh wallet is refused with `NotEntitledError`, and
-  draw 1 closed, awarded against a KMS-signed seed and evaluated all five savers.
-- Two live faults found and fixed during that migration. One of Zama's thirteen KMS parties is
-  serving a share the others disagree with, which fails reconstruction for a given transport
-  key pair every time; the tasks recover by regenerating the key pair, which is the only thing
-  that redraws the share set. And the new SDK returns `euint8`, `euint16` and `euint32` as
-  JavaScript numbers where the legacy one returned bigints, which broke the draw's scale count
-  until the coercions were widened.
-
-- App rewired from Lantern to Hearth in `packages/web`. Dependencies moved to Next 16.3.4,
-  React 19.2.8, wagmi 3.7.7, viem 2.56.3 and `@zama-fhe/sdk` 3.5.1, which takes
-  `npm audit --omit=dev` from 27 findings to zero; the 37 that `npm audit` still lists are all
-  in the Hardhat toolchain, which is never shipped. Routes: `/` the scroll story, `/app` the
-  console, `/verify` (no wallet), `/lab` the draw ceremony, `/how`, `/docs` as an index.
-  ABIs generated from the artifacts, addresses from three env variables, the asset and its
-  underlying read on chain. English only, and the ten locale files are gone; see `DECISIONS.md`.
-  Typecheck, lint and a production build against `.next-verify` are all clean.
+- Design in `ARCHITECTURE.md`, revised after two adversarial reviews; every decision in
+  `DECISIONS.md`; milestones in `PLAN.md`.
+- Git hooks installed and proven; `RECOVERY_PHRASE` wired in; ten Sepolia accounts derive
+  from it: index 0 deploys, 1 keeps, 2 to 6 are the demo savers, 6 also proves.
+- Contracts, third pass: `HearthVault`, `HearthPrizePool`, `SponsoredYieldSource`; 35 tests
+  green on the mock including the fairness run (240 scored draws) and the invariant walk
+  (27 periods); solhint clean; slither's 85 results explained on
+  `docs/security/static-analysis.md`; executed attack scripts, 10 of 12 rows locally.
+- Every tier reconciles every draw so the jackpot accumulates in public; docs follow.
+- Sepolia deployed at block 11622398 and verified (addresses below); 10,000 USDC sponsored
+  at 20 an hour; five savers in (1,200 / 600 / 300 / 150 / 75 USDC).
+- The legacy relayer SDK cannot decrypt against the live KMS; the tasks and the keeper run
+  on `@zama-fhe/sdk` 3.5.1, regenerating the transport key pair when a KMS party serves a
+  bad share, which happens often.
+- Keeper live under pm2 as `hearth-keeper` from account index 1, 59 offline tests. Draws 1
+  and 2 closed, awarded against KMS-signed proofs and evaluated by it.
+- The prove-it command ran end to end on Sepolia: nine steps, 260 seconds, transcript in
+  the README. The attack scripts ran live: the three rows a public network can run pass,
+  transcript under `docs/security/attacks`.
+- The app is Hearth: three-contract wiring, wrap kept apart from deposit, Reveal per panel
+  with one shared permit, the claim button as a withdraw, the draw ceremony on /lab, the
+  verify page, the /docs site rendered from the markdown, next 16 and wagmi 3 with zero
+  production audit findings. English only, because the ten locale files could not be
+  regenerated honestly. Dev server on localhost:3000.
+- README with the live transcript, judge paths naming the real buttons, licence,
+  submission drafts rewritten against the real screens.
 
 ## Next
 
-- Run the keeper through at least two draws, prove-it output, attack scripts run live,
-  threat model finalised, README numbers.
-- The `/docs` route rendering the markdown with a sidebar, mermaid and search.
-- Then the README numbers and the submission package.
+- Fill the last gas placeholders from the finalize and reconcile receipts, the worked
+  example from draw 2's reconcile, and the test output after switching the root back to
+  `@fhevm/solidity` 0.11.1 with `npm run fhe:test`; commit the root manifest.
+- Finishing sweep from section 13 of the build manual, then the retro.
 
 ## Blocked on Ram
 
-Look at these on `localhost:3000` before anything is deployed, since visual calls are his:
-
-1. `/` the landing story, and the closing panel with the live grand prize and saver count.
-2. `/app` connected to a wallet on Sepolia, so the deposit, reveal, draw and withdraw
-   states can be walked with real money. No transaction has been sent from the browser
-   yet; every write path is untested against a live wallet.
-3. `/lab`, the draw ceremony. It is the signature moment and it is not linked from the nav.
-4. `/verify` with an address pasted in.
-
-Also on his list: 25 LINK from the Chainlink faucet if he wants the Automation redundancy
-registered, the Vercel deploy (`submission/vercel.md` has the new env list, and three old
-variables to delete), the video, the X post, and the push to GitHub when he says so.
+- Look at localhost:3000: the hero, /app with a Sepolia wallet (every write path is proven
+  by the operator tasks and by selector checks, not yet by a click in a browser), /lab and
+  "Open the seal", /verify, /docs.
+- Two design calls made in his absence, each reversible by one redeploy: every tier
+  reconciles every draw (visible accumulating jackpot, per-draw prize counts public a draw
+  later), and the exact aggregate is never published, only its power-of-two bracket.
+- His list: the Vercel deploy (settings in `submission/vercel.md`), the video
+  (`submission/video-script.md`), the X post (`submission/x-post.md`), the push to GitHub,
+  and optionally 25 LINK for a Chainlink time-based upkeep and a logon hook so pm2 survives
+  a reboot.
 
 ## Live addresses
 
