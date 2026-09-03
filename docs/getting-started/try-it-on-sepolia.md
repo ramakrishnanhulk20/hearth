@@ -149,8 +149,8 @@ You can reveal four things about yourself:
 | Credit, per draw | What that draw paid you. Zero if you did not win. |
 
 The first two open from "Reveal" in "What you hold". The last two open from "Reveal my
-result" on that draw's card in "Your draws", and only one of the two is open at a time, so
-"Seal it again" closes the first before the second will offer itself.
+result" on that draw's card in "Your draws". Both can be open at once, one signature serves
+both, and "Seal it again" closes only the panel it sits in.
 
 The last two are what let you check the draw yourself: take your weight, take the public
 seed and the public bracket, recompute your thresholds, and confirm the credit matches.
@@ -220,8 +220,8 @@ balance behind.
 3. Click "Reveal" in "What you hold" and sign: your principal appears, in the browser only.
 4. In "Run the draw", press "Close", then "Award", to close and award the last finished
    period yourself, or watch the keeper do it.
-5. Press "Advance", then "Seal it again" and "Reveal my result" on that draw's card: your
-   weight and credit for that draw appear.
+5. Press "Advance", then "Reveal my result" on that draw's card: your weight and credit for
+   that draw appear.
 6. Open `/verify`: the public seed and bracket are there, "Thresholds for an address"
    recomputes your thresholds in front of you, and the comparison matches.
 7. Click "All of it" in "Withdraw". Principal and any winnings come back in one transfer.

@@ -484,8 +484,8 @@ Nothing here needs us to be online. Every step of a draw is permissionless.
    finished period yourself, or watch the keeper do it. Award fetches the four decryption
    proofs in the browser and sends the signed cleartexts back to the pool.
 6. Press **Advance** once. Then, on that draw's card under **Your draws**, press **Reveal my
-   result**. If your balance is still open from step 4, press **Seal it again** first, because
-   the app keeps one reveal open at a time. Your weight and credit for that draw appear.
+   result**. Your weight and credit for that draw appear, and the balance you opened in step
+   4 stays open; the one signature serves both.
 7. Open `/verify`. The public seed and bracket are there, **Thresholds for an address**
    recomputes your thresholds in front of you, and the comparison matches what the contract
    credited.
