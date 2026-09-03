@@ -99,3 +99,18 @@ after the one being quoted.
 | `{{PROVE_OUTPUT}}` | The pasted output of the prove-it command on Sepolia | The live run |
 | `{{GAS_DEPOSIT}}` | Gas of one deposit through the receive hook on Sepolia | A live receipt |
 | `{{GAS_WITHDRAW}}` | Gas of one `withdrawAll` on Sepolia | A live receipt |
+
+## Status, 3 September 2026
+
+Every placeholder that a live deployment can answer is filled: the three contract addresses,
+the deploy block, the first period, the sponsor rate, the batch size, every gas figure from a
+Sepolia receipt, the worked verification example from draw 2, the test output and the prove-it
+transcript. What is left needs someone to publish something:
+
+| Token | Waiting on |
+| --- | --- |
+| `{{APP_URL}}` | The Vercel deployment |
+| `{{DOCS_URL}}` | The same deployment, its /docs route |
+| `{{REPO_URL}}` | The public GitHub repository |
+| `{{VIDEO_URL}}` | The demo video, once recorded |
+| `{{X_POST_URL}}` | The announcement post |
