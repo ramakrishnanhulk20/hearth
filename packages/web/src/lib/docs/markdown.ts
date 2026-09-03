@@ -148,8 +148,14 @@ export async function renderMarkdown({ source, dir, resolve }: RenderInput): Pro
         }
 
         const known = CODE_LANGUAGES.find((candidate) => candidate === lang);
-        const highlighted = shiki.codeToHtml(text, { lang: known ?? "bash", theme: "hearth" });
-        return `<figure class="doc-code" data-code>${highlighted}</figure>\n`;
+
+        // Most blocks in these pages are formulas and pseudo-code with no language on the fence.
+        // Guessing one paints keywords onto arithmetic, so an unlabelled block stays plain.
+        const body = known
+          ? shiki.codeToHtml(text, { lang: known, theme: "hearth" })
+          : `<pre class="doc-plain"><code>${escapeHtml(text)}</code></pre>`;
+
+        return `<figure class="doc-code" data-code>${body}</figure>\n`;
       },
 
       table(token) {

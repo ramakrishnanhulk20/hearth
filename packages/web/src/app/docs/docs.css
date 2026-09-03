@@ -388,6 +388,7 @@
   color: var(--text);
   font-size: 16px;
   line-height: 1.75;
+  overflow-wrap: break-word;
 }
 
 .doc-prose > p,
@@ -541,6 +542,12 @@ h2.doc-heading .doc-anchor {
   font-size: 0.86em;
 }
 
+/*
+ * "anywhere" rather than "break-word": these pages are full of identifiers like
+ * confidentialTransferAndCall that are longer than a phone column, and only "anywhere" lets the
+ * paragraph and the table cell shrink below the width of the token. Without it the chip pushes
+ * the whole page sideways.
+ */
 .doc-prose p code,
 .doc-prose li code,
 .doc-prose td code,
@@ -552,7 +559,7 @@ h2.doc-heading .doc-anchor {
   background: rgba(255, 255, 255, 0.05);
   padding: 1px 5px;
   color: #e7e1d4;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- tables ---------- */
@@ -585,6 +592,11 @@ h2.doc-heading .doc-anchor {
   border-bottom: 1px solid var(--hairline);
 }
 
+.doc-scroll td,
+.doc-scroll th {
+  overflow-wrap: anywhere;
+}
+
 .doc-scroll td {
   padding: 0.7rem 0.9rem;
   border-bottom: 1px solid var(--hairline-soft);
@@ -613,10 +625,16 @@ h2.doc-heading .doc-anchor {
 
 .doc-code pre {
   overflow-x: auto;
-  padding: 1rem 1.1rem;
+  /* Right padding keeps a short first line clear of the copy button sitting in that corner. */
+  padding: 1rem 4.25rem 1rem 1.1rem;
   font-size: 13px;
   line-height: 1.7;
   background: transparent !important;
+}
+
+.doc-plain code {
+  color: #cfcabf;
+  white-space: pre;
 }
 
 .doc-code code {
