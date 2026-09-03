@@ -110,7 +110,8 @@ pm2 startup          # follow the command it prints, so a reboot brings the keep
 
 On Windows, `pm2 startup` is not supported. Either install `pm2-windows-startup` (`npm install -g
 pm2-windows-startup && pm2-startup install`) or add a Task Scheduler entry at logon that runs
-`pm2 resurrect`. The demo keeper for the Sepolia pool runs this way on a Windows machine.
+`pm2 resurrect`. The demo keeper runs under pm2 on a Windows machine; the logon hook is a
+one-time install.
 
 Run exactly one instance. Two keepers on the same account race for the same nonce.
 
