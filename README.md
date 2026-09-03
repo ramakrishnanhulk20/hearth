@@ -488,22 +488,71 @@ Nothing here needs us to be online. Every step of a draw is permissionless.
 
 ### The prove-it command
 
-The claim Hearth makes is a privacy claim, so the command attacks it rather than
-demonstrating it. It runs against the live Sepolia deployment and needs no wallet of ours.
-
 ```bash
 npm run prove:sepolia -w @hearth/contracts
 ```
 
-It does five things and prints the result of each: asks Zama's relayer to decrypt another
-address's principal, winnings, per-draw weight and per-draw credit, and expects four
-refusals; asks for the pool's aggregate weight handle and expects a refusal; recomputes
-every threshold of a real draw from the published seed and bracket and checks them against
-the contract's own `thresholdOf` view; checks the draw's conservation, that prizes paid
-equal credits written; and reads the unfunded counter and expects zero.
+It runs from one saver's account against the live deployment and prints nine numbered steps.
+Every step is a real transaction or a real decryption: deposit 500 USDC; decrypt your own
+principal and check it moved by exactly that; ask for the same handle from a fresh wallet and
+show the refusal; drive any pending draw and pick the newest awarded draw the saver holds a
+weight in; decrypt your own weight and credit for it; recompute the outcome from the public
+seed and bracket through the vault's `thresholdOf` view, and fail if the chain paid more than
+the thresholds allow; withdraw exactly the stake plus the winnings through an encrypted amount;
+and check the wallet grew by exactly that while the principal is back at its baseline. It
+never waits for a period, it leaves the pool as it found it, and it can be run any number of
+times.
+
+The run below is from 3 September 2026 and took 260 seconds, almost all of it waiting on the
+relayer. The lines that say a KMS share did not reconstruct are Zama's key management
+service serving one bad share for a given transport key; the command recovers by
+regenerating the key and asking again, and every decryption below succeeded.
 
 ```
-{{PROVE_OUTPUT}}
+Proving Hearth on sepolia from 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f. Every line below is a real transaction or a real decryption.
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 2)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 3)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 4)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 2)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 3)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 4)
+  minted 500.00 USDC to 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f (tx 0x5d521754e36c479f3b281e8c7bea29c9bd2dbb1d0bcd837a4adb382554a73171, gas 51,756)
+  approved the wrapper to take 500.00 USDC from 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f (tx 0x3b8c872fab620b61ff287e94e58799927ec81920813d9e16dd99a2c0e314812c, gas 46,353)
+  wrapped 500.00 USDC into confidential USDC for 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f (tx 0x9144936d44c74283375b1a20972f14cc06ece1f78bab2a2099caa86ffd9f4136, gas 342,157)
+  deposited an encrypted amount into the vault for 0x913446bEb36a56dBDb7b2562bE6b674d1B39Ef2f (tx 0xbebc1772c2c5388bf1eb77ed34b0ed092625683fe9ca2aa322d37395d196abc5, gas 1,427,319)
+1. I took 500.00 of test USDC, wrapped it into confidential USDC and deposited it in period 3 (113.5s)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 2)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 3)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 4)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 5)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 6)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 7)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 8)
+2. I signed an EIP-712 request and decrypted my own principal: 575.00 USDC, up by exactly what I deposited (167.6s)
+3. a fresh wallet 0x3d67500910adaE196986eD3729B0B3dcDD9D3769 asked for the same handle and was refused: NotEntitledError: the access control list does not allow 0x3d67500910adaE196986eD3729B0B3dcDD9D3769 to decrypt 0x579371175db8f645ea33ec42678563598b0051d410ff0000000000aa36a70500 on 0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52 (168.1s)
+nothing is closable in period 3, so this pass awards and evaluates what is already open
+4. I drove every pending draw from the keeper account and picked draw 2, the newest awarded draw I hold a weight in (173.7s)
+5. draw 2 was closed, awarded against a KMS-signed seed and evaluated for every saver, and the 500.00 USDC I just deposited counts from period 3 onward, weighted by the part of that period that was still to run (173.7s)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 2)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 3)
+6. I decrypted my own weight for that draw, 270,000,000,000 balance-seconds, and my credit, 0.00 USDC (192.7s)
+7. I recomputed my own outcome from the public thresholds: 0.00 USDC against the 0.00 credited, which matches to the unit (194.4s)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 2)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 3)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 4)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+8. I withdrew exactly the 500.00 I deposited plus 0.00 of winnings, in one confidential transfer that looks the same whether or not I won, leaving my 75.00 of seeded principal in the pool (246.2s, gas 1,031,770)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 1)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 2)
+  a KMS share did not reconstruct, asking again under a fresh transport key (try 3)
+9. my confidential wallet went from 0.00 to 500.00 USDC, up by the 500.00 I put in plus 0.00 of winnings (260.0s)
+Every step above happened on chain on sepolia: the deposit, the draw, the KMS-signed seed, the evaluation and the withdrawal. Nothing was mocked and no number came from this script.
 ```
 
 Executed attack outputs from the self-audit are committed under `docs/security/attacks`.
@@ -737,7 +786,7 @@ Figures are live Sepolia receipts at 1 gwei, the Sepolia base fee at deployment,
 | Wrap USDC into confidential USDC | Zama's wrapper, not ours | Two calls, an approve and a wrap |
 | Deposit | `{{GAS_DEPOSIT}}` | One transaction, carrying an encrypted amount and its proof |
 | Reveal your balance or winnings | None | An off-chain signature. No transaction |
-| Withdraw, whether or not it includes a prize | `{{GAS_WITHDRAW}}` | One confidential transfer |
+| Withdraw, whether or not it includes a prize | `1,031,770` | One confidential transfer |
 
 | What a draw costs | Transactions | Gas each |
 | --- | --- | --- |
