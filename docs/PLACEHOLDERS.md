@@ -91,7 +91,7 @@ after the one being quoted.
 
 | Token | Meaning | Source of the value |
 | --- | --- | --- |
-| `{{REPO_URL}}` | The public GitHub repository | Ram, at push time |
+| `{{REPO_URL}}` | Filled: https://github.com/ramakrishnanhulk20/hearth | Filled 3 September 2026: https://github.com/ramakrishnanhulk20/hearth |
 | `{{DOCS_URL}}` | The docs route of the live app | The app deployment |
 | `{{VIDEO_URL}}` | The demo video, hosted on X, YouTube or Loom | Ram, after recording |
 | `{{X_POST_URL}}` | The X post or thread announcing the project | Ram, after posting |
@@ -111,6 +111,6 @@ transcript. What is left needs someone to publish something:
 | --- | --- |
 | `{{APP_URL}}` | The Vercel deployment |
 | `{{DOCS_URL}}` | The same deployment, its /docs route |
-| `{{REPO_URL}}` | The public GitHub repository |
+| `{{REPO_URL}}` | Filled: https://github.com/ramakrishnanhulk20/hearth |
 | `{{VIDEO_URL}}` | The demo video, once recorded |
 | `{{X_POST_URL}}` | The announcement post |

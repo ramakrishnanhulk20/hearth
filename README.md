@@ -618,7 +618,7 @@ Executed attack outputs from the self-audit are committed under `docs/security/a
 Node 20 or newer. The repository is one npm workspace, so every command runs from the root.
 
 ```bash
-git clone {{REPO_URL}}
+git clone https://github.com/ramakrishnanhulk20/hearth
 cd hearth
 npm install
 ```

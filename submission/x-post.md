@@ -31,7 +31,7 @@ link to the post itself back into the submission form.
 > Sepolia venue pays yield on the test token, and every seam I know about is written down.
 >
 > App: {{APP_URL}}
-> Code: {{REPO_URL}}
+> Code: https://github.com/ramakrishnanhulk20/hearth
 
 ---
 
