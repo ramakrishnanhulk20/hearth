@@ -19,6 +19,8 @@ export function DrawsPanel({
   config,
   saver,
   draws,
+  period,
+  periodKnown,
   now,
   reveal,
   money,
@@ -27,18 +29,26 @@ export function DrawsPanel({
   config: HearthConfig;
   saver: SaverState;
   draws: DrawView[];
+  period: number;
+  periodKnown: boolean;
   now: number;
   reveal: Reveal;
   money: ReturnType<typeof useActions>;
   refresh: () => void;
 }) {
+  // An empty list means three different things, and saying the wrong one states a fact about the
+  // pool that is not true. The draw ids are derived from the period, so before that read lands
+  // there is nothing to derive them from.
+  const empty =
+    !periodKnown
+      ? "Reading the pool."
+      : period <= 1
+        ? "No period has finished yet, so there is no draw to show. The first one appears as soon as period 1 is over."
+        : "The draws could not be read just now. They are on chain either way; this panel retries on its own.";
   return (
-    <Panel title="Your draws" step="3" hint={`${draws.length} most recent`}>
+    <Panel title="Your draws" step="3" hint={periodKnown ? `${draws.length} most recent` : "reading"}>
       {draws.length === 0 ? (
-        <p className="text-[14px] leading-relaxed text-muted">
-          No period has finished yet, so there is no draw to show. The first one appears as soon as
-          period 1 is over.
-        </p>
+        <p className="text-[14px] leading-relaxed text-muted">{empty}</p>
       ) : (
         <div className="flex flex-col gap-3">
           {draws.map((draw) => (

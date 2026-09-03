@@ -153,6 +153,8 @@ function Console() {
                 config={config}
                 saver={saver}
                 draws={draws}
+                period={pool.period}
+                periodKnown={pool.known.period}
                 now={now}
                 reveal={reveal}
                 money={actions}
