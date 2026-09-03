@@ -78,7 +78,7 @@ function Console() {
   const unshield = useUnshield(config);
 
   useActionScene(actions.phase, actions.label);
-  usePeekScene(reveal.state.kind === "working" || reveal.state.kind === "open");
+  usePeekScene(reveal.active);
 
   const refresh = () => {
     pool.refetch();

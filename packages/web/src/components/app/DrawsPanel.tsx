@@ -4,7 +4,7 @@ import { Panel, Button, Pill, SealedBars, Spinner } from "@/components/ui";
 import { EVALUATE_BATCH, TIER_NAMES } from "@/lib/chain/addresses";
 import { countdown, formatAmount, formatUtc } from "@/lib/format";
 import type { useActions } from "@/hooks/useActions";
-import type { useReveal } from "@/hooks/useReveal";
+import { drawScope, type Reveal } from "@/hooks/useReveal";
 import type { DrawView, HearthConfig, SaverState } from "@/hooks/useHearth";
 
 /**
@@ -27,7 +27,7 @@ export function DrawsPanel({
   saver: SaverState;
   draws: DrawView[];
   now: number;
-  reveal: ReturnType<typeof useReveal>;
+  reveal: Reveal;
   money: ReturnType<typeof useActions>;
   refresh: () => void;
 }) {
@@ -71,20 +71,23 @@ function DrawCard({
   config: HearthConfig;
   saver: SaverState;
   now: number;
-  reveal: ReturnType<typeof useReveal>;
+  reveal: Reveal;
   money: ReturnType<typeof useActions>;
   refresh: () => void;
 }) {
+  // One scope per draw, so this card opens and seals on its own and says nothing about what any
+  // other panel on the page is showing.
+  const view = reveal.scope(drawScope(draw.drawId));
   const mine = draw.mine;
-  const weight = mine ? reveal.read(mine.weightHandle) : null;
-  const credit = mine ? reveal.read(mine.creditHandle) : null;
-  const opened = reveal.state.kind === "open";
+  const weight = mine ? view.read(mine.weightHandle) : null;
+  const credit = mine ? view.read(mine.creditHandle) : null;
+  const opened = view.open;
   const inWindow = now < draw.windowEndsAt;
   const offeredAnything = draw.offered.some((value) => value > 0n);
 
   const askMine = () => {
     if (!config.vault || !mine) return;
-    void reveal.reveal([
+    view.reveal([
       { handle: mine.weightHandle, contractAddress: config.vault },
       { handle: mine.creditHandle, contractAddress: config.vault },
     ]);
@@ -128,6 +131,19 @@ function DrawCard({
             <span className="tabular-nums text-parchment">
               {draw.walkCount === 0 ? "not started" : `${draw.cursor} of ${draw.walkCount}`}
             </span>
+          </span>
+        </div>
+      )}
+
+      {!mine && draw.status === "awarded" && (
+        <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-hairlineSoft pt-3">
+          <span className="text-[12px] uppercase tracking-label text-faint">Your result</span>
+          <SealedBars count={4} label="a result, encrypted" />
+          <Button size="small" tone="ghost" disabled>
+            Reveal my result
+          </Button>
+          <span className="text-[12.5px] leading-relaxed text-faint">
+            Connect a wallet and this opens on its own, without sealing anything else on the page.
           </span>
         </div>
       )}
@@ -176,15 +192,28 @@ function DrawCard({
               </div>
 
               {!opened && (
-                <Button size="small" tone="ghost" busy={reveal.state.kind === "working"} onClick={askMine}>
+                <Button size="small" tone="ghost" busy={view.state.kind === "working"} onClick={askMine}>
                   Reveal my result
                 </Button>
               )}
-              {reveal.state.kind === "working" && (
+              {opened && (
+                <Button size="small" tone="quiet" onClick={view.hide}>
+                  Seal it again
+                </Button>
+              )}
+              {view.state.kind === "working" && (
                 <span className="flex items-center gap-2 text-[12px] text-muted">
                   <Spinner size={12} />
-                  {reveal.state.note}
+                  {view.state.note}
                 </span>
+              )}
+              {view.state.kind === "denied" && (
+                <span className="text-[12px] text-bad">
+                  Refused: this result belongs to a different address.
+                </span>
+              )}
+              {view.state.kind === "failed" && (
+                <span className="text-[12px] text-bad">{view.state.error.message}</span>
               )}
 
               {opened && credit !== null && credit > 0n && (

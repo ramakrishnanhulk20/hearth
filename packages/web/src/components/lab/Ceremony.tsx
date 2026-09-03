@@ -12,7 +12,7 @@ import { HEARTH_POOL_ABI, HEARTH_VAULT_ABI } from "@/lib/chain/abis";
 import { HEARTH, TIER_NAMES } from "@/lib/chain/addresses";
 import { formatAmount, shortAddress, shortHandle } from "@/lib/format";
 import { useDraws, usePoolState, type DrawView } from "@/hooks/useHearth";
-import { useReveal } from "@/hooks/useReveal";
+import { drawScope, useReveal, type Reveal } from "@/hooks/useReveal";
 
 export function CeremonyScreen() {
   return (
@@ -128,7 +128,7 @@ function Stack({
   draw: DrawView;
   stage: Stage;
   address: Address | null;
-  reveal: ReturnType<typeof useReveal>;
+  reveal: Reveal;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -349,14 +349,15 @@ function MineCard({
   connected,
 }: {
   draw: DrawView;
-  reveal: ReturnType<typeof useReveal>;
+  reveal: Reveal;
   connected: boolean;
 }) {
   const vault = HEARTH.vault;
+  const view = reveal.scope(drawScope(draw.drawId));
   const mine = draw.mine;
-  const weight = mine ? reveal.read(mine.weightHandle) : null;
-  const credit = mine ? reveal.read(mine.creditHandle) : null;
-  const open = reveal.state.kind === "open";
+  const weight = mine ? view.read(mine.weightHandle) : null;
+  const credit = mine ? view.read(mine.creditHandle) : null;
+  const open = view.open;
   const nothingOfMine = !mine || (!mine.weightHandle && !mine.creditHandle);
 
   return (
@@ -394,18 +395,18 @@ function MineCard({
 
           <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-hairlineSoft pt-4">
             {open ? (
-              <Button size="small" onClick={reveal.hide}>
+              <Button size="small" onClick={view.hide}>
                 Seal it again
               </Button>
             ) : (
               <Button
                 size="small"
                 tone="primary"
-                busy={reveal.state.kind === "working"}
+                busy={view.state.kind === "working"}
                 onClick={() =>
                   vault &&
                   mine &&
-                  void reveal.reveal([
+                  view.reveal([
                     { handle: mine.weightHandle, contractAddress: vault },
                     { handle: mine.creditHandle, contractAddress: vault },
                   ])
@@ -414,17 +415,17 @@ function MineCard({
                 Decrypt my result
               </Button>
             )}
-            {reveal.state.kind === "working" && (
+            {view.state.kind === "working" && (
               <span className="flex items-center gap-2 text-[12.5px] text-muted">
                 <Spinner size={13} />
-                {reveal.state.note}
+                {view.state.note}
               </span>
             )}
-            {reveal.state.kind === "denied" && (
+            {view.state.kind === "denied" && (
               <span className="text-[12.5px] text-bad">Refused: these values belong to another wallet.</span>
             )}
-            {reveal.state.kind === "failed" && (
-              <span className="text-[12.5px] text-bad">{reveal.state.error.message}</span>
+            {view.state.kind === "failed" && (
+              <span className="text-[12.5px] text-bad">{view.state.error.message}</span>
             )}
           </div>
         </>

@@ -251,3 +251,11 @@ marked as such.
   summaries rather than rendering the markdown. The rendered site with a sidebar, mermaid and
   search is its own unit; a nav link that 404s is worse than a map, and a map is honest about
   where the pages are.
+- 2026-09-03: the reveal store is one cache with one state per panel. The balance panel and every
+  draw card open and seal on their own, and both can be open at once; the decrypted values and
+  Zama's permit are shared, and requests are serialised, so a second panel opened while the first
+  is still working waits for the permit the first one signed instead of prompting the wallet a
+  second time, and a handle already decrypted is never asked for twice. One shared state was the
+  first shape and it was wrong on the judge path: with "what you hold" open, every draw card read
+  as open too, so it showed sealed bars with no button to press. Values are keyed by owner as well
+  as by handle, so a wallet switch cannot read the previous account's plaintexts.

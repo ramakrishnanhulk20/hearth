@@ -5,7 +5,7 @@ import { Panel, AmountField, Button, Spinner } from "@/components/ui";
 import { txUrl } from "@/lib/chain/addresses";
 import { formatAmount, parseAmount } from "@/lib/format";
 import type { useActions } from "@/hooks/useActions";
-import type { useReveal } from "@/hooks/useReveal";
+import { BALANCE_SCOPE, type Reveal } from "@/hooks/useReveal";
 import type { useUnshield } from "@/hooks/useUnshield";
 import type { DrawView, HearthConfig, SaverState } from "@/hooks/useHearth";
 
@@ -27,7 +27,7 @@ export function WithdrawPanel({
   config: HearthConfig;
   saver: SaverState;
   draws: DrawView[];
-  reveal: ReturnType<typeof useReveal>;
+  reveal: Reveal;
   money: ReturnType<typeof useActions>;
   unshield: ReturnType<typeof useUnshield>;
   refresh: () => void;
@@ -35,9 +35,12 @@ export function WithdrawPanel({
   const [input, setInput] = useState("");
   const [unshieldInput, setUnshieldInput] = useState("");
 
-  const open = reveal.state.kind === "open";
-  const principal = reveal.read(saver.principalHandle);
-  const winnings = reveal.read(saver.winningsHandle);
+  // The same scope the balance panel opens, because it is the same two values. Revealing there
+  // caps this field; a draw card being open changes nothing here.
+  const balance = reveal.scope(BALANCE_SCOPE);
+  const open = balance.open;
+  const principal = balance.read(saver.principalHandle);
+  const winnings = balance.read(saver.winningsHandle);
   const known = open && principal !== null && winnings !== null;
   const available = known ? principal + winnings : null;
 
@@ -113,7 +116,9 @@ export function WithdrawPanel({
                   busy={money.busy && money.label === "Withdraw"}
                   onClick={() => amount.ok && money.withdraw(amount.value, () => {
                     setInput("");
-                    reveal.hide();
+                    // The principal and winnings handles change with the withdrawal, so this
+                    // panel seals rather than showing what was true a block ago.
+                    balance.hide();
                     refresh();
                   })}
                 >
@@ -124,7 +129,9 @@ export function WithdrawPanel({
                   busy={money.busy && money.label === "Withdraw everything"}
                   onClick={() => money.withdrawAll(() => {
                     setInput("");
-                    reveal.hide();
+                    // The principal and winnings handles change with the withdrawal, so this
+                    // panel seals rather than showing what was true a block ago.
+                    balance.hide();
                     refresh();
                   })}
                 >
