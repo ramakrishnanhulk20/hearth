@@ -1,64 +1,102 @@
 # Demo video script
 
-90 seconds, Ram on camera, normal speed, no cuts that skip a confirmation. The bounty asks
-for a real person and will not accept an AI voice or a sped-up recording. Three minutes is
-the maximum; 90 seconds is the target, because a judge watching twenty of these rewards the
-one that gets to the point.
+Ram on camera, normal speed. The bounty rejects an AI voice and a sped-up recording, so the
+whole thing is shot at real speed with real waits. Three minutes is the hard cap. The target
+is about two minutes forty of runtime carrying roughly 90 seconds of speech, which leaves
+headroom if a transaction is slow on the day.
 
-Six things have to appear on screen, and all six are in the shot list below: a deposit,
-decrypting the pool balance, a draw being triggered, claiming a prize, withdrawing
-principal, and one sentence on why the selection is fair and confidential.
+Five things have to appear on screen, because the bounty form names them: depositing into the
+pool, decrypting your own pool balance, a draw being triggered, claiming a prize, and
+withdrawing principal. Plus one short explanation of why winner selection stays fair and
+confidential. All six are in the shot list.
+
+Host it on X if you can, since the form prefers that. YouTube or Loom otherwise. Nothing else
+is accepted.
 
 ---
 
 ## Before you press record
 
-The pool has to be in this state or the 90 seconds will not fit.
+The pool has to be in this state or the shot list will not fit.
 
-- **The demo pool has at least four other savers**, seeded by the seed script. Below three
-  savers the app shows a privacy warning, which is correct behaviour and a bad first frame.
-- **Your wallet already deposited in the previous period**, and holds a large share of the
-  pool. Odds come from your average balance across a whole period, so the deposit you make
-  on camera earns odds for the *current* period, not for the draw you trigger. The prize
-  you reveal comes from the earlier deposit. That is the product working, not a fudge.
-- **The last finished period has not been closed yet.** Stop the keeper about ten minutes
-  before recording, or record in the first minutes of a new period, so the draw panel has
-  something to close and the "Advance draw" button is live.
-- **The yield source is sponsored** and the tiers hold real prize liquidity, so the draw
-  panel shows three prize sizes rather than zeros.
-- **You hold spare confidential USDC** already shielded, so the deposit on camera is one
-  click and not an approve, a wrap and a deposit.
-- **Sepolia ETH in the wallet**, at least 0.05, and the wallet already connected and on the
-  right network before the first frame.
+- **You are one of the larger savers.** The seeded wallets hold 1,200, 600, 300, 150 and 75
+  USDC. Record from one of the top two. Odds are proportional to weight, and shot 6 needs a
+  prize on screen.
+- **You already have a prize waiting.** Open `/app`, press **Reveal** in "What you hold" and
+  look at "Unclaimed winnings", or open the newest awarded card in "Your draws", press
+  **Reveal my result** and check the number is above zero. The **Claim** button only exists
+  when the credit is above zero, so if it is zero, wait for the next draw and check again.
+  The frequent tier offers up to four prizes a draw across five savers, so this rarely takes
+  long.
+- **A draw is waiting to be closed.** Stop the keeper about half an hour before recording, or
+  record just after a period boundary. A draw stays closable for an hour and a half after its
+  period ends, so there is room. If the "Run the draw" panel says nothing is waiting, there is
+  no draw to trigger on camera.
+- **The tiers hold prize money**, so the pool panel shows three prize sizes rather than zeros.
+  The sponsor drips about 20 USDC an hour into the pool.
+- **You hold spare confidential USDC already wrapped**, so the deposit on camera is one click
+  rather than an approve, a wrap and a deposit.
+- **At least 0.05 Sepolia ETH**, wallet connected, already on Sepolia, before the first frame.
+- Run `npm run prove:sepolia -w @hearth/contracts` about five minutes before you need shot 10,
+  in a terminal you can bring to the front. It takes a little over four minutes, almost all of
+  it waiting on Zama's relayer, and it puts money in and takes it back out, so it leaves the
+  pool as it found it.
 - Browser at 100 percent zoom, wallet pop-ups visible, no other tabs, no notifications.
 
-Have the tab open on the app's main screen. Do not start on the landing page.
+Start on camera. Have `/` already scrolled to the last screen in one tab and `/app` open in
+another.
 
 ---
 
 ## Shot list
 
-| # | Time | On screen | What you do | What you say |
+| # | Time | Screen | What you click | What you say |
 | --- | --- | --- | --- | --- |
-| 1 | 0:00 to 0:10 | You, on camera | Nothing. Talk to the lens | "This is Hearth. It is a savings pool where you cannot lose your money and you might win a prize. Your balance is encrypted on chain. Nobody can see what you saved, and nobody can see what you won." |
-| 2 | 0:10 to 0:22 | The app, deposit panel | Type an amount. Click **Deposit**. Confirm in the wallet. Let the confirmation land on screen | "I am depositing confidential USDC. The amount is encrypted in my browser before it is sent, so it goes on chain as a ciphertext. The contract adds it to my balance without ever reading it." |
-| 3 | 0:22 to 0:34 | The reveal panel, then the wallet signature prompt | Click **Reveal**. Sign the message. Let the number appear | "To see my own balance I sign a message. That is EIP-712 user decryption. It is not a transaction, it costs nothing, and it leaves nothing behind. Zama's relayer only answers because the contract granted my address, and it refuses anybody else." |
-| 4 | 0:34 to 0:50 | The draw panel | Click **Advance draw**. Let the close confirm, then the proof fetch, then the award. Point at the seed and the bracket when they appear | "Now the draw. The random seed is generated inside Zama's coprocessor, so nobody sees it, and it can only be drawn once. Prize sizes were fixed before it existed. Anyone can run this. I am not privileged here." |
-| 5 | 0:50 to 1:00 | The draw panel, evaluation progress | Click **Advance evaluation** once. Let the batch confirm | "This step credits the winners. It walks the saver list from a point the seed decides, so I cannot aim it at myself, and pressing it says nothing about whether I won." |
-| 6 | 1:00 to 1:12 | Reveal panel showing winnings, then the verify panel | Click **Reveal** again. The winnings appear. Click across to the verify panel showing the recomputed thresholds | "I won. And here is why anybody can check that: the seed and the pool's scale are public, so my threshold is public arithmetic. The only private number is my own balance, and it is the only one that needs to be." |
-| 7 | 1:12 to 1:22 | The winnings row | Click **Claim prize**. Confirm in the wallet | "Claiming is an ordinary withdrawal. There is no claim function in the contract at all, so there is no transaction only a winner would send." |
-| 8 | 1:22 to 1:30 | Withdraw panel, then the empty balance | Click **Withdraw all**. Confirm. Let the balance go to zero | "And my principal comes back whenever I ask. No lock-up, no loss. That is the whole product. Contracts are verified on Sepolia and the link is below." |
+| 1 | 0:00 to 0:15 | You, on camera | Nothing. Talk to the lens | "PoolTogether is a good product that publishes everything: every balance, every wallet's odds, every winner. I built Hearth: no-loss prize savings on Zama's protocol, with every balance encrypted on chain." |
+| 2 | 0:15 to 0:32 | `/`, the last screen of the landing story, the card titled "A saver's balance" | Click **Try to open it**. Let the refusal land and stay on it for a beat | "That is a real saver's balance. I am asking Zama's key management service to open it. It refuses. That refusal came from the network, not from my page." |
+| 3 | 0:32 to 0:50 | `/app`, panel 1, "Deposit" | Type an amount in the deposit field. Click **Deposit**. Confirm in the wallet | "Wrapping is public. Depositing is not. That is why they are two buttons. The amount is encrypted in my browser and the contract never reads it." |
+| 4 | 0:50 to 1:05 | `/app`, panel 2, "What you hold" | Click **Reveal**. Sign the message. Let the principal and winnings appear | "To read my own balance I sign a message. No gas, no transaction. The relayer answers me and nobody else." |
+| 5 | 1:05 to 1:32 | `/app`, right column, "Run the draw" | Click **Close**, confirm, then click **Award** on the same panel and confirm. Stay on the "asking Zama's key management service for the seed" line while it works | "Now the draw. Closing fixes the prize sizes and draws a seed inside the coprocessor. Awarding hands back the signed seed, and the contract checks that signature on chain." |
+| 6 | 1:32 to 1:55 | `/app`, panel 3, "Your draws", the newest awarded card | Click **Advance the draw** and confirm. Once the walk reaches you, click **Reveal my result**, then click the claim button, which carries your own amount and reads **Claim 1.00 USDC** or whatever you won, and confirm | "This walks the saver list from a point the seed picked, so I cannot aim it at myself. There is my result. Claiming is an ordinary withdrawal. No transaction names a winner." |
+| 7 | 1:55 to 2:10 | `/lab`, the draw ceremony | Click the newest **Draw** chip, then **Open the seal**. Let the seed, the bracket and the thresholds fall in | "The seed and the bracket are public. Anyone can recompute the threshold any address had to beat." |
+| 8 | 2:10 to 2:18 | `/verify` | Paste any saver's address into "Thresholds for an address". Let the numbers render | "Same numbers here, with no wallet at all." |
+| 9 | 2:18 to 2:30 | `/app`, panel 4, "Withdraw" | Click **All of it**. Confirm. Let the balance seal itself again | "My principal comes back whenever I ask, in full." |
+| 10 | 2:30 to 2:45 | The terminal, on the finished output of the prove-it command | Scroll to the last lines, where step 9 says the wallet grew by exactly what went in | "One command proves the whole thing against the live network. Deposit, decrypt, a stranger refused, withdraw to the unit. Contracts verified on Sepolia." |
+| 11 | 2:45 to 2:52 | You, on camera | Nothing | "Anyone can run it. The link is below." |
+
+---
+
+## The waits, and how to handle them
+
+Every one of these is honest latency. Do not speed any of it up and do not hide it. A cut is
+allowed while something is spinning; a cut that removes a wallet confirmation is not.
+
+- **Reveal takes a few seconds.** It signs, then decrypts in the browser. The panel says which
+  it is doing.
+- **A retry can add half a minute.** One of Zama's key management parties sometimes serves a
+  share the others disagree with. The app says "a KMS share failed, retrying with a new key"
+  and asks again under a fresh key. That line is worth keeping in the take: it is the product
+  handling a real fault in public. If it drags past about 40 seconds, cut to the moment the
+  number lands rather than restarting.
+- **Awarding fetches four cleartexts before it sends anything.** Expect "asking Zama's key
+  management service for the seed" on screen for several seconds, and occasionally "the seed
+  is published but not decryptable yet, asking again".
+- **A period is one hour.** Shots 5, 6 and 7 only exist when a real draw is there to close and
+  a real awarded draw is there to open. Record those three when a draw actually lands, and if
+  the keeper closed it first, use the next one.
+- **The prove-it command takes a little over four minutes.** Start it before the take. Shot 10
+  films the finished output, not the run.
 
 ---
 
 ## Notes for the edit
 
-- Show every wallet confirmation. A judge scoring correctness wants to see the chain
-  agreeing with the app.
-- Do not cut the wait on shot 4. The proof fetch takes a few seconds and the app labels it
-  honestly. A demo that hides its own latency looks edited.
-- If a step fails on the take, keep going and start the take again. Do not speed anything
-  up: sped-up video is explicitly disqualified.
-- Total spoken words are about 215, which lands near 90 seconds at a normal pace. If you
-  are running long, shot 5 is the one to shorten, not shot 6.
-- End on the app, not on a slide.
+- Show every wallet confirmation. A judge scoring correctness wants to see the chain agreeing
+  with the app.
+- Spoken text is 230 words, which lands near 90 seconds at a normal pace. If the runtime is
+  over 2:50, drop shot 8 and shorten shot 11 to "Anyone can run it." Do not cut shot 2 or shot
+  6: the refusal and the claim are the two things nothing else in the field can show.
+- If a step fails on the take, keep going and start the take again. Never speed anything up.
+  A sped-up video is explicitly not considered.
+- The project name on the form is Hearth. It must not contain the word Zama.
+- End on camera, not on a slide.

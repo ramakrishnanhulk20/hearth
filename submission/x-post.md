@@ -1,81 +1,50 @@
-# X post drafts
+# X post
 
-The submission form asks for a thread or an article on X, tagging @zama and using
-#ZamaDeveloperProgram. Both are required, and nothing else is. No other hashtags.
+The form asks for a thread or an article on X that tags @zama and uses
+#ZamaDeveloperProgram. Both are required. Nothing else is, so there are no other hashtags
+here.
 
-Two drafts below. Post one of them, not both. Fill the placeholders with the real links
-before posting, and check the thread renders as one thread rather than five separate posts.
-
----
-
-## Variant A: a single post
-
-Fits the 280-character limit, so it works on any account. 267 characters as written, and
-279 once the placeholder becomes a real link, because X counts every link as 23 characters
-however long it is. There is no room left, so do not add a word.
-
-> Hearth: prize savings where nobody can see what you saved or what you won.
->
-> Balances encrypted with @zama FHE. Odds are time-weighted. Anyone can check the draw. No
-> claim button, so no transaction names the winner.
->
-> Live on Sepolia: {{APP_URL}}
->
-> #ZamaDeveloperProgram
+The draft below is one post of 193 words. Fill in the two links before posting, and paste the
+link to the post itself back into the submission form.
 
 ---
 
-## Variant B: a five-post thread
+## The post
 
-Post 1 is the hook and carries the tag. The rest are replies. Keep the video on post 5 so
-the thread reads before it plays. Lengths as written: 257, 269, 275, 270 and 226 characters
-with the four links counted at 23 each. Only post 5 has room for another line.
-
-**1/5**
-
-> I built Hearth for the @zama Developer Program. It is no-loss prize savings, the
-> PoolTogether idea, with one difference: your balance, your odds and your winnings are
-> encrypted on chain. Nobody can read them. Not other savers, not me.
+> PoolTogether is a good product that publishes everything: every balance, every wallet's
+> odds, every winner. I built Hearth: no-loss prize savings on the @zama protocol, with every
+> balance encrypted on chain. #ZamaDeveloperProgram
 >
-> #ZamaDeveloperProgram
-
-**2/5**
-
-> You deposit confidential USDC. The pool's yield is handed out as prizes every hour. Your
-> principal comes back whenever you ask, in full. Your odds come from your average balance
-> across the whole period, so nobody can flash a big balance in one block and take the
-> prize.
-
-**3/5**
-
-> The hard part is keeping the draw checkable while the balances stay secret. The random
-> seed is drawn inside Zama's coprocessor and published after the period ends with a proof
-> the contract verifies on chain. From it anyone can recompute the threshold any address
-> had to beat.
-
-**4/5**
-
-> There is no claim function. Prizes land in an encrypted winnings balance, and taking one
-> out is an ordinary withdrawal that looks like every other withdrawal. In most prize
-> protocols only a winner has a reason to send a claim, so the transaction list quietly
-> names them.
-
-**5/5**
-
-> Live on Sepolia, contracts verified, keeper running. What leaks is written down rather
-> than glossed over.
+> You deposit confidential USDC and your balance stays a ciphertext on chain. The yield is
+> handed out as prizes every hour, and your odds come from your average balance across the
+> whole period, so nobody can flash a big balance in one block and take the prize.
+>
+> The hard part was keeping the draw checkable while balances stay secret. The seed is drawn
+> inside Zama's coprocessor and published after the period with a signature the contract
+> verifies on chain. Anyone can then recompute the threshold any address had to beat.
+>
+> There is no claim function. Prizes land in an encrypted winnings balance and taking one out
+> is an ordinary withdrawal. In most prize protocols only a winner sends a claim, so the
+> transaction list names them.
+>
+> Live on Sepolia with the contracts verified. The yield there is sponsored, because no
+> Sepolia venue pays yield on the test token, and every seam I know about is written down.
 >
 > App: {{APP_URL}}
 > Code: {{REPO_URL}}
-> Docs: {{DOCS_URL}}
-> Demo: {{VIDEO_URL}}
 
 ---
 
 ## Before posting
 
 - Post from the account named on the submission form.
-- Tag @zama exactly once and use #ZamaDeveloperProgram exactly once. Nothing else.
-- Attach one image to post 1 if you have a good frame from the video. A thread with a card
-  gets read; a wall of text does not.
-- The submission form wants the link to the post itself, so copy it after posting.
+- One post of this length needs a Premium account. Without one, post it as a five-part thread:
+  one paragraph per post in the same order, with the last two paragraphs together in the final
+  reply. The paragraphs are 229, 258, 261, 207 and 233 characters, all inside the 280-character
+  limit, counting each link at the 23 characters X charges however long it is. There is no room
+  left in any of them, so do not add a word.
+- Tag @zama exactly once and use #ZamaDeveloperProgram exactly once. No other hashtags.
+- Attach one image or the demo video to the first post. A card gets read; a wall of text does
+  not. The frame worth using is the refusal on the landing page or the seed opening on `/lab`.
+- The project name is Hearth. It must not contain the word Zama, on the post or on the form.
+- Copy the link to the post afterwards. The form asks for it.
