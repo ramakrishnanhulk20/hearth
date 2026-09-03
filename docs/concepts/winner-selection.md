@@ -182,7 +182,7 @@ with 5,000,000 in sequential depth, and prices a 64-bit add at 162,000, a compar
 about 118,000, a select at 55,000 and a multiply by a public number at 365,000. Those
 numbers put one saver in the low millions of compute units, which is why evaluation is
 batched at `4` savers per transaction. The measured figure is
-`{{HCU_EVALUATE}}` per saver and the measured gas is `{{GAS_EVALUATE}}`.
+`3,674,128 on the mock coprocessor's price table (the live coprocessor does not report compute units in a receipt)` per saver and the measured gas is `708,836 (the marginal cost of one more saver in a batch; a batch of one costs 1,291,192)`.
 
 ## What this page does not cover
 

@@ -128,17 +128,17 @@ Costs per draw, from the live deployment.
 
 | Step | Transactions per draw | Gas each |
 | --- | --- | --- |
-| Close | 1 | `{{GAS_CLOSE}}` |
-| Award | 1 | `{{GAS_AWARD}}` |
-| Evaluate | `ceil(savers / 4)` | `{{GAS_EVALUATE_BATCH}}` |
-| Finalize | 1 | `{{GAS_FINALIZE}}` |
-| Reconcile | 3, one per tier, since every tier is due every draw | `{{GAS_RECONCILE}}` |
+| Close | 1 | `1,422,474` |
+| Award | 1 | `435,578` |
+| Evaluate | `ceil(savers / 4)` | `3,417,699` |
+| Finalize | 1 | `509,463` |
+| Reconcile | 3, one per tier, since every tier is due every draw | `459,994` |
 
-At 5 savers that is `{{GAS_PER_DRAW}}` gas per draw, or about
-`{{ETH_PER_DRAW}}` at 1 gwei, the Sepolia base fee at deployment. On a one-hour period that is 24 draws a
-day and `{{ETH_PER_DAY}}` per day; on a daily period it is `{{ETH_PER_DAY_MAINNET}}`.
+At 5 savers that is `8,456,388` gas per draw, or about
+`0.0085 ETH` at 1 gwei, the Sepolia base fee at deployment. On a one-hour period that is 24 draws a
+day and `0.2030 ETH` per day; on a daily period it is `0.0085 ETH`.
 
-Per-saver evaluation is `{{GAS_EVALUATE}}` gas and `{{HCU_EVALUATE}}` compute units. The
+Per-saver evaluation is `708,836 (the marginal cost of one more saver in a batch; a batch of one costs 1,291,192)` gas and `3,674,128 on the mock coprocessor's price table (the live coprocessor does not report compute units in a receipt)` compute units. The
 batch size `4` is set from that measurement against Zama's published Sepolia
 limits of 20,000,000 compute units per transaction with 5,000,000 in sequential depth.
 `evaluate` accepts any count, so if Zama reprices an operation the keeper can drop to a

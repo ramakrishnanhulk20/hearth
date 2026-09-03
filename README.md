@@ -791,25 +791,25 @@ Figures are live Sepolia receipts at 1 gwei, the Sepolia base fee at deployment,
 | What a user does | Gas | In plain words |
 | --- | --- | --- |
 | Wrap USDC into confidential USDC | Zama's wrapper, not ours | Two calls, an approve and a wrap |
-| Deposit | `{{GAS_DEPOSIT}}` | One transaction, carrying an encrypted amount and its proof |
+| Deposit | `1,515,752` | One transaction, carrying an encrypted amount and its proof |
 | Reveal your balance or winnings | None | An off-chain signature. No transaction |
 | Withdraw, whether or not it includes a prize | `1,031,770` | One confidential transfer |
 
 | What a draw costs | Transactions | Gas each |
 | --- | --- | --- |
-| Close | 1 | `{{GAS_CLOSE}}` |
-| Award | 1 | `{{GAS_AWARD}}` |
-| Evaluate | `ceil(savers / 4)` | `{{GAS_EVALUATE_BATCH}}` |
-| Finalize | 1 | `{{GAS_FINALIZE}}` |
-| Reconcile | 0 to 3, depending on which tiers are due | `{{GAS_RECONCILE}}` |
+| Close | 1 | `1,422,474` |
+| Award | 1 | `435,578` |
+| Evaluate | `ceil(savers / 4)` | `3,417,699` |
+| Finalize | 1 | `509,463` |
+| Reconcile | 0 to 3, depending on which tiers are due | `459,994` |
 
-A whole draw is `{{GAS_PER_DRAW}}` gas, about `{{ETH_PER_DRAW}}`. At a one-hour period that
-is 24 draws a day and `{{ETH_PER_DAY}}`; at the daily period a mainnet deployment would use
-it is `{{ETH_PER_DAY_MAINNET}}`. Whoever sends the transactions pays. Nothing on chain
+A whole draw is `8,456,388` gas, about `0.0085 ETH`. At a one-hour period that
+is 24 draws a day and `0.2030 ETH`; at the daily period a mainnet deployment would use
+it is `0.0085 ETH`. Whoever sends the transactions pays. Nothing on chain
 caps evaluation, so the keeper caps its own spend, and any saver can push the walk further
 from the app.
 
-Evaluating one saver is `{{GAS_EVALUATE}}` gas and `{{HCU_EVALUATE}}` homomorphic compute
+Evaluating one saver is `708,836 (the marginal cost of one more saver in a batch; a batch of one costs 1,291,192)` gas and `3,674,128 on the mock coprocessor's price table (the live coprocessor does not report compute units in a receipt)` homomorphic compute
 units. Zama caps one transaction on Sepolia at 20,000,000 compute units with 5,000,000 of
 sequential depth. The batch size was measured against the coprocessor's price table on the
 Sepolia tier set at 748,032 units of fixed cost per call plus 3,674,128 per saver, which
