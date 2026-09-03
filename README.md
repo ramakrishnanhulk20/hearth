@@ -155,6 +155,99 @@ the one a transparent chain cannot offer. Full argument in
 
 ---
 
+## Architecture
+
+Three views of the same system: what talks to what, one draw from deposit to reconcile, and
+which contracts depend on which. All three are kept current in
+[ARCHITECTURE.md](ARCHITECTURE.md), which is the implementation specification.
+
+### System overview
+
+```mermaid
+flowchart LR
+    Saver["Saver wallet"]
+    USDC["USDC (public ERC-20)"]
+    cUSDC["Confidential USDC<br/>Zama ERC-7984 wrapper"]
+    Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
+    Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
+    Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
+    Keeper["Keeper script<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
+    Relayer["Zama relayer + KMS"]
+
+    Saver -- "wrap" --> cUSDC
+    USDC -- "approve" --> cUSDC
+    Saver -- "confidentialTransferAndCall" --> Vault
+    Saver -- "withdraw" --> Vault
+    Vault -- "scale of the aggregate" --> Pool
+    Pool -- "fund(encrypted amount)" --> Vault
+    Yield -- "harvest (encrypted transfer)" --> Pool
+    Keeper -- "closeDraw, awardDraw,<br/>evaluate, finalize, reconcile" --> Pool
+    Keeper -- "public decryption proofs" --> Relayer
+    Saver -- "EIP-712 user decryption" --> Relayer
+```
+
+### One draw, end to end
+
+```mermaid
+sequenceDiagram
+    participant S as Saver
+    participant V as HearthVault
+    participant P as HearthPrizePool
+    participant Y as Yield source
+    participant K as Keeper
+    participant Z as Zama relayer/KMS
+
+    S->>V: confidentialTransferAndCall (encrypted deposit)
+    V->>V: principal += amount, observations updated
+    Note over V,P: period p ends
+    K->>P: closeDraw(p)
+    P->>P: fix prize sizes, move liquidity into the draw, seed = randEuint64
+    P->>Y: harvest()
+    Y-->>P: encrypted transfer, handle
+    P->>V: scaleFor(p, previous m)
+    V-->>P: encrypted scale count and non-empty flag
+    P->>Z: makePubliclyDecryptable(seed, scale, nonEmpty, harvested)
+    K->>Z: publicDecrypt([seed, scale, nonEmpty, harvested])
+    Z-->>K: cleartexts + KMS proof
+    K->>P: awardDraw(p, seed, scale, nonEmpty, harvested, proof)
+    P->>P: checkSignatures, book harvest, open the window
+    K->>V: evaluate(p, count) until the walk wraps
+    V->>V: per saver: weight, thresholds, gt, select, clamp
+    V->>P: fund(encrypted credited total)
+    P->>V: confidentialTransfer(vault, total)
+    S->>Z: EIP-712 user decryption of winnings and credit
+    S->>V: withdraw(winnings) or withdrawAll()
+    V-->>S: confidentialTransfer(principal + winnings)
+    Note over V,P: window ends after period p+2
+    K->>V: finalizeDraw(p)
+    K->>Z: publicDecrypt(carry of each tier that is due)
+    K->>P: reconcile(tier, carry, proof)
+```
+
+### Contract dependencies
+
+```mermaid
+flowchart TD
+    Vault["HearthVault"] --> IERC7984["IERC7984 (Zama cUSDC)"]
+    Vault --> FHE["@fhevm/solidity FHE"]
+    Vault --> Pool["HearthPrizePool"]
+    Pool --> IERC7984
+    Pool --> FHE
+    Pool --> IYield["IYieldSource"]
+    IYield --> Sponsored["SponsoredYieldSource"]
+    IYield -.-> CV["ConfidentialVaultYieldSource (mainnet design, not built)"]
+    CV -.-> Batcher["Zama DepositVaultBatcherConfidential (mainnet design, not built)"]
+    Pool --> Auto["IAutomationCompatible"]
+    Vault --> OZ["OpenZeppelin Ownable2Step, Pausable, ReentrancyGuard"]
+    Pool --> OZ
+```
+
+Solid edges are contracts in this repository. The two dotted nodes are the mainnet yield
+path: the adapter is specified against Zama's published batcher interface and no adapter
+contract is written here.
+
+---
+
 ## How the pool and draws work
 
 Time is cut into equal periods. On Sepolia a period is one hour, so a visitor sees a full
@@ -249,93 +342,6 @@ Full detail: [how a draw works](docs/concepts/how-a-draw-works.md),
 [time-weighted balance](docs/concepts/time-weighted-balance.md),
 [winner selection](docs/concepts/winner-selection.md),
 [prizes and tiers](docs/concepts/prizes-and-tiers.md).
-
-### System overview
-
-```mermaid
-flowchart LR
-    Saver["Saver wallet"]
-    USDC["USDC (public ERC-20)"]
-    cUSDC["Confidential USDC<br/>Zama ERC-7984 wrapper"]
-    Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
-    Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
-    Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
-    Keeper["Keeper script<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
-    Relayer["Zama relayer + KMS"]
-
-    Saver -- "wrap" --> cUSDC
-    USDC -- "approve" --> cUSDC
-    Saver -- "confidentialTransferAndCall" --> Vault
-    Saver -- "withdraw" --> Vault
-    Vault -- "scale of the aggregate" --> Pool
-    Pool -- "fund(encrypted amount)" --> Vault
-    Yield -- "harvest (encrypted transfer)" --> Pool
-    Keeper -- "closeDraw, awardDraw,<br/>evaluate, finalize, reconcile" --> Pool
-    Keeper -- "public decryption proofs" --> Relayer
-    Saver -- "EIP-712 user decryption" --> Relayer
-```
-
-### One draw, end to end
-
-```mermaid
-sequenceDiagram
-    participant S as Saver
-    participant V as HearthVault
-    participant P as HearthPrizePool
-    participant Y as Yield source
-    participant K as Keeper
-    participant Z as Zama relayer/KMS
-
-    S->>V: confidentialTransferAndCall (encrypted deposit)
-    V->>V: principal += amount, observations updated
-    Note over V,P: period p ends
-    K->>P: closeDraw(p)
-    P->>P: fix prize sizes, move liquidity into the draw, seed = randEuint64
-    P->>Y: harvest()
-    Y-->>P: encrypted transfer, handle
-    P->>V: scaleFor(p, previous m)
-    V-->>P: encrypted scale count and non-empty flag
-    P->>Z: makePubliclyDecryptable(seed, scale, nonEmpty, harvested)
-    K->>Z: publicDecrypt([seed, scale, nonEmpty, harvested])
-    Z-->>K: cleartexts + KMS proof
-    K->>P: awardDraw(p, seed, scale, nonEmpty, harvested, proof)
-    P->>P: checkSignatures, book harvest, open the window
-    K->>V: evaluate(p, count) until the walk wraps
-    V->>V: per saver: weight, thresholds, gt, select, clamp
-    V->>P: fund(encrypted credited total)
-    P->>V: confidentialTransfer(vault, total)
-    S->>Z: EIP-712 user decryption of winnings and credit
-    S->>V: withdraw(winnings) or withdrawAll()
-    V-->>S: confidentialTransfer(principal + winnings)
-    Note over V,P: window ends after period p+2
-    K->>V: finalizeDraw(p)
-    K->>Z: publicDecrypt(carry of each tier that is due)
-    K->>P: reconcile(tier, carry, proof)
-```
-
-### Contract dependencies
-
-```mermaid
-flowchart TD
-    Vault["HearthVault"] --> IERC7984["IERC7984 (Zama cUSDC)"]
-    Vault --> FHE["@fhevm/solidity FHE"]
-    Vault --> Pool["HearthPrizePool"]
-    Pool --> IERC7984
-    Pool --> FHE
-    Pool --> IYield["IYieldSource"]
-    IYield --> Sponsored["SponsoredYieldSource"]
-    IYield -.-> CV["ConfidentialVaultYieldSource (mainnet design, not built)"]
-    CV -.-> Batcher["Zama DepositVaultBatcherConfidential (mainnet design, not built)"]
-    Pool --> Auto["IAutomationCompatible"]
-    Vault --> OZ["OpenZeppelin Ownable2Step, Pausable, ReentrancyGuard"]
-    Pool --> OZ
-```
-
-Solid edges are contracts in this repository. The two dotted nodes are the mainnet yield
-path: the adapter is specified against Zama's published batcher interface and no adapter
-contract is written here.
-
----
 
 ## The confidentiality design
 
