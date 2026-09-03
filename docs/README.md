@@ -7,7 +7,7 @@ Nobody, including us, can read what you saved or what you won.
 
 These pages are the full written record of how it works and what it does not hide.
 `ARCHITECTURE.md` in the repository root is the implementation specification; this tree
-is the same design explained for the people who use it and the judges who score it.
+is the same design explained for the people who use it and the people who audit it.
 
 ## Pages
 

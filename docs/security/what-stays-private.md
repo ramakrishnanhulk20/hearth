@@ -1,8 +1,7 @@
 # What stays private
 
-The judging criteria ask three things about confidentiality: what stays encrypted, is the
-draw provably fair and deposit-weighted, and is any leakage minimal and documented. This
-page is the answer to the first and third. Our position is that naming every seam
+Three things matter about confidentiality: what stays encrypted, is the draw provably fair
+and weighted by deposit, and is every leak named. This page answers the first and the third. Our position is that naming every seam
 ourselves is worth more than a claim nobody can check.
 
 ## The table

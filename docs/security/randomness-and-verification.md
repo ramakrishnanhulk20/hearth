@@ -45,8 +45,8 @@ Four things, together.
 
 Compare that with the alternative designs. A draw fed by a block hash can be re-rolled by
 a validator who does not like the result. A draw fed by an off-chain number can be chosen
-outright. Neither is possible here, which is why the bounty asks for on-chain FHE
-randomness and no off-chain generator.
+outright. Neither is possible here, which is the whole reason the randomness is generated
+on chain under encryption and never by an off-chain generator.
 
 ## What becomes public, and when
 
@@ -111,7 +111,7 @@ time-weighted weight for period `p` was strictly greater than `threshold_k`.
 
 You do not have to reimplement it. The vault exposes
 `thresholdOf(drawId, saver, tier, k)` as a pure view over the same arithmetic evaluation
-uses, so the app's verify panel, the test suite and a judge with a block explorer all read
+uses, so the app's verify panel, the test suite and anyone with a block explorer all read
 the same implementation. Reimplementing it off chain is four lines of big-integer
 arithmetic if you would rather check the contract against your own code.
 

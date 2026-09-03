@@ -9,9 +9,6 @@ us, can read what you saved or what you won. Anybody can check that the draw was
 
 [Live app]({{APP_URL}}) · [Documentation]({{DOCS_URL}}) · [Contracts on Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) · [Demo video]({{VIDEO_URL}}) · [X thread]({{X_POST_URL}})
 
-Built for the Zama Developer Program, Mainnet Season 4, bounty "Build the Confidential
-PoolTogether App".
-
 ---
 
 ## Live deployments
@@ -125,7 +122,7 @@ the one a transparent chain cannot offer. Full argument in
   with `FHE.checkSignatures`.
 - From those two numbers anyone recomputes the exact threshold any address had to beat, in
   any tier. The vault exposes the same arithmetic as a view, `thresholdOf`, so the app,
-  the test suite and a judge with a block explorer read one implementation.
+  the test suite and anyone with a block explorer read one implementation.
 - A saver can go further: decrypt your own weight and your own credit for a draw and check
   the two against each other.
 - Every unpaid unit of prize money is accounted for. The unfunded counter is published at
@@ -345,9 +342,9 @@ Full detail: [how a draw works](docs/concepts/how-a-draw-works.md),
 
 ## The confidentiality design
 
-The judging criteria ask what stays encrypted, whether the draw is provably fair and
-deposit-weighted, and whether any leakage is minimal and documented. Our position is that
-naming every seam ourselves is worth more than a claim nobody can check.
+Three questions decide whether a confidential pool deserves anyone's money: what stays
+encrypted, is the draw provably fair and weighted by deposit, and is every leak named. Our
+position is that naming every seam ourselves is worth more than a claim nobody can check.
 
 ### Encrypted versus public
 
@@ -456,8 +453,8 @@ and every harvest are public, exactly as the yield a PoolTogether vault contribu
 public. What is confidential in Hearth is who saved how much and who won, never how much
 money the pool made.
 
-The bounty allows a mock source as long as the README explains it, and we looked for a real
-one first. There is no venue on Sepolia that pays yield on Zama's mock USDC: Aave refuses
+The source of the money is a mock, and this section is where we say so rather than leaving
+anyone to work it out. We looked for a real one first. There is no venue on Sepolia that pays yield on Zama's mock USDC: Aave refuses
 those deposits because the supply cap is exceeded, Compound wants Circle's own USDC, and
 Zama's own Sepolia vault is idle-only with no yield adapter, which is Zama's own
 description of it.
@@ -495,14 +492,14 @@ stages is permissionless.
 
 Because Sepolia's vault is idle, the adapter is specified against Zama's published batcher
 interface and is not implemented in this repository. Saying it is live when it earns
-nothing would be a claim a judge could check in a minute. What Hearth would inherit on
+nothing would be a claim anyone could check in a minute. What Hearth would inherit on
 mainnet, stated plainly: vault risk in full from the third-party ERC-4626 vault, batch
 confidentiality rather than pool confidentiality, and the batcher owner's bounded powers
 over batch age and pausing. Detail and addresses: [yield source](docs/concepts/yield-source.md).
 
 ---
 
-## The two-minute judge path
+## Try it in two minutes
 
 Nothing here needs us to be online. Every step of a draw is permissionless.
 
@@ -675,7 +672,7 @@ Nothing sensitive is hardcoded. `packages/contracts/.env.example` lists every ke
 comment on where its value comes from. The deployer's key and the keeper's key are
 different accounts derived from the same seed phrase, so the keeper's hot key holds no
 owner powers. Sepolia ETH comes from any public faucet; the Google Cloud, Alchemy and Chainlink faucets
-each pay out enough for the judge path in one request.
+each pay out enough for the whole walkthrough in one request.
 
 ---
 
@@ -984,7 +981,6 @@ hearth/
 │   ├── web/              the Next.js app and the documentation site it serves
 │   └── keeper/           the script that drives draws, with its own suite and pm2 config
 ├── docs/                 the written record: getting started, concepts, security, operations
-├── submission/           video script, X post draft, Vercel settings
 ├── ARCHITECTURE.md       the implementation specification, with the three diagrams
 ├── DECISIONS.md          one line per design decision, with the reason
 ├── PLAN.md               milestones, each ending in a proof gate

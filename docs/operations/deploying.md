@@ -40,7 +40,7 @@ three.
 | 5 | Wire: `pool.setYieldSource(source)` | Emits `YieldSourceSet`. Until this lands, a close harvests nothing and emits `HarvestFailed`. |
 
 After step 5, seed the pool: sponsor the yield source so prizes exist, and run the demo
-seeding script so a judge lands on a populated pool rather than an empty one.
+seeding script so a first visitor lands on a populated pool rather than an empty one.
 
 ## The parameters
 
@@ -180,6 +180,52 @@ Nothing sensitive is ever hardcoded. The deploy reads from a `.env` file, and
 `.env.example` lists every key with a comment on where its value comes from. The
 deployer's key and the keeper's key are separate accounts, so the keeper's hot key has no
 owner powers.
+
+## Hosting the app
+
+The app is a Next.js workspace package, not the repository root, which is the only setting
+most hosts get wrong.
+
+| Setting | Value | Why |
+| --- | --- | --- |
+| Framework preset | Next.js | Detected from `packages/web/package.json` |
+| Root directory | `packages/web` | The app lives in an npm workspace |
+| Include source files outside the root directory | On | Dependencies are hoisted to the repository root, and the build needs the root `package.json` and lockfile |
+| Install command | the default, `npm install` | Runs at the repository root and installs the whole workspace |
+| Build command | the default, `next build` | With the root directory set, it runs inside `packages/web` |
+| Output directory | the default, `.next` | See the warning below |
+| Node version | 20 or newer | The root `package.json` sets `engines.node` |
+
+Do not set `NEXT_DIST_DIR` in a hosted environment. `packages/web/next.config.ts` reads it
+and moves the build output when it is present. It exists so a local verification build does
+not fight a running dev server over the same `.next` directory. In a hosted build it would
+move the output away from where the host looks for it, and the deploy would fail with
+nothing obvious to point at.
+
+### Environment variables
+
+| Variable | Public in the browser | Where its value comes from |
+| --- | --- | --- |
+| `SEPOLIA_RPC_URL` | No | Your own Sepolia endpoint. The landing page and the `/api/activity` route read the chain on the server, so this one never reaches a browser. Log queries need it, because the free public node caps `eth_getLogs` ranges far below a day of blocks |
+| `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Yes | Optional. The wallet reads use it and fall back to `https://ethereum-sepolia-rpc.publicnode.com` when it is unset. Visible in the bundle, so it must be one you are happy to publish |
+| `NEXT_PUBLIC_CHAIN_ID` | Yes | `11155111` for Ethereum Sepolia. The app defaults to it if unset |
+| `NEXT_PUBLIC_HEARTH_VAULT` | Yes | From `packages/contracts/deployments/sepolia/hearth.json` |
+| `NEXT_PUBLIC_HEARTH_POOL` | Yes | Same file |
+| `NEXT_PUBLIC_HEARTH_SOURCE` | Yes | Same file |
+
+The confidential asset and its underlying ERC-20 are deliberately not configured here. The
+app reads them from the vault and the wrapper on chain, so it cannot talk to a token the
+vault would refuse.
+
+### After the first deploy
+
+1. Open the production URL on a phone. Every page has to work at 375 pixels wide.
+2. Connect a wallet on Sepolia and walk the two-minute path from the README against the
+   deployed site rather than localhost.
+3. Open `/verify` and paste a saver's address. The thresholds come from a contract call, so
+   if they render, the deployed app is talking to the deployed vault.
+
+---
 
 ## What this page does not cover
 

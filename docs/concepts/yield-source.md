@@ -57,9 +57,9 @@ draws that do have savers. Nothing is stranded in an empty pool.
 
 ### Why a mock at all
 
-The bounty explicitly allows a mock yield source on Sepolia, as long as the docs explain
-how it works and how a real one plugs in. We looked for a real one first and there is not
-one on Sepolia that pays yield on Zama's mock USDC:
+Because a mock source is only honest if the docs say how it works and how a real one plugs
+in, both are below. We looked for a real one first and there is not one on Sepolia that pays
+yield on Zama's mock USDC:
 
 | Venue | Why not |
 | --- | --- |
@@ -154,7 +154,7 @@ only depositor.
 
 Because the Sepolia vault is idle, the adapter is specified here against Zama's published
 batcher interface and is not written yet. Saying it is live when it earns nothing would be
-a lie a judge could check in a minute.
+a lie anyone could check in a minute.
 
 ### What plugging it in means in practice
 

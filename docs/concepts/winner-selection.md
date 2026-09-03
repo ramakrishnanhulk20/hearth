@@ -67,7 +67,7 @@ For a saver `u` in tier `t` of draw `p`:
    `threshold_k = floor((r + k * M) * oddsDen[t] / (oddsNum[t] * count[t]))`.
    These are public numbers. Anyone can compute them for any address, and the contract
    exposes the same arithmetic as a view, `thresholdOf(drawId, saver, tier, k)`, so the
-   app's verify panel, the tests and a judge all use one implementation.
+   app's verify panel, the tests and any outside checker all use one implementation.
 4. Compare. Prize `k` is won when the saver's encrypted weight is greater than
    `threshold_k`. This is the only step that touches a secret, and it is an encrypted
    comparison whose result is an encrypted true or false that nobody can read.

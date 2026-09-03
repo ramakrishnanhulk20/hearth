@@ -200,7 +200,7 @@ for low-odds tiers when `M` is very large; in that case no 64-bit weight can exc
 the answer is false without a comparison. Thresholds only rise with `k`, so the tier loop
 stops at the first such threshold. Nothing branches on a secret.
 
-A pure view `thresholdOf(drawId, saver, tier, k)` exposes the same arithmetic, so a judge,
+A pure view `thresholdOf(drawId, saver, tier, k)` exposes the same arithmetic, so an outside checker,
 the app's verify page and the tests share one implementation. `evaluate` reverts for a
 draw that is `Empty`, `Skipped` or not yet awarded.
 

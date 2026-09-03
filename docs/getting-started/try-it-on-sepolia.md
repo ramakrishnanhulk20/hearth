@@ -223,7 +223,7 @@ because the confidential transfer to that address is itself the link. If it matt
 you, unwrap in round numbers unrelated to your position, or leave a standing confidential
 balance behind.
 
-## The two-minute judge path
+## Try it in two minutes
 
 The app is a console with a rail down the left, one task per screen, so the path is a walk
 down that rail.

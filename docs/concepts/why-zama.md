@@ -1,8 +1,8 @@
 # Why this needs Zama
 
-The test a judge should apply to any project built for a company's developer program:
-delete that company's technology and see whether the product survives. If it still works,
-the technology was decoration.
+The test to apply to any project that claims it needs a particular technology: delete that
+technology and see whether the product survives. If it still works, the technology was
+decoration.
 
 ## Delete the encryption and there is no product
 
@@ -117,7 +117,7 @@ no claim function at all: learning that you won costs nothing and leaves nothing
 The other half of that promise is that evaluation cannot be aimed at yourself either, so
 there is no transaction of any kind that only a winner would send.
 
-The bounty requires user decryption of both balance and winnings. Hearth also grants the
+Both the balance and the winnings are decryptable by their owner. Hearth also grants the
 per-draw weight and per-draw credit, so a saver can verify the draw's arithmetic against
 their own inputs rather than being asked to trust it.
 
