@@ -7,7 +7,7 @@ USDC, your balance stays encrypted on chain, the yield the pool earns is handed 
 prizes every period, and your principal is withdrawable at any time. Nobody, including
 us, can read what you saved or what you won. Anybody can check that the draw was honest.
 
-[Live app](https://hearth-ram.vercel.app) · [Documentation](https://hearth-ram.vercel.app/docs) · [Contracts on Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) · [Demo video]({{VIDEO_URL}}) · [X thread]({{X_POST_URL}})
+[Live app](https://hearth-ram.vercel.app) · [Documentation](https://hearth-ram.vercel.app/docs) · [Contracts on Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) · [Demo video]({{VIDEO_URL}}) · [X thread](https://x.com/ram_krish2000/status/2095949745135268159)
 
 ---
 
