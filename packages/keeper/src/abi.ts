@@ -14,8 +14,11 @@ export class AbiError extends Error {
 const ARTIFACT_ROOT = join("packages", "contracts", "artifacts", "contracts");
 
 /** ABIs committed beside the keeper, so it runs on a host that never compiles the contracts.
- *  Regenerate with: npm run abi -w @hearth/keeper */
-const BUNDLED_ABI_DIR = fileURLToPath(new URL("../abi", import.meta.url));
+ *  Regenerate with: npm run abi -w @hearth/keeper
+ *  Two candidates because this file runs from src during a test and from dist/src once built. */
+const BUNDLED_ABI_DIR = ["../abi", "../../abi"]
+  .map((where) => fileURLToPath(new URL(where, import.meta.url)))
+  .find((dir) => existsSync(dir)) ?? fileURLToPath(new URL("../../abi", import.meta.url));
 
 /**
  * Walks up from a starting directory until it finds the workspace root, recognised by the
