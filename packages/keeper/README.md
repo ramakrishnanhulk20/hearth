@@ -260,3 +260,36 @@ touches a network, a wallet or the relayer.
 
 Not covered: the live relayer and KMS, real gas, nonce behaviour under a reorg, and anything the
 contracts do once called. Those belong to the contracts test suite and to a live run on Sepolia.
+
+## Running it on a host instead of a laptop
+
+The keeper is a long-running process, not a scheduled function: one pass can spend two minutes
+waiting on the key management service, which is longer than most serverless platforms allow. Any
+host that keeps a Node process alive will do.
+
+The repository carries a `railway.json` at its root, so a Railway service pointed at this
+repository needs no build configuration. It installs the workspace, runs
+`npm run build -w @hearth/keeper`, and starts `node packages/keeper/dist/src/index.js`. On any
+other host, those are the two commands.
+
+The contract ABIs the keeper needs are committed under `packages/keeper/abi`, generated from the
+compiled artifacts by `npm run abi -w @hearth/keeper`. That is what lets the keeper run somewhere
+that never compiles the contracts. The boot check still compares the loaded ABI against the
+functions the keeper calls, so a drift between the two is reported at startup rather than on the
+first transaction.
+
+Five variables are required:
+
+| Variable | Value |
+| --- | --- |
+| `RECOVERY_PHRASE` | The twelve word phrase. The keeper signs from account index 1, which holds no owner rights over the contracts |
+| `SEPOLIA_RPC_URL` | Your own endpoint. A pass makes up to 28 requests, so give the keeper one that is not shared with the app |
+| `HEARTH_VAULT` | The deployed vault |
+| `HEARTH_POOL` | The deployed prize pool |
+| `HEARTH_SOURCE` | The deployed yield source |
+
+Everything else has a default that suits an hourly period. `KEEPER_POLL_SECONDS` is 30,
+`KEEPER_BATCH` is 4, and `KEEPER_MAX_FEE_GWEI` is unset, which means no ceiling.
+
+Run exactly one instance. Two keepers signing from the same account race for the same nonce, so
+stop the local one before starting a hosted one.
