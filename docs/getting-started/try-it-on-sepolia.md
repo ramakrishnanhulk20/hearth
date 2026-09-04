@@ -5,7 +5,7 @@ whole cycle for free. A period on Sepolia is one hour, so budget up to about an 
 half if you want to watch the draw for a period you deposited in. The two-minute path at
 the bottom of this page does not wait for one.
 
-The live app is at {{APP_URL}}. Everything below can also be done straight from a block
+The live app is at https://hearth-ram.vercel.app. Everything below can also be done straight from a block
 explorer if you prefer to watch the raw calls.
 
 ## Contracts you will touch
@@ -228,7 +228,7 @@ balance behind.
 The app is a console with a rail down the left, one task per screen, so the path is a walk
 down that rail.
 
-1. Open {{APP_URL}}, follow "The pool" in the header to `/app`, and connect a wallet on
+1. Open https://hearth-ram.vercel.app, follow "The pool" in the header to `/app`, and connect a wallet on
    Sepolia. The dashboard opens with a block marked "Next" naming the one thing to do.
 2. "Deposit" in the sidebar, which opens on whichever of its three steps your wallet is up
    to. Click "Get test USDC", then "Shield", then "Deposit".

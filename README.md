@@ -7,7 +7,7 @@ USDC, your balance stays encrypted on chain, the yield the pool earns is handed 
 prizes every period, and your principal is withdrawable at any time. Nobody, including
 us, can read what you saved or what you won. Anybody can check that the draw was honest.
 
-[Live app]({{APP_URL}}) · [Documentation]({{DOCS_URL}}) · [Contracts on Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) · [Demo video]({{VIDEO_URL}}) · [X thread]({{X_POST_URL}})
+[Live app](https://hearth-ram.vercel.app) · [Documentation](https://hearth-ram.vercel.app/docs) · [Contracts on Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) · [Demo video]({{VIDEO_URL}}) · [X thread]({{X_POST_URL}})
 
 ---
 
@@ -506,7 +506,7 @@ Nothing here needs us to be online. Every step of a draw is permissionless.
 The app is a console: a rail down the left with one task per screen. The path is a walk down
 that rail.
 
-1. Open {{APP_URL}}, follow **The pool** in the header to `/app`, and connect a wallet on
+1. Open https://hearth-ram.vercel.app, follow **The pool** in the header to `/app`, and connect a wallet on
    Sepolia. **Dashboard** opens with a block marked **Next** naming the one thing your wallet
    is up to, and a button that goes straight to it.
 2. **Deposit** in the sidebar. It opens on whichever of its three steps your wallet is
