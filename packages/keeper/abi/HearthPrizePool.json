@@ -1,0 +1,1171 @@
+{
+  "contractName": "HearthPrizePool",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IHearthVault",
+          "name": "vault_",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IERC7984",
+          "name": "asset_",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "prizeCount",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "oddsNumerator",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "oddsDenominator",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint16",
+              "name": "shares",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "reconcileEvery",
+              "type": "uint16"
+            }
+          ],
+          "internalType": "struct HearthPrizePool.Tier[3]",
+          "name": "tiers_",
+          "type": "tuple[3]"
+        },
+        {
+          "internalType": "uint8",
+          "name": "initialScaleBits",
+          "type": "uint8"
+        },
+        {
+          "internalType": "address",
+          "name": "owner_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        }
+      ],
+      "name": "AlreadyClosed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CannotRescueAsset",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "tier",
+          "type": "uint8"
+        }
+      ],
+      "name": "CarryNotPending",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        }
+      ],
+      "name": "CloseWindowClosed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "EnforcedPause",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ExpectedPause",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidKMSSignatures",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "scaleBits",
+          "type": "uint8"
+        }
+      ],
+      "name": "InvalidScaleBits",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "tier",
+          "type": "uint8"
+        }
+      ],
+      "name": "InvalidTier",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotTheVault",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NothingToClose",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReentrancyGuardReentrantCall",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RenounceDisabled",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "SafeERC20FailedOperation",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        },
+        {
+          "internalType": "enum IHearthPrizePool.DrawStatus",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "name": "WrongStatus",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "YieldSourceHasNoCode",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZamaProtocolUnsupported",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "seed",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "scaleBits",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "harvested",
+          "type": "uint64"
+        }
+      ],
+      "name": "DrawAwarded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "euint64",
+          "name": "seedHandle",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "euint8",
+          "name": "scaleHandle",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "ebool",
+          "name": "nonEmptyHandle",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "euint64",
+          "name": "harvestHandle",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64[3]",
+          "name": "prize",
+          "type": "uint64[3]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64[3]",
+          "name": "offered",
+          "type": "uint64[3]"
+        }
+      ],
+      "name": "DrawClosed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "harvested",
+          "type": "uint64"
+        }
+      ],
+      "name": "DrawEmpty",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "harvested",
+          "type": "uint64"
+        }
+      ],
+      "name": "DrawSkipped",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "euint64",
+          "name": "amount",
+          "type": "bytes32"
+        }
+      ],
+      "name": "Funded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        }
+      ],
+      "name": "HarvestFailed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferStarted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Paused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bytes32[]",
+          "name": "handlesList",
+          "type": "bytes32[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "abiEncodedCleartexts",
+          "type": "bytes"
+        }
+      ],
+      "name": "PublicDecryptionVerified",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint8",
+          "name": "tier",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "carry",
+          "type": "uint64"
+        }
+      ],
+      "name": "TierReconciled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "Unpaused",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "yieldSource",
+          "type": "address"
+        }
+      ],
+      "name": "YieldSourceSet",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_SCALE_BITS",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TIERS",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "UTILISATION_BPS",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "acceptOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "asset",
+      "outputs": [
+        {
+          "internalType": "contract IERC7984",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "seed",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scaleCount",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "nonEmpty",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint64",
+          "name": "harvested",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes",
+          "name": "proof",
+          "type": "bytes"
+        }
+      ],
+      "name": "awardDraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "canClose",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "checkUpkeep",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "upkeepNeeded",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes",
+          "name": "performData",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "closableDraw",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        }
+      ],
+      "name": "closeDeadline",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        }
+      ],
+      "name": "closeDraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "closeDraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "confidentialProtocolId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentPeriod",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        }
+      ],
+      "name": "drawOf",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum IHearthPrizePool.DrawStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "euint64",
+              "name": "seedHandle",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "euint8",
+              "name": "scaleHandle",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "ebool",
+              "name": "nonEmptyHandle",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "euint64",
+              "name": "harvestHandle",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "seed",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scaleBits",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "harvested",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64[3]",
+              "name": "prize",
+              "type": "uint64[3]"
+            },
+            {
+              "internalType": "uint64[3]",
+              "name": "offered",
+              "type": "uint64[3]"
+            }
+          ],
+          "internalType": "struct HearthPrizePool.Draw",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        }
+      ],
+      "name": "drawParams",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum IHearthPrizePool.DrawStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64[3]",
+              "name": "prize",
+              "type": "uint64[3]"
+            },
+            {
+              "internalType": "uint64[3]",
+              "name": "offered",
+              "type": "uint64[3]"
+            },
+            {
+              "internalType": "uint64[3]",
+              "name": "zoneMul",
+              "type": "uint64[3]"
+            },
+            {
+              "internalType": "uint64[3]",
+              "name": "zoneDiv",
+              "type": "uint64[3]"
+            },
+            {
+              "internalType": "uint32[3]",
+              "name": "prizeCount",
+              "type": "uint32[3]"
+            },
+            {
+              "internalType": "uint64",
+              "name": "seed",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scaleBits",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct IHearthPrizePool.DrawParams",
+          "name": "params",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "firstPeriodAt",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "euint64",
+          "name": "amount",
+          "type": "bytes32"
+        }
+      ],
+      "name": "fund",
+      "outputs": [
+        {
+          "internalType": "euint64",
+          "name": "sent",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastClosedDraw",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "liquidity",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pause",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pendingOwner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "performData",
+          "type": "bytes"
+        }
+      ],
+      "name": "performUpkeep",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "periodLength",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "tier",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint64",
+          "name": "carry",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes",
+          "name": "proof",
+          "type": "bytes"
+        }
+      ],
+      "name": "reconcile",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "tier",
+          "type": "uint8"
+        }
+      ],
+      "name": "reconcileEvery",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        }
+      ],
+      "name": "rescueERC20",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "scaleBits",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract IYieldSource",
+          "name": "yieldSource_",
+          "type": "address"
+        }
+      ],
+      "name": "setYieldSource",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "tier",
+          "type": "uint8"
+        }
+      ],
+      "name": "tierOf",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "prizeCount",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "oddsNumerator",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "oddsDenominator",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint16",
+              "name": "shares",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "reconcileEvery",
+              "type": "uint16"
+            }
+          ],
+          "internalType": "struct HearthPrizePool.Tier",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "unpause",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "vault",
+      "outputs": [
+        {
+          "internalType": "contract IHearthVault",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "drawId",
+          "type": "uint32"
+        }
+      ],
+      "name": "windowEndsAt",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "yieldSource",
+      "outputs": [
+        {
+          "internalType": "contract IYieldSource",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}

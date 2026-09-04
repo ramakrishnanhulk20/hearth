@@ -13,6 +13,10 @@ export class AbiError extends Error {
 
 const ARTIFACT_ROOT = join("packages", "contracts", "artifacts", "contracts");
 
+/** ABIs committed beside the keeper, so it runs on a host that never compiles the contracts.
+ *  Regenerate with: npm run abi -w @hearth/keeper */
+const BUNDLED_ABI_DIR = fileURLToPath(new URL("../abi", import.meta.url));
+
 /**
  * Walks up from a starting directory until it finds the workspace root, recognised by the
  * contracts package. The keeper runs both from source and from dist, and pm2 may start it from
@@ -47,11 +51,17 @@ interface Artifact {
 /** Reads a Hardhat artifact and returns its ABI. The ABI is never hand written, so a contract
  * rename or a missing compile is reported here instead of failing on the first call. */
 export function loadAbi(contractName: string, dir = artifactsDir()): InterfaceAbi {
-  const file = join(dir, `${contractName}.sol`, `${contractName}.json`);
+  const compiled = join(dir, `${contractName}.sol`, `${contractName}.json`);
+  // The compiled artifact wins when it is there, so a developer who just changed a contract runs
+  // against what they changed. A deployed keeper has no artifacts folder, because build output is
+  // not in the repository, so it falls back to the copy shipped beside the source. Both are
+  // generated from the same compile and never hand written, and the boot check compares whichever
+  // one loaded against the functions the keeper actually calls.
+  const file = existsSync(compiled) ? compiled : join(BUNDLED_ABI_DIR, `${contractName}.json`);
   if (!existsSync(file)) {
     throw new AbiError(
-      `No compiled ABI at ${file}. Run "npm run compile -w @hearth/contracts" first, ` +
-        `or point HEARTH_ARTIFACTS_DIR at the folder that holds it.`,
+      `No ABI for ${contractName}: looked in ${compiled} and ${BUNDLED_ABI_DIR}. ` +
+        `Run "npm run compile -w @hearth/contracts", or point HEARTH_ARTIFACTS_DIR at the folder.`,
     );
   }
   let parsed: Artifact;
