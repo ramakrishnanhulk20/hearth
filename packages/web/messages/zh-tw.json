@@ -1,0 +1,964 @@
+{
+  "chrome": {
+    "home": "Hearth，首頁",
+    "nav": {
+      "pool": "資金池",
+      "verify": "查核",
+      "how": "運作方式",
+      "docs": "說明文件"
+    },
+    "menu": {
+      "open": "開啟選單",
+      "close": "關閉選單",
+      "label": "網站選單"
+    },
+    "footer": {
+      "tagline": "機密型不賠本抽獎儲蓄",
+      "zama": "建立在 Zama Protocol 上",
+      "disclaimer": "這是在 Sepolia 測試網路上的示範。代幣是沒有價值的測試代幣，收益來自贊助的餘額而不是真實策略，這裡的一切都不構成財務建議。"
+    },
+    "language": {
+      "trigger": "語言：{name}。點此變更",
+      "list": "挑一種語言",
+      "heading": "語言",
+      "note": "全部由人工翻譯。還沒翻到的頁面會顯示英文。",
+      "current": "目前"
+    }
+  },
+  "landing": {
+    "scrollCue": "向下捲動",
+    "noWebgl": "這個瀏覽器無法啟動 3D 場景，所以這段故事改用一般頁面呈現。網站上其他地方都不需要它。",
+    "header": {
+      "how": "運作方式",
+      "open": "打開資金池"
+    },
+    "story": {
+      "one": {
+        "kicker": "機密型抽獎儲蓄",
+        "title": "一爐火。只為守著它的人亮著。"
+      },
+      "two": {
+        "kicker": "你存入",
+        "title": "你把它填滿，金額隨即封存。",
+        "body": "金額在你的瀏覽器裡加密，在鏈上始終是一段密文。從這一刻起，這個數字只屬於你，而執行這件事的是 Zama 的存取控制清單。"
+      },
+      "three": {
+        "title": "而它只是其中一爐。",
+        "body": "每位存戶的餘額都在燃燒，沒有一筆能從外面讀到。資金池也從不公布自己的精確總額，只公布它落在哪一個 2 的冪之下，因為精確總額會洩漏一位落單存戶的存入金額。"
+      },
+      "four": {
+        "kicker": "抽獎",
+        "title": "一顆沒人看得到的種子，在協同處理器裡抽出。",
+        "body": "獎金金額在種子存在之前就定好了，所以沒有人能讀到種子、算出自己中了獎，再把那次中獎變大。期別結束時，種子會連同合約在鏈上驗證的簽章一起公布。"
+      },
+      "five": {
+        "kicker": "中獎",
+        "title": "有一爐燒得更亮。",
+        "body": "中獎機率跟你在整段期間持有的餘額成正比，所以抽獎前才存入的錢，只賺到它待在池裡的那一小段。獎金落進一筆加密的獎金餘額，而領獎就是一筆普通的提領。"
+      }
+    },
+    "close": {
+      "kicker": "來試試",
+      "title": "在暗處儲蓄。",
+      "body": "在 Sepolia 上存入一種機密測試代幣，自己跑一次抽獎，再確認只有你讀得到自己的餘額。除了一點測試 ETH 之外不花任何成本。",
+      "open": "打開資金池",
+      "grandPrize": "下次抽獎頭獎 <figure>{amount} {symbol}</figure>",
+      "saversPeriod": "{count, plural, other {{shown} 位存戶}} · 第 {period} 期",
+      "offline": "Sepolia 現在沒有回應，所以即時數字缺席。資金池不受影響：它活在鏈上，不在這裡。"
+    },
+    "shelf": {
+      "heading": "挑一種代幣",
+      "unread": "未讀取",
+      "note": "各池此刻的頭獎，直接讀自鏈上。同一套金庫、同一種抽獎、同樣的隱私，每一種機密代幣一個。"
+    },
+    "sealed": {
+      "heading": "一位存戶的餘額",
+      "empty": "還沒有人存入。只要有人存了，他的加密餘額就會出現在這裡，你可以試著打開它。",
+      "try": "試著打開它",
+      "asking": "正在詢問 Zama 的金鑰管理服務",
+      "askingWait": "通常幾秒鐘。",
+      "askingLong": "已經 {seconds} 秒。這是實際運作中的網路，偶爾會久一點。",
+      "refused": "被拒絕。",
+      "refusedNote": "那個拒絕來自 Zama 的金鑰管理服務，不是來自這個頁面。只有持有這筆餘額的錢包讀得到它，沒有任何管理員推翻得了。",
+      "unreachable": "連不上解密服務。",
+      "unreachableNote": "那是網路問題，不是拒絕，所以兩邊都證明不了什麼。過一會兒再試一次比較好。",
+      "again": "再試一次",
+      "leaked": "它被解密了，而這本來不該發生。",
+      "leakedNote": "服務回傳了 {value}。請告訴我們，因為這正是這個產品要讓它不可能發生的那一件事。"
+    },
+    "footer": {
+      "tagline": "Hearth，機密型不賠本抽獎儲蓄",
+      "how": "運作方式",
+      "verify": "查核一次抽獎",
+      "docs": "說明文件",
+      "zama": "建立在 Zama Protocol 上"
+    }
+  },
+  "how": {
+    "kicker": "兩分鐘導覽",
+    "title": "Hearth 怎麼運作",
+    "lede": "一起儲蓄，贏取由收益支付的獎金，而且永遠不會賠掉存款。錢是看不見的，公平不是。",
+    "steps": {
+      "one": {
+        "title": "先遮蔽，再存入",
+        "body": "把一種普通測試代幣換成它的機密版本，再把其中一部分放進該代幣的資金池。遮蔽是公開的，存入不是，這正是它們分成兩顆按鈕的原因：一鍵做完兩件事，等於把你的存入金額公告給每一個讀鏈的人。"
+      },
+      "two": {
+        "title": "你的機率就是你的平均餘額",
+        "body": "看的不是抽獎當下的餘額，而是你在整段期間的餘額。在期別結束前五分鐘存入，你拿到的機率只有整期持有同樣金額的十二分之一。這就是讓人無法在每次抽獎前臨時亮出一大筆餘額、再把獎金帶走的原因。"
+      },
+      "three": {
+        "title": "抽獎截止，種子抽出",
+        "body": "獎金金額先被固定下來，發生在任何隨機數存在之前。然後種子以密文的形式在 Zama 的協同處理器裡生成，所以沒有人在它被抽出時看見它，也沒有第二次重擲。期別結束後，種子會連同合約在鏈上驗證的簽章一起公布。"
+      },
+      "four": {
+        "title": "每個人的結果早已定案",
+        "body": "從種子被驗證的那一刻起，門檻就是任何人都能重算的公開數字，而權重再也不會變。評估只是把已經成立的事實寫下來，從種子挑中的位置開始走過存戶名單。沒有人能選誰被評估、或以什麼順序被評估。"
+      },
+      "five": {
+        "title": "你看得到，而且只有你",
+        "body": "按下「揭露」並簽署一則訊息。那個簽章向 Zama 的中繼器證明你控制這個位址，中繼器就把合約已授權你存取的那些數值的明文交還給你：你的本金、你的獎金、你在每次抽獎的權重和入帳金額。它不花 gas，也不寫下任何東西。"
+      },
+      "six": {
+        "title": "隨時領回",
+        "body": "提領先付獎金、再動本金，在一筆機密轉帳裡完成，並在鏈上被限制在你持有的金額之內。領獎是同一個呼叫、同樣的形狀，跟任何一筆提領沒有兩樣，所以沒有哪一種交易類型會點名中獎者。"
+      }
+    },
+    "private": {
+      "title": "加密，只有你讀得到",
+      "note": "你自己的數值",
+      "one": "你的本金",
+      "two": "你未領取的獎金",
+      "three": "你在每一次抽獎的時間加權餘額",
+      "four": "每一次抽獎付了你多少，也就是你有沒有中獎"
+    },
+    "public": {
+      "title": "公開，所以這個池值得信任",
+      "note": "任何人都能查核",
+      "one": "每一次抽獎的種子，以及它的簽章",
+      "two": "這次抽獎所對照的級距",
+      "three": "每個層級的獎金金額和資金",
+      "four": "某個層級派出幾份獎，延後一期公布",
+      "five": "哪些位址存了錢，以及什麼時候"
+    },
+    "leaks": {
+      "title": "誠實點名：什麼會外洩",
+      "oneLead": "遮蔽和解除遮蔽是公開的。",
+      "oneBody": "把公開代幣換成機密代幣，本質上就是一個公開的動作。如果有人能鎖定你的餘額，通常是盯著一次公開遮蔽、緊接著一筆同樣金額的存入，那麼從那時起你在每一次抽獎的結果，都只是公開的算術，因為門檻依設計就是公開的。",
+      "twoLead": "存戶少於三位時，級距幾乎等於個人資訊。",
+      "twoBody": "只有一位存戶時，它就是那位存戶的權重，誤差在兩倍以內。真的發生時，App 會在頁面上寫明。",
+      "threeLead": "每個層級會公布自己派出幾份獎，",
+      "threeBody": "延後一期，而且從不公布派給誰。同一個步驟也把沒人贏走的錢放回公開獎池，那正是讓頭獎能在你看得見的地方累積的原因。它會慢慢縮小一筆從不移動的餘額的範圍。",
+      "fourLead": "代幣是 Zama 的，而且可以升級。",
+      "fourBody": "它的擁有者可以指派觀察者，讓他們解密經過這個代幣的每一筆金額，而且可回溯。Hearth 自己的帳本他們讀不到，而且一旦有觀察者被指派，App 會顯示一則橫幅。"
+    },
+    "closing": "你可以從頭到尾看完一次抽獎，卻仍然說不出是誰中獎。這就是重點，而這是只有全同態加密才做得到的一件事。",
+    "open": "打開資金池",
+    "check": "自己查核一次抽獎"
+  },
+  "picker": {
+    "trigger": "以 {symbol} 儲蓄。點此換代幣",
+    "list": "挑一種代幣",
+    "saveIn": "儲蓄幣種",
+    "grandPrize": "頭獎",
+    "unread": "未讀取",
+    "savingPool": "儲蓄池",
+    "notSupported": "不支援",
+    "zamaList": "Zama 的清單",
+    "reasons": {
+      "restrictedMint": "鑄造權限只在發行方手裡"
+    }
+  },
+  "console": {
+    "shell": {
+      "openMenu": "打開主控台選單",
+      "closeMenu": "關閉主控台選單",
+      "menuLabel": "主控台選單",
+      "loading": "正在點亮爐火"
+    },
+    "sidebar": {
+      "nav": "主控台",
+      "dashboard": "儀表板",
+      "deposit": "存入",
+      "withdraw": "提領",
+      "draws": "我的抽獎",
+      "run": "跑一次抽獎",
+      "anyone": "任何人",
+      "anyoneTitle": "抽獎的每一步，任何錢包都能呼叫",
+      "docs": "說明文件",
+      "verify": "查核"
+    },
+    "wallet": {
+      "connect": "連接錢包",
+      "connecting": "連接中",
+      "scan": "用手機掃描",
+      "getWallet": "取得錢包",
+      "noneLead": "這個瀏覽器裡沒有錢包。",
+      "noneLink": "從 ethereum.org 挑一個",
+      "noneTail": "，加一點 Sepolia 測試 ETH，然後回來。這個畫面上的一切，沒有錢包也都免費讀得到。",
+      "switching": "切換中",
+      "switchTo": "切換到 {network}",
+      "options": "錢包選項",
+      "explorer": "在 Etherscan 上查看",
+      "disconnect": "中斷連接"
+    },
+    "connect": {
+      "prompt": "請先連接錢包。"
+    },
+    "note": {
+      "encrypting": "加密並產生證明中，大約十秒",
+      "signing": "請在錢包裡確認",
+      "mining": "等待交易被打包",
+      "done": "完成",
+      "busy": "這次按下被忽略了：{label} 正在進行，而一個錢包一次只簽一筆交易。等上面那一行跑完。",
+      "line": "{label}：{state}",
+      "explorer": "在 Etherscan 上查看這筆交易",
+      "dismiss": "關閉"
+    },
+    "actions": {
+      "mint": "拿測試代幣",
+      "approve": "授權包裝器",
+      "wrap": "遮蔽成機密代幣",
+      "deposit": "存入",
+      "withdraw": "提領",
+      "withdrawAll": "全部提領",
+      "close": "截止第 {drawId} 期抽獎",
+      "award": "開出第 {drawId} 期抽獎",
+      "advance": "推進第 {drawId} 期抽獎",
+      "finalize": "為第 {drawId} 期抽獎定案",
+      "reconcile": "為{tier}層級對帳",
+      "askingSeed": "正在向 Zama 的金鑰管理服務索取種子",
+      "seedSealing": "種子已公布，但還不能解密，再問一次",
+      "askingCarry": "正在索取該層級沒派掉的資金"
+    },
+    "reveal": {
+      "signing": "在錢包裡簽署這個請求，不花 gas",
+      "asking": "正在你的瀏覽器裡解密",
+      "sealing": "這個值剛寫進去，還不能解密，再問一次",
+      "newKey": "有一份 KMS 金鑰分片失敗，改用新金鑰重試",
+      "elapsed": "已經 {seconds} 秒，通常只要幾秒",
+      "stopWaiting": "不等了",
+      "denied": "Zama 的中繼器拒絕了：這些數值不屬於這個錢包。",
+      "reveal": "揭露{label}",
+      "hide": "隱藏{label}",
+      "sealAgain": "重新封存",
+      "cost": "揭露，一個簽章，不花 gas",
+      "encrypted": "{label}，已加密",
+      "encryptedAlone": "已加密",
+      "partial": "中繼器的回覆裡沒有這個值，所以總額無法確定。"
+    },
+    "unknown": {
+      "word": "未知",
+      "default": "這還沒有從鏈上回來。"
+    },
+    "amount": {
+      "max": "上限",
+      "allOfIt": "全部",
+      "maxFor": "{max}：{name}",
+      "shape": "只能填數字。小數點用點號或逗號都可以，最多一個，千位不加分隔符號。",
+      "precision": "{symbol} 有 {decimals} 位小數，所以比 {smallest} 更細的金額送不出去。",
+      "zero": "請填一個大於零的金額。"
+    },
+    "banners": {
+      "wrongNetwork": "你的錢包在錯的網路上。",
+      "wrongNetworkBody": "Hearth 部署在 Ethereum Sepolia 上。在錢包切過去之前，這個頁面不會讀也不會寫。",
+      "switch": "切換到 Sepolia",
+      "denied": "這個位址在代幣的拒絕名單上。",
+      "deniedBody": "{symbol} 拒絕這個位址的每一筆進出轉帳，所以存入和提領都會失敗。那是代幣擁有者的設定，不是我們的。",
+      "tokenPaused": "{symbol} 代幣已暫停。",
+      "tokenPausedBody": "遮蔽、轉帳和解除遮蔽都在代幣層被停住了。Hearth 自己的合約不受影響，但在 Zama 解除暫停之前，什麼都動不了。",
+      "vaultPaused": "金庫已暫停。",
+      "vaultPausedBody": "新的存入和抽獎截止都停住了。提領、評估、開獎和定案永遠不可暫停，所以你的錢仍然拿得回來。",
+      "poolPaused": "資金池已暫停。",
+      "poolPausedBody": "抽獎無法截止。開獎、評估、對帳和提領照常進行。",
+      "observers": "代幣擁有者已指派 {count, plural, other {{shown} 位觀察者}}。",
+      "observersBody": "{symbol} 上的觀察者能解密經過這個代幣的每一筆金額，包括存入和給付，而且可回溯。Hearth 自己的帳本，也就是你的本金、獎金、權重和入帳金額，他們讀不到。",
+      "upgraded": "{symbol} 代幣已被升級。",
+      "upgradedBody": "它現在跑的實作是 {implementation}，不是我們逐行讀過原始碼的那一份。它處理 Hearth 那些 handle 的行為可能已經變了。",
+      "unknownImplementation": "未知",
+      "thinSet": "資金池裡現在只有 {count, plural, other {{shown} 位存戶}}。",
+      "thinSetBody": "存戶少於 {minimum} 位時，公布的級距已經接近個人資訊：只有一位存戶時，它就是那位存戶的權重，誤差在兩倍以內；有兩位時，彼此都能框出對方的範圍。金額在哪一種情況下都保持加密，但在更多人加入之前，這裡的隱私是薄的。",
+      "noKeeper": "最近幾個小時內，沒有任何抽獎被推進過。",
+      "noKeeperBody": "抽獎的每一步任何人都能呼叫。側邊欄的「跑一次抽獎」把五個步驟都放在那裡。停擺的 keeper 讓池子損失的是抽獎，不是錢。",
+      "keeperLate": "上一個抽獎步驟落在 {ago}，比一期還久。",
+      "keeperLateFrom": "由 {address} 送出。",
+      "keeperLateBody": "沒有人需要等 keeper：「跑一次抽獎」可以用你自己的錢包完成截止、開獎、評估、定案和對帳。",
+      "keeperLink": "在 Etherscan 上查看",
+      "tokenUnread": "代幣自己的狀態讀不到。",
+      "tokenUnreadBody": "Hearth 每次造訪都會檢查 {symbol} 有沒有觀察者、有沒有暫停，以及你的位址有沒有被封鎖，而那幾次讀取沒有回應。鏈上什麼都沒變，變的只是這個頁面看到的樣子。這確實表示這個畫面上的代幣警告是因為什麼都沒讀到而缺席，不是因為沒有東西可報。",
+      "historyDown": "抽獎紀錄暫時讀不到。",
+      "historyDownBody": "{detail} 畫面上的每一個數字，依然都直接來自鏈上。"
+    },
+    "unsupported": {
+      "subtitle": "Hearth 無法在這種代幣上開池，所以這裡沒有東西可以簽。",
+      "pill": "不支援",
+      "notDeployed": "未部署",
+      "whyLabel": "這種代幣為什麼沒有池",
+      "whyOne": "這種代幣的鑄造權限制在發行方手上，所以 Hearth 無法在它上面開池。請換一個池。",
+      "whyTwo": "Hearth 的池需要存戶能先拿到普通代幣、自己遮蔽它。{name} 由 Zama 在 Sepolia 上發行，它的底層代幣只有部署它的位址鑄造得出來，所以除了發行方沒有人能遮蔽進去，開在它上面的金庫只會空著。那是這個代幣的設定，不是這裡合約的限制：金庫接受任何符合標準的機密代幣。",
+      "reason": "原因",
+      "confidentialToken": "機密代幣",
+      "underlying": "底層代幣",
+      "publishedBy": "發布者",
+      "zamaList": "Zama 的 Sepolia 位址表",
+      "pickLabel": "挑一個開著的池",
+      "pickNote": "上面每一個池都是同一套金庫、同一種抽獎、同樣的隱私，只是換一種機密代幣。你在其中一個池的部位，說不出你在另一個池的部位。"
+    }
+  },
+  "dashboard": {
+    "title": "儀表板",
+    "subtitle": "你持有什麼、資金池在做什麼，以及接下來該做的那一件事。",
+    "next": "下一步",
+    "position": {
+      "label": "你持有什麼",
+      "open": "已在這個瀏覽器裡打開",
+      "sealed": "在鏈上封存",
+      "principal": "本金",
+      "principalNote": "你存了多少。你的機率依這筆金額在整段期間加權。",
+      "principalSpoken": "你的本金",
+      "winnings": "未領取的獎金",
+      "winningsNote": "已記到你名下、還沒提領的獎金。它自己不賺中獎機率。",
+      "winningsSpoken": "你未領取的獎金",
+      "outside": "這個錢包目前不在池裡。存入之後，這兩個數字就會開始長出來。",
+      "footConnect": "連接錢包才能打開你自己的數值。沒有別人打得開，而且執行這件事的是 Zama 在鏈上的存取清單，不是這個頁面的承諾。",
+      "footNetwork": "打開這些需要在 Sepolia 上簽名。把錢包切過去，眼睛就又能用了。",
+      "footOpen": "只有這個瀏覽器看到那些數字。沒有任何東西寫上鏈，也沒有任何東西送到伺服器。",
+      "footSealed": "那顆眼睛請 Zama 的中繼器解密這個位址擁有的數值。一個簽章，不花 gas，也沒有交易。"
+    },
+    "pool": {
+      "label": "此刻的資金池",
+      "pill": "所有人都看得到",
+      "savers": "存戶",
+      "saversUnknown": "存戶人數還沒有從鏈上回來。",
+      "liquidity": "獎金資金",
+      "liquidityUnknown": "三個層級的餘額有一個還沒回來，而部分加總不等於整個池。",
+      "period": "期別",
+      "periodUnknown": "目前的期別還沒有從鏈上回來。",
+      "endsIn": "剩餘",
+      "endsUnknown": "這一期的結束時間還沒有從鏈上回來。",
+      "tier": "層級",
+      "chance": "機率",
+      "prizeEach": "每份獎（{symbol}）",
+      "prizeCount": "{count, plural, other {每期 {shown} 份獎}}",
+      "prizeCountUnknown": "獎項數量未知",
+      "carryWaiting": "第 {drawId} 期的結轉金待處理",
+      "oddsUnknown": "這個層級的機率還沒有從鏈上回來。",
+      "nextPrizeUnknown": "這個層級的下一份獎還沒有從鏈上回來。",
+      "footOne": "每份獎是該層級資金的一半除以獎項數量，在截止時、隨機種子存在之前就固定下來。沒人贏走的部分會在一期之後公布，並再次拿出來。",
+      "footBracket": "機率是對照 <bracket>2^{bits}</bracket> 這個級距抽的，級距隨抽獎一起公布。",
+      "footBracketUnknown": "那些機率所對照的級距，還沒有從鏈上回來。"
+    },
+    "tiers": {
+      "grand": "頭獎",
+      "mid": "中型獎",
+      "frequent": "常態獎"
+    },
+    "tiersLower": {
+      "grand": "頭獎",
+      "mid": "中型獎",
+      "frequent": "常態獎"
+    }
+  },
+  "nextStep": {
+    "connectTitle": "先連接錢包。",
+    "connectDetail": "Hearth 跑在 Ethereum Sepolia 上。你需要一點測試 ETH 付 gas，而錢包一連上，測試 {underlyingSymbol} 按一下就有。",
+    "connectCta": "連接錢包",
+    "switchTitle": "這個錢包指向另一個網路。",
+    "switchDetail": "這個頁面上的池子數字，兩種情況下都是從 Sepolia 讀來的。但在錢包也切過去之前，什麼都簽不了、也送不出。",
+    "switchCta": "切換到 Sepolia",
+    "readingTitle": "正在從鏈上讀取這個錢包。",
+    "readingDetail": "讀取回來之後，下一步就會出現。用一筆還沒到的餘額指路，只會把你帶到錯的畫面。",
+    "faucetTitle": "先拿一些測試 {underlyingSymbol}。",
+    "faucetDetail": "這個 mock {underlyingSymbol} 有開放的鑄造，單次上限一百萬顆。它一文不值，所以拿得比你需要的多一點。",
+    "faucetCta": "拿測試 {underlyingSymbol}",
+    "shieldTitle": "遮蔽你的 {underlyingSymbol}。",
+    "shieldDetail": "遮蔽把普通的 {underlyingSymbol} 變成 {symbol}。這一步本質上就是公開的，也是關於這筆錢、任何人讀得到的最後一件事。",
+    "shieldCta": "遮蔽 {underlyingSymbol}",
+    "depositTitle": "把你的 {symbol} 放進池裡。",
+    "depositDetail": "金額在送出之前就在你的瀏覽器裡加密，所以金庫記下的是一個它讀不懂的數字。你的機率跟著你持有的金額走。",
+    "depositCta": "存入",
+    "claimTitle": "有獎金在等你。",
+    "claimDetail": "領獎就是一筆金額剛好等於它的普通提領。在鏈上，它跟任何一筆提領形狀相同，這正是讓它不會點名中獎者的原因。",
+    "claimCta": "領取你的獎金",
+    "readingDrawsTitle": "正在讀取最近幾次抽獎。",
+    "readingDrawsDetail": "它們回來之後，下一步就會出現。用一份還沒到的抽獎清單指路，只會把你帶到錯的畫面。",
+    "resultTitle": "第 {drawId} 期抽獎已經寫下你的結果。",
+    "resultDetail": "巡走已經走到這個錢包，所以有沒有中獎早就定了，也存下來了。在你打開它之前它保持封存，而打開只花一個簽章，不花 gas。",
+    "resultCta": "打開第 {drawId} 期抽獎",
+    "settledTitle": "現在沒有什麼需要做。",
+    "settledDetail": "你的存款待在池裡，每待一秒都在賺中獎機率。下一次抽獎在期末截止，而且任何人都能截止它。",
+    "settledCta": "再存一些",
+    "noWallet": "找不到錢包"
+  },
+  "deposit": {
+    "title": "存入",
+    "subtitle": "拿測試 {underlying}，遮蔽成 {confidential}，再放進金庫。",
+    "connect": "在 Sepolia 上連接錢包才能存入。下面三個步驟就是把錢放進池裡要做的事，而畫面會直接打開你的錢包實際該做的那一步。",
+    "connectNote": "你會需要一點 Sepolia ETH 付 gas。連上之後，測試 {underlying} 按一下就有。",
+    "lowGas": "這個錢包幾乎沒有 Sepolia ETH，所以交易在送出之前就會失敗。任何 Sepolia 水龍頭都能補：Google Cloud Web3 水龍頭、Alchemy 的或 Chainlink 的。零點一顆 ETH 遠遠超過所需。",
+    "inWallet": "你的錢包裡",
+    "inWalletSpoken": "你的 {symbol} 餘額",
+    "inWalletUnknown": "你的錢包裡：",
+    "faucet": {
+      "title": "拿測試 {underlying}",
+      "held": "你的錢包裡有 {amount} {underlying}。",
+      "heldSummary": "你的錢包裡有 {amount} {underlying}。",
+      "more": "再拿一百萬",
+      "unread": "你的錢包餘額還沒有從鏈上回來。",
+      "button": "拿測試 {underlying}",
+      "note": "這個 mock {underlying} 有開放的鑄造，單次上限一百萬顆。它一文不值，所以要得比你需要的多一點。"
+    },
+    "shield": {
+      "title": "遮蔽你的 {underlying}",
+      "summary": "已遮蔽。餘額被封存，所以只有你讀得到裡面是多少。",
+      "more": "再遮蔽一些",
+      "body": "遮蔽把普通的 {underlying} 變成 {confidential}，而且是公開的。包裝器合約會發出明文金額，ERC-20 轉帳又帶了一次，而這件事繞不過去：把公開代幣換成機密代幣，本質上就是一個公開的動作。",
+      "youShield": "你遮蔽",
+      "fieldName": "要遮蔽的 {underlying} 金額",
+      "balance": "你的錢包裡有 {amount} {underlying}",
+      "tooMuch": "你持有 {amount} {underlying}。填少一點，或先鑄造更多。",
+      "youReceive": "你會收到",
+      "rateUnknown": "包裝器的換算率還沒有從鏈上回來。",
+      "rateOne": "包裝器是一比一，所以你遮蔽多少就收到多少。",
+      "rateOther": "包裝器要 {rate} 單位的 {underlying} 才換一單位的 {confidential}。",
+      "why": "這就是遮蔽和存入分成兩顆按鈕、而不是一顆的原因。在你自己選的時間點遮蔽一個整數金額，之後再存入其中一部分。任何能鎖定你餘額的人，從此都能算出你在每一次抽獎有沒有中，因為門檻依設計就是公開的。",
+      "approve": "授權包裝器",
+      "button": "遮蔽",
+      "approveNote": "授權一次，之後每次遮蔽都只要一筆交易。它讓 {confidential} 包裝器合約能從這個錢包裡取走 {underlying}，碰不到你其他任何東西。{underlying} 是上面那顆水龍頭按鈕給的 Sepolia 測試代幣，在任何真實網路上都沒有價值。授權被打包之後，遮蔽按鈕就會接手。",
+      "waiting": "你的餘額還沒有從鏈上回來，所以這一步先等著。",
+      "skip": "改為存入你已經持有的"
+    },
+    "vault": {
+      "title": "存進金庫",
+      "body": "金額會在你的瀏覽器裡連同一份零知識證明一起加密，然後在一筆交易裡送出。金庫記的是代幣說實際移動了多少，所以要求超過你持有的金額，結果是什麼都不動，而不是大聲失敗。不確定自己有多少，就打開下面那顆眼睛。",
+      "closedNotAwarded": "現在有一次抽獎已經截止、正在等開獎。存入照樣允許；這筆錢從此刻開始計算，並依本期還沒跑完的部分加權。",
+      "youDeposit": "你存入",
+      "fieldName": "要存入的 {confidential} 金額",
+      "cap": "金庫對單一存戶的上限是 {amount} {confidential}，所以這一筆會在同一筆交易裡被拒絕並退還。",
+      "tooMuch": "你持有 {amount} {confidential}。要求更多不會在鏈上被拒絕：代幣移動的是你有的部分，這裡就是零，而交易照樣成功。",
+      "sealedNote": "你的餘額是封存的，所以這個畫面沒辦法拿它來核對金額。超過你持有金額的存入什麼都不會動，卻照樣花一筆交易。打開上面那顆眼睛，這個欄位就會替你核對。",
+      "button": "存入",
+      "paused": "金庫已暫停，所以存入會被拒絕。提領仍然可用。"
+    }
+  },
+  "withdraw": {
+    "title": "提領",
+    "subtitle": "兩個階段：先從金庫拿出來，再換回 {underlying}。本金從不被鎖住，抽獎進行到一半也一樣。",
+    "connect": "連接錢包才能提領。第一階段把本金和獎金從金庫拿出來，第二階段把 {confidential} 換回 {underlying}。",
+    "connectNote": "這裡沒有任何東西會被鎖住。你什麼時候要，本金就全額回來，抽獎進行到一半也一樣。",
+    "tabs": {
+      "label": "提領階段",
+      "vault": "從金庫拿出",
+      "unshield": "換回普通代幣",
+      "unfinished": "有未完成的事"
+    },
+    "pending": {
+      "title": "有一次解除遮蔽送出了，卻沒有完成。",
+      "body": "機密代幣已經銷毀，{underlying} 還卡在包裝器上。送出第二筆交易就會把它放出來。",
+      "link": "查看這次解除遮蔽",
+      "finish": "完成解除遮蔽"
+    },
+    "vault": {
+      "reading": "正在讀取這個錢包在金庫裡持有什麼。",
+      "unavailable": "這個錢包的讀取沒有回來，所以這個畫面說不出金庫替你保管了什麼。等網路恢復回應之後重新載入。",
+      "neverDepositedLead": "這個錢包從來沒有存過，所以金庫沒有替它保管任何東西，提領會在鏈上被拒絕。",
+      "depositFirst": "先去存入",
+      "neverDepositedTail": "，或者如果你手上有想換回 {underlying} 的 {confidential}，就用第二階段。",
+      "youWithdraw": "你提領",
+      "fieldName": "要從金庫提領的金額",
+      "inVault": "金庫裡",
+      "inVaultSpoken": "你的金庫餘額",
+      "clamped": "那超過你持有的金額。金庫會送出你持有的 {amount}，到此為止。",
+      "revealNote": "揭露之後這個欄位就有上限，也看得到拆分。跳過也安全：金庫在鏈上兩種情況都會把金額限制住。",
+      "youReceive": "你會收到",
+      "receiveBalance": "進到你的錢包，仍然是加密的。第二階段把它換回 {underlying}。",
+      "split": "其中 {winnings} 來自獎金、{principal} 來自本金，在一筆兩種情況看起來都一樣的轉帳裡送出。",
+      "splitSealed": "揭露你的金庫餘額，就能看到這筆錢在獎金和本金之間怎麼拆。",
+      "button": "提領",
+      "everything": "全部提領",
+      "everythingNote": "全部提領不需要揭露，也不需要加密輸入。金庫在鏈上把你的本金加上獎金，然後送出總額，所以你和這個頁面都不必先知道它是多少。",
+      "howLabel": "一筆提領怎麼付",
+      "howOne": "先付獎金、再動本金，在一筆機密轉帳裡完成。這筆轉帳不會透露它是由哪些部分組成的。",
+      "howTwo": "金額在鏈上會被限制在「你要求的」「你持有的」和「金庫持有的」三者中最小的那一個，因為機密轉帳要嘛整筆過、要嘛完全不過。要求過大的結果是把你持有的全部送出，而不是失敗，這也是為什麼沒有人能靠要一個超大金額、再看發生什麼事來找出你的餘額。",
+      "howWindow": "現在有一個抽獎視窗開著。提領是允許的，也不會改變已經替你固定下來的機率。那次抽獎的任何獎金都會落進你的獎金餘額，留給之後提領。",
+      "howThree": "本金從不被鎖住。沒有通知期、沒有罰則，也不必等抽獎結束。"
+    },
+    "unshield": {
+      "youUnshield": "你解除遮蔽",
+      "fieldName": "要解除遮蔽的 {confidential} 金額",
+      "inWallet": "你的錢包裡",
+      "inWalletSpoken": "你的 {confidential} 餘額",
+      "tooMuch": "你持有 {amount} {confidential}。要求更多不會在鏈上被拒絕：它會花掉兩筆交易，卻什麼都不動。",
+      "revealNote": "揭露之後這個欄位就有上限。超過你持有金額的解除遮蔽不會被拒絕，只是什麼都不動。",
+      "youReceive": "你會收到",
+      "receiveBalance": "進到你錢包裡的 {underlying}，在哪裡都能用。",
+      "receiveNote": "這個數字會以明文上鏈。兩筆交易中的第一筆就是公布它的那一筆。",
+      "button": "解除遮蔽",
+      "unfinished": "新的解除遮蔽要等上面那一次完成。系統一次只記得一筆，再開一筆會讓第一筆的代幣已經銷毀、卻沒有東西能把它們放出來。",
+      "unwrapping": "解除遮蔽：你的錢包會問兩次。先要一個簽章，讓包裝器能讀你的機密餘額，這個不花 gas；然後才是交易本身。",
+      "waiting": "解除遮蔽已送出。正在等 Zama 的協定公布明文和它的證明。",
+      "finalizing": "收尾中：確認第二筆交易，把 {underlying} 放出來。",
+      "done": "已解除遮蔽。你的 {underlying} 餘額增加了 {amount}，這是第二筆交易之後從鏈上讀回來的。",
+      "doneUnchecked": "已解除遮蔽。兩筆交易都落地了，但 {underlying} 餘額讀不回來，所以這個畫面說不出到帳多少。請看你的錢包。",
+      "nothingMoved": "什麼都沒動。兩筆交易都落地了，而你的 {underlying} 餘額跟原本一模一樣。這會發生在金額超過你機密餘額的時候：包裝器不會拒絕，只是什麼都不放出來。用上面那顆眼睛打開餘額，再按「全部」。",
+      "whyLabel": "為什麼這要兩筆交易",
+      "whyOne": "包裝器先銷毀那筆加密金額並公布它，等 Zama 的協定產出明文和證明之後，才把普通代幣放出來。那是兩個各自獨立的呼叫，而且如果你在中間關掉分頁，第二個之後再送也可以。",
+      "whyTwo": "在第一筆交易之前，你的錢包還會要一個簽章，因為包裝器要讀你的機密餘額來核對金額。那個提示是簽章不是交易，而且不花 gas。",
+      "whyThree": "清空之前值得知道：全額遮蔽進來、又全額解除遮蔽出去，兩個公開總額之間的差額，就是你歷來贏得金額的下限。用整數金額解除遮蔽，或者在裡面留一筆常駐的機密餘額。"
+    }
+  },
+  "draws": {
+    "title": "我的抽獎",
+    "subtitle": "最近的每一次抽獎、它公開的獎金數字，以及眼睛後面你自己的權重和獎金。",
+    "count": "最近 {count} 次",
+    "reading": "讀取中",
+    "emptyReading": "正在讀取資金池。",
+    "emptyNone": "還沒有任何一期結束，所以沒有抽獎可看。第 1 期一結束，第一次抽獎就會出現。",
+    "emptyFailed": "抽獎剛剛讀不到。它們無論如何都在鏈上；這個頁面會自己重試。",
+    "card": {
+      "label": "第 {drawId} 期抽獎",
+      "claimNote": "領獎就是一筆金額剛好等於它的普通提領。在鏈上，它跟任何一筆提領形狀相同，這正是讓領獎不會點名中獎者的原因。",
+      "claim": "領取 {amount} {symbol}",
+      "advanceNote": "推進會把共用的巡走往前移動最多 {batch} 位存戶，順序由這次抽獎的種子決定。它沒辦法瞄準你，所以按下它，說不出你有沒有中獎。",
+      "advance": "推進抽獎",
+      "waitingLead": "這一步任何人都能做。",
+      "waitingLink": "跑一次抽獎",
+      "waitingTail": " 裡有它。",
+      "periodEnded": "第 {drawId} 期結束",
+      "periodEndedUnknown": "這一期的結束時間還沒有從鏈上回來。",
+      "closeDeadline": "截止期限",
+      "closeDeadlineUnknown": "這次抽獎的截止期限還沒有從鏈上回來。",
+      "passed": "已過",
+      "prizeWindow": "獎金視窗",
+      "windowUnknown": "這次抽獎的視窗還沒有從鏈上回來。",
+      "windowLeft": "還剩 {time}",
+      "windowClosed": "已關閉",
+      "bracket": "級距",
+      "bracketNote": "公布它，取代資金池的總權重",
+      "walk": "巡走",
+      "walkNotStarted": "尚未開始",
+      "walkProgress": "{total} 位中的 {cursor} 位",
+      "walkNote": "每次呼叫最多 {batch} 位存戶",
+      "prizeWorth": "一份獎值多少",
+      "noPrizeMoney": "這次抽獎沒有獎金可派：它截止時還沒有任何收成入帳。",
+      "yourResult": "你的結果",
+      "sealedResult": "一個結果，已加密",
+      "sealedResultNote": "在鏈上加密，只有它所屬的錢包讀得到。",
+      "notReachedUnknown": "巡走還沒走到你，而這次抽獎的視窗也還沒有從鏈上回來，所以這個頁面說不出它還能不能被推進。",
+      "notReachedYet": "巡走還沒走到你。在那之前，這次抽獎對你沒有任何數字，中沒中都一樣。",
+      "missedWindow": "視窗在巡走走到你之前就關了，所以這次抽獎不付你任何東西，錢回到了層級裡。現在沒有人能再評估它。",
+      "yourPrize": "你的獎金",
+      "yourPrizeSpoken": "你在第 {drawId} 期抽獎的獎金",
+      "yourWeight": "你的權重",
+      "yourWeightSpoken": "你在第 {drawId} 期抽獎的權重",
+      "noPrize": "這次沒有中獎。你的權重有被算進去，門檻沒有落在你這邊。",
+      "claimed": "已經領走了。金庫不欠這個錢包任何東西，所以這筆獎金在你的機密餘額裡。這次抽獎把數字留著當紀錄。"
+    }
+  },
+  "describe": {
+    "unreadBadge": "未讀取",
+    "unread": "這次抽獎還沒有從鏈上回來，所以底下的一切都還不是事實。頁面會繼續問。",
+    "notClosedBadge": "未截止",
+    "notClosed": "這一期已經結束，這次抽獎正在等人截止。任何人都能截止它，包括你。",
+    "missedBadge": "錯過",
+    "missed": "沒有人在期限之前截止這次抽獎，所以它不付任何東西。它的資金從來沒被移動過，下一次截止會再拿出來。",
+    "closedBadge": "等待證明",
+    "closed": "已截止。種子、級距、非空旗標和收成都已公布，正在等 Zama 的金鑰管理服務為它們的明文簽名。任何人都能取回它們並開出這次抽獎。",
+    "emptyBadge": "空的",
+    "empty": "這一期沒有人持有餘額，所以沒有東西可以計重。拿出來的資金直接回到層級裡。",
+    "skippedBadge": "略過",
+    "skipped": "開獎落在抽獎視窗之後，所以沒有派出任何獎金。資金回到層級裡，而收成照樣入帳。",
+    "awardedBadge": "已開獎",
+    "awardedAllDisconnected": "已開獎，而且巡走已經走過裡面的每一位存戶。連接錢包就能看到你在其中的位置。",
+    "awardedDisconnected": "已開獎。評估的巡走還在跑。連接錢包就能看到你在其中的位置。",
+    "awardedAllOutside": "已開獎，而且每位存戶都評估過了。這個錢包當時不在池裡。",
+    "awardedOutside": "已開獎。評估的巡走還在跑，而這個錢包不在裡面。",
+    "awardedAll": "已開獎，而且巡走已經走過裡面的每一位存戶。每一個結果都固定下來、也寫下來了。",
+    "awarded": "已開獎。從這一刻起，每一個結果都已經定案：門檻是公開的，權重再也不會變。評估只是把它們寫下來。"
+  },
+  "run": {
+    "title": "跑一次抽獎",
+    "subtitle": "一次抽獎要五筆交易。每一筆任何錢包都能呼叫，包括你的。",
+    "connect": "連接錢包就能送出其中任何一筆。它們都不需要合約認得的任何特權，也都沒辦法瞄準某一位存戶。",
+    "connectNote": "下面五個步驟兩種情況下都會從鏈上讀取，所以在你連接任何東西之前，這個畫面就值得看一看。",
+    "waitingFor": "資金池正在等什麼",
+    "nothing": "沒有",
+    "ordering": " 也有一次抽獎可以截止了。定案和對帳先做，因為結轉金放出來的錢，正是下一次截止用來算獎金金額的來源。",
+    "unknownDue": "指出哪一步該做的那些讀取，還沒有從鏈上回來。",
+    "idleWithClock": "不是 keeper 跟上了，就是這一期還在跑。它在 {time} 之後結束。",
+    "idle": "不是 keeper 跟上了，就是這一期還在跑。",
+    "railLabel": "五個步驟，照一次抽獎需要的順序",
+    "unknownStep": "這一步能不能做，還沒有從鏈上回來。",
+    "chip": {
+      "due": "現在該做",
+      "ready": "就緒",
+      "unknown": "未知",
+      "notYet": "還沒到"
+    },
+    "blocked": {
+      "connect": "連接錢包才能送出這一筆。",
+      "network": "你的錢包在另一個網路上。",
+      "busy": "已經有另一筆交易在進行中。"
+    },
+    "close": {
+      "title": "截止",
+      "headline": "截止第 {drawId} 期抽獎",
+      "headlineIdle": "截止一次抽獎",
+      "button": "截止",
+      "does": "用每個層級裡的錢固定它的獎金金額，把那筆錢移進這次抽獎，收成收益來源，並抽出一顆沒有人（包括我們）讀得到的加密種子。",
+      "paused": "資金池已暫停，所以沒有抽獎可以截止。",
+      "readyDeadline": "第 {drawId} 期抽獎還有 {time} 可以截止。過了就會被略過，它的錢留在層級裡。",
+      "ready": "第 {drawId} 期抽獎正在等人截止。",
+      "waitingClock": "沒有抽獎在等。第 {drawId} 期抽獎會在 {time} 之後、也就是這一期結束時變成可截止。",
+      "waiting": "沒有抽獎在等人截止。"
+    },
+    "award": {
+      "title": "開獎",
+      "headline": "開出第 {drawId} 期抽獎",
+      "headlineIdle": "開出一次抽獎",
+      "button": "開獎",
+      "does": "把截止時公布的那四個值的明文，連同金鑰管理服務對它們的簽章一起交給資金池。資金池在鏈上驗證那個簽章，把收成記進層級，並打開這次抽獎。中獎者就在這一刻被決定。",
+      "ready": "第 {drawId} 期抽獎已截止、正在等待。系統會先取回四份證明，這要花幾秒鐘，然後你的錢包才會請你簽名。",
+      "waiting": "沒有已截止的抽獎在等開獎。"
+    },
+    "advance": {
+      "title": "推進",
+      "headline": "推進第 {drawId} 期抽獎",
+      "headlineIdle": "推進一次抽獎",
+      "button": "推進",
+      "does": "從種子決定的位置開始走過存戶名單，依公布的門檻把每位存戶贏到的金額記給他。呼叫者只能選一次呼叫涵蓋幾位存戶，永遠不能選是哪幾位，所以送出這一筆，說不出你在這次抽獎裡是誰。",
+      "readyCount": "第 {drawId} 期抽獎已完成 {total} 位存戶中的 {cursor} 位。每次呼叫把共用的巡走往前移動最多 {batch} 位，那也是一筆交易付得起的量。",
+      "ready": "第 {drawId} 期抽獎還有存戶沒走到。每次呼叫把共用的巡走往前移動最多 {batch} 位，那也是一筆交易付得起的量。",
+      "waiting": "沒有已開獎的抽獎在視窗內還剩下存戶。"
+    },
+    "finalize": {
+      "title": "定案",
+      "headline": "為第 {drawId} 期抽獎定案",
+      "headlineIdle": "為一次抽獎定案",
+      "button": "定案",
+      "does": "視窗結束之後，把每個層級沒派掉的餘額摺進該層級的加密結轉金，並公布每個輪到的層級的結轉金。",
+      "ready": "第 {drawId} 期抽獎的視窗已經結束，所以它再也記不出任何一筆獎金。",
+      "waitingClock": "沒有視窗結束。第 {drawId} 期抽獎可以在 {time} 之後定案。",
+      "waiting": "沒有抽獎在視窗結束後還沒定案。"
+    },
+    "reconcile": {
+      "title": "對帳",
+      "headline": "為{tier}層級對帳",
+      "headlineIdle": "為一個層級對帳",
+      "button": "對帳",
+      "does": "取回一筆已公布結轉金的明文，向資金池證明它，並把錢記回該層級的明文資金裡，好讓下一次截止能再拿出來。",
+      "ready": "{tier}層級在第 {drawId} 期抽獎公布了它的結轉金。",
+      "readyMore": "{count, plural, other { 後面還有 {shown} 個層級，每按一次做一個。}}",
+      "waiting": "沒有層級有結轉金在等著記回去。"
+    },
+    "who": {
+      "label": "這些是誰送的",
+      "oneStart": "我們跑了一支 keeper 盯著資金池，每一步一到期就送出去，所以在平常的一個小時裡，這個畫面上沒有事情要做。",
+      "onePeriod": " 這裡的一期是 {period}，所以完整的五步循環就以這個頻率送出。",
+      "oneEnd": " keeper 沒有握有合約認得的任何特權。它可能濫用的那兩件事，也就是挑哪些存戶被評估、挑獎金派出的順序，都不是任何呼叫者能做的選擇。",
+      "two": "開獎和對帳是唯二需要鏈下東西的步驟。你的瀏覽器向 Zama 的中繼器索取資金池公布內容的明文，開獎要四個值、對帳要一個，連同金鑰管理服務對它們的簽章一起。那跟 keeper 做的是同一個呼叫，而合約自己會驗證簽章，所以瀏覽器沒辦法謊報它讀到什麼。",
+      "three": "keeper 停了，什麼都不會不見。一次從未截止的抽獎會把錢留在層級裡並再次拿出來，而一筆從未對帳的結轉金，會被它落地之後的第一次截止摺回去。停擺的 keeper 讓池子損失的是抽獎，不是錢，而且這裡任何錢包都能把它們重新啟動。",
+      "periodHours": "{count, plural, other {{shown} 小時}}",
+      "periodMinutes": "{count} 分鐘",
+      "periodSeconds": "{count} 秒"
+    },
+    "stand": {
+      "label": "抽獎目前的狀態",
+      "period": "目前期別",
+      "periodNote": "{time} 之後結束",
+      "savers": "存戶",
+      "saversNote": "一趟完整巡走要走多遠",
+      "lastClosed": "上一次截止的抽獎",
+      "lastClosedNone": "還沒有",
+      "vaultUnknown": "金庫狀態未知",
+      "vaultPaused": "金庫已暫停",
+      "vaultRunning": "金庫運作中",
+      "poolUnknown": "資金池狀態未知",
+      "poolPaused": "資金池已暫停",
+      "poolRunning": "資金池運作中"
+    }
+  },
+  "verify": {
+    "title": "自己查核一次抽獎。",
+    "lede": "不需要錢包。這裡的每一個數字都直接讀自合約，而門檻來自金庫自己的 <code>thresholdOf</code> view 函式，也就是決定結果的那同一套算術。這個頁面上沒有第二套實作可以跟第一套唱反調。",
+    "noPool": "{symbol} 沒有池可以查核。",
+    "noPoolBody": "{reason}，所以 Hearth 從未在它上面開過金庫，這裡也沒有抽獎。請從上面的清單挑一種代幣。",
+    "unreachable": "連不上 Sepolia。",
+    "unreachableBody": "這個頁面透過一個 RPC 端點讀取金庫和資金池，而那次讀取失敗了，所以它沒有東西可顯示。抽獎本身無論如何都在鏈上。",
+    "tryAgain": "再試一次",
+    "reading": "正在從 Sepolia 讀取抽獎。",
+    "noneYet": "還沒有任何抽獎被截止，所以沒有東西可查核。第 1 期結束、有人截止之後，第一次抽獎就會出現。",
+    "oneNotClosed": "第 {drawId} 期抽獎還沒有被截止，所以沒有東西可查核。",
+    "rangeNotClosed": "第 {first} 到 {last} 期抽獎都還沒有被截止，所以這裡沒有東西可查核。更早的在區塊瀏覽器上。",
+    "drawButton": "第 {drawId} 期",
+    "facts": {
+      "title": "第 {drawId} 期抽獎",
+      "periodCovered": "涵蓋的期別",
+      "periodEnded": "結束於 {stamp}",
+      "windowEnds": "視窗結束",
+      "seed": "種子",
+      "seedUnpublished": "尚未公布",
+      "bracket": "級距",
+      "bracketUnset": "尚未設定",
+      "bracketNote": "{count} 餘額秒",
+      "prizeSizes": "獎金金額",
+      "prizeSizesNote": "頭獎 / 中型獎 / 常態獎",
+      "harvest": "已入帳的收成",
+      "walkSavers": "巡走裡的存戶",
+      "walkNotStarted": "尚未開始",
+      "walkPosition": "巡走位置",
+      "walkProgress": "{total} 位中的 {cursor} 位",
+      "finalized": "已定案",
+      "yes": "是",
+      "no": "否",
+      "note": "種子以密文的形式在 Zama 的協同處理器裡生成，所以沒有人在它被抽出時看見它；而截止一次抽獎剛好只會成功一次，所以沒有第二次重擲。級距是大於資金池總權重的最小 2 的冪，公布它而不是精確總額，是因為連續兩個精確總額就能解出一位落單存戶的存入金額。"
+    },
+    "tiers": {
+      "title": "每個層級拿出多少、派出多少",
+      "hint": "依設計公開",
+      "each": "每份 {amount} {symbol}",
+      "offered": "拿出來的",
+      "returned": "沒派掉退回的",
+      "notReconciled": "尚未對帳",
+      "paid": "派出的獎項",
+      "paidUnknown": "對帳之前無法得知",
+      "paidInexact": "無法精確推得",
+      "note": "派出的獎項數，是從公開數字算出來的：該層級拿出來的，減掉沒派掉退回的，再除以獎金金額。只要沒有加密結轉金一起跟進這次抽獎，結果就是精確的，而這次部署每個層級每期都對帳，所以通常就是精確的。它從不說出派給了誰。"
+    },
+    "thresholds": {
+      "title": "某個位址的門檻",
+      "hint": "讀自 thresholdOf",
+      "body": "貼上任何一個位址。金庫會回傳這個位址在這次抽獎、每個層級的每一份獎必須超過的確切權重。拿它跟那位存戶自己解密出來的權重比對，結果就對得上：他們中獎，剛好就在權重嚴格大於門檻的時候。",
+      "fieldName": "要查核的位址",
+      "invalid": "那不是一個有效的以太坊位址。",
+      "notAwarded": "第 {drawId} 期抽獎還沒開獎，所以還沒有種子，也還沒有門檻。",
+      "row": "{tier}第 {index} 份獎",
+      "reading": "讀取中",
+      "rowFailed": "節點沒有回應這份獎的 thresholdOf。抽獎本身什麼都沒變，變的只是這個頁面看到的樣子。",
+      "noCounts": "這次抽獎的獎項數量讀不到，所以這個頁面說不出一共有幾個門檻。過一會兒再試。",
+      "outOfRange": "超出範圍，所以贏不到",
+      "unit": "餘額秒"
+    },
+    "transactions": {
+      "title": "那些交易",
+      "hint": "在 Etherscan 上",
+      "none": "最近幾個小時的區塊裡，沒有這次抽獎的東西。更早的紀錄在區塊瀏覽器上。",
+      "block": "第 {block} 區塊",
+      "open": "打開資金池",
+      "closed": "已截止",
+      "awarded": "已開獎",
+      "markedEmpty": "標為空的",
+      "markedSkipped": "標為略過",
+      "finalized": "已定案",
+      "reconciled": "層級已對帳",
+      "withTier": "{label}（{tier}）"
+    }
+  },
+  "lab": {
+    "pill": "實驗頁",
+    "title": "開獎儀式",
+    "lede": "站上沒有連結指向這裡。底下每一個數字都是從 Sepolia 上的合約即時讀來的：封存的 handle、金鑰管理服務簽過的種子、這次抽獎所對照的級距，以及一個錢包必須超過的確切門檻。",
+    "noPool": "{symbol} 沒有池可以打開。",
+    "noPoolBody": "{reason}，所以 Hearth 從未在它上面開過金庫。請挑一種有池的代幣。",
+    "noDraw": "還沒有已開獎的抽獎可以打開。",
+    "noDrawBody": "這場儀式需要一次已經截止並開獎的抽獎。到資金池的抽獎面板跑一次，然後回來。",
+    "drawButton": "第 {drawId} 期",
+    "openSeal": "打開封印",
+    "again": "再跑一次",
+    "stages": {
+      "sealed": "封存",
+      "seed": "種子打開",
+      "bracket": "級距",
+      "thresholds": "門檻落下",
+      "mine": "你自己的結果"
+    },
+    "seals": {
+      "title": "截止公布了什麼",
+      "hint": "四個 handle，就是這個順序",
+      "seed": "種子",
+      "scale": "級距計數",
+      "nonEmpty": "非空",
+      "harvest": "收成",
+      "unpublished": "尚未公布",
+      "note": "資金池會照那個順序重新編碼四個明文，並在鏈上驗證金鑰管理服務對那份編碼的簽章，所以用任何別的順序索取，開獎都會失敗。順序在這裡是合約，不是方便。"
+    },
+    "seed": {
+      "title": "種子打開",
+      "note": "以密文的形式在 Zama 的協同處理器裡生成，所以沒有人在它被抽出時看見它。期別結束後公布，由金鑰管理服務簽名，並在這次抽獎的其他任何事情被允許發生之前，由資金池在鏈上驗證。獎金金額在截止時就已經固定，發生在這個數字存在之前。"
+    },
+    "bracket": {
+      "title": "級距",
+      "unit": "{count} 餘額秒",
+      "note": "抽獎對照的是大於資金池總權重的最小 2 的冪，而不是總權重本身。公布精確總額，會讓任何人用連續兩個總額加上自己交易的時間戳，解出一位落單存戶的存入金額。"
+    },
+    "thresholds": {
+      "title": "門檻落下",
+      "connectHint": "連接錢包就能看到你自己的",
+      "connectBody": "門檻是逐位址的，而且公開。連接錢包，它在這次抽獎每一份獎必須超過的確切數字就會出現在這裡，由金庫算出，不是這個頁面算的。",
+      "row": "{tier}第 {index} 份獎",
+      "reading": "讀取中",
+      "outOfRange": "超出範圍",
+      "note": "超過門檻，獎就是你的。這些來自金庫自己的 view 函式，也就是決定結果的那同一套算術，所以這裡沒有第二套實作可以跟第一套唱反調。"
+    },
+    "mine": {
+      "title": "而且只給你",
+      "connectBody": "連接錢包，這張卡片就會填上它被判定時的權重，以及第 {drawId} 期抽獎付了它多少，只在你的瀏覽器裡解密，別無他處。",
+      "nothing": "這個錢包在第 {drawId} 期抽獎裡沒有權重，所以沒有屬於它自己的東西可以打開。只有走進巡走的存戶，這裡才有權重和入帳金額。",
+      "weight": "你的權重",
+      "weightUnit": "整段期間的餘額秒",
+      "paid": "這次抽獎付了你多少",
+      "paidUnit": "{symbol}，記入你的獎金",
+      "sealAgain": "重新封存",
+      "decrypt": "解密我的結果",
+      "denied": "被拒絕：這些數值屬於另一個錢包。",
+      "note": "這張卡片以上的一切都是公開的，任何人都能查核。這張卡片不是：它需要擁有這些數值的錢包簽一則 EIP-712，而 Zama 的存取控制清單會拒絕其他所有人。整個產品就在這兩段話裡。"
+    }
+  },
+  "docs": {
+    "title": "說明文件",
+    "kicker": "說明文件",
+    "heading": "完整的書面紀錄",
+    "count": "{count, plural, other {共 {shown} 頁}}。每一頁都是程式庫 <path>docs/</path> 底下的一個檔案，在這裡呈現。",
+    "contents": "目錄",
+    "close": "關閉",
+    "overview": "總覽",
+    "nav": "說明文件",
+    "search": "搜尋說明文件",
+    "noResults": "沒有符合的內容。",
+    "outline": "本頁大綱",
+    "nearby": "相鄰頁面",
+    "previous": "上一頁",
+    "next": "下一頁",
+    "copy": "複製",
+    "copied": "已複製",
+    "copyManual": "請按 ctrl C",
+    "copyLabel": "複製這個區塊",
+    "diagramWide": "比這一欄還寬。請橫向捲動。",
+    "diagramFailed": "這張圖沒有畫出來。原始碼在下方。",
+    "rendererFailed": "圖表繪製器沒有載入。原始碼在下方。",
+    "fallbackNote": "這一頁還沒有翻譯，所以顯示英文。",
+    "sections": {
+      "reference": "參考",
+      "attackLogs": "攻擊紀錄",
+      "gettingstarted": "開始使用",
+      "concepts": "概念",
+      "security": "安全",
+      "operations": "維運"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "這個網址上沒有東西。",
+      "body": "頁面搬走了、連結打錯了，或者裡面的代幣不是這個版本部署過的。無論哪一種，資金池本身都在鏈上，不受影響。",
+      "home": "回到起點",
+      "pool": "打開資金池",
+      "docs": "閱讀說明文件"
+    },
+    "crashed": {
+      "title": "壞掉的是這個畫面，不是你的錢。",
+      "body": "頁面本身有東西出錯了。沒有簽任何東西，也沒有送出任何東西，所以你的餘額原封不動。重新載入這個畫面是安全的。",
+      "digest": "參考編號 {digest}",
+      "home": "回到起點",
+      "retry": "再試一次這個畫面"
+    },
+    "unknown": "出了點問題。",
+    "userRejected": "你在錢包裡拒絕了這個請求。沒有送出任何東西。",
+    "signingRejected": "你在錢包裡拒絕了這個簽章。沒有送出任何東西。",
+    "notConnected": "請先連接錢包。",
+    "decryptNotConnected": "連接錢包才能解密你自己的數值。",
+    "addressesMissing": "Hearth 的位址沒有設定，所以什麼都送不出去。",
+    "drawNotWaiting": "第 {drawId} 期抽獎不在等開獎，所以沒有東西可送。",
+    "insufficientAllowance": "包裝器還不能從你的代幣裡取走那麼多。請先授權它。",
+    "insufficientErc20": "這個錢包裡的普通測試代幣不夠。請從水龍頭鑄造一些。",
+    "insufficientConfidential": "機密代幣不夠。請先把一些普通代幣遮蔽起來。",
+    "chainMismatch": "你的錢包在跟 App 不同的網路上。請切換到 Sepolia。",
+    "notEntitled": "這個錢包不能讀那個值。它屬於另一個位址。",
+    "noCiphertext": "這裡還沒有加密值，也就是餘額為零。",
+    "relayerRateLimited": "Zama 的中繼器正在限制這個瀏覽器的請求速率。等幾秒再問一次。",
+    "relayerUnreachable": "連不上 Zama 的中繼器。過一會兒再問一次。",
+    "relayerUnreachableStatus": "連不上 Zama 的中繼器（HTTP {status}）。過一會兒再問一次。",
+    "rpcRateLimited": "Sepolia 節點正在限制這個瀏覽器的請求速率。等幾秒再問一次。",
+    "noGas": "Sepolia ETH 不夠付 gas。任何 Sepolia 水龍頭都能補。",
+    "relayerBehind": "Zama 的中繼器還沒跟上那個區塊。過一會兒再問一次。",
+    "EnforcedPause": "金庫已暫停，所以存入和抽獎截止都停住了。提領仍然可用。",
+    "NotASaver": "這個錢包從來沒有存過，所以沒有東西可以提領。",
+    "NotTheAsset": "只接受這個金庫部署時搭配的那一種機密代幣。請遮蔽那種代幣再試一次。",
+    "DrawNotAwarded": "那次抽獎還沒開獎，所以沒有東西可以評估。請先截止並開獎。",
+    "EvaluationWindowClosed": "那次抽獎的兩期視窗已經結束。它再也不能被評估，也不付任何東西。",
+    "EvaluationWindowOpen": "那次抽獎還能被評估，所以還不能定案。請等視窗結束。",
+    "AlreadyFinalized": "那次抽獎已經定案。上面沒有剩下的事可做。",
+    "DrawNotOpen": "那次抽獎從來沒有被截止，所以沒有東西可以定案。",
+    "AlreadyClosed": "有人搶先截止了那次抽獎。下一步是開獎。",
+    "NothingToClose": "現在沒有抽獎在等人截止。",
+    "CloseWindowClosed": "那次抽獎的截止期限已經過了。它的資金回到層級裡，下一次抽獎會再拿出來。",
+    "WrongStatus": "這筆交易還沒落地，抽獎就往前走了。請重新載入，看看它現在到哪裡。",
+    "CarryNotPending": "那個層級沒有已公布的結轉金在等，所以沒有東西可以對帳。",
+    "InvalidKMSSignatures": "金鑰管理服務的簽章在鏈上驗證失敗。請重新索取一次解密。"
+  },
+  "format": {
+    "pending": "...",
+    "dust": "<0.01",
+    "now": "現在",
+    "seconds": "{seconds} 秒",
+    "minutesSeconds": "{minutes} 分 {seconds} 秒",
+    "hoursMinutes": "{hours} 小時 {minutes} 分",
+    "agoSeconds": "{count} 秒前",
+    "agoMinutes": "{count} 分鐘前",
+    "agoHours": "{count} 小時前",
+    "agoDays": "{count} 天前",
+    "notYet": "還沒",
+    "utc": "{stamp} UTC",
+    "oddsNever": "永不",
+    "oddsEveryDraw": "每次抽獎",
+    "oddsOneIn": "{count} 次抽獎中 1 次",
+    "balanceSeconds": "餘額秒"
+  },
+  "meta": {
+    "titleDefault": "Hearth，沒有人看得進去的抽獎儲蓄",
+    "titleTemplate": "{title} | Hearth",
+    "description": "建立在 Zama Protocol 上的機密型不賠本抽獎儲蓄。存入、餘額和獎金在鏈上保持加密，獎金由收益抽出，中獎機率跟你的時間加權餘額成正比，而本金隨時全額領回。",
+    "ogTitle": "Hearth",
+    "ogDescription": "建立在 Zama Protocol 上的機密型不賠本抽獎儲蓄。",
+    "how": {
+      "title": "運作方式",
+      "description": "存入一種機密代幣，讓餘額保持加密，贏取由收益抽出的獎金，中獎機率由你的時間加權餘額決定，隨時都能提領。"
+    },
+    "verify": {
+      "title": "查核一次抽獎",
+      "description": "直接從合約讀出一次抽獎的種子、級距、收成和獎金金額，並取得任何位址必須超過的確切門檻。"
+    },
+    "lab": {
+      "title": "開獎儀式",
+      "description": "一個實驗頁：封存的種子打開、級距、門檻，以及一位存戶自己的結果。"
+    },
+    "docs": {
+      "title": "說明文件",
+      "description": "一次抽獎怎麼跑、機率怎麼算、獎金從哪裡來、什麼保持私密，以及我們知道的每一道接縫。"
+    },
+    "dashboard": {
+      "title": "{symbol} 儀表板",
+      "titleFallback": "儀表板",
+      "description": "這個錢包持有什麼、獎金池值多少，以及下一步，而每一筆存戶金額都在鏈上加密。"
+    },
+    "deposit": {
+      "title": "存入 {symbol}",
+      "titleFallback": "存入",
+      "description": "拿測試 {underlyingSymbol}，遮蔽成 {symbol}，再存進 Hearth 金庫。",
+      "descriptionFallback": "拿測試代幣，遮蔽它，再存進 Hearth 金庫。"
+    },
+    "withdraw": {
+      "title": "提領 {symbol}",
+      "titleFallback": "提領",
+      "description": "把本金和獎金從 Hearth 金庫拿出來，再把 {symbol} 解除遮蔽換回 {underlyingSymbol}。",
+      "descriptionFallback": "把本金和獎金從 Hearth 金庫拿出來，再解除遮蔽換回普通代幣。"
+    },
+    "draws": {
+      "title": "我的抽獎",
+      "description": "最近每一次抽獎付出了多少、付了你多少，而你的權重和獎金在你打開之前都是加密的。"
+    },
+    "run": {
+      "title": "跑一次抽獎",
+      "description": "截止、開獎、推進、定案、對帳。Hearth 抽獎的每一步，任何錢包都能呼叫。"
+    }
+  }
+}

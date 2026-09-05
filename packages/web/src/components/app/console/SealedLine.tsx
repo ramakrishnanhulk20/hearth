@@ -1,6 +1,7 @@
 "use client";
 
-import { formatAmount } from "@/lib/format";
+import { useTranslations } from "next-intl";
+import { useFormat } from "@/hooks/useFormat";
 import type { RevealScope } from "@/hooks/useReveal";
 import { RevealEye, RevealNote } from "./SealedValue";
 import { Unknown } from "./Unknown";
@@ -19,6 +20,8 @@ export function SealedLine({
   spoken,
   scope,
   amount,
+  unit,
+  decimals,
   onReveal,
   disabled = false,
 }: {
@@ -32,9 +35,15 @@ export function SealedLine({
    * the relayer answers without one of them, which is not a zero and must not read as one.
    */
   amount: bigint | null;
+  /** The token's ticker, printed after the figure once it is open. */
+  unit: string;
+  decimals: number;
   onReveal: () => void;
   disabled?: boolean;
 }) {
+  const t = useTranslations("console.reveal");
+  const format = useFormat();
+
   return (
     <span className="inline-flex flex-col">
       <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -42,7 +51,7 @@ export function SealedLine({
 
         {!scope.open ? (
           <>
-            <span className="sr-only">{spoken}, encrypted</span>
+            <span className="sr-only">{t("encrypted", { label: spoken })}</span>
             {/* The same size as the figure it stands in for, so pressing the eye swaps one for
                 the other without the line changing height under the pointer. */}
             <span
@@ -55,10 +64,10 @@ export function SealedLine({
           </>
         ) : amount !== null ? (
           <span className="font-display text-[15px] tabular-nums text-parchment" style={{ fontWeight: 620 }}>
-            {formatAmount(amount)} USDC
+            {format.amount(amount, decimals)} {unit}
           </span>
         ) : (
-          <Unknown scale="inline" reason="The relayer answered without this value, so the total is not known." />
+          <Unknown scale="inline" reason={t("partial")} />
         )}
 
         <RevealEye scope={scope} label={spoken} onReveal={onReveal} disabled={disabled} />

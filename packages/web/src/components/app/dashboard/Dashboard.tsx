@@ -1,8 +1,7 @@
 "use client";
 
-import { useDraws, useHearthConfig, useNow, usePoolState, useSaverState } from "@/hooks/useHearth";
+import { useDraws, useHearthConfig, usePoolState, useSaverState } from "@/hooks/useHearth";
 import { BALANCE_SCOPE, useReveal } from "@/hooks/useReveal";
-import { CONFIGURED } from "@/lib/chain/addresses";
 import { NextAction } from "./NextAction";
 import { chooseNextStep, latestWrittenResult } from "./nextStep";
 import { PoolNow } from "./PoolNow";
@@ -21,7 +20,6 @@ export function Dashboard() {
   const saver = useSaverState(config);
   const draws = useDraws(pool.period);
   const reveal = useReveal();
-  const now = useNow();
 
   // The scope is taken here rather than inside the card, so the step that offers a claim and the
   // figure that was opened are reading the same decryption.
@@ -35,8 +33,11 @@ export function Dashboard() {
   const step = chooseNextStep({
     connected: saver.connected,
     wrongNetwork: saver.wrongNetwork,
+    symbol: config.symbol,
+    underlyingSymbol: config.underlyingSymbol,
+    base: `/app/${config.slug}`,
     positionKnown,
-    usdc: saver.usdc,
+    underlyingBalance: saver.underlyingBalance,
     hasConfidential: saver.confidentialHandle !== null,
     isSaver: saver.isSaver,
     winnings: balance.read(saver.winningsHandle),
@@ -46,13 +47,11 @@ export function Dashboard() {
 
   return (
     <>
-      {/* With no addresses configured there is nothing to read and no step worth naming. The
-          shell's banner already says which environment variables are missing. */}
-      {CONFIGURED && <NextAction step={step} />}
+      <NextAction step={step} />
 
       <div className="flex flex-col gap-4">
         <Position config={config} saver={saver} scope={balance} known={positionKnown} />
-        <PoolNow pool={pool} now={now} />
+        <PoolNow pool={pool} symbol={config.symbol} decimals={config.decimals} />
       </div>
     </>
   );

@@ -21,18 +21,46 @@ export type Phase =
   | { kind: "done"; hash: Hex | null }
   | { kind: "error"; error: RoutedError };
 
+/**
+ * What the current run is called, as a key into the `console.actions` namespace rather than a
+ * sentence. A screen compares `label.key` to know which of its buttons is the busy one, and the
+ * note above the form turns the same key into words. The two used to be one English string, which
+ * meant a translated console could no longer tell its own buttons apart.
+ */
+export type ActionLabel = { key: ActionKey; values?: Record<string, string | number> };
+
+export type ActionKey =
+  | "mint"
+  | "approve"
+  | "wrap"
+  | "deposit"
+  | "withdraw"
+  | "withdrawAll"
+  | "close"
+  | "award"
+  | "advance"
+  | "finalize"
+  | "reconcile";
+
 export type Action = {
   phase: Phase;
-  /** What the current or last run was called, so the note can name it. */
-  label: string;
+  /** What the current or last run was called, so the note can name it. Null before the first. */
+  label: ActionLabel | null;
   busy: boolean;
+  /**
+   * What was already running when a second control was pressed. One wallet signs one transaction
+   * at a time, so the second press has to be refused, and a press that does nothing and says
+   * nothing reads as a broken button.
+   */
+  blockedBy: ActionLabel | null;
   reset: () => void;
 };
 
 type Setter = (phase: Phase) => void;
 
 const NOT_CONNECTED: RoutedError = {
-  message: "Connect a wallet first.",
+  key: "notConnected",
+  raw: "Connect a wallet first.",
   remedy: "connect",
   retryable: false,
 };
@@ -48,15 +76,26 @@ export function useActions(config: HearthConfig) {
   const { writeContractAsync } = useWriteContract();
 
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
-  const [label, setLabel] = useState("");
+  const [label, setLabel] = useState<ActionLabel | null>(null);
+  const [blockedBy, setBlockedBy] = useState<ActionLabel | null>(null);
   const running = useRef(false);
+  // The label the running call is using, read by a refused press. State would be a render behind.
+  const runningLabel = useRef<ActionLabel | null>(null);
 
-  const reset = useCallback(() => setPhase({ kind: "idle" }), []);
+  const reset = useCallback(() => {
+    setPhase({ kind: "idle" });
+    setBlockedBy(null);
+  }, []);
 
   const run = useCallback(
-    async (name: string, steps: (set: Setter) => Promise<Hex | null>, onDone?: () => void) => {
-      if (running.current) return;
+    async (name: ActionLabel, steps: (set: Setter) => Promise<Hex | null>, onDone?: () => void) => {
+      if (running.current) {
+        setBlockedBy(runningLabel.current);
+        return;
+      }
       running.current = true;
+      runningLabel.current = name;
+      setBlockedBy(null);
       setLabel(name);
       try {
         const hash = await steps(setPhase);
@@ -66,6 +105,8 @@ export function useActions(config: HearthConfig) {
         setPhase({ kind: "error", error: routeError(error) });
       } finally {
         running.current = false;
+        runningLabel.current = null;
+        setBlockedBy(null);
       }
     },
     [],
@@ -84,7 +125,7 @@ export function useActions(config: HearthConfig) {
 
   const encrypt = useCallback(
     async (set: Setter, contractAddress: Address, amount: bigint) => {
-      if (!address || !sdk) throw Object.assign(new Error(NOT_CONNECTED.message), { code: "WALLET_NOT_CONNECTED" });
+      if (!address || !sdk) throw Object.assign(new Error(NOT_CONNECTED.raw), { code: "WALLET_NOT_CONNECTED" });
       set({ kind: "encrypting" });
       const { encryptedValues, inputProof } = await sdk.encrypt({
         values: [{ type: "euint64", value: amount }],
@@ -98,7 +139,9 @@ export function useActions(config: HearthConfig) {
 
   const needAddresses = useCallback(() => {
     if (!config.vault || !config.pool || !config.asset || !config.underlying) {
-      throw new Error("The Hearth addresses are not configured, so nothing can be sent.");
+      throw Object.assign(new Error("The Hearth addresses are not configured, so nothing can be sent."), {
+        errorName: "addressesMissing",
+      });
     }
     return {
       vault: config.vault,
@@ -108,17 +151,23 @@ export function useActions(config: HearthConfig) {
     };
   }, [config]);
 
-  const action: Action = { phase, label, busy: phase.kind !== "idle" && phase.kind !== "done" && phase.kind !== "error", reset };
+  const action: Action = {
+    phase,
+    label,
+    busy: phase.kind !== "idle" && phase.kind !== "done" && phase.kind !== "error",
+    blockedBy,
+    reset,
+  };
 
   return {
     ...action,
 
     mint: (amount: bigint, onDone?: () => void) =>
       run(
-        "Get test USDC",
+        { key: "mint" },
         async (set) => {
           const { underlying } = needAddresses();
-          if (!address) throw new Error(NOT_CONNECTED.message);
+          if (!address) throw new Error(NOT_CONNECTED.raw);
           return send(set, {
             address: underlying,
             abi: ERC20_ABI,
@@ -131,7 +180,7 @@ export function useActions(config: HearthConfig) {
 
     approve: (amount: bigint, onDone?: () => void) =>
       run(
-        "Approve the wrapper",
+        { key: "approve" },
         async (set) => {
           const { underlying, asset } = needAddresses();
           return send(set, {
@@ -146,10 +195,10 @@ export function useActions(config: HearthConfig) {
 
     wrap: (amount: bigint, onDone?: () => void) =>
       run(
-        "Wrap into confidential USDC",
+        { key: "wrap" },
         async (set) => {
           const { asset } = needAddresses();
-          if (!address) throw new Error(NOT_CONNECTED.message);
+          if (!address) throw new Error(NOT_CONNECTED.raw);
           return send(set, {
             address: asset,
             abi: CONFIDENTIAL_ASSET_ABI,
@@ -162,7 +211,7 @@ export function useActions(config: HearthConfig) {
 
     deposit: (amount: bigint, onDone?: () => void) =>
       run(
-        "Deposit",
+        { key: "deposit" },
         async (set) => {
           const { asset, vault } = needAddresses();
           const { handle, proof } = await encrypt(set, asset, amount);
@@ -178,7 +227,7 @@ export function useActions(config: HearthConfig) {
 
     withdraw: (amount: bigint, onDone?: () => void) =>
       run(
-        "Withdraw",
+        { key: "withdraw" },
         async (set) => {
           const { vault } = needAddresses();
           const { handle, proof } = await encrypt(set, vault, amount);
@@ -194,7 +243,7 @@ export function useActions(config: HearthConfig) {
 
     withdrawAll: (onDone?: () => void) =>
       run(
-        "Withdraw everything",
+        { key: "withdrawAll" },
         async (set) => {
           const { vault } = needAddresses();
           return send(set, { address: vault, abi: HEARTH_VAULT_ABI, functionName: "withdrawAll", args: [] });
@@ -204,7 +253,7 @@ export function useActions(config: HearthConfig) {
 
     closeDraw: (drawId: number, onDone?: () => void) =>
       run(
-        `Close draw ${drawId}`,
+        { key: "close", values: { drawId } },
         async (set) => {
           const { pool } = needAddresses();
           return send(set, { address: pool, abi: HEARTH_POOL_ABI, functionName: "closeDraw", args: [drawId] });
@@ -220,10 +269,10 @@ export function useActions(config: HearthConfig) {
      */
     awardDraw: (drawId: number, onDone?: () => void) =>
       run(
-        `Award draw ${drawId}`,
+        { key: "award", values: { drawId } },
         async (set) => {
           const { pool } = needAddresses();
-          if (!sdk) throw new Error(NOT_CONNECTED.message);
+          if (!sdk) throw new Error(NOT_CONNECTED.raw);
           const draw = await readContract(wagmiConfig, {
             address: pool,
             abi: HEARTH_POOL_ABI,
@@ -231,10 +280,13 @@ export function useActions(config: HearthConfig) {
             args: [drawId],
           });
           if (Number(draw.status) !== 1) {
-            throw new Error(`Draw ${drawId} is not waiting for its award, so there is nothing to send.`);
+            throw Object.assign(new Error(`Draw ${drawId} is not waiting for its award.`), {
+              errorName: "drawNotWaiting",
+              drawId,
+            });
           }
 
-          set({ kind: "decrypting", note: "asking Zama's key management service for the seed" });
+          set({ kind: "decrypting", note: "askingSeed" });
           const published = await decryptPublic(
             sdk,
             [draw.seedHandle, draw.scaleHandle, draw.nonEmptyHandle, draw.harvestHandle] as Hex[],
@@ -242,10 +294,7 @@ export function useActions(config: HearthConfig) {
               onNote: (note) =>
                 set({
                   kind: "decrypting",
-                  note:
-                    note === "sealing"
-                      ? "the seed is published but not decryptable yet, asking again"
-                      : "asking Zama's key management service for the seed",
+                  note: note === "sealing" ? "seedSealing" : "askingSeed",
                 }),
             },
           );
@@ -269,7 +318,7 @@ export function useActions(config: HearthConfig) {
 
     evaluate: (drawId: number, count: bigint, onDone?: () => void) =>
       run(
-        `Advance draw ${drawId}`,
+        { key: "advance", values: { drawId } },
         async (set) => {
           const { vault } = needAddresses();
           return send(set, {
@@ -284,7 +333,7 @@ export function useActions(config: HearthConfig) {
 
     finalizeDraw: (drawId: number, onDone?: () => void) =>
       run(
-        `Finalize draw ${drawId}`,
+        { key: "finalize", values: { drawId } },
         async (set) => {
           const { vault } = needAddresses();
           return send(set, {
@@ -299,19 +348,23 @@ export function useActions(config: HearthConfig) {
 
     reconcile: (tier: number, onDone?: () => void) =>
       run(
-        `Reconcile tier ${tier}`,
+        { key: "reconcile", values: { tier } },
         async (set) => {
           const { vault, pool } = needAddresses();
-          if (!sdk) throw new Error(NOT_CONNECTED.message);
+          if (!sdk) throw new Error(NOT_CONNECTED.raw);
           const [handle, , pending] = await readContract(wagmiConfig, {
             address: vault,
             abi: HEARTH_VAULT_ABI,
             functionName: "publishedCarry",
             args: [tier],
           });
-          if (!pending) throw new Error("That tier has no published carry waiting, so there is nothing to reconcile.");
+          if (!pending) {
+            throw Object.assign(new Error("That tier has no published carry waiting."), {
+              errorName: "CarryNotPending",
+            });
+          }
 
-          set({ kind: "decrypting", note: "asking for the tier's unpaid liquidity" });
+          set({ kind: "decrypting", note: "askingCarry" });
           const published = await decryptPublic(sdk, [handle as Hex]);
 
           return send(set, {

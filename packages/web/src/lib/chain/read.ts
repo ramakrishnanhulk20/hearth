@@ -2,7 +2,7 @@ import "server-only";
 import { createPublicClient, http, type Address, type Hex } from "viem";
 import { sepolia } from "viem/chains";
 import { HEARTH_POOL_ABI, HEARTH_SOURCE_ABI, HEARTH_VAULT_ABI } from "./abis";
-import { HEARTH } from "./addresses";
+import { OPEN_POOLS, type OpenPool } from "./pools";
 
 /**
  * Server-side reads. The endpoint is deliberately not prefixed with NEXT_PUBLIC: the landing page
@@ -18,6 +18,10 @@ export const serverClient = createPublicClient({
 });
 
 export type PoolStats = {
+  slug: string;
+  /** The confidential token's ticker, so a figure on the landing page never floats unlabelled. */
+  symbol: string;
+  decimals: number;
   period: number;
   periodEndsAt: number;
   periodLength: number;
@@ -40,9 +44,8 @@ export type PoolStats = {
 
 const UTILISATION_BPS = 5000n;
 
-export async function readPoolStats(): Promise<PoolStats | null> {
-  const { vault, pool, source } = HEARTH;
-  if (!vault || !pool || !source) return null;
+export async function readPoolStats(entry: OpenPool): Promise<PoolStats | null> {
+  const { vault, pool, source } = entry;
 
   try {
     const vaultAt = { address: vault, abi: HEARTH_VAULT_ABI } as const;
@@ -89,6 +92,9 @@ export async function readPoolStats(): Promise<PoolStats | null> {
     const sealed = await readSealedHandle(vault, savers);
 
     return {
+      slug: entry.slug,
+      symbol: entry.symbol,
+      decimals: entry.decimals,
       period: Number(period),
       periodEndsAt: Number(periodEndsAt),
       periodLength: Number(periodLength),
@@ -134,5 +140,56 @@ async function readSealedHandle(
     return { handle, owner };
   } catch {
     return { handle: null, owner: null };
+  }
+}
+
+export type PoolPrize = {
+  slug: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  /** What the grand tier would pay per prize if a draw closed now, null when the read failed. */
+  grand: bigint | null;
+};
+
+/**
+ * The grand prize of every open pool, in one multicall.
+ *
+ * The landing page shows the whole shelf, so asking each pool separately would be one round trip
+ * per token on a page that has to render before anybody has scrolled.
+ */
+export async function readAllGrandPrizes(): Promise<PoolPrize[]> {
+  const pools = OPEN_POOLS;
+  if (pools.length === 0) return [];
+
+  const shape = (entry: OpenPool, grand: bigint | null): PoolPrize => ({
+    slug: entry.slug,
+    symbol: entry.symbol,
+    name: entry.name,
+    decimals: entry.decimals,
+    grand,
+  });
+
+  try {
+    const results = await serverClient.multicall({
+      allowFailure: true,
+      contracts: pools.flatMap((entry) => [
+        { address: entry.pool, abi: HEARTH_POOL_ABI, functionName: "liquidity", args: [0n] } as const,
+        { address: entry.pool, abi: HEARTH_POOL_ABI, functionName: "tierOf", args: [0] } as const,
+      ]),
+    });
+
+    return pools.map((entry, index) => {
+      const liquidity = results[index * 2];
+      const tier = results[index * 2 + 1];
+      if (liquidity?.status !== "success" || tier?.status !== "success") return shape(entry, null);
+      const count = Number((tier.result as { prizeCount: number }).prizeCount);
+      if (count === 0) return shape(entry, 0n);
+      return shape(entry, ((liquidity.result as bigint) * UTILISATION_BPS) / 10_000n / BigInt(count));
+    });
+  } catch {
+    // The shelf still lists every token when the node will not answer. A missing figure says so
+    // on the row rather than taking the row away.
+    return pools.map((entry) => shape(entry, null));
   }
 }

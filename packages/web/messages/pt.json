@@ -1,0 +1,981 @@
+{
+  "chrome": {
+    "home": "Hearth, início",
+    "nav": {
+      "pool": "O pool",
+      "verify": "Verificar",
+      "how": "Como funciona",
+      "docs": "Docs"
+    },
+    "menu": {
+      "open": "Abrir o menu",
+      "close": "Fechar o menu",
+      "label": "Menu do site"
+    },
+    "footer": {
+      "tagline": "Poupança premiada confidencial e sem perdas",
+      "zama": "Construído sobre o Protocolo da Zama",
+      "disclaimer": "Uma demonstração na rede de teste Sepolia. Os tokens são de teste e não valem nada, o rendimento é um saldo bancado por um patrocinador em vez de uma estratégia real, e nada aqui é recomendação financeira."
+    },
+    "language": {
+      "trigger": "Idioma: {name}. Trocar de idioma",
+      "list": "Escolha um idioma",
+      "heading": "Idioma",
+      "note": "Traduzido à mão. Uma página que ainda não alcançamos aparece em inglês.",
+      "current": "atual"
+    }
+  },
+
+  "landing": {
+    "scrollCue": "Role",
+    "noWebgl": "Este navegador não conseguiu iniciar a cena 3D, então a história está aqui como página. Nada mais no site precisa dela.",
+    "header": {
+      "how": "Como funciona",
+      "open": "Abrir o pool"
+    },
+    "story": {
+      "one": {
+        "kicker": "Poupança premiada confidencial",
+        "title": "Uma lareira. Acesa só para quem cuida dela."
+      },
+      "two": {
+        "kicker": "Você deposita",
+        "title": "Você a enche, e o valor se sela.",
+        "body": "O valor é cifrado no seu navegador e continua um texto cifrado na blockchain. Daqui em diante o número é só seu, e a lista de controle de acesso da Zama é o que garante isso."
+      },
+      "three": {
+        "title": "E ela é uma entre muitas.",
+        "body": "O saldo de cada poupador arde e nenhum deles pode ser lido de fora. O pool também nunca publica o total exato, só a potência de dois abaixo da qual ele fica, porque o total exato entregaria o depósito de quem se moveu sozinho."
+      },
+      "four": {
+        "kicker": "O sorteio",
+        "title": "Uma semente que ninguém vê, sorteada dentro do coprocessador.",
+        "body": "Os tamanhos dos prêmios são fixados antes de a semente existir, então ninguém pode ler uma semente, descobrir que ganhou e fazer o ganho valer mais. Quando o período termina a semente é publicada com uma assinatura que o contrato confere na blockchain."
+      },
+      "five": {
+        "kicker": "A vitória",
+        "title": "Uma lareira arde mais forte.",
+        "body": "As chances são proporcionais ao saldo mantido ao longo de todo o período, então um depósito feito pouco antes do sorteio rende só a fração do período em que esteve lá. O prêmio cai em um saldo de ganhos cifrado, e um resgate é um saque comum."
+      }
+    },
+    "close": {
+      "kicker": "Experimente",
+      "title": "Poupe no escuro.",
+      "body": "Deposite um token confidencial de teste na Sepolia, rode um sorteio você mesmo, e confira que só você consegue ler o seu próprio saldo. Não custa nada além de um pouco de ETH de teste.",
+      "open": "Abrir o pool",
+      "grandPrize": "<figure>{amount} {symbol}</figure> de prêmio grande no próximo sorteio",
+      "saversPeriod": "{count, plural, one {{shown} poupador} other {{shown} poupadores}} · período {period}",
+      "offline": "A Sepolia não está respondendo agora, então os números ao vivo estão faltando. O pool não é afetado: ele vive na blockchain, não aqui."
+    },
+    "shelf": {
+      "heading": "Escolha seu token",
+      "unread": "não lido",
+      "note": "Prêmio grande de cada pool agora, lido da blockchain. Mesmo cofre, mesmo sorteio, mesma privacidade, um por token confidencial."
+    },
+    "sealed": {
+      "heading": "O saldo de um poupador",
+      "empty": "Ninguém depositou ainda. Assim que alguém depositar, o saldo cifrado dessa pessoa aparece aqui e você pode tentar abri-lo.",
+      "try": "Tente abrir",
+      "asking": "Perguntando ao serviço de gestão de chaves da Zama",
+      "askingWait": "Costuma levar alguns segundos.",
+      "askingLong": "{seconds}s até agora. É uma rede ao vivo, então às vezes isso demora.",
+      "refused": "Recusado.",
+      "refusedNote": "Isso veio do serviço de gestão de chaves da Zama, não desta página. Só a carteira dona deste saldo consegue lê-lo, e nenhum administrador pode passar por cima disso.",
+      "unreachable": "Não foi possível alcançar o serviço de decifragem.",
+      "unreachableNote": "Isso é um problema de rede em vez de uma recusa, então não prova nada em nenhum dos sentidos. Vale tentar de novo em um instante.",
+      "again": "Tentar de novo",
+      "leaked": "Decifrou, e não deveria.",
+      "leakedNote": "O serviço devolveu {value}. Por favor, nos avise, porque este é o único resultado que este produto foi feito para tornar impossível."
+    },
+    "footer": {
+      "tagline": "Hearth, poupança premiada confidencial e sem perdas",
+      "how": "Como funciona",
+      "verify": "Verificar um sorteio",
+      "docs": "Docs",
+      "zama": "Construído sobre o Protocolo da Zama"
+    }
+  },
+
+  "how": {
+    "kicker": "Um guia de dois minutos",
+    "title": "Como o Hearth funciona",
+    "lede": "Poupe junto, ganhe um prêmio pago com rendimento, e nunca perca seu depósito. O dinheiro é invisível. A honestidade do sorteio não é.",
+    "steps": {
+      "one": {
+        "title": "Blinde, depois deposite",
+        "body": "Transforme um token de teste comum no gêmeo confidencial dele, depois coloque parte disso no pool daquele token. Blindar é público e depositar não é, e é exatamente por isso que são dois botões: fazer os dois em um clique publica o tamanho do seu depósito para qualquer um que leia a blockchain."
+      },
+      "two": {
+        "title": "Suas chances são o seu saldo médio",
+        "body": "Não o seu saldo no momento do sorteio, o seu saldo ao longo de todo o período. Deposite cinco minutos antes de o período acabar e você fica com um doze avos das chances de quem manteve o mesmo valor o período inteiro. É isso que impede alguém de exibir um saldo grande pouco antes de cada sorteio e levar o prêmio."
+      },
+      "three": {
+        "title": "O sorteio fecha, e uma semente é sorteada",
+        "body": "Os tamanhos dos prêmios são fixados primeiro, antes de qualquer número aleatório existir. Depois a semente é gerada como um texto cifrado dentro do coprocessador da Zama, então ninguém a vê quando ela é sorteada e não existe segunda rodada. Quando o período acaba a semente é publicada com uma assinatura que o contrato confere na blockchain."
+      },
+      "four": {
+        "title": "O resultado de todo mundo já está decidido",
+        "body": "A partir do momento em que a semente é verificada, os limiares são números públicos que qualquer um pode recalcular e os pesos não podem mais mudar. A avaliação só anota o que já é verdade, percorrendo a lista de poupadores a partir de um ponto que a semente escolheu. Ninguém escolhe quem é avaliado nem em que ordem."
+      },
+      "five": {
+        "title": "Você olha, e só você",
+        "body": "Aperte Revelar e assine uma mensagem. Essa assinatura prova ao relayer da Zama que você controla o endereço, e ele devolve o texto claro dos valores que o contrato concedeu a você: seu principal, seus ganhos, seu peso e seu crédito em cada sorteio. Não custa gás e não escreve nada."
+      },
+      "six": {
+        "title": "Tire quando quiser",
+        "body": "Os saques pagam primeiro dos ganhos, depois do principal, em uma transferência confidencial limitada na blockchain ao que você tem. Um resgate é a mesma chamada com a mesma forma de qualquer outro saque, então não existe tipo de transação que nomeie os vencedores."
+      }
+    },
+    "private": {
+      "title": "Cifrado, legível só por você",
+      "note": "seus próprios valores",
+      "one": "Seu principal",
+      "two": "Seus ganhos não resgatados",
+      "three": "Seu saldo ponderado pelo tempo em cada sorteio",
+      "four": "Quanto cada sorteio pagou a você, e portanto se você ganhou"
+    },
+    "public": {
+      "title": "Público, para que o pool mereça confiança",
+      "note": "qualquer um confere",
+      "one": "A semente de cada sorteio, e a assinatura dela",
+      "two": "A faixa contra a qual o sorteio rodou",
+      "three": "O tamanho do prêmio e a liquidez de cada nível",
+      "four": "Quantos prêmios um nível pagou, um sorteio depois",
+      "five": "Quais endereços depositaram, e quando"
+    },
+    "leaks": {
+      "title": "Dito com honestidade: o que vaza",
+      "oneLead": "Blindar e desblindar são públicos.",
+      "oneBody": "Transformar um token público em um confidencial é, por definição, um ato público. Se alguém consegue fixar o seu saldo, normalmente vendo uma blindagem pública seguida de um depósito do mesmo tamanho, então o seu resultado em todo sorteio dali em diante é aritmética pública, porque os limiares são públicos por projeto.",
+      "twoLead": "Abaixo de três poupadores a faixa é quase pessoal.",
+      "twoBody": "Com um poupador ela é o peso desse poupador com margem de um fator de dois. O aplicativo diz isso na página quando acontece.",
+      "threeLead": "Cada nível publica quantos prêmios pagou,",
+      "threeBody": "um sorteio depois, nunca para quem. Esse é o mesmo passo que devolve o dinheiro não ganho ao bolo público, que é o que deixa o prêmio grande acumular onde você pode ver. Ele estreita devagar um saldo que nunca se move.",
+      "fourLead": "O token é da Zama, e é atualizável.",
+      "fourBody": "O dono dele pode nomear observadores capazes de decifrar todo valor que passa pelo token, retroativamente. O registro próprio do Hearth não é legível por eles, e o aplicativo mostra um aviso se algum observador for nomeado."
+    },
+    "closing": "Você pode assistir a um sorteio inteiro e ainda assim não saber dizer quem ganhou. Esse é o ponto, e é a única coisa que só a criptografia totalmente homomórfica torna possível.",
+    "open": "Abrir o pool",
+    "check": "Confira um sorteio você mesmo"
+  },
+
+  "console": {
+    "shell": {
+      "openMenu": "Abrir o menu do console",
+      "closeMenu": "Fechar o menu do console",
+      "menuLabel": "Menu do console",
+      "loading": "Acendendo a lareira"
+    },
+    "sidebar": {
+      "nav": "Console",
+      "dashboard": "Painel",
+      "deposit": "Depósito",
+      "withdraw": "Saque",
+      "draws": "Meus sorteios",
+      "run": "Rodar um sorteio",
+      "anyone": "Qualquer um",
+      "anyoneTitle": "Todo passo de um sorteio pode ser chamado por qualquer carteira",
+      "docs": "Docs",
+      "verify": "Verificar"
+    },
+    "wallet": {
+      "connect": "Conectar carteira",
+      "connecting": "Conectando",
+      "scan": "Escanear com o celular",
+      "getWallet": "Instalar uma carteira",
+      "noneLead": "Este navegador não tem carteira nenhuma. ",
+      "noneLink": "Escolha uma no ethereum.org",
+      "noneTail": ", adicione um pouco de ETH de teste da Sepolia, e volte. Tudo nesta tela é livre para ler sem carteira.",
+      "switching": "Trocando",
+      "switchTo": "Trocar para {network}",
+      "options": "Opções da carteira",
+      "explorer": "Ver no Etherscan",
+      "disconnect": "Desconectar"
+    },
+    "connect": {
+      "prompt": "Conecte uma carteira primeiro."
+    },
+    "note": {
+      "encrypting": "cifrando e provando, cerca de dez segundos",
+      "signing": "confirme na sua carteira",
+      "mining": "esperando a transação ser minerada",
+      "done": "pronto",
+      "busy": "Esse toque foi ignorado: {label} já está rodando e uma carteira assina uma transação por vez. Espere a linha acima terminar.",
+      "line": "{label}: {state}",
+      "explorer": "Ver a transação no Etherscan",
+      "dismiss": "Dispensar"
+    },
+    "actions": {
+      "mint": "Consiga tokens de teste",
+      "approve": "Aprovar o wrapper",
+      "wrap": "Blindar no token confidencial",
+      "deposit": "Depositar",
+      "withdraw": "Sacar",
+      "withdrawAll": "Sacar tudo",
+      "close": "Fechar o sorteio {drawId}",
+      "award": "Premiar o sorteio {drawId}",
+      "advance": "Avançar o sorteio {drawId}",
+      "finalize": "Finalizar o sorteio {drawId}",
+      "reconcile": "Reconciliar o nível {tier}",
+      "askingSeed": "pedindo a semente ao serviço de gestão de chaves da Zama",
+      "seedSealing": "a semente está publicada mas ainda não é decifrável, perguntando de novo",
+      "askingCarry": "pedindo a liquidez não paga do nível"
+    },
+    "reveal": {
+      "signing": "assine o pedido na sua carteira, não custa gás",
+      "asking": "decifrando no seu navegador",
+      "sealing": "o valor acabou de ser escrito e ainda não é decifrável, perguntando de novo",
+      "newKey": "uma parte do KMS falhou, tentando de novo com uma chave nova",
+      "elapsed": "{seconds}s até agora, normalmente são poucos",
+      "stopWaiting": "Parar de esperar",
+      "denied": "O relayer da Zama recusou: esta carteira não é a dona destes valores.",
+      "reveal": "Revelar {label}",
+      "hide": "Esconder {label}",
+      "sealAgain": "Selar de novo",
+      "cost": "Revelar, uma assinatura, sem gás",
+      "encrypted": "{label}, cifrado",
+      "encryptedAlone": "cifrado",
+      "partial": "O relayer respondeu sem este valor, então o total não é conhecido."
+    },
+    "unknown": {
+      "word": "desconhecido",
+      "default": "Isto ainda não voltou da blockchain."
+    },
+    "amount": {
+      "max": "Máx",
+      "allOfIt": "Tudo",
+      "maxFor": "{max}: {name}",
+      "shape": "Só números. A vírgula e o ponto valem como separador decimal, no máximo um, e sem separador de milhar.",
+      "precision": "{symbol} tem {decimals} casas decimais, então nada mais fino que {smallest} pode ser enviado.",
+      "zero": "Digite um valor acima de zero."
+    },
+    "banners": {
+      "wrongNetwork": "Sua carteira está na rede errada.",
+      "wrongNetworkBody": "O Hearth está implantado na Ethereum Sepolia. Nada nesta página lê ou escreve até sua carteira estar nela.",
+      "switch": "Trocar para a Sepolia",
+      "denied": "Este endereço está na lista de bloqueio do token.",
+      "deniedBody": "{symbol} recusa toda transferência de entrada e de saída deste endereço, então depósitos e saques vão reverter. Essa é uma configuração do dono do token, não nossa.",
+      "tokenPaused": "O token {symbol} está pausado.",
+      "tokenPausedBody": "Blindar, transferir e desblindar estão todos parados na camada do token. Os contratos do próprio Hearth não são afetados, mas nada pode se mover até a Zama despausar.",
+      "vaultPaused": "O cofre está pausado.",
+      "vaultPausedBody": "Novos depósitos e o fechamento de sorteios estão parados. Sacar, avaliar, premiar e finalizar nunca podem ser pausados, então seu dinheiro continua seu para tirar.",
+      "poolPaused": "O pool de prêmios está pausado.",
+      "poolPausedBody": "Sorteios não podem ser fechados. Premiação, avaliação, reconciliação e saques continuam.",
+      "observers": "O dono do token nomeou {count, plural, one {{shown} observador} other {{shown} observadores}}.",
+      "observersBody": "Um observador em {symbol} pode decifrar todo valor que passa pelo token, inclusive depósitos e pagamentos, e retroativamente. O registro próprio do Hearth, o seu principal, os seus ganhos, o seu peso e o seu crédito, não é legível por ele.",
+      "upgraded": "O token {symbol} foi atualizado.",
+      "upgradedBody": "Ele agora roda a implementação {implementation}, que não é aquela cujo código-fonte lemos linha por linha. O comportamento dele sobre os handles do Hearth pode ter mudado.",
+      "unknownImplementation": "uma desconhecida",
+      "thinSet": "Só {count, plural, one {{shown} poupador} other {{shown} poupadores}} no pool agora.",
+      "thinSetBody": "Abaixo de {minimum} poupadores a faixa publicada chega perto de informação pessoal: com um poupador ela é o peso desse poupador com margem de um fator de dois, e com dois cada um limita o outro. Os valores seguem cifrados de todo jeito, mas a privacidade é fina até mais gente entrar.",
+      "noKeeper": "Nenhum sorteio foi avançado nas últimas horas.",
+      "noKeeperBody": "Todo passo de um sorteio pode ser chamado por qualquer pessoa. Rodar um sorteio, na barra lateral, oferece os cinco. Um keeper travado custa sorteios, nunca dinheiro.",
+      "keeperLate": "O último passo de sorteio chegou {ago}, mais que um período.",
+      "keeperLateFrom": "Enviado por {address}. ",
+      "keeperLateBody": "Ninguém precisa esperar por um keeper: Rodar um sorteio fecha, premia, avalia, finaliza e reconcilia a partir da sua própria carteira.",
+      "keeperLink": "Ver no Etherscan",
+      "tokenUnread": "O estado do próprio token não pôde ser lido.",
+      "tokenUnreadBody": "O Hearth confere em {symbol} se há observadores, se há pausa e se há bloqueio do seu endereço a cada visita, e essas leituras não responderam. Nada mudou na blockchain, só a visão que esta página tem dela. Isso significa, sim, que os avisos sobre o token nesta tela estão faltando porque nada foi lido, não porque não havia nada a relatar.",
+      "historyDown": "O histórico de sorteios está indisponível.",
+      "historyDownBody": "{detail} Todo número nas próprias telas continua vindo direto da blockchain."
+    },
+    "unsupported": {
+      "subtitle": "O Hearth não pode abrir um pool sobre este token, então não há nada aqui para assinar.",
+      "pill": "sem suporte",
+      "notDeployed": "não implantado",
+      "whyLabel": "Por que este token não tem pool",
+      "whyOne": "O mint deste token é restrito ao emissor dele, então o Hearth não pode abrir um pool sobre ele. Escolha outro pool.",
+      "whyTwo": "Um pool do Hearth precisa que os poupadores consigam obter o token comum primeiro e blindá-lo eles mesmos. {name} é emitido pela Zama na Sepolia e o subjacente dele só pode ser cunhado pelo endereço que o implantou, então ninguém além do emissor consegue blindar nele e um cofre sobre ele ficaria vazio. Essa é uma configuração do token, não um limite dos contratos daqui: o cofre aceita qualquer token confidencial que siga o padrão.",
+      "reason": "Motivo",
+      "confidentialToken": "Token confidencial",
+      "underlying": "Subjacente",
+      "publishedBy": "Publicado por",
+      "zamaList": "Endereços da Zama na Sepolia",
+      "pickLabel": "Escolha um pool que esteja aberto",
+      "pickNote": "Todo pool acima é o mesmo cofre, o mesmo sorteio e a mesma privacidade, sobre um token confidencial diferente. Sua posição em um não diz nada sobre sua posição em outro."
+    }
+  },
+
+  "picker": {
+    "trigger": "Poupando em {symbol}. Trocar de token",
+    "list": "Escolha um token",
+    "saveIn": "Poupe em",
+    "grandPrize": "Prêmio grande",
+    "unread": "não lido",
+    "savingPool": "pool de poupança",
+    "notSupported": "sem suporte",
+    "zamaList": "Lista da Zama",
+    "reasons": {
+      "restrictedMint": "a emissão é restrita ao emissor"
+    }
+  },
+
+  "dashboard": {
+    "title": "Painel",
+    "subtitle": "O que você tem, o que o pool está fazendo, e a única coisa a fazer em seguida.",
+    "next": "Próximo",
+    "position": {
+      "label": "O que você tem",
+      "open": "aberto neste navegador",
+      "sealed": "selado na blockchain",
+      "principal": "Principal",
+      "principalNote": "O que você poupou. Suas chances são ponderadas por isso ao longo de todo o período.",
+      "principalSpoken": "seu principal",
+      "winnings": "Ganhos não resgatados",
+      "winningsNote": "Dinheiro de prêmio creditado a você e ainda não sacado. Ele não rende chances próprias.",
+      "winningsSpoken": "seus ganhos não resgatados",
+      "outside": "Esta carteira não está no pool agora. Deposite e os dois números começam a se preencher.",
+      "footConnect": "Conecte uma carteira para abrir os seus. Mais ninguém consegue, e é a lista de acesso da Zama na blockchain que garante isso, não uma promessa desta página.",
+      "footNetwork": "Abrir isto precisa de uma assinatura na Sepolia. Troque a carteira para ela e o olho volta a funcionar.",
+      "footOpen": "Só este navegador viu esses números. Nada foi escrito na blockchain e nada foi enviado a nenhum servidor.",
+      "footSealed": "O olho pede ao relayer da Zama para decifrar valores que este endereço possui. Uma assinatura, sem gás, sem transação."
+    },
+    "pool": {
+      "label": "O pool agora",
+      "pill": "público para todo mundo",
+      "savers": "Poupadores",
+      "saversUnknown": "A contagem de poupadores ainda não voltou da blockchain.",
+      "liquidity": "Liquidez de prêmio",
+      "liquidityUnknown": "Um dos três saldos de nível ainda não voltou, e uma soma parcial não é o pool.",
+      "period": "Período",
+      "periodUnknown": "O período atual ainda não voltou da blockchain.",
+      "endsIn": "Termina em",
+      "endsUnknown": "O fim deste período ainda não voltou da blockchain.",
+      "tier": "Nível",
+      "chance": "Chance",
+      "prizeEach": "Prêmio cada ({symbol})",
+      "prizeCount": "{count, plural, one {{shown} prêmio por sorteio} other {{shown} prêmios por sorteio}}",
+      "prizeCountUnknown": "contagem de prêmios desconhecida",
+      "carryWaiting": "remanescente do sorteio {drawId} esperando",
+      "oddsUnknown": "As chances deste nível ainda não voltaram da blockchain.",
+      "nextPrizeUnknown": "O próximo prêmio deste nível ainda não voltou da blockchain.",
+      "footOne": "Cada prêmio é metade da liquidez do nível dele dividida pela contagem de prêmios, fixada no fechamento antes de a semente aleatória existir. O que ninguém ganha é publicado um sorteio depois e oferecido de novo.",
+      "footBracket": "As chances são sorteadas contra uma faixa de <bracket>2^{bits}</bracket>, publicada junto com o sorteio.",
+      "footBracketUnknown": "A faixa contra a qual essas chances são sorteadas ainda não voltou da blockchain."
+    },
+    "tiers": {
+      "grand": "Grande",
+      "mid": "Médio",
+      "frequent": "Frequente"
+    },
+    "tiersLower": {
+      "grand": "grande",
+      "mid": "médio",
+      "frequent": "frequente"
+    }
+  },
+
+  "nextStep": {
+    "connectTitle": "Conecte uma carteira para começar.",
+    "connectDetail": "O Hearth roda na Ethereum Sepolia. Você precisa de um pouco de ETH de teste para o gás, e o {underlyingSymbol} de teste está a um clique assim que uma carteira estiver conectada.",
+    "connectCta": "Conectar carteira",
+    "switchTitle": "Esta carteira está apontada para outra rede.",
+    "switchDetail": "Os números do pool nesta página são lidos da Sepolia de todo jeito. Nada pode ser assinado ou enviado até a carteira estar nela também.",
+    "switchCta": "Trocar para a Sepolia",
+    "readingTitle": "Lendo esta carteira da blockchain.",
+    "readingDetail": "O próximo passo aparece assim que as leituras chegarem. Nomear um a partir de um saldo que não chegou apontaria você para a tela errada.",
+    "faucetTitle": "Consiga {underlyingSymbol} de teste.",
+    "faucetDetail": "O {underlyingSymbol} de mentira tem mint aberto, limitado a um milhão de tokens por chamada. Não vale nada, então pegue mais do que precisa.",
+    "faucetCta": "Consiga {underlyingSymbol} de teste",
+    "shieldTitle": "Blinde seu {underlyingSymbol}.",
+    "shieldDetail": "Blindar transforma {underlyingSymbol} comum em {symbol}. Esse passo é público por natureza, e é a última coisa sobre este dinheiro que alguém consegue ler.",
+    "shieldCta": "Blindar {underlyingSymbol}",
+    "depositTitle": "Coloque seu {symbol} no pool.",
+    "depositDetail": "O valor é cifrado no seu navegador antes de ser enviado, então o cofre credita um número que não consegue ler. Suas chances acompanham o que você tem.",
+    "depositCta": "Depositar",
+    "claimTitle": "Você tem ganhos esperando.",
+    "claimDetail": "Resgatar é um saque comum daquele valor. Na blockchain ele tem a mesma forma de qualquer outro saque, e é isso que impede que ele nomeie o vencedor.",
+    "claimCta": "Resgatar seus ganhos",
+    "readingDrawsTitle": "Lendo os sorteios recentes.",
+    "readingDrawsDetail": "O próximo passo aparece assim que eles chegarem. Nomear um a partir de uma lista de sorteios que não chegou apontaria você para a tela errada.",
+    "resultTitle": "O sorteio {drawId} tem o seu resultado escrito.",
+    "resultDetail": "A varredura alcançou esta carteira, então se ela ganhou já está decidido e guardado. Fica selado até você abrir, o que custa uma assinatura e nenhum gás.",
+    "resultCta": "Abrir o sorteio {drawId}",
+    "settledTitle": "Nada precisa ser feito agora.",
+    "settledDetail": "Seu depósito fica no pool e rende chances a cada segundo em que está lá. O próximo sorteio fecha no fim do período, e qualquer um pode fechá-lo.",
+    "settledCta": "Aumentar seu depósito",
+    "noWallet": "Nenhuma carteira encontrada"
+  },
+
+  "deposit": {
+    "title": "Depósito",
+    "subtitle": "Consiga {underlying} de teste, blinde em {confidential}, depois coloque no cofre.",
+    "connect": "Conecte uma carteira na Sepolia para depositar. Os três passos abaixo são o que colocar dinheiro no pool exige, e a tela abre naquele em que a sua carteira realmente está.",
+    "connectNote": "Você vai precisar de um pouco de ETH da Sepolia para o gás. O {underlying} de teste está a um clique assim que você conectar.",
+    "lowGas": "Esta carteira quase não tem ETH da Sepolia, então uma transação vai falhar antes de ser enviada. Qualquer faucet da Sepolia recarrega: o faucet Web3 do Google Cloud, o da Alchemy ou o da Chainlink. Um décimo de ETH é muito mais que suficiente.",
+    "inWallet": "Na sua carteira",
+    "inWalletSpoken": "seu saldo de {symbol}",
+    "inWalletUnknown": "Na sua carteira: ",
+    "faucet": {
+      "title": "Consiga {underlying} de teste",
+      "held": "{amount} {underlying} na sua carteira.",
+      "heldSummary": "{amount} {underlying} na sua carteira. ",
+      "more": "Consiga mais um milhão",
+      "unread": "O saldo da sua carteira ainda não voltou da blockchain.",
+      "button": "Consiga {underlying} de teste",
+      "note": "O {underlying} de mentira tem mint aberto, limitado a um milhão de tokens por chamada. Não vale nada, então peça mais do que precisa."
+    },
+    "shield": {
+      "title": "Blinde seu {underlying}",
+      "summary": "Blindado. O saldo está selado, então só você consegue ler o que tem nele. ",
+      "more": "Blindar mais",
+      "body": "Blindar transforma {underlying} comum em {confidential}, e é público. O contrato do wrapper emite o valor em texto claro, a transferência ERC-20 o carrega de novo, e não há como escapar disso: transformar um token público em um confidencial é, por definição, um ato público.",
+      "youShield": "Você blinda",
+      "fieldName": "Valor de {underlying} a blindar",
+      "balance": "{amount} {underlying} na sua carteira",
+      "tooMuch": "Você tem {amount} {underlying}. Peça menos, ou cunhe mais antes.",
+      "youReceive": "Você recebe",
+      "rateUnknown": "A taxa do wrapper ainda não voltou da blockchain.",
+      "rateOne": "O wrapper é um para um, então você recebe exatamente o que blinda.",
+      "rateOther": "O wrapper cobra {rate} unidades de {underlying} por uma unidade de {confidential}.",
+      "why": "É por isso que blindar e depositar são dois botões e não um. Blinde um número redondo, na hora que você quiser, e deposite parte dele depois. Quem consegue fixar o seu saldo pode calcular se você ganhou em todo sorteio dali em diante, porque os limiares são públicos por projeto.",
+      "approve": "Aprovar o wrapper",
+      "button": "Blindar",
+      "approveNote": "Uma aprovação, e toda blindagem depois dela é uma única transação. Ela deixa o contrato do wrapper {confidential} puxar {underlying} desta carteira e não alcança mais nada que você tem. {underlying} é um token de teste da Sepolia vindo do botão de faucet acima, sem valor em nenhuma rede real. O botão de blindar assume assim que a aprovação for minerada.",
+      "waiting": "Seus saldos ainda não voltaram da blockchain, então isto fica esperando até que voltem.",
+      "skip": "Depositar o que você já tem"
+    },
+    "vault": {
+      "title": "Deposite no cofre",
+      "body": "O valor é cifrado no seu navegador com uma prova de conhecimento zero, depois enviado em uma transação. O cofre credita exatamente o que o token diz que se moveu de fato, então pedir mais do que você tem não move nada em vez de falhar ruidosamente. Abra o olho abaixo se não tiver certeza do que você tem.",
+      "closedNotAwarded": "Um sorteio está fechado e esperando a premiação dele agora. Depositar segue permitido; este dinheiro conta a partir deste momento, ponderado pela parte do período atual que ainda falta correr.",
+      "youDeposit": "Você deposita",
+      "fieldName": "Valor de {confidential} a depositar",
+      "cap": "O cofre limita um poupador a {amount} {confidential}, então isto seria recusado e devolvido dentro da mesma transação.",
+      "tooMuch": "Você tem {amount} {confidential}. Pedir mais não é recusado na blockchain: o token move o que você tem, que aqui é nada, e a transação ainda assim dá certo.",
+      "sealedNote": "Seu saldo está selado, então esta tela não consegue conferir o valor contra ele. Um depósito acima do que você tem não move nada e ainda custa uma transação. Abra o olho acima e o campo é conferido para você.",
+      "button": "Depositar",
+      "paused": "O cofre está pausado, então depósitos são recusados. Sacar continua funcionando."
+    }
+  },
+
+  "withdraw": {
+    "title": "Saque",
+    "subtitle": "Dois estágios: para fora do cofre, depois de volta para {underlying}. O principal nunca fica travado, nem no meio de um sorteio.",
+    "connect": "Conecte uma carteira para sacar. O estágio um tira principal e ganhos do cofre, o estágio dois transforma {confidential} de volta em {underlying}.",
+    "connectNote": "Nada aqui fica travado. O principal volta integralmente sempre que você pedir, inclusive no meio de um sorteio.",
+    "tabs": {
+      "label": "Estágios do saque",
+      "vault": "Para fora do cofre",
+      "unshield": "De volta ao token comum",
+      "unfinished": "tem algo por terminar"
+    },
+    "pending": {
+      "title": "Uma desblindagem foi enviada e nunca terminou.",
+      "body": "Os tokens confidenciais já foram queimados e o {underlying} está esperando no wrapper. Enviar a segunda transação libera. ",
+      "link": "Ver a desblindagem",
+      "finish": "Terminar a desblindagem"
+    },
+    "vault": {
+      "reading": "Lendo o que esta carteira tem no cofre.",
+      "unavailable": "As leituras desta carteira não voltaram, então esta tela não sabe dizer o que o cofre guarda para você. Recarregue quando a rede estiver respondendo.",
+      "neverDepositedLead": "Esta carteira nunca depositou, então o cofre não guarda nada para ela e um saque seria recusado na blockchain. ",
+      "depositFirst": "Deposite primeiro",
+      "neverDepositedTail": ", ou use o estágio dois se você tem {confidential} que quer de volta como {underlying}.",
+      "youWithdraw": "Você saca",
+      "fieldName": "Valor a sacar do cofre",
+      "inVault": "No cofre",
+      "inVaultSpoken": "seu saldo no cofre",
+      "clamped": "Isso é mais do que você tem. O cofre envia os {amount} que você tem e para por aí.",
+      "revealNote": "Revele para limitar este campo e ver a divisão. Pular isso é seguro: o cofre limita o valor na blockchain de todo jeito.",
+      "youReceive": "Você recebe",
+      "receiveBalance": "Na sua carteira, ainda cifrado. O estágio dois transforma de volta em {underlying}.",
+      "split": "{winnings} disso sai dos ganhos e {principal} do principal, em uma transferência que parece igual nos dois casos.",
+      "splitSealed": "Revele seu saldo do cofre para ver como isso se divide entre ganhos e principal.",
+      "button": "Sacar",
+      "everything": "Sacar tudo",
+      "everythingNote": "Sacar tudo não precisa de revelação nem de entrada cifrada. O cofre soma seu principal aos seus ganhos na blockchain e envia o total, então nem você nem esta página precisa saber quanto é antes.",
+      "howLabel": "Como um saque é pago",
+      "howOne": "Os ganhos vão primeiro, depois o principal, em uma transferência confidencial. Nada na transferência diz de que partes ela foi feita.",
+      "howTwo": "O valor é limitado na blockchain ao menor entre o que você pede, o que você tem e o que o cofre tem, porque uma transferência confidencial move o valor inteiro ou nada. Um pedido grande demais envia tudo que você tem em vez de falhar, que é também por que ninguém pode descobrir o seu saldo pedindo demais e vendo o que acontece.",
+      "howWindow": "Uma janela de sorteio está aberta agora. Sacar é permitido e não muda as chances já fixadas para você. Qualquer prêmio daquele sorteio cai nos seus ganhos, para um saque posterior.",
+      "howThree": "O principal nunca fica travado. Não há aviso prévio, nem multa, nem espera pelo fim de um sorteio."
+    },
+    "unshield": {
+      "youUnshield": "Você desblinda",
+      "fieldName": "Valor de {confidential} a desblindar",
+      "inWallet": "Na sua carteira",
+      "inWalletSpoken": "seu saldo de {confidential}",
+      "tooMuch": "Você tem {amount} {confidential}. Pedir mais não é recusado na blockchain: gasta as duas transações e não move nada.",
+      "revealNote": "Revele para limitar este campo. Uma desblindagem maior do que você tem não é recusada, só não move nada.",
+      "youReceive": "Você recebe",
+      "receiveBalance": "{underlying} na sua carteira, gastável em qualquer lugar.",
+      "receiveNote": "Este número vai para a blockchain em claro. A primeira das duas transações é o que o publica.",
+      "button": "Desblindar",
+      "unfinished": "Uma nova desblindagem tem que esperar a de cima terminar. Só uma é lembrada por vez, e começar outra deixaria a primeira com os tokens queimados e nada para liberá-los.",
+      "unwrapping": "Desblindar: sua carteira pergunta duas vezes. Primeiro uma assinatura para o wrapper poder ler seu saldo confidencial, que não custa gás, depois a transação em si.",
+      "waiting": "Desblindagem enviada. Esperando o protocolo da Zama publicar o texto claro e a prova dele.",
+      "finalizing": "Finalizando: confirme a segunda transação para liberar o {underlying}.",
+      "done": "Desblindado. Seu saldo de {underlying} subiu {amount}, lido da blockchain depois da segunda transação.",
+      "doneUnchecked": "Desblindado. As duas transações chegaram, mas o saldo de {underlying} não pôde ser lido de volta, então esta tela não sabe dizer o que chegou. Confira sua carteira.",
+      "nothingMoved": "Nada se moveu. As duas transações chegaram e seu saldo de {underlying} está exatamente como estava, o que acontece quando o valor era maior que o seu saldo confidencial: o wrapper não libera nada em vez de recusar. Abra o saldo com o olho acima e use Tudo.",
+      "whyLabel": "Por que isso leva duas transações",
+      "whyOne": "O wrapper queima o valor cifrado e o publica primeiro, depois libera os tokens comuns quando o protocolo da Zama tiver produzido o texto claro e a prova dele. Essas são duas chamadas separadas, e a segunda pode ser enviada depois se você fechar a aba entre elas.",
+      "whyTwo": "Sua carteira também pede uma assinatura antes da primeira transação, porque o wrapper lê seu saldo confidencial para conferir o valor. Esse pedido é uma assinatura e não uma transação, e não custa gás.",
+      "whyThree": "Vale saber antes de esvaziar: blinde tudo na entrada e desblinde tudo na saída, e a diferença entre os dois totais públicos é um piso de tudo que você já ganhou. Desblinde em números redondos, ou deixe um saldo confidencial parado para trás."
+    }
+  },
+
+  "draws": {
+    "title": "Meus sorteios",
+    "subtitle": "Cada sorteio recente, os números públicos de prêmio dele, e o seu próprio peso e prêmio atrás do olho.",
+    "count": "{count} mais recentes",
+    "reading": "lendo",
+    "emptyReading": "Lendo o pool.",
+    "emptyNone": "Nenhum período terminou ainda, então não há sorteio para mostrar. O primeiro aparece assim que o período 1 acabar.",
+    "emptyFailed": "Os sorteios não puderam ser lidos agora. Eles estão na blockchain de todo jeito; esta página tenta de novo sozinha.",
+    "card": {
+      "label": "Sorteio {drawId}",
+      "claimNote": "Resgatar é um saque comum exatamente daquele valor. Na blockchain ele tem a mesma forma de qualquer outro saque, e é isso que impede um resgate de nomear o vencedor.",
+      "claim": "Resgatar {amount} {symbol}",
+      "advanceNote": "Avançar move a varredura compartilhada em até {batch} poupadores, na ordem que a semente deste sorteio definiu. Não dá para mirá-la em você, então apertar isso não diz nada sobre se você ganhou.",
+      "advance": "Avançar o sorteio",
+      "waitingLead": "Este passo é aberto a qualquer pessoa. ",
+      "waitingLink": "Rodar um sorteio",
+      "waitingTail": " tem ele.",
+      "periodEnded": "Período {drawId} terminou",
+      "periodEndedUnknown": "O fim deste período ainda não voltou da blockchain.",
+      "closeDeadline": "Prazo de fechamento",
+      "closeDeadlineUnknown": "O prazo de fechamento deste sorteio ainda não voltou da blockchain.",
+      "passed": "vencido",
+      "prizeWindow": "Janela de prêmios",
+      "windowUnknown": "A janela deste sorteio ainda não voltou da blockchain.",
+      "windowLeft": "faltam {time}",
+      "windowClosed": "fechada",
+      "bracket": "Faixa",
+      "bracketNote": "publicada no lugar do peso total do pool",
+      "walk": "Varredura",
+      "walkNotStarted": "não começou",
+      "walkProgress": "{cursor} de {total}",
+      "walkNote": "até {batch} poupadores por chamada",
+      "prizeWorth": "Quanto valia um prêmio",
+      "noPrizeMoney": "Este sorteio não ofereceu dinheiro de prêmio: nenhuma colheita tinha sido contabilizada quando ele fechou.",
+      "yourResult": "Seu resultado",
+      "sealedResult": "um resultado, cifrado",
+      "sealedResultNote": "Cifrado na blockchain, e legível só pela carteira dona dele.",
+      "notReachedUnknown": "A varredura ainda não chegou em você, e a janela deste sorteio não voltou da blockchain, então a página não sabe dizer se ele ainda pode ser avançado.",
+      "notReachedYet": "A varredura ainda não chegou em você. Até chegar, este sorteio não guarda número nenhum para você, ganho ou não.",
+      "missedWindow": "A janela fechou antes de a varredura chegar em você, então este sorteio não paga nada a você e o dinheiro voltou para os níveis. Ninguém consegue avaliá-lo agora.",
+      "yourPrize": "Seu prêmio",
+      "yourPrizeSpoken": "seu prêmio no sorteio {drawId}",
+      "yourWeight": "Seu peso",
+      "yourWeightSpoken": "seu peso no sorteio {drawId}",
+      "noPrize": "Sem prêmio neste sorteio. Seu peso foi contado e os limiares não caíram a seu favor.",
+      "claimed": "Já retirado. O cofre não deve nada a esta carteira, então este prêmio está no seu saldo confidencial. O sorteio guarda o número como registro."
+    }
+  },
+
+  "describe": {
+    "unreadBadge": "não lido",
+    "unread": "Este sorteio ainda não voltou da blockchain, então nada abaixo dele é fato. A página segue perguntando.",
+    "notClosedBadge": "não fechado",
+    "notClosed": "O período acabou e este sorteio está esperando ser fechado. Qualquer um pode fechá-lo, você inclusive.",
+    "missedBadge": "perdido",
+    "missed": "Ninguém fechou este sorteio antes do prazo dele, então ele não paga nada. A liquidez dele nunca foi movida e o próximo fechamento a oferece de novo.",
+    "closedBadge": "esperando a prova",
+    "closed": "Fechado. A semente, a faixa, o sinalizador de não vazio e a colheita estão publicados e esperando o serviço de gestão de chaves da Zama assinar os textos claros. Qualquer um pode buscá-los e premiar o sorteio.",
+    "emptyBadge": "vazio",
+    "empty": "Ninguém tinha saldo durante este período, então não havia o que pesar. A liquidez oferecida voltou direto para os níveis.",
+    "skippedBadge": "pulado",
+    "skipped": "A premiação chegou depois da janela do sorteio, então nenhum prêmio foi pago. A liquidez voltou para os níveis e a colheita ainda assim foi contabilizada.",
+    "awardedBadge": "premiado",
+    "awardedAllDisconnected": "Premiado, e a varredura alcançou todo poupador nele. Conecte uma carteira para ver onde você estava nele.",
+    "awardedDisconnected": "Premiado. A varredura de avaliação ainda está rodando. Conecte uma carteira para ver onde você está nela.",
+    "awardedAllOutside": "Premiado e todo poupador avaliado. Esta carteira não estava no pool na época.",
+    "awardedOutside": "Premiado. A varredura de avaliação ainda está rodando, e esta carteira não está nela.",
+    "awardedAll": "Premiado, e a varredura alcançou todo poupador nele. Todo resultado está fixado e escrito.",
+    "awarded": "Premiado. A partir deste momento todo resultado já está decidido: os limiares são públicos e os pesos não podem mais mudar. A avaliação só os anota."
+  },
+
+  "run": {
+    "title": "Rodar um sorteio",
+    "subtitle": "Um sorteio leva cinco transações. Cada uma delas pode ser chamada por qualquer carteira, a sua inclusive.",
+    "connect": "Conecte uma carteira para enviar qualquer uma destas. Nenhuma precisa de um privilégio que os contratos reconheçam, e nenhuma pode ser mirada em um poupador específico.",
+    "connectNote": "Os cinco passos abaixo leem da blockchain de todo jeito, então vale olhar a tela antes de conectar qualquer coisa.",
+    "waitingFor": "O que o pool está esperando",
+    "nothing": "Nada",
+    "ordering": " Um sorteio também está pronto para fechar. Finalizar e reconciliar vêm antes, porque o dinheiro que um remanescente libera é a base dos prêmios do próximo fechamento.",
+    "unknownDue": "As leituras que dizem qual passo está na vez ainda não voltaram da blockchain.",
+    "idleWithClock": "Ou o keeper acompanhou o ritmo ou este período ainda está rodando. Ele termina em {time}.",
+    "idle": "Ou o keeper acompanhou o ritmo ou este período ainda está rodando.",
+    "railLabel": "Os cinco passos, na ordem em que um sorteio precisa deles",
+    "unknownStep": "Se este passo está disponível ainda não voltou da blockchain.",
+    "chip": {
+      "due": "na vez agora",
+      "ready": "pronto",
+      "unknown": "desconhecido",
+      "notYet": "ainda não"
+    },
+    "blocked": {
+      "connect": "Conecte uma carteira para enviar isto.",
+      "network": "Sua carteira está em outra rede.",
+      "busy": "Outra transação já está a caminho."
+    },
+    "close": {
+      "title": "Fechar",
+      "headline": "Fechar o sorteio {drawId}",
+      "headlineIdle": "Fechar um sorteio",
+      "button": "Fechar",
+      "does": "Fixa o tamanho do prêmio de cada nível a partir do dinheiro que está nele, move esse dinheiro para o sorteio, colhe a fonte de rendimento, e sorteia uma semente cifrada que ninguém, nós inclusive, consegue ler.",
+      "paused": "O pool de prêmios está pausado, então nenhum sorteio pode ser fechado.",
+      "readyDeadline": "O sorteio {drawId} pode ser fechado por mais {time}. Passado isso ele é pulado e o dinheiro dele fica nos níveis.",
+      "ready": "O sorteio {drawId} está esperando ser fechado.",
+      "waitingClock": "Nenhum sorteio está esperando. O sorteio {drawId} fica fechável em {time}, quando este período terminar.",
+      "waiting": "Nenhum sorteio está esperando para ser fechado."
+    },
+    "award": {
+      "title": "Premiar",
+      "headline": "Premiar o sorteio {drawId}",
+      "headlineIdle": "Premiar um sorteio",
+      "button": "Premiar",
+      "does": "Entrega ao pool os textos claros dos quatro valores que o fechamento publicou, com a assinatura do serviço de gestão de chaves sobre eles. O pool confere essa assinatura na blockchain, contabiliza a colheita nos níveis e abre o sorteio. Os vencedores são decididos neste momento.",
+      "ready": "O sorteio {drawId} está fechado e esperando. As quatro provas são buscadas primeiro, o que leva alguns segundos, e então sua carteira pede sua assinatura.",
+      "waiting": "Nenhum sorteio fechado está esperando pela premiação dele."
+    },
+    "advance": {
+      "title": "Avançar",
+      "headline": "Avançar o sorteio {drawId}",
+      "headlineIdle": "Avançar um sorteio",
+      "button": "Avançar",
+      "does": "Percorre a lista de poupadores a partir de um ponto que a semente decide e credita a cada poupador o que os limiares publicados dizem que ele ganhou. Quem chama escolhe quantos poupadores uma chamada cobre, nunca quais, então enviar isto não diz nada sobre quem você é no sorteio.",
+      "readyCount": "{cursor} de {total} poupadores feitos no sorteio {drawId}. Cada chamada move a varredura compartilhada em até {batch}, que é o que uma transação paga.",
+      "ready": "O sorteio {drawId} ainda tem poupadores a cobrir. Cada chamada move a varredura compartilhada em até {batch}, que é o que uma transação paga.",
+      "waiting": "Nenhum sorteio premiado tem poupadores restantes dentro da janela dele."
+    },
+    "finalize": {
+      "title": "Finalizar",
+      "headline": "Finalizar o sorteio {drawId}",
+      "headlineIdle": "Finalizar um sorteio",
+      "button": "Finalizar",
+      "does": "Dobra o resto não pago de cada nível no remanescente cifrado daquele nível assim que a janela acaba, e publica o remanescente de cada nível que está na vez.",
+      "ready": "O sorteio {drawId} terminou a janela dele, então nada mais pode ser creditado a partir dele.",
+      "waitingClock": "Nenhuma janela terminou. O sorteio {drawId} pode ser finalizado em {time}.",
+      "waiting": "Nenhum sorteio terminou a janela dele sem ser finalizado."
+    },
+    "reconcile": {
+      "title": "Reconciliar",
+      "headline": "Reconciliar o nível {tier}",
+      "headlineIdle": "Reconciliar um nível",
+      "button": "Reconciliar",
+      "does": "Busca o texto claro de um remanescente publicado, prova ele ao pool e lança o dinheiro de volta na liquidez em texto claro daquele nível, para que o próximo fechamento possa oferecê-lo de novo.",
+      "ready": "O nível {tier} publicou o remanescente dele no sorteio {drawId}.",
+      "readyMore": "{count, plural, one { Mais {shown} nível está atrás dele, e cada toque faz um.} other { Mais {shown} níveis estão atrás dele, e cada toque faz um.}}",
+      "waiting": "Nenhum nível tem remanescente esperando para ser lançado de volta."
+    },
+    "who": {
+      "label": "Quem envia isto",
+      "oneStart": "Um keeper que rodamos observa o pool e envia cada um destes assim que entra na vez, então em uma hora comum não há nada nesta tela para fazer.",
+      "onePeriod": " Um período aqui é {period}, então uma rodada completa de cinco sai nessa frequência.",
+      "oneEnd": " O keeper não tem privilégio nenhum que os contratos reconheçam. As duas coisas de que ele poderia ter abusado, escolher quais poupadores são avaliados e escolher a ordem em que os prêmios são pagos, não são escolhas de quem chama.",
+      "two": "Premiar e reconciliar são os dois passos que precisam de algo fora da blockchain. Seu navegador pede ao relayer da Zama o texto claro do que o pool publicou, quatro valores para uma premiação e um para uma reconciliação, junto com a assinatura do serviço de gestão de chaves sobre eles. Essa é a mesma chamada que o keeper faz, e o contrato confere a assinatura ele mesmo, então um navegador não consegue mentir sobre o que leu.",
+      "three": "Se o keeper parar, nada se perde. Um sorteio que nunca é fechado mantém o dinheiro dele nos níveis e é oferecido de novo, e um remanescente que nunca é reconciliado é dobrado de volta pelo primeiro fechamento depois que ele chega. Um keeper travado custa sorteios ao pool, não dinheiro, e qualquer carteira aqui pode recomeçá-los.",
+      "periodHours": "{count, plural, one {uma hora} other {{shown} horas}}",
+      "periodMinutes": "{count} minutos",
+      "periodSeconds": "{count} segundos"
+    },
+    "stand": {
+      "label": "Onde os sorteios estão",
+      "period": "Período atual",
+      "periodNote": "Termina em {time}",
+      "savers": "Poupadores",
+      "saversNote": "O quanto uma varredura completa tem que percorrer",
+      "lastClosed": "Último sorteio fechado",
+      "lastClosedNone": "nenhum ainda",
+      "vaultUnknown": "estado do cofre desconhecido",
+      "vaultPaused": "cofre pausado",
+      "vaultRunning": "cofre rodando",
+      "poolUnknown": "estado do pool de prêmios desconhecido",
+      "poolPaused": "pool de prêmios pausado",
+      "poolRunning": "pool de prêmios rodando"
+    }
+  },
+
+  "verify": {
+    "title": "Confira um sorteio você mesmo.",
+    "lede": "Sem carteira. Cada número aqui é lido direto dos contratos, e os limiares vêm da própria view <code>thresholdOf</code> do cofre, que é a mesma aritmética que decidiu o resultado. Não existe uma segunda implementação nesta página para discordar da primeira.",
+    "noPool": "{symbol} não tem pool para conferir.",
+    "noPoolBody": "{reason}, então o Hearth nunca abriu um cofre sobre ele e não há sorteio aqui. Escolha um token da lista acima.",
+    "unreachable": "Não foi possível alcançar a Sepolia.",
+    "unreachableBody": "Esta página lê o cofre e o pool por um endpoint RPC, e essa leitura falhou, então ela não tem nada para mostrar. Os sorteios em si estão na blockchain de todo jeito.",
+    "tryAgain": "Tentar de novo",
+    "reading": "Lendo os sorteios da Sepolia.",
+    "noneYet": "Nenhum sorteio foi fechado ainda, então não há o que conferir. O primeiro aparece quando o período 1 acabar e alguém o fechar.",
+    "oneNotClosed": "O sorteio {drawId} ainda não foi fechado, então não há o que conferir.",
+    "rangeNotClosed": "Os sorteios {first} a {last} não foram fechados, então não há o que conferir aqui. Qualquer coisa mais antiga está no explorador.",
+    "drawButton": "Sorteio {drawId}",
+    "facts": {
+      "title": "Sorteio {drawId}",
+      "periodCovered": "Período coberto",
+      "periodEnded": "terminou {stamp}",
+      "windowEnds": "A janela termina",
+      "seed": "Semente",
+      "seedUnpublished": "ainda não publicada",
+      "bracket": "Faixa",
+      "bracketUnset": "ainda não definida",
+      "bracketNote": "{count} saldo-segundos",
+      "prizeSizes": "Tamanhos dos prêmios",
+      "prizeSizesNote": "grande / médio / frequente",
+      "harvest": "Colheita contabilizada",
+      "walkSavers": "Poupadores na varredura",
+      "walkNotStarted": "não começou",
+      "walkPosition": "Posição da varredura",
+      "walkProgress": "{cursor} de {total}",
+      "finalized": "Finalizado",
+      "yes": "sim",
+      "no": "não",
+      "note": "A semente é gerada como um texto cifrado dentro do coprocessador da Zama, então ninguém a vê quando ela é sorteada, e fechar um sorteio dá certo exatamente uma vez, então não existe segunda rodada. A faixa é a menor potência de dois acima do peso agregado do pool, publicada no lugar do agregado exato porque dois totais exatos consecutivos resolveriam o depósito de quem se moveu sozinho."
+    },
+    "tiers": {
+      "title": "O que cada nível ofereceu e pagou",
+      "hint": "público por projeto",
+      "each": "{amount} {symbol} cada",
+      "offered": "oferecido",
+      "returned": "devolvido não pago",
+      "notReconciled": "ainda não reconciliado",
+      "paid": "prêmios pagos",
+      "paidUnknown": "desconhecido até reconciliar",
+      "paidInexact": "não exatamente derivável",
+      "note": "Prêmios pagos é calculado a partir dos números públicos: o que o nível ofereceu, menos o que voltou não pago, dividido pelo tamanho do prêmio. Fecha exato sempre que nenhum remanescente cifrado entrou junto no sorteio, e esta implantação reconcilia todo nível a cada sorteio para que normalmente feche. Ele nunca diz quem foi pago."
+    },
+    "thresholds": {
+      "title": "Limiares de um endereço",
+      "hint": "lido de thresholdOf",
+      "body": "Cole qualquer endereço. O cofre devolve o peso exato que aquele endereço tinha que superar em cada prêmio de cada nível neste sorteio. Compare com o peso decifrado do próprio poupador e o resultado se confirma: ele ganhou um prêmio exatamente quando o peso dele ficou estritamente acima do limiar.",
+      "fieldName": "Um endereço para conferir",
+      "invalid": "Isso não é um endereço Ethereum válido.",
+      "notAwarded": "O sorteio {drawId} não foi premiado, então ainda não tem semente nem limiares.",
+      "row": "{tier}, prêmio {index}",
+      "reading": "lendo",
+      "rowFailed": "O nó não respondeu thresholdOf para este prêmio. Nada mudou no sorteio, só a visão que esta página tem dele.",
+      "noCounts": "As contagens de prêmios deste sorteio não puderam ser lidas, então esta página não sabe dizer quantos limiares existem. Tente de novo em um instante.",
+      "outOfRange": "fora da faixa, então inatingível",
+      "unit": "saldo-segundos"
+    },
+    "transactions": {
+      "title": "As transações",
+      "hint": "no Etherscan",
+      "none": "Nada para este sorteio nas últimas horas de blocos. Histórico mais antigo está no explorador.",
+      "block": "bloco {block}",
+      "open": "Abrir o pool",
+      "closed": "Fechado",
+      "awarded": "Premiado",
+      "markedEmpty": "Marcado como vazio",
+      "markedSkipped": "Marcado como pulado",
+      "finalized": "Finalizado",
+      "reconciled": "Nível reconciliado",
+      "withTier": "{label} ({tier})"
+    }
+  },
+
+  "lab": {
+    "pill": "Página de laboratório",
+    "title": "A cerimônia do sorteio",
+    "lede": "Não é linkada no site. Cada número abaixo é lido ao vivo dos contratos na Sepolia: os handles selados, a semente que o serviço de gestão de chaves assinou, a faixa contra a qual o sorteio rodou, e os limiares exatos que uma carteira tinha que superar.",
+    "noPool": "{symbol} não tem pool para abrir.",
+    "noPoolBody": "{reason}, então o Hearth nunca abriu um cofre sobre ele. Escolha um token que tenha.",
+    "noDraw": "Nenhum sorteio premiado para abrir ainda.",
+    "noDrawBody": "A cerimônia precisa de um sorteio que tenha sido fechado e premiado. Rode um pelo painel de sorteios no pool, e volte.",
+    "drawButton": "Sorteio {drawId}",
+    "openSeal": "Abrir o selo",
+    "again": "Rodar de novo",
+    "stages": {
+      "sealed": "selado",
+      "seed": "a semente abre",
+      "bracket": "a faixa",
+      "thresholds": "os limiares caem",
+      "mine": "seu próprio resultado"
+    },
+    "seals": {
+      "title": "O que o fechamento publicou",
+      "hint": "quatro handles, nesta ordem exata",
+      "seed": "semente",
+      "scale": "contagem de escala",
+      "nonEmpty": "não vazio",
+      "harvest": "colheita",
+      "unpublished": "não publicado",
+      "note": "O pool recodifica os quatro textos claros nessa ordem e confere a assinatura do serviço de gestão de chaves sobre essa codificação na blockchain, então pedi-los em qualquer outra ordem faz a premiação reverter. A ordem é o contrato aqui, não uma conveniência."
+    },
+    "seed": {
+      "title": "A semente abre",
+      "note": "Gerada como um texto cifrado dentro do coprocessador da Zama, então ninguém a viu quando ela foi sorteada. Publicada quando o período terminou, assinada pelo serviço de gestão de chaves, e verificada na blockchain pelo pool antes de qualquer outra coisa neste sorteio poder acontecer. Os tamanhos dos prêmios já estavam fixados no fechamento, antes de este número existir."
+    },
+    "bracket": {
+      "title": "A faixa",
+      "unit": "{count} saldo-segundos",
+      "note": "O sorteio roda contra a menor potência de dois acima do peso agregado do pool, nunca contra o agregado em si. Publicar o total exato deixaria qualquer um resolver o depósito de quem se moveu sozinho a partir de dois totais consecutivos e do carimbo de tempo da própria transação."
+    },
+    "thresholds": {
+      "title": "Os limiares caem",
+      "connectHint": "conecte uma carteira para ver os seus",
+      "connectBody": "Os limiares são por endereço e públicos. Conecte uma carteira e o número exato que ela tinha que superar em cada prêmio deste sorteio aparece aqui, calculado pelo cofre, não por esta página.",
+      "row": "{tier}, prêmio {index}",
+      "reading": "lendo",
+      "outOfRange": "fora da faixa",
+      "note": "Supere o limiar e o prêmio é seu. Estes vêm da própria view do cofre, a mesma aritmética que decidiu o resultado, então não há uma segunda implementação aqui para discordar da primeira."
+    },
+    "mine": {
+      "title": "E só para você",
+      "connectBody": "Conecte uma carteira e este cartão se preenche com o peso pelo qual ela foi julgada e o que o sorteio {drawId} pagou a ela, decifrado no seu navegador e em nenhum outro lugar.",
+      "nothing": "Esta carteira não tem peso no sorteio {drawId}, então não há nada dela para abrir. Só um poupador que estava na varredura tem peso e crédito aqui.",
+      "weight": "Seu peso",
+      "weightUnit": "saldo-segundos ao longo do período",
+      "paid": "O que este sorteio pagou a você",
+      "paidUnit": "{symbol}, creditado aos seus ganhos",
+      "sealAgain": "Selar de novo",
+      "decrypt": "Decifrar meu resultado",
+      "denied": "Recusado: estes valores pertencem a outra carteira.",
+      "note": "Tudo acima deste cartão é público e qualquer um pode conferir. Este cartão não: ele exige uma assinatura EIP-712 da carteira dona destes valores, e a lista de controle de acesso da Zama recusa todo mundo mais. Esse é o produto inteiro em dois parágrafos."
+    }
+  },
+
+  "docs": {
+    "title": "Documentação",
+    "kicker": "Documentação",
+    "heading": "O registro escrito",
+    "count": "{count, plural, one {{shown} página} other {{shown} páginas}}. Cada uma delas é um arquivo no repositório em <path>docs/</path>, renderizado aqui.",
+    "contents": "Conteúdo",
+    "close": "Fechar",
+    "overview": "Visão geral",
+    "nav": "Documentação",
+    "search": "Buscar na documentação",
+    "noResults": "Nada corresponde a isso.",
+    "outline": "Nesta página",
+    "nearby": "Páginas próximas",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "copyManual": "Aperte ctrl C",
+    "copyLabel": "Copiar este bloco",
+    "diagramWide": "Mais largo que a coluna. Role para o lado.",
+    "diagramFailed": "Este diagrama não desenhou. A fonte está abaixo.",
+    "rendererFailed": "O renderizador de diagramas não carregou. A fonte está abaixo.",
+    "fallbackNote": "Esta página ainda não foi traduzida, então está em inglês.",
+    "sections": {
+      "reference": "Referência",
+      "attackLogs": "Registros de ataque",
+      "gettingstarted": "Primeiros passos",
+      "concepts": "Conceitos",
+      "security": "Segurança",
+      "operations": "Operações"
+    }
+  },
+
+  "errors": {
+    "notFound": {
+      "title": "Não há nada neste endereço.",
+      "body": "A página mudou de lugar, o link foi digitado errado, ou o token nele não é um daqueles contra os quais esta versão foi implantada. O pool em si está na blockchain e não é afetado de todo jeito.",
+      "home": "Voltar ao começo",
+      "pool": "Abrir o pool",
+      "docs": "Ler a documentação"
+    },
+    "crashed": {
+      "title": "Esta tela quebrou, e o dinheiro não.",
+      "body": "Algo na própria página deu erro. Nada foi assinado e nada foi enviado, então seu saldo está exatamente onde estava. Recarregar esta tela é seguro.",
+      "digest": "Referência {digest}",
+      "home": "Voltar ao começo",
+      "retry": "Tentar esta tela de novo"
+    },
+    "unknown": "Algo deu errado.",
+    "userRejected": "Você recusou o pedido na sua carteira. Nada foi enviado.",
+    "signingRejected": "Você recusou a assinatura na sua carteira. Nada foi enviado.",
+    "notConnected": "Conecte uma carteira primeiro.",
+    "decryptNotConnected": "Conecte uma carteira para decifrar seus próprios valores.",
+    "addressesMissing": "Os endereços do Hearth não estão configurados, então nada pode ser enviado.",
+    "drawNotWaiting": "O sorteio {drawId} não está esperando pela premiação dele, então não há o que enviar.",
+    "insufficientAllowance": "O wrapper ainda não tem permissão para pegar tanto do seu token. Aprove ele primeiro.",
+    "insufficientErc20": "Não há token de teste comum suficiente nesta carteira. Cunhe um pouco no faucet.",
+    "insufficientConfidential": "Não há token confidencial suficiente. Blinde um pouco do comum primeiro.",
+    "chainMismatch": "Sua carteira está em uma rede diferente da do aplicativo. Troque para a Sepolia.",
+    "notEntitled": "Esta carteira não tem permissão para ler esse valor. Ele pertence a outro endereço.",
+    "noCiphertext": "Ainda não há valor cifrado aqui, o que significa um saldo de zero.",
+    "relayerRateLimited": "O relayer da Zama está limitando a taxa deste navegador. Espere alguns segundos e peça de novo.",
+    "relayerUnreachable": "Não foi possível alcançar o relayer da Zama. Peça de novo em um instante.",
+    "relayerUnreachableStatus": "Não foi possível alcançar o relayer da Zama (HTTP {status}). Peça de novo em um instante.",
+    "rpcRateLimited": "O nó da Sepolia está limitando a taxa deste navegador. Espere alguns segundos e peça de novo.",
+    "noGas": "Não há ETH da Sepolia suficiente para pagar o gás. Qualquer faucet da Sepolia recarrega.",
+    "relayerBehind": "O relayer da Zama ainda não alcançou aquele bloco. Peça de novo em um instante.",
+    "EnforcedPause": "O cofre está pausado, então depósitos e o fechamento de sorteios estão parados. Sacar continua funcionando.",
+    "NotASaver": "Esta carteira nunca depositou, então não há o que sacar.",
+    "NotTheAsset": "Só o token confidencial com que este cofre foi implantado é aceito. Blinde esse token e tente de novo.",
+    "DrawNotAwarded": "Esse sorteio ainda não foi premiado, então não há o que avaliar. Feche e premie ele primeiro.",
+    "EvaluationWindowClosed": "A janela de dois períodos desse sorteio acabou. Ele não pode mais ser avaliado, e não paga nada.",
+    "EvaluationWindowOpen": "Esse sorteio ainda pode ser avaliado, então não pode ser finalizado ainda. Espere a janela terminar.",
+    "AlreadyFinalized": "Esse sorteio já está finalizado. Não sobrou nada para fazer nele.",
+    "DrawNotOpen": "Esse sorteio nunca foi fechado, então não há o que finalizar.",
+    "AlreadyClosed": "Alguém fechou esse sorteio antes. A premiação dele é o próximo passo.",
+    "NothingToClose": "Nenhum sorteio está esperando para ser fechado agora.",
+    "CloseWindowClosed": "O prazo de fechamento desse sorteio passou. A liquidez dele volta para os níveis e o próximo sorteio a oferece de novo.",
+    "WrongStatus": "O sorteio andou antes de esta transação chegar. Recarregue e veja onde ele está agora.",
+    "CarryNotPending": "Esse nível não tem remanescente publicado esperando, então não há o que reconciliar.",
+    "InvalidKMSSignatures": "A assinatura do serviço de gestão de chaves não verificou na blockchain. Peça a decifragem de novo."
+  },
+
+  "format": {
+    "pending": "...",
+    "dust": "<0,01",
+    "now": "agora",
+    "seconds": "{seconds}s",
+    "minutesSeconds": "{minutes}m {seconds}s",
+    "hoursMinutes": "{hours}h {minutes}m",
+    "agoSeconds": "há {count}s",
+    "agoMinutes": "há {count}m",
+    "agoHours": "há {count}h",
+    "agoDays": "há {count}d",
+    "notYet": "ainda não",
+    "utc": "{stamp} UTC",
+    "oddsNever": "nunca",
+    "oddsEveryDraw": "todo sorteio",
+    "oddsOneIn": "1 sorteio em {count}",
+    "balanceSeconds": "saldo-segundos"
+  },
+
+  "meta": {
+    "titleDefault": "Hearth, poupança premiada que ninguém consegue ver por dentro",
+    "titleTemplate": "{title} | Hearth",
+    "description": "Poupança premiada confidencial e sem perdas no Protocolo da Zama. Depósitos, saldos e ganhos ficam cifrados na blockchain, os prêmios são sorteados a partir do rendimento com chances proporcionais ao seu saldo ponderado pelo tempo, e o principal volta integralmente sempre que você pedir.",
+    "ogTitle": "Hearth",
+    "ogDescription": "Poupança premiada confidencial e sem perdas no Protocolo da Zama.",
+    "how": {
+      "title": "Como funciona",
+      "description": "Deposite um token confidencial, mantenha seu saldo cifrado, ganhe prêmios sorteados a partir do rendimento com chances definidas pelo seu saldo ponderado pelo tempo, e saque quando quiser."
+    },
+    "verify": {
+      "title": "Verificar um sorteio",
+      "description": "Leia a semente, a faixa, a colheita e os tamanhos dos prêmios de um sorteio direto dos contratos, e obtenha o limiar exato que qualquer endereço tinha que superar."
+    },
+    "lab": {
+      "title": "A cerimônia do sorteio",
+      "description": "Uma página de laboratório: a semente selada abrindo, a faixa, os limiares e o resultado de um poupador."
+    },
+    "docs": {
+      "title": "Documentação",
+      "description": "Como funciona um sorteio, como as chances são calculadas, de onde vem o dinheiro dos prêmios, o que permanece privado, e cada costura que conhecemos."
+    },
+    "dashboard": {
+      "title": "Painel de {symbol}",
+      "titleFallback": "Painel",
+      "description": "O que esta carteira tem, quanto vale o pool de prêmios, e o próximo passo, com todo valor de poupador cifrado na blockchain."
+    },
+    "deposit": {
+      "title": "Depositar {symbol}",
+      "titleFallback": "Depósito",
+      "description": "Consiga {underlyingSymbol} de teste, blinde em {symbol}, depois deposite no cofre do Hearth.",
+      "descriptionFallback": "Consiga o token de teste, blinde, depois deposite no cofre do Hearth."
+    },
+    "withdraw": {
+      "title": "Sacar {symbol}",
+      "titleFallback": "Saque",
+      "description": "Tire principal e ganhos do cofre do Hearth, depois desblinde {symbol} de volta para {underlyingSymbol}.",
+      "descriptionFallback": "Tire principal e ganhos do cofre do Hearth, depois desblinde de volta para o token comum."
+    },
+    "draws": {
+      "title": "Meus sorteios",
+      "description": "Quanto cada sorteio recente pagou, e quanto pagou a você, com seu peso e seu prêmio cifrados até você abri-los."
+    },
+    "run": {
+      "title": "Rodar um sorteio",
+      "description": "Fechar, premiar, avançar, finalizar e reconciliar. Todo passo de um sorteio do Hearth pode ser chamado por qualquer carteira."
+    }
+  }
+}

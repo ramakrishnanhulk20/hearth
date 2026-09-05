@@ -28,17 +28,17 @@ export type RevealScope = {
 export type Reveal = {
   /** Binds a panel to its own reveal state. Two scopes can be open at the same time. */
   scope: (key: string) => RevealScope;
-  /** True while any panel is decrypting or showing an opened value. */
-  active: boolean;
-  /** Seals everything and forgets every decrypted value. */
-  hideAll: () => void;
 };
 
+/**
+ * Where a reveal has got to, as keys into `console.reveal` rather than sentences. The note is
+ * rendered by whichever figure owns the eye, and that is the component that knows the language.
+ */
 const NOTES = {
-  signing: "sign the request in your wallet, it costs no gas",
-  asking: "decrypting in your browser",
-  sealing: "the value was just written and is not decryptable yet, asking again",
-  "new-key": "a KMS share failed, retrying with a new key",
+  signing: "signing",
+  asking: "asking",
+  sealing: "sealing",
+  "new-key": "newKey",
 } as const;
 
 const LOCKED: RevealState = { kind: "locked" };
@@ -101,15 +101,6 @@ export function useReveal(): Reveal {
     });
   }, []);
 
-  const hideAll = useCallback(() => {
-    for (const controller of controllers.current.values()) controller.abort();
-    controllers.current.clear();
-    cache.current = {};
-    setValues({});
-    setStates({});
-    setOpenedBy(null);
-  }, []);
-
   const run = useCallback(
     async (key: string, requests: RevealRequest[]) => {
       const me = address;
@@ -117,7 +108,12 @@ export function useReveal(): Reveal {
         setOpenedBy(me ?? null);
         put(key, {
           kind: "failed",
-          error: { message: "Connect a wallet to decrypt your own values.", remedy: "connect", retryable: false },
+          error: {
+            key: "decryptNotConnected",
+            raw: "Connect a wallet to decrypt your own values.",
+            remedy: "connect",
+            retryable: false,
+          },
         });
         return;
       }
@@ -200,16 +196,20 @@ export function useReveal(): Reveal {
     [owned, states, values, address, run, drop],
   );
 
-  const active = useMemo(
-    () => owned && Object.values(states).some((state) => state.kind === "working" || state.kind === "open"),
-    [owned, states],
-  );
-
-  return useMemo(() => ({ scope, active, hideAll }), [scope, active, hideAll]);
+  return useMemo(() => ({ scope }), [scope]);
 }
 
 /** The saver's principal and winnings, opened by the balance panel and read by the withdraw one. */
 export const BALANCE_SCOPE = "balance";
+
+/**
+ * The confidential token sitting in the wallet, which is not the balance sitting in the vault.
+ *
+ * Deposit and withdraw both show this one figure, and they used to name its scope differently, so
+ * opening it on one screen left it sealed on the other for no reason a reader could see. One
+ * value, one scope, one signature.
+ */
+export const WALLET_SCOPE = "wallet-confidential";
 
 /** One scope per draw, so opening a draw's result leaves every other panel as it was. */
 export const drawScope = (drawId: number): string => `draw:${drawId}`;

@@ -1,8 +1,9 @@
 "use client";
 
-import { CAP_LABEL, CARD_NOTE, Card, CardPill, Stat, Unknown } from "@/components/app/console";
-import { TIER_NAMES } from "@/lib/chain/addresses";
-import { countdown, formatAmount, formatUtc, oddsLabel } from "@/lib/format";
+import { useTranslations } from "next-intl";
+import { CAP_LABEL, CARD_NOTE, Card, CardPill, Countdown, Stat, Unknown } from "@/components/app/console";
+import { TIER_KEYS } from "@/lib/chain/addresses";
+import { useFormat } from "@/hooks/useFormat";
 import type { PoolState } from "@/hooks/useHearth";
 
 /**
@@ -13,72 +14,69 @@ import type { PoolState } from "@/hooks/useHearth";
  * answered say so, because "the pool holds nothing" and "we have not heard back" look identical
  * once a zero is printed.
  */
-export function PoolNow({ pool, now }: { pool: PoolState; now: number }) {
+export function PoolNow({
+  pool,
+  symbol,
+  decimals,
+}: {
+  pool: PoolState;
+  /** The confidential token every figure in this card is counted in. */
+  symbol: string;
+  decimals: number;
+}) {
+  const t = useTranslations("dashboard.pool");
+  const tiers = useTranslations("dashboard.tiers");
+  const format = useFormat();
   const ends = pool.periodEndsAt;
 
   return (
     <Card
-      label="The pool right now"
-      pill={<CardPill tone="quiet">public to everyone</CardPill>}
+      label={t("label")}
+      pill={<CardPill tone="quiet">{t("pill")}</CardPill>}
       footer={
         <div className={`space-y-2 ${CARD_NOTE}`}>
-          <p>
-            Each prize is half of its tier&apos;s liquidity divided by the prize count, fixed at the close
-            before the random seed exists. What nobody wins is published one draw later and offered again.
-          </p>
+          <p>{t("footOne")}</p>
           {pool.known.scaleBits ? (
             <p>
-              Odds are drawn against a bracket of{" "}
-              <span className="tabular-nums text-muted">2^{pool.scaleBits}</span>, published with the draw.
+              {t.rich("footBracket", {
+                bits: pool.scaleBits,
+                bracket: (chunks) => <span className="tabular-nums text-muted">{chunks}</span>,
+              })}
             </p>
           ) : (
-            <p>The bracket those odds are drawn against has not come back from the chain yet.</p>
+            <p>{t("footBracketUnknown")}</p>
           )}
         </div>
       }
     >
       <div className="grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4">
         <Stat
-          label="Savers"
+          label={t("savers")}
           value={
-            pool.known.savers ? (
-              pool.savers.toLocaleString("en-US")
-            ) : (
-              <Unknown reason="The saver count has not come back from the chain yet." />
-            )
+            pool.known.savers ? format.count(pool.savers) : <Unknown reason={t("saversUnknown")} />
           }
         />
         <Stat
-          label="Prize liquidity"
+          label={t("liquidity")}
           value={
             pool.totalLiquidity === null ? (
-              <Unknown reason="One of the three tier balances has not come back yet, and a partial sum is not the pool." />
+              <Unknown reason={t("liquidityUnknown")} />
             ) : (
-              formatAmount(pool.totalLiquidity)
+              format.amount(pool.totalLiquidity, decimals)
             )
           }
-          unit="USDC"
+          unit={symbol}
         />
         <Stat
-          label="Period"
+          label={t("period")}
           value={
-            pool.known.period ? (
-              pool.period.toLocaleString("en-US")
-            ) : (
-              <Unknown reason="The current period has not come back from the chain yet." />
-            )
+            pool.known.period ? format.count(pool.period) : <Unknown reason={t("periodUnknown")} />
           }
         />
         <Stat
-          label="Ends in"
-          value={
-            ends > 0 ? (
-              countdown(ends, now)
-            ) : (
-              <Unknown reason="The end of this period has not come back from the chain yet." />
-            )
-          }
-          note={ends > 0 ? formatUtc(ends) : undefined}
+          label={t("endsIn")}
+          value={ends > 0 ? <Countdown target={ends} /> : <Unknown reason={t("endsUnknown")} />}
+          note={ends > 0 ? format.utc(ends) : undefined}
         />
       </div>
 
@@ -87,51 +85,62 @@ export function PoolNow({ pool, now }: { pool: PoolState; now: number }) {
           three row dividers below it and the table lost its top edge on the near-black card. */}
       <div className="mt-8 border-t border-hairline pt-5">
         <div className={`grid grid-cols-[1fr_auto] items-baseline gap-x-6 pb-1 sm:grid-cols-[1fr_auto_auto] ${CAP_LABEL}`}>
-          <span>Tier</span>
-          <span className="hidden text-right sm:block">Chance</span>
-          <span className="text-right">Prize each (USDC)</span>
+          <span>{t("tier")}</span>
+          <span className="hidden text-end sm:block">{t("chance")}</span>
+          <span className="text-end">{t("prizeEach", { symbol })}</span>
         </div>
 
-        {pool.tiers.map((tier, index) => (
-          <div
-            key={TIER_NAMES[index]}
-            className="grid grid-cols-[1fr_auto] items-baseline gap-x-6 border-b border-hairlineSoft py-3 last:border-b-0 sm:grid-cols-[1fr_auto_auto]"
-          >
-            <span className="min-w-0 text-[13.5px] text-parchment">
-              {TIER_NAMES[index]}
-              <span className="ml-2 text-[12.5px] text-muted">
-                {tier.known
-                  ? `${tier.prizeCount} prize${tier.prizeCount === 1 ? "" : "s"} a draw`
-                  : "prize count unknown"}
-              </span>
-              {/* The ember and not the flame. Everywhere else in the console the flame marks a
-                  control, a link or the row you are standing on, and a carry is none of those. At
-                  full flame it was the loudest thing in the table and pulled the eye off the prize
-                  figure the row exists to show. */}
-              {tier.carryPending && (
-                <span className="ml-2 text-[12.5px] text-ember">
-                  carry from draw {tier.carryPublishedAt} waiting
+        {pool.tiers.map((tier, index) => {
+          const chance = tier.known ? (
+            format.odds(tier.oddsNumerator, tier.oddsDenominator)
+          ) : (
+            <Unknown scale="inline" reason={t("oddsUnknown")} />
+          );
+
+          return (
+            <div
+              key={TIER_KEYS[index]}
+              className="grid grid-cols-[1fr_auto] items-baseline gap-x-6 border-b border-hairlineSoft py-3 last:border-b-0 sm:grid-cols-[1fr_auto_auto]"
+            >
+              <span className="min-w-0 text-[13.5px] text-parchment">
+                {tiers(TIER_KEYS[index])}
+                <span className="ms-2 text-[12.5px] text-muted">
+                  {tier.known
+                    ? t("prizeCount", { count: tier.prizeCount, shown: format.count(tier.prizeCount) })
+                    : t("prizeCountUnknown")}
                 </span>
-              )}
-            </span>
-            {/* Odds are a figure, and the faintest tone is where this console puts labels. On the
-                dark card that read as a column switched off rather than a column of data. */}
-            <span className="hidden text-right text-[13px] tabular-nums text-muted sm:block">
-              {tier.known ? (
-                oddsLabel(tier.oddsNumerator, tier.oddsDenominator)
-              ) : (
-                <Unknown scale="inline" reason="This tier's odds have not come back from the chain yet." />
-              )}
-            </span>
-            <span className="text-right text-[14px] tabular-nums text-parchment">
-              {tier.nextPrize === null ? (
-                <Unknown scale="inline" reason="This tier's next prize has not come back from the chain yet." />
-              ) : (
-                formatAmount(tier.nextPrize)
-              )}
-            </span>
-          </div>
-        ))}
+                {/* The ember and not the flame. Everywhere else in the console the flame marks a
+                    control, a link or the row you are standing on, and a carry is none of those. At
+                    full flame it was the loudest thing in the table and pulled the eye off the prize
+                    figure the row exists to show. */}
+                {tier.carryPending && (
+                  <span className="ms-2 text-[12.5px] text-ember">
+                    {t("carryWaiting", { drawId: tier.carryPublishedAt })}
+                  </span>
+                )}
+                {/* A phone has no room for a third column, and dropping the odds there took the
+                    one number a saver is actually weighing off the screen entirely. It moves
+                    under the tier name instead, carrying its own label. */}
+                <span className="mt-1.5 flex items-baseline gap-2 sm:hidden">
+                  <span className="text-[10.5px] uppercase tracking-label text-muted">{t("chance")}</span>
+                  <span className="text-[12.5px] tabular-nums text-muted">{chance}</span>
+                </span>
+              </span>
+              {/* Odds are a figure, and the faintest tone is where this console puts labels. On the
+                  dark card that read as a column switched off rather than a column of data. */}
+              <span className="hidden text-end text-[13px] tabular-nums text-muted sm:block">
+                {chance}
+              </span>
+              <span className="text-end text-[14px] tabular-nums text-parchment">
+                {tier.nextPrize === null ? (
+                  <Unknown scale="inline" reason={t("nextPrizeUnknown")} />
+                ) : (
+                  format.amount(tier.nextPrize, decimals)
+                )}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </Card>
   );

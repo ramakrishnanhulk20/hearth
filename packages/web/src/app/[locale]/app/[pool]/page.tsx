@@ -1,20 +1,33 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHeader } from "@/components/app/console";
 import { Dashboard } from "@/components/app/dashboard/Dashboard";
+import { findPool } from "@/lib/chain/pools";
+import { alternates } from "@/lib/hreflang";
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description:
-    "What this wallet holds, what the prize pool is worth, and the next step, with every saver amount encrypted on chain.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; pool: string }>;
+}): Promise<Metadata> {
+  const { locale, pool } = await params;
+  const entry = findPool(pool);
+  const t = await getTranslations({ locale, namespace: "meta.dashboard" });
+  return {
+    title: entry ? t("title", { symbol: entry.symbol }) : t("titleFallback"),
+    description: t("description"),
+    alternates: alternates(`/app/${pool}`, locale),
+  };
+}
 
-export default function AppPage() {
+export default async function AppPage({ params }: { params: Promise<{ locale: string; pool: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "dashboard" });
+
   return (
     <>
-      <PageHeader
-        title="Dashboard"
-        subtitle="What you hold, what the pool is doing, and the one thing to do next."
-      />
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <Dashboard />
     </>
   );

@@ -1,37 +1,24 @@
-import type { Address } from "viem";
-
 export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 11155111);
-
-const address = (value: string | undefined): Address | null => {
-  const trimmed = (value ?? "").trim();
-  return /^0x[0-9a-fA-F]{40}$/.test(trimmed) ? (trimmed as Address) : null;
-};
-
-/**
- * Only Hearth's own three contracts come from the environment. The confidential asset and its
- * underlying ERC-20 are read from the vault and the wrapper on chain, so a mismatch between what
- * the app talks to and what the vault accepts is impossible by construction.
- */
-export const HEARTH = {
-  vault: address(process.env.NEXT_PUBLIC_HEARTH_VAULT),
-  pool: address(process.env.NEXT_PUBLIC_HEARTH_POOL),
-  source: address(process.env.NEXT_PUBLIC_HEARTH_SOURCE),
-} as const;
-
-export const CONFIGURED = HEARTH.vault !== null && HEARTH.pool !== null && HEARTH.source !== null;
 
 export const EXPLORER = "https://sepolia.etherscan.io";
 
 export const txUrl = (hash: string) => `${EXPLORER}/tx/${hash}`;
 export const addressUrl = (value: string) => `${EXPLORER}/address/${value}`;
 
-export const TIER_NAMES = ["Grand", "Mid", "Frequent"] as const;
+/** Zama's own list of the confidential tokens it publishes on Sepolia, addresses included. */
+export const ZAMA_TOKEN_LIST = "https://docs.zama.ai/protocol/protocol/deployments/sepolia";
 
-export const TOKEN_DECIMALS = 6;
-export const TOKEN_UNIT = 1_000_000n;
+/**
+ * The three prize tiers, in the order the contracts index them.
+ *
+ * These are keys into the `dashboard.tiers` namespace rather than the words themselves, because
+ * the tier a saver reads about on the dashboard, in a draw card and on the verify page has to be
+ * the same word in whichever language they are reading, and only one of those three screens would
+ * ever remember to translate a constant of its own.
+ */
+export const TIER_KEYS = ["grand", "mid", "frequent"] as const;
 
-/** Zama's mock USDC caps one mint at a million tokens, and the app asks for the cap. */
-export const FAUCET_AMOUNT = 1_000_000n * TOKEN_UNIT;
+export type TierKey = (typeof TIER_KEYS)[number];
 
 /** The vault stops at four savers of encrypted work per call, so a larger ask silently does less. */
 export const EVALUATE_BATCH = 4n;

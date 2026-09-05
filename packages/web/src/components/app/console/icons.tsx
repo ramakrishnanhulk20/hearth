@@ -162,6 +162,16 @@ export function MoreIcon({ size }: IconProps) {
   );
 }
 
+export function GlobeIcon({ size }: IconProps) {
+  return (
+    <Frame size={size}>
+      <circle cx="12" cy="12" r="8.4" {...stroke} />
+      <path d="M3.7 9.4h16.6M3.7 14.6h16.6" {...stroke} />
+      <path d="M12 3.6c2 2.3 3.1 5.2 3.1 8.4s-1.1 6.1-3.1 8.4c-2-2.3-3.1-5.2-3.1-8.4S10 5.9 12 3.6z" {...stroke} />
+    </Frame>
+  );
+}
+
 export function CoinIcon({ size }: IconProps) {
   return (
     <Frame size={size}>

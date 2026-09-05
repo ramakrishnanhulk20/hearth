@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useId, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import type { Phase } from "@/hooks/useActions";
-import { txUrl } from "@/lib/chain/addresses";
+import { Link } from "@/i18n/navigation";
 
 /** The mark: a hearth mouth with a flame in it. Repeated in the header, the favicon and the tab. */
 export function HearthMark({ size = 18 }: { size?: number }) {
@@ -93,42 +92,15 @@ export function Panel({
   );
 }
 
-export function Figure({
-  label,
-  value,
-  unit,
-  accent = false,
-  note,
-}: {
-  label: string;
-  value: ReactNode;
-  unit?: string;
-  accent?: boolean;
-  note?: string;
-}) {
-  return (
-    <div>
-      <p className="text-[11px] uppercase tracking-label text-faint">{label}</p>
-      <p className="mt-1.5 flex items-baseline gap-1.5">
-        <span
-          className={`font-display text-[24px] leading-none tabular-nums tracking-tight sm:text-[26px] ${
-            accent ? "text-flameInk" : "text-parchment"
-          }`}
-          style={{ fontWeight: 620 }}
-        >
-          {value}
-        </span>
-        {unit && <span className="text-[12px] text-faint">{unit}</span>}
-      </p>
-      {note && <p className="mt-1 text-[12px] leading-snug text-faint">{note}</p>}
-    </div>
-  );
-}
-
 /** What an encrypted value looks like before its owner opens it. */
-export function SealedBars({ count = 5, label = "encrypted" }: { count?: number; label?: string }) {
+export function SealedBars({ count = 5, label }: { count?: number; label?: string }) {
+  const t = useTranslations("console.reveal");
+
   return (
-    <span className="inline-flex items-center gap-[3px] align-middle" aria-label={label}>
+    <span
+      className="inline-flex items-center gap-[3px] align-middle"
+      aria-label={label ?? t("encryptedAlone")}
+    >
       {Array.from({ length: count }).map((_, index) => (
         <span key={index} className="block h-[17px] w-[10px] rounded-[2px] bg-seal" />
       ))}
@@ -197,7 +169,7 @@ export function AmountField({
   maxLabel,
   disabled = false,
   problem,
-  suffix = "USDC",
+  suffix,
   variant = "boxed",
 }: {
   /** What this field is for. Four of these sit on one page, so the placeholder cannot name them. */
@@ -208,6 +180,7 @@ export function AmountField({
   maxLabel?: string;
   disabled?: boolean;
   problem?: string | null;
+  /** The ticker after the digits, on the boxed skin. The console cards print their own instead. */
   suffix?: string;
   /**
    * "plain" drops the framing and enlarges the digits, for the console cards that supply their
@@ -217,6 +190,7 @@ export function AmountField({
    */
   variant?: "boxed" | "plain";
 }) {
+  const t = useTranslations("console.amount");
   const problemId = useId();
 
   const input = (
@@ -254,10 +228,10 @@ export function AmountField({
               type="button"
               onClick={onMax}
               disabled={disabled}
-              aria-label={name ? `${maxLabel ?? "Max"}: ${name}` : undefined}
-              className="shrink-0 rounded-lg border border-hairline px-2.5 py-1 text-[12.5px] font-medium text-muted transition-colors hover:border-hairlineStrong hover:text-parchment"
+              aria-label={name ? t("maxFor", { max: maxLabel ?? t("max"), name }) : undefined}
+              className="relative shrink-0 rounded-lg border border-hairline px-2.5 py-1 text-[12.5px] font-medium text-muted transition-colors after:absolute after:-inset-[9px] after:content-[''] hover:border-hairlineStrong hover:text-parchment"
             >
-              {maxLabel ?? "Max"}
+              {maxLabel ?? t("max")}
             </button>
           )}
         </div>
@@ -280,10 +254,10 @@ export function AmountField({
             type="button"
             onClick={onMax}
             disabled={disabled}
-            aria-label={name ? `${maxLabel ?? "Max"}: ${name}` : undefined}
-            className="shrink-0 rounded-md border border-hairline px-2 py-1 text-[11px] uppercase tracking-label text-faint transition-colors hover:border-flame/45 hover:text-flameInk"
+            aria-label={name ? t("maxFor", { max: maxLabel ?? t("max"), name }) : undefined}
+            className="relative shrink-0 rounded-md border border-hairline px-2 py-1 text-[11px] uppercase tracking-label text-faint transition-colors after:absolute after:-inset-[9px] after:content-[''] hover:border-flame/45 hover:text-flameInk"
           >
-            {maxLabel ?? "Max"}
+            {maxLabel ?? t("max")}
           </button>
         )}
         <span className="shrink-0 text-[13px] text-faint">{suffix}</span>
@@ -330,82 +304,8 @@ export function Banner({
           {children && <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{children}</p>}
         </div>
       </div>
-      {action && <div className="shrink-0 sm:pl-2">{action}</div>}
+      {action && <div className="shrink-0 sm:ps-2">{action}</div>}
     </motion.div>
-  );
-}
-
-const PHASE_TEXT: Record<string, string> = {
-  encrypting: "encrypting and proving, about ten seconds",
-  signing: "confirm in your wallet",
-  mining: "waiting for the transaction to be mined",
-  done: "done",
-};
-
-/** One line under an action, saying exactly where it is and what to do about it. */
-export function PhaseNote({
-  phase,
-  label,
-  onDismiss,
-  remedyButton,
-}: {
-  phase: Phase;
-  label: string;
-  onDismiss: () => void;
-  remedyButton?: ReactNode;
-}) {
-  const working = phase.kind === "encrypting" || phase.kind === "signing" || phase.kind === "mining" || phase.kind === "decrypting";
-  const text =
-    phase.kind === "idle"
-      ? null
-      : phase.kind === "error"
-        ? phase.error.message
-        : phase.kind === "decrypting"
-          ? `${label}: ${phase.note}`
-          : `${label}: ${PHASE_TEXT[phase.kind] ?? phase.kind}`;
-  const colour = phase.kind === "done" ? "text-good" : phase.kind === "error" ? "text-bad" : "text-muted";
-  const hash = phase.kind === "mining" ? phase.hash : phase.kind === "done" ? phase.hash : null;
-
-  // The wrapper stays in the page while the action is idle, empty. A live region that is inserted
-  // with its text already in it is announced unreliably, and this line is the only thing telling a
-  // screen reader that a wallet prompt is waiting.
-  return (
-    <div role="status" aria-live="polite" aria-atomic="true">
-      {text !== null && (
-        <div className="mt-4 flex flex-col gap-2 rounded-lg border border-hairlineSoft bg-[rgba(10,10,10,0.68)] px-4 py-3 backdrop-blur-md sm:flex-row sm:items-start">
-          {working && (
-            <span className="mt-0.5 hidden sm:block">
-              <Spinner size={14} />
-            </span>
-          )}
-          <div className="flex-1">
-            <p className={`text-[13px] leading-relaxed ${colour}`}>{text}</p>
-            {hash && (
-              <a
-                href={txUrl(hash)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-1 inline-block text-[12px] text-flameInk underline-offset-2 hover:underline"
-              >
-                View the transaction on Etherscan
-              </a>
-            )}
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            {remedyButton}
-            {(phase.kind === "done" || phase.kind === "error") && (
-              <button
-                type="button"
-                onClick={onDismiss}
-                className="text-[12px] text-faint transition-colors hover:text-parchment"
-              >
-                Dismiss
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -413,9 +313,9 @@ export function Row({ label, value, note }: { label: string; value: ReactNode; n
   return (
     <div className="flex flex-col gap-0.5 border-b border-hairlineSoft py-2.5 last:border-b-0 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
       <span className="shrink-0 text-[13px] text-faint">{label}</span>
-      <span className="break-words sm:text-right">
+      <span className="break-words sm:text-end">
         <span className="text-[13.5px] tabular-nums text-parchment">{value}</span>
-        {note && <span className="ml-2 text-[12px] text-faint">{note}</span>}
+        {note && <span className="ms-2 text-[12px] text-faint">{note}</span>}
       </span>
     </div>
   );

@@ -1,0 +1,981 @@
+{
+  "chrome": {
+    "home": "Hearth, ana sayfa",
+    "nav": {
+      "pool": "Havuz",
+      "verify": "Doğrula",
+      "how": "Nasıl çalışır",
+      "docs": "Dokümanlar"
+    },
+    "menu": {
+      "open": "Menüyü aç",
+      "close": "Menüyü kapat",
+      "label": "Site menüsü"
+    },
+    "footer": {
+      "tagline": "Gizli, kayıpsız ödüllü tasarruf",
+      "zama": "Zama Protocol üzerine kuruldu",
+      "disclaimer": "Sepolia test ağı üzerinde bir gösterim. Tokenler değeri olmayan test tokenleridir, getiri gerçek bir strateji değil sponsor destekli bir bakiyedir, ve buradaki hiçbir şey finansal tavsiye değildir."
+    },
+    "language": {
+      "trigger": "Dil: {name}. Değiştirin",
+      "list": "Bir dil seçin",
+      "heading": "Dil",
+      "note": "Elle çevrildi. Henüz ulaşamadığımız bir sayfa İngilizce görünür.",
+      "current": "şu anki"
+    }
+  },
+
+  "landing": {
+    "scrollCue": "Kaydırın",
+    "noWebgl": "Bu tarayıcı 3D sahneyi başlatamadı, dolayısıyla hikaye burada sayfa olarak duruyor. Sitedeki başka hiçbir şeyin ona ihtiyacı yok.",
+    "header": {
+      "how": "Nasıl çalışır",
+      "open": "Havuzu aç"
+    },
+    "story": {
+      "one": {
+        "kicker": "Gizli ödüllü tasarruf",
+        "title": "Tek bir ocak. Yalnızca onu besleyen kişi için yanıyor."
+      },
+      "two": {
+        "kicker": "Siz yatırırsınız",
+        "title": "Onu doldurursunuz, ve tutar mühürlenir.",
+        "body": "Tutar tarayıcınızda şifrelenir ve zincir üzerinde şifreli veri olarak kalır. Bundan sonra sayı yalnızca sizindir, ve bunu uygulayan şey Zama'nın erişim kontrol listesidir."
+      },
+      "three": {
+        "title": "Ve o, çoklardan biridir.",
+        "body": "Her tasarruf sahibinin bakiyesi yanar ve hiçbiri dışarıdan okunamaz. Havuz da tam toplamını asla yayımlamaz, yalnızca altında durduğu ikinin kuvvetini, çünkü tam toplam tek başına hareket eden birinin yatırdığı tutarı ele verirdi."
+      },
+      "four": {
+        "kicker": "Çekiliş",
+        "title": "Kimsenin göremediği bir tohum, yardımcı işlemcinin içinde çekilir.",
+        "body": "Ödül büyüklükleri tohum var olmadan sabitlenir, dolayısıyla kimse bir tohumu okuyup kazandığını anlayıp kazancı büyütemez. Dönem bittiğinde tohum, sözleşmenin zincir üzerinde doğruladığı bir imzayla birlikte yayımlanır."
+      },
+      "five": {
+        "kicker": "Kazanç",
+        "title": "Bir ocak daha parlak yanar.",
+        "body": "Olasılıklar dönem boyunca tutulan bakiyeyle orantılıdır, dolayısıyla çekilişten hemen önce yatırılan para yalnızca orada bulunduğu dönem kesri kadar kazanır. Ödül şifreli bir kazanç bakiyesine düşer, ve talep sıradan bir çekimdir."
+      }
+    },
+    "close": {
+      "kicker": "Deneyin",
+      "title": "Karanlıkta biriktirin.",
+      "body": "Sepolia üzerinde gizli bir test tokeni yatırın, bir çekilişi kendiniz çalıştırın, ve kendi bakiyenizi yalnızca sizin okuyabildiğinizi kontrol edin. Az miktarda test ETH'sinden başka hiçbir maliyeti yok.",
+      "open": "Havuzu aç",
+      "grandPrize": "sonraki çekilişte <figure>{amount} {symbol}</figure> büyük ödül",
+      "saversPeriod": "{count, plural, one {{shown} tasarruf sahibi} other {{shown} tasarruf sahibi}} · dönem {period}",
+      "offline": "Sepolia şu anda cevap vermiyor, dolayısıyla canlı rakamlar eksik. Havuz bundan etkilenmez: burada değil, zincir üzerinde yaşıyor."
+    },
+    "shelf": {
+      "heading": "Tokeninizi seçin",
+      "unread": "okunamadı",
+      "note": "Her havuzun şu anki büyük ödülü, zincirden okundu. Aynı kasa, aynı çekiliş, aynı gizlilik, gizli token başına bir tane."
+    },
+    "sealed": {
+      "heading": "Bir tasarruf sahibinin bakiyesi",
+      "empty": "Henüz kimse para yatırmadı. Biri yatırdığı anda şifreli bakiyesi burada belirir ve onu açmayı deneyebilirsiniz.",
+      "try": "Açmayı deneyin",
+      "asking": "Zama'nın anahtar yönetim servisine soruluyor",
+      "askingWait": "Genelde birkaç saniye sürer.",
+      "askingLong": "Şimdiye kadar {seconds} sn. Canlı bir ağ, dolayısıyla bu bazen uzun sürer.",
+      "refused": "Reddedildi.",
+      "refusedNote": "Bu, bu sayfadan değil, Zama'nın anahtar yönetim servisinden geldi. Bu bakiyeyi yalnızca onu tutan cüzdan okuyabilir, ve hiçbir yönetici bunu geçersiz kılamaz.",
+      "unreachable": "Şifre çözme servisine ulaşılamadı.",
+      "unreachableNote": "Bu bir ret değil, bir ağ sorunu, dolayısıyla hiçbir yönde bir şey kanıtlamaz. Birazdan yeniden denemeye değer.",
+      "again": "Yeniden deneyin",
+      "leaked": "Şifresi çözüldü, ve çözülmemeliydi.",
+      "leakedNote": "Servis {value} döndürdü. Lütfen bize bildirin, çünkü bu, bu ürünün imkansız kılmak üzere kurulduğu tek sonuçtur."
+    },
+    "footer": {
+      "tagline": "Hearth, gizli ve kayıpsız ödüllü tasarruf",
+      "how": "Nasıl çalışır",
+      "verify": "Bir çekilişi doğrulayın",
+      "docs": "Dokümanlar",
+      "zama": "Zama Protocol üzerine kuruldu"
+    }
+  },
+
+  "how": {
+    "kicker": "İki dakikalık bir rehber",
+    "title": "Hearth nasıl çalışır",
+    "lede": "Birlikte biriktirin, getiriden ödenen bir ödül kazanın, ve yatırdığınızı asla kaybetmeyin. Para görünmez. Adalet görünür.",
+    "steps": {
+      "one": {
+        "title": "Önce gizleyin, sonra yatırın",
+        "body": "Açık bir test tokenini gizli ikizine çevirin, sonra bir kısmını o tokenin havuzuna koyun. Gizleme herkese açıktır, yatırma değildir, ve tam da bu yüzden iki ayrı düğmedir: ikisini tek tıkta yapmak, yatırdığınız tutarın büyüklüğünü zinciri okuyan herkese yayımlar."
+      },
+      "two": {
+        "title": "Olasılığınız, ortalama bakiyenizdir",
+        "body": "Çekiliş anındaki bakiyeniz değil, dönem boyunca taşıdığınız bakiye. Dönem bitmeden beş dakika önce para yatırırsanız, aynı tutarı bütün dönem boyunca tutmanın olasılığının on ikide birini alırsınız. Her çekilişten hemen önce büyük bir bakiye gösterip ödülü kapmayı engelleyen şey budur."
+      },
+      "three": {
+        "title": "Çekiliş kapanır, ve bir tohum çekilir",
+        "body": "Önce ödül büyüklükleri sabitlenir, herhangi bir rastgele sayı var olmadan. Sonra tohum Zama'nın yardımcı işlemcisi içinde şifreli veri olarak üretilir, dolayısıyla çekildiğinde kimse onu görmez ve ikinci bir atış yoktur. Dönem bittiğinde tohum, sözleşmenin zincir üzerinde doğruladığı bir imzayla yayımlanır."
+      },
+      "four": {
+        "title": "Herkesin sonucu çoktan belirlenmiştir",
+        "body": "Tohum doğrulandığı andan itibaren eşikler herkesin yeniden hesaplayabileceği açık sayılardır ve ağırlıklar artık değişemez. Değerlendirme yalnızca zaten doğru olanı yazıya döker, tasarruf sahibi listesinde tohumun seçtiği bir noktadan yürüyerek. Kimin, hangi sırayla değerlendirileceğini kimse seçmez."
+      },
+      "five": {
+        "title": "Siz bakarsınız, yalnızca siz",
+        "body": "Açığa çıkar düğmesine basın ve bir mesaj imzalayın. O imza, Zama'nın relayer'ına adresi sizin kontrol ettiğinizi kanıtlar, ve sözleşmenin size verdiği değerlerin açık halini geri döndürür: anaparanız, kazancınız, ağırlığınız ve her çekiliş için hesabınıza geçen tutar. Gas harcamaz ve hiçbir şey yazmaz."
+      },
+      "six": {
+        "title": "İstediğiniz zaman çekin",
+        "body": "Çekimler önce kazançtan, sonra anaparadan öder, elinizdekine zincir üzerinde kırpılmış tek bir gizli transferle. Talep, herhangi bir çekimle aynı biçimdeki aynı çağrıdır, dolayısıyla kazananları adlandıran bir işlem türü yoktur."
+      }
+    },
+    "private": {
+      "title": "Şifreli, yalnızca sizin okuyabildiğiniz",
+      "note": "kendi değerleriniz",
+      "one": "Anaparanız",
+      "two": "Talep edilmemiş kazancınız",
+      "three": "Her çekilişteki zaman ağırlıklı bakiyeniz",
+      "four": "Her çekilişin size ne ödediği, yani kazanıp kazanmadığınız"
+    },
+    "public": {
+      "title": "Herkese açık, ki havuza güvenilebilsin",
+      "note": "herkes kontrol edebilir",
+      "one": "Her çekilişin tohumu ve imzası",
+      "two": "Çekilişin karşı koştuğu aralık",
+      "three": "Her kademenin ödül büyüklüğü ve likiditesi",
+      "four": "Bir kademenin kaç ödül ödediği, bir çekiliş sonra",
+      "five": "Hangi adreslerin ne zaman para yatırdığı"
+    },
+    "leaks": {
+      "title": "Dürüstçe adı konmuş: neler sızıyor",
+      "oneLead": "Gizleme ve gizliliği kaldırma herkese açıktır.",
+      "oneBody": "Açık bir tokeni gizli olana çevirmek tanımı gereği herkese açık bir eylemdir. Biri bakiyenizi sabitleyebilirse, ki bu genelde herkese açık bir gizlemenin ardından aynı büyüklükte bir yatırma izlenerek olur, o andan sonraki her çekilişteki sonucunuz açık bir aritmetik meselesidir, çünkü eşikler tasarım gereği herkese açıktır.",
+      "twoLead": "Üç tasarruf sahibinin altında aralık neredeyse kişisel bilgidir.",
+      "twoBody": "Tek tasarruf sahibiyle, o kişinin ağırlığını iki kat hata payıyla verir. Bu olduğunda uygulama sayfada bunu söyler.",
+      "threeLead": "Her kademe kaç ödül ödediğini yayımlar,",
+      "threeBody": "bir çekiliş sonra, kime ödediğini asla. Kazanılmayan parayı herkese açık kasaya geri döndüren adım da aynı adımdır, ki büyük ödülün gözünüzün önünde birikmesini sağlayan budur. Bu, hiç hareket etmeyen bir bakiyeyi yavaşça daraltır.",
+      "fourLead": "Token Zama'nındır, ve yükseltilebilir.",
+      "fourBody": "Sahibi, tokenden geçen her tutarın şifresini geriye dönük olarak çözebilen gözlemciler atayabilir. Hearth'ün kendi defteri onlar tarafından okunamaz, ve bir gözlemci atandığında uygulama bir uyarı şeridi gösterir."
+    },
+    "closing": "Bir çekilişin baştan sona olmasını izleyip yine de kimin kazandığını söyleyemezsiniz. Mesele budur, ve bunu yalnızca tam homomorfik şifreleme mümkün kılar.",
+    "open": "Havuzu aç",
+    "check": "Bir çekilişi kendiniz kontrol edin"
+  },
+
+  "console": {
+    "shell": {
+      "openMenu": "Konsol menüsünü aç",
+      "closeMenu": "Konsol menüsünü kapat",
+      "menuLabel": "Konsol menüsü",
+      "loading": "Ocak yakılıyor"
+    },
+    "sidebar": {
+      "nav": "Konsol",
+      "dashboard": "Gösterge paneli",
+      "deposit": "Yatır",
+      "withdraw": "Çek",
+      "draws": "Çekilişlerim",
+      "run": "Çekiliş çalıştır",
+      "anyone": "Herkes",
+      "anyoneTitle": "Bir çekilişin her adımı her cüzdan tarafından çağrılabilir",
+      "docs": "Dokümanlar",
+      "verify": "Doğrula"
+    },
+    "wallet": {
+      "connect": "Cüzdan bağla",
+      "connecting": "Bağlanıyor",
+      "scan": "Telefonla tarayın",
+      "getWallet": "Cüzdan edinin",
+      "noneLead": "Bu tarayıcıda cüzdan yok. ",
+      "noneLink": "ethereum.org'dan birini seçin",
+      "noneTail": ", biraz Sepolia test ETH'si ekleyin, ve geri dönün. Bu ekrandaki her şey cüzdan olmadan da okunabilir.",
+      "switching": "Değiştiriliyor",
+      "switchTo": "{network} ağına geç",
+      "options": "Cüzdan seçenekleri",
+      "explorer": "Etherscan'de görüntüle",
+      "disconnect": "Bağlantıyı kes"
+    },
+    "connect": {
+      "prompt": "Önce bir cüzdan bağlayın."
+    },
+    "note": {
+      "encrypting": "şifreleniyor ve kanıtlanıyor, yaklaşık on saniye",
+      "signing": "cüzdanınızda onaylayın",
+      "mining": "işlemin bloğa yazılması bekleniyor",
+      "done": "tamam",
+      "busy": "Bu basış yok sayıldı: {label} zaten çalışıyor ve bir cüzdan aynı anda tek bir işlem imzalar. Yukarıdaki satırın bitmesini bekleyin.",
+      "line": "{label}: {state}",
+      "explorer": "İşlemi Etherscan'de görüntüle",
+      "dismiss": "Kapat"
+    },
+    "actions": {
+      "mint": "Test tokeni al",
+      "approve": "Sarmalayıcıyı onayla",
+      "wrap": "Gizli tokene gizle",
+      "deposit": "Yatır",
+      "withdraw": "Çek",
+      "withdrawAll": "Hepsini çek",
+      "close": "{drawId} çekilişini kapat",
+      "award": "{drawId} çekilişine ödül ver",
+      "advance": "{drawId} çekilişini ilerlet",
+      "finalize": "{drawId} çekilişini sonlandır",
+      "reconcile": "{tier} numaralı kademe mutabakatı",
+      "askingSeed": "Zama'nın anahtar yönetim servisinden tohum isteniyor",
+      "seedSealing": "tohum yayımlandı ama şifresi henüz çözülebilir değil, yeniden soruluyor",
+      "askingCarry": "kademenin ödenmemiş likiditesi isteniyor"
+    },
+    "reveal": {
+      "signing": "isteği cüzdanınızda imzalayın, gas harcamaz",
+      "asking": "tarayıcınızda şifre çözülüyor",
+      "sealing": "değer henüz yeni yazıldı ve şifresi çözülebilir değil, yeniden soruluyor",
+      "newKey": "bir KMS payı başarısız oldu, yeni bir anahtarla yeniden deneniyor",
+      "elapsed": "şimdiye kadar {seconds} sn, genelde birkaç saniye sürer",
+      "stopWaiting": "Beklemeyi bırak",
+      "denied": "Zama'nın relayer'ı reddetti: bu değerler bu cüzdana ait değil.",
+      "reveal": "Açığa çıkar: {label}",
+      "hide": "Gizle: {label}",
+      "sealAgain": "Yeniden mühürle",
+      "cost": "Açığa çıkarma: tek imza, gas yok",
+      "encrypted": "{label}, şifreli",
+      "encryptedAlone": "şifreli",
+      "partial": "Relayer bu değeri vermeden cevapladı, dolayısıyla toplam bilinmiyor."
+    },
+    "unknown": {
+      "word": "bilinmiyor",
+      "default": "Bu henüz zincirden dönmedi."
+    },
+    "amount": {
+      "max": "Maks",
+      "allOfIt": "Hepsi",
+      "maxFor": "{max}: {name}",
+      "shape": "Yalnızca sayı. Ondalık ayırıcı olarak nokta da virgül de olur, en fazla bir tane, binlik ayırıcı kullanılamaz.",
+      "precision": "{symbol} {decimals} ondalık taşır, dolayısıyla {smallest} değerinden daha ince bir tutar gönderilemez.",
+      "zero": "Sıfırdan büyük bir tutar girin."
+    },
+    "banners": {
+      "wrongNetwork": "Cüzdanınız yanlış ağda.",
+      "wrongNetworkBody": "Hearth, Ethereum Sepolia üzerinde dağıtıldı. Cüzdanınız o ağa geçene kadar bu sayfada hiçbir şey okunmaz ya da yazılmaz.",
+      "switch": "Sepolia'ya geç",
+      "denied": "Bu adres tokenin yasaklı adres listesinde.",
+      "deniedBody": "{symbol}, bu adrese gelen ve bu adresten giden her transferi reddediyor, dolayısıyla yatırma ve çekme işlemleri geri dönecek. Bu bizim değil, token sahibinin ayarı.",
+      "tokenPaused": "{symbol} tokeni duraklatıldı.",
+      "tokenPausedBody": "Gizleme, transfer ve gizliliği kaldırma token katmanında durdurulmuş durumda. Hearth'ün kendi sözleşmeleri etkilenmez, ama Zama duraklatmayı kaldırana kadar hiçbir şey hareket edemez.",
+      "vaultPaused": "Kasa duraklatıldı.",
+      "vaultPausedBody": "Yeni yatırmalar ve çekiliş kapatma durduruldu. Çekim, değerlendirme, ödül adımı ve sonlandırma hiçbir zaman duraklatılamaz, dolayısıyla paranız hala sizin ve çekilebilir durumda.",
+      "poolPaused": "Ödül havuzu duraklatıldı.",
+      "poolPausedBody": "Çekilişler kapatılamaz. Ödül adımı, değerlendirme, mutabakat ve çekimler devam eder.",
+      "observers": "Token sahibi {count, plural, one {{shown} gözlemci} other {{shown} gözlemci}} atadı.",
+      "observersBody": "{symbol} üzerindeki bir gözlemci, tokenden geçen her tutarın, yatırmalar ve ödemeler dahil, şifresini geriye dönük olarak çözebilir. Hearth'ün kendi defteri, yani anaparanız, kazancınız, ağırlığınız ve hesabınıza geçen tutar, onlar tarafından okunamaz.",
+      "upgraded": "{symbol} tokeni yükseltildi.",
+      "upgradedBody": "Şu anda çalıştırdığı uygulama: {implementation}. Bu, kaynağını satır satır okuduğumuz uygulama değil. Hearth'ün handle'ları üzerindeki davranışı değişmiş olabilir.",
+      "unknownImplementation": "bilinmeyen",
+      "thinSet": "Şu anda havuzda yalnızca {count, plural, one {{shown} tasarruf sahibi} other {{shown} tasarruf sahibi}} var.",
+      "thinSetBody": "{minimum} tasarruf sahibinin altında, yayımlanan aralık kişisel bilgiye yaklaşır: tek kişiyle o kişinin ağırlığını iki kat hata payıyla verir, iki kişiyle her biri diğerini sınırlayabilir. Tutarlar her durumda şifreli kalır, ama daha çok kişi katılana kadar gizlilik incedir.",
+      "noKeeper": "Son birkaç saattir hiçbir çekiliş ilerletilmedi.",
+      "noKeeperBody": "Bir çekilişin her adımını herkes çağırabilir. Yan menüdeki Çekiliş çalıştır, beşinin hepsini sunar. Takılmış bir keeper çekilişe mal olur, paraya asla.",
+      "keeperLate": "Son çekiliş adımı {ago} gerçekleşti, bir dönemden daha uzun süre önce.",
+      "keeperLateFrom": "{address} tarafından gönderildi. ",
+      "keeperLateBody": "Kimsenin bir keeper'ı beklemesi gerekmez: Çekiliş çalıştır ekranı kendi cüzdanınızdan kapatır, ödül verir, değerlendirir, sonlandırır ve mutabakat yapar.",
+      "keeperLink": "Etherscan'de görün",
+      "tokenUnread": "Tokenin kendi durumu okunamadı.",
+      "tokenUnreadBody": "Hearth her ziyarette {symbol} tokenini gözlemciler, bir duraklatma ve adresinize konmuş bir engel için kontrol eder, ve bu okumalar cevap vermedi. Zincir üzerinde hiçbir şey değişmedi, yalnızca bu sayfanın oraya bakışı. Şu anlama gelir: bu ekrandaki token uyarıları, raporlanacak bir şey olmadığı için değil, hiçbir şey okunamadığı için eksik.",
+      "historyDown": "Çekiliş geçmişi kullanılamıyor.",
+      "historyDownBody": "{detail} Ekranlardaki her rakam yine de doğrudan zincirden geliyor."
+    },
+    "unsupported": {
+      "subtitle": "Hearth bu token üzerinde havuz açamaz, dolayısıyla burada imzalanacak bir şey yok.",
+      "pill": "desteklenmiyor",
+      "notDeployed": "dağıtılmadı",
+      "whyLabel": "Bu tokenin neden havuzu yok",
+      "whyOne": "Bu tokenin basımı ihraççısına ait, dolayısıyla Hearth üzerine havuz açamaz. Başka bir havuz seçin.",
+      "whyTwo": "Bir Hearth havuzu, tasarruf sahiplerinin önce açık tokeni edinip kendilerinin gizleyebilmesini gerektirir. {name}, Sepolia üzerinde Zama tarafından ihraç edilir ve dayanağını yalnızca onu dağıtan adres basabilir, dolayısıyla ihraççıdan başka kimse ona gizleme yapamaz ve üzerindeki bir kasa boş kalırdı. Bu, buradaki sözleşmelerin bir kısıtı değil, tokenin ayarı: kasa, standarda uyan her gizli tokeni kabul eder.",
+      "reason": "Sebep",
+      "confidentialToken": "Gizli token",
+      "underlying": "Dayanak",
+      "publishedBy": "Yayımlayan",
+      "zamaList": "Zama'nın Sepolia adresleri",
+      "pickLabel": "Açık olan bir havuz seçin",
+      "pickNote": "Yukarıdaki her havuz, farklı bir gizli token üzerinde aynı kasa, aynı çekiliş ve aynı gizliliktir. Birindeki pozisyonunuz, diğerindeki pozisyonunuz hakkında hiçbir şey söylemez."
+    }
+  },
+
+  "picker": {
+    "trigger": "{symbol} ile biriktiriyorsunuz. Token değiştirin",
+    "list": "Bir token seçin",
+    "saveIn": "Şununla biriktirin",
+    "grandPrize": "Büyük ödül",
+    "unread": "okunamadı",
+    "savingPool": "tasarruf havuzu",
+    "notSupported": "desteklenmiyor",
+    "zamaList": "Zama'nın listesi",
+    "reasons": {
+      "restrictedMint": "basım yalnızca ihraççıya açık"
+    }
+  },
+
+  "dashboard": {
+    "title": "Gösterge paneli",
+    "subtitle": "Elinizdekiler, havuzun ne yaptığı, ve sırada yapılacak tek şey.",
+    "next": "Sıradaki",
+    "position": {
+      "label": "Elinizdekiler",
+      "open": "bu tarayıcıda açık",
+      "sealed": "zincir üzerinde mühürlü",
+      "principal": "Anapara",
+      "principalNote": "Biriktirdiğiniz tutar. Olasılığınız dönem boyunca buna göre ağırlıklandırılır.",
+      "principalSpoken": "anaparanız",
+      "winnings": "Talep edilmemiş kazanç",
+      "winningsNote": "Hesabınıza geçmiş ve henüz çekilmemiş ödül parası. Kendi başına olasılık kazandırmaz.",
+      "winningsSpoken": "talep edilmemiş kazancınız",
+      "outside": "Bu cüzdan şu anda havuzda değil. Para yatırın, iki rakam da dolmaya başlasın.",
+      "footConnect": "Kendi değerlerinizi açmak için bir cüzdan bağlayın. Başka kimse açamaz, ve bunu bu sayfanın sözü değil, zincir üzerindeki Zama erişim listesi uygular.",
+      "footNetwork": "Bunları açmak Sepolia üzerinde bir imza ister. Cüzdanı o ağa geçirin, göz yeniden çalışsın.",
+      "footOpen": "Bu rakamları yalnızca bu tarayıcı gördü. Zincire hiçbir şey yazılmadı ve hiçbir sunucuya bir şey gönderilmedi.",
+      "footSealed": "Göz, Zama'nın relayer'ından bu adrese ait değerlerin şifresini çözmesini ister. Tek imza, gas yok, işlem yok."
+    },
+    "pool": {
+      "label": "Havuzun şu anki durumu",
+      "pill": "herkese açık",
+      "savers": "Tasarruf sahipleri",
+      "saversUnknown": "Tasarruf sahibi sayısı henüz zincirden dönmedi.",
+      "liquidity": "Ödül likiditesi",
+      "liquidityUnknown": "Üç kademe bakiyesinden biri henüz dönmedi, ve eksik bir toplam havuzu vermez.",
+      "period": "Dönem",
+      "periodUnknown": "İçinde bulunulan dönem henüz zincirden dönmedi.",
+      "endsIn": "Bitmesine",
+      "endsUnknown": "Bu dönemin bitişi henüz zincirden dönmedi.",
+      "tier": "Kademe",
+      "chance": "Şans",
+      "prizeEach": "Ödül başına ({symbol})",
+      "prizeCount": "çekiliş başına {count, plural, one {{shown} ödül} other {{shown} ödül}}",
+      "prizeCountUnknown": "ödül sayısı bilinmiyor",
+      "carryWaiting": "{drawId} çekilişinden devir bekliyor",
+      "oddsUnknown": "Bu kademenin olasılıkları henüz zincirden dönmedi.",
+      "nextPrizeUnknown": "Bu kademenin sonraki ödülü henüz zincirden dönmedi.",
+      "footOne": "Her ödül, kademesinin likiditesinin yarısının ödül sayısına bölümüdür, ve kapanışta, rastgele tohum var olmadan sabitlenir. Kimsenin kazanmadığı tutar bir çekiliş sonra yayımlanır ve yeniden teklif edilir.",
+      "footBracket": "Olasılıklar <bracket>2^{bits}</bracket> aralığına karşı çekilir, ve bu aralık çekilişle birlikte yayımlanır.",
+      "footBracketUnknown": "Bu olasılıkların karşı çekildiği aralık henüz zincirden dönmedi."
+    },
+    "tiers": {
+      "grand": "Büyük",
+      "mid": "Orta",
+      "frequent": "Sık"
+    },
+    "tiersLower": {
+      "grand": "büyük ödül",
+      "mid": "orta ödül",
+      "frequent": "sık ödül"
+    }
+  },
+
+  "nextStep": {
+    "connectTitle": "Başlamak için bir cüzdan bağlayın.",
+    "connectDetail": "Hearth, Ethereum Sepolia üzerinde çalışır. Gas için biraz test ETH'sine ihtiyacınız var, ve bir cüzdan bağlandığında test {underlyingSymbol} tek tık uzakta.",
+    "connectCta": "Cüzdan bağla",
+    "switchTitle": "Bu cüzdan başka bir ağa bakıyor.",
+    "switchDetail": "Bu sayfadaki havuz rakamları her durumda Sepolia'dan okunuyor. Cüzdan da o ağa geçene kadar hiçbir şey imzalanamaz ya da gönderilemez.",
+    "switchCta": "Sepolia'ya geç",
+    "readingTitle": "Bu cüzdan zincirden okunuyor.",
+    "readingDetail": "Okumalar gelince sıradaki adım belirir. Ulaşmamış bir bakiyeye dayanarak adım önermek sizi yanlış ekrana yönlendirirdi.",
+    "faucetTitle": "Biraz test {underlyingSymbol} alın.",
+    "faucetDetail": "Sahte {underlyingSymbol}, çağrı başına bir milyon tokenle sınırlı açık bir basım fonksiyonuna sahip. Hiçbir değeri yok, dolayısıyla ihtiyacınızdan fazlasını alın.",
+    "faucetCta": "Test {underlyingSymbol} al",
+    "shieldTitle": "{underlyingSymbol} tokeninizi gizleyin.",
+    "shieldDetail": "Gizleme, açık {underlyingSymbol} tokenini {symbol} tokenine çevirir. O adım doğası gereği herkese açıktır, ve bu paraya dair birinin okuyabileceği son şeydir.",
+    "shieldCta": "{underlyingSymbol} gizle",
+    "depositTitle": "{symbol} tokeninizi havuza koyun.",
+    "depositDetail": "Tutar gönderilmeden önce tarayıcınızda şifrelenir, dolayısıyla kasa okuyamadığı bir sayıyı hesabınıza geçirir. Olasılığınız elinizdekini takip eder.",
+    "depositCta": "Yatır",
+    "claimTitle": "Sizi bekleyen kazanç var.",
+    "claimDetail": "Talep, o tutar için sıradan bir çekimdir. Zincir üzerinde diğer her çekimle aynı biçimdedir, ki kazananı adlandırmasını engelleyen şey budur.",
+    "claimCta": "Kazancınızı talep edin",
+    "readingDrawsTitle": "Son çekilişler okunuyor.",
+    "readingDrawsDetail": "Onlar gelince sıradaki adım belirir. Ulaşmamış bir çekiliş listesine dayanarak adım önermek sizi yanlış ekrana yönlendirirdi.",
+    "resultTitle": "Çekiliş {drawId} içinde sonucunuz yazılı.",
+    "resultDetail": "Yürüyüş bu cüzdana ulaştı, dolayısıyla kazanıp kazanmadığı çoktan belirlendi ve kaydedildi. Siz açana kadar mühürlü kalır, ve açmak bir imzaya mal olur, gas'a değil.",
+    "resultCta": "Çekiliş {drawId} sonucunu aç",
+    "settledTitle": "Şu anda yapılacak bir şey yok.",
+    "settledDetail": "Yatırdığınız para havuzda duruyor ve orada kaldığı her saniye için olasılık kazanıyor. Sonraki çekiliş dönemin sonunda kapanır, ve onu herkes kapatabilir.",
+    "settledCta": "Yatırdığınıza ekleyin",
+    "noWallet": "Cüzdan bulunamadı"
+  },
+
+  "deposit": {
+    "title": "Yatırma",
+    "subtitle": "Test {underlying} alın, {confidential} olarak gizleyin, sonra kasaya koyun.",
+    "connect": "Para yatırmak için Sepolia üzerinde bir cüzdan bağlayın. Aşağıdaki üç adım, havuza para sokmanın gerektirdiği şeydir, ve ekran cüzdanınızın gerçekten hangisinde olduğunu açar.",
+    "connectNote": "Gas için biraz Sepolia ETH'sine ihtiyacınız olacak. Bağlandığınızda test {underlying} tek tık uzakta.",
+    "lowGas": "Bu cüzdanda neredeyse hiç Sepolia ETH'si yok, dolayısıyla bir işlem gönderilmeden önce başarısız olur. Herhangi bir Sepolia faucet'i onu doldurur: Google Cloud Web3 faucet'i, Alchemy'ninki ya da Chainlink'inki. Bir ETH'nin onda biri fazlasıyla yeter.",
+    "inWallet": "Cüzdanınızda",
+    "inWalletSpoken": "{symbol} bakiyeniz",
+    "inWalletUnknown": "Cüzdanınızda: ",
+    "faucet": {
+      "title": "Test {underlying} al",
+      "held": "Cüzdanınızda {amount} {underlying} var.",
+      "heldSummary": "Cüzdanınızda {amount} {underlying} var. ",
+      "more": "Bir milyon daha al",
+      "unread": "Cüzdan bakiyeniz henüz zincirden dönmedi.",
+      "button": "Test {underlying} al",
+      "note": "Sahte {underlying}, çağrı başına bir milyon tokenle sınırlı açık bir basım fonksiyonuna sahip. Hiçbir değeri yok, dolayısıyla ihtiyacınızdan fazlasını isteyin."
+    },
+    "shield": {
+      "title": "{underlying} tokeninizi gizleyin",
+      "summary": "Gizlendi. Bakiye mühürlü, dolayısıyla içinde ne olduğunu yalnızca siz okuyabilirsiniz. ",
+      "more": "Daha fazla gizle",
+      "body": "Gizleme, açık {underlying} tokenini {confidential} tokenine çevirir, ve herkese açıktır. Sarmalayıcı sözleşme açık tutarı yayar, ERC-20 transferi onu bir kez daha taşır, ve bunun etrafından dolaşmanın yolu yoktur: açık bir tokeni gizli olana çevirmek tanımı gereği herkese açık bir eylemdir.",
+      "youShield": "Gizlediğiniz",
+      "fieldName": "Gizlenecek {underlying} tutarı",
+      "balance": "Cüzdanınızda {amount} {underlying}",
+      "tooMuch": "Elinizde {amount} {underlying} var. Daha azını isteyin, ya da önce biraz daha basın.",
+      "youReceive": "Aldığınız",
+      "rateUnknown": "Sarmalayıcı oranı henüz zincirden dönmedi.",
+      "rateOne": "Sarmalayıcı bire birdir, dolayısıyla gizlediğinizin tam karşılığını alırsınız.",
+      "rateOther": "Sarmalayıcı, bir birim {confidential} için {rate} birim {underlying} alır.",
+      "why": "Gizleme ve yatırmanın tek düğme değil iki düğme olmasının sebebi budur. Yuvarlak bir sayıyı, kendi seçtiğiniz bir zamanda gizleyin, ve bir kısmını daha sonra yatırın. Bakiyenizi sabitleyebilen biri, o andan sonraki her çekilişte kazanıp kazanmadığınızı hesaplayabilir, çünkü eşikler tasarım gereği herkese açıktır.",
+      "approve": "Sarmalayıcıyı onayla",
+      "button": "Gizle",
+      "approveNote": "Tek bir onay, ve ondan sonraki her gizleme tek işlemdir. Bu onay, {confidential} sarmalayıcı sözleşmesinin bu cüzdandan {underlying} çekmesine izin verir ve sahip olduğunuz başka hiçbir şeye erişmez. {underlying}, yukarıdaki faucet düğmesinden gelen bir Sepolia test tokenidir ve hiçbir gerçek ağda değeri yoktur. Onay bloğa yazıldığında gizleme düğmesi devreye girer.",
+      "waiting": "Bakiyeleriniz henüz zincirden dönmedi, dolayısıyla bu, onlar gelene kadar bekletiliyor.",
+      "skip": "Bunun yerine elinizdekini yatırın"
+    },
+    "vault": {
+      "title": "Kasaya yatırın",
+      "body": "Tutar tarayıcınızda sıfır bilgi kanıtıyla şifrelenir, sonra tek bir işlemde gönderilir. Kasa, tokenin gerçekten hareket ettiğini söylediği tutarı hesabınıza geçirir, dolayısıyla elinizdekinden fazlasını istemek gürültüyle başarısız olmak yerine hiçbir şey hareket ettirmez. Ne kadarınız olduğundan emin değilseniz aşağıdaki gözü açın.",
+      "closedNotAwarded": "Şu anda kapanmış ve ödül adımını bekleyen bir çekiliş var. Yatırmaya yine de izin verilir; bu para şu andan itibaren sayılır, içinde bulunulan dönemin kalan kısmına göre ağırlıklandırılarak.",
+      "youDeposit": "Yatırdığınız",
+      "fieldName": "Yatırılacak {confidential} tutarı",
+      "cap": "Kasa tek bir tasarruf sahibini {amount} {confidential} ile sınırlar, dolayısıyla bu reddedilir ve aynı işlemin içinde iade edilir.",
+      "tooMuch": "Elinizde {amount} {confidential} var. Fazlasını istemek zincir üzerinde reddedilmez: token elinizdekini hareket ettirir, ki burada bu hiçbir şeydir, ve işlem yine de başarılı olur.",
+      "sealedNote": "Bakiyeniz mühürlü, dolayısıyla bu ekran tutarı ona karşı kontrol edemez. Elinizdekinin üzerinde bir yatırma hiçbir şey hareket ettirmez ve yine de bir işleme mal olur. Yukarıdaki gözü açın, alan sizin için kontrol edilsin.",
+      "button": "Yatır",
+      "paused": "Kasa duraklatıldı, dolayısıyla yatırmalar reddediliyor. Çekim hala çalışıyor."
+    }
+  },
+
+  "withdraw": {
+    "title": "Çekim",
+    "subtitle": "İki aşama: önce kasadan çıkarma, sonra {underlying} tokenine dönüş. Anapara, bir çekilişin ortasında bile hiçbir zaman kilitli değildir.",
+    "connect": "Çekim yapmak için bir cüzdan bağlayın. Birinci aşama anaparayı ve kazancı kasadan çıkarır, ikinci aşama {confidential} tokenini {underlying} tokenine geri çevirir.",
+    "connectNote": "Burada hiçbir şey kilitli değildir. Anapara, bir çekilişin ortasında bile, istediğiniz anda tam olarak geri gelir.",
+    "tabs": {
+      "label": "Çekim aşamaları",
+      "vault": "Kasadan çıkarma",
+      "unshield": "Açık tokene dönüş",
+      "unfinished": "yarım kalan bir işlem var"
+    },
+    "pending": {
+      "title": "Bir gizliliği kaldırma işlemi gönderildi ve hiç bitirilmedi.",
+      "body": "Gizli tokenler çoktan yakıldı ve {underlying} sarmalayıcıda bekliyor. İkinci işlemi göndermek onu serbest bırakır. ",
+      "link": "Gizliliği kaldırma işlemini görün",
+      "finish": "Gizliliği kaldırmayı bitir"
+    },
+    "vault": {
+      "reading": "Bu cüzdanın kasada ne tuttuğu okunuyor.",
+      "unavailable": "Bu cüzdanın okumaları geri gelmedi, dolayısıyla bu ekran kasanın sizin için ne tuttuğunu söyleyemez. Ağ cevap verdiğinde sayfayı yeniden yükleyin.",
+      "neverDepositedLead": "Bu cüzdan hiç para yatırmadı, dolayısıyla kasa onun için hiçbir şey tutmuyor ve bir çekim zincir üzerinde reddedilirdi. ",
+      "depositFirst": "Önce para yatırın",
+      "neverDepositedTail": ", ya da {underlying} olarak geri istediğiniz {confidential} tutuyorsanız ikinci aşamayı kullanın.",
+      "youWithdraw": "Çektiğiniz",
+      "fieldName": "Kasadan çekilecek tutar",
+      "inVault": "Kasada",
+      "inVaultSpoken": "kasa bakiyeniz",
+      "clamped": "Bu, elinizdekinden fazla. Kasa elinizdeki {amount} tutarını gönderir ve orada durur.",
+      "revealNote": "Bu alanı sınırlamak ve dağılımı görmek için açığa çıkarın. Atlamak güvenlidir: kasa tutarı her durumda zincir üzerinde kırpar.",
+      "youReceive": "Aldığınız",
+      "receiveBalance": "Cüzdanınızda, hala şifreli. İkinci aşama onu {underlying} tokenine geri çevirir.",
+      "split": "Bunun {winnings} kadarı kazançtan, {principal} kadarı anaparadan çıkar, ve her iki durumda da aynı görünen tek bir transferle.",
+      "splitSealed": "Kazanç ile anapara arasında nasıl bölündüğünü görmek için kasa bakiyenizi açığa çıkarın.",
+      "button": "Çek",
+      "everything": "Hepsini çek",
+      "everythingNote": "Hepsini çekmek ne bir açığa çıkarma ne de şifreli bir girdi ister. Kasa anaparanızı kazancınıza zincir üzerinde ekler ve toplamı gönderir, dolayısıyla ne sizin ne de bu sayfanın onu önceden bilmesi gerekir.",
+      "howLabel": "Bir çekim nasıl ödenir",
+      "howOne": "Önce kazanç, sonra anapara, tek bir gizli transferle. Transferin hiçbir yanı hangi parçalardan oluştuğunu söylemez.",
+      "howTwo": "Tutar zincir üzerinde, istediğiniz, elinizde olan ve kasanın tuttuğu miktarların en küçüğüne kırpılır, çünkü gizli bir transfer ya tutarın tamamını taşır ya da hiçbir şeyi. Fazla büyük bir istek başarısız olmak yerine elinizdeki her şeyi gönderir, ki bu aynı zamanda kimsenin çok fazlasını isteyip ne olduğunu izleyerek bakiyenizi bulamamasının sebebidir.",
+      "howWindow": "Şu anda bir çekiliş penceresi açık. Çekim yapmaya izin verilir ve bu, sizin için çoktan sabitlenmiş olasılıkları değiştirmez. O çekilişten çıkan bir ödül, daha sonraki bir çekim için kazancınıza düşer.",
+      "howThree": "Anapara hiçbir zaman kilitli değildir. İhbar süresi, ceza ya da bir çekilişin bitmesini bekleme yoktur."
+    },
+    "unshield": {
+      "youUnshield": "Gizliliğini kaldırdığınız",
+      "fieldName": "Gizliliği kaldırılacak {confidential} tutarı",
+      "inWallet": "Cüzdanınızda",
+      "inWalletSpoken": "{confidential} bakiyeniz",
+      "tooMuch": "Elinizde {amount} {confidential} var. Fazlasını istemek zincir üzerinde reddedilmez: her iki işlemi de harcar ve hiçbir şey hareket ettirmez.",
+      "revealNote": "Bu alanı sınırlamak için açığa çıkarın. Elinizdekinden fazlasının gizliliğini kaldırmak reddedilmez, yalnızca hiçbir şey hareket ettirmez.",
+      "youReceive": "Aldığınız",
+      "receiveBalance": "Cüzdanınızda {underlying}, her yerde harcanabilir.",
+      "receiveNote": "Bu rakam zincire açık halde gider. Onu yayımlayan şey, iki işlemden ilkidir.",
+      "button": "Gizliliği kaldır",
+      "unfinished": "Yeni bir gizliliği kaldırma, yukarıdaki bitene kadar beklemek zorunda. Aynı anda yalnızca bir tanesi hatırlanır, ve bir yenisini başlatmak ilkini, tokenleri yakılmış ve onları serbest bırakacak hiçbir şeyi olmadan bırakırdı.",
+      "unwrapping": "Gizliliği kaldırma: cüzdanınız iki kez sorar. Önce sarmalayıcının gizli bakiyenizi okuyabilmesi için bir imza, ki gas harcamaz, sonra işlemin kendisi.",
+      "waiting": "Gizliliği kaldırma gönderildi. Zama'nın protokolünün açık metni ve kanıtını yayımlaması bekleniyor.",
+      "finalizing": "Sonlandırılıyor: {underlying} tokenini serbest bırakmak için ikinci işlemi onaylayın.",
+      "done": "Gizlilik kaldırıldı. {underlying} bakiyeniz {amount} kadar arttı, ikinci işlemden sonra zincirden okundu.",
+      "doneUnchecked": "Gizlilik kaldırıldı. Her iki işlem de gerçekleşti, ama {underlying} bakiyesi geri okunamadı, dolayısıyla bu ekran ne geldiğini söyleyemez. Cüzdanınızı kontrol edin.",
+      "nothingMoved": "Hiçbir şey hareket etmedi. Her iki işlem de gerçekleşti ve {underlying} bakiyeniz tam olarak eskisi kadar, ki bu, tutar gizli bakiyenizin üzerinde olduğunda olur: sarmalayıcı reddetmek yerine hiçbir şey serbest bırakmaz. Yukarıdaki gözle bakiyeyi açın ve Hepsi seçeneğini kullanın.",
+      "whyLabel": "Bu neden iki işlem gerektiriyor",
+      "whyOne": "Sarmalayıcı önce şifreli tutarı yakar ve yayımlar, sonra Zama'nın protokolü açık metni ve kanıtını ürettiğinde açık tokenleri serbest bırakır. Bunlar iki ayrı çağrıdır, ve aralarında sekmeyi kapatırsanız ikincisi daha sonra da gönderilebilir.",
+      "whyTwo": "Cüzdanınız ayrıca ilk işlemden önce bir imza ister, çünkü sarmalayıcı tutarı kontrol etmek için gizli bakiyenizi okur. O istem bir imzadır, işlem değil, ve gas harcamaz.",
+      "whyThree": "Hesabınızı boşaltmadan önce bilmeye değer: tamamını gizleyip tamamının gizliliğini kaldırırsanız, iki açık toplam arasındaki fark, şimdiye kadar kazandığınız her şeyin alt sınırı olur. Yuvarlak sayılarla gizliliği kaldırın, ya da geride duran bir gizli bakiye bırakın."
+    }
+  },
+
+  "draws": {
+    "title": "Çekilişlerim",
+    "subtitle": "Son çekilişlerin her biri, herkese açık ödül rakamları, ve gözün ardında kendi ağırlığınız ve ödülünüz.",
+    "count": "en son {count} tanesi",
+    "reading": "okunuyor",
+    "emptyReading": "Havuz okunuyor.",
+    "emptyNone": "Henüz hiçbir dönem bitmedi, dolayısıyla gösterilecek çekiliş yok. İlki, 1. dönem biter bitmez belirir.",
+    "emptyFailed": "Çekilişler şu anda okunamadı. Her durumda zincirdeler; bu sayfa kendiliğinden yeniden deniyor.",
+    "card": {
+      "label": "Çekiliş {drawId}",
+      "claimNote": "Talep, tam olarak o tutar için sıradan bir çekimdir. Zincir üzerinde diğer her çekimle aynı biçimdedir, ki bir talebin kazananı adlandırmasını engelleyen şey budur.",
+      "claim": "{amount} {symbol} talep et",
+      "advanceNote": "İlerletme, ortak yürüyüşü bu çekilişin tohumunun belirlediği sırada en fazla {batch} tasarruf sahibi kadar ileri taşır. Size yöneltilemez, dolayısıyla ona basmak kazanıp kazanmadığınız hakkında hiçbir şey söylemez.",
+      "advance": "Çekilişi ilerlet",
+      "waitingLead": "Bu adım herkese açıktır. ",
+      "waitingLink": "Çekiliş çalıştır",
+      "waitingTail": " ekranında yer alır.",
+      "periodEnded": "{drawId}. dönem bitti",
+      "periodEndedUnknown": "Bu dönemin bitişi henüz zincirden dönmedi.",
+      "closeDeadline": "Kapatma son tarihi",
+      "closeDeadlineUnknown": "Bu çekilişin kapatma son tarihi henüz zincirden dönmedi.",
+      "passed": "geçti",
+      "prizeWindow": "Ödül penceresi",
+      "windowUnknown": "Bu çekilişin penceresi henüz zincirden dönmedi.",
+      "windowLeft": "{time} kaldı",
+      "windowClosed": "kapandı",
+      "bracket": "Aralık",
+      "bracketNote": "havuzun toplam ağırlığının yerine yayımlandı",
+      "walk": "Yürüyüş",
+      "walkNotStarted": "başlamadı",
+      "walkProgress": "{total} içinde {cursor}",
+      "walkNote": "çağrı başına en fazla {batch} tasarruf sahibi",
+      "prizeWorth": "Bir ödül ne değerindeydi",
+      "noPrizeMoney": "Bu çekiliş hiç ödül parası teklif etmedi: kapandığında henüz hiçbir hasat kayda geçmemişti.",
+      "yourResult": "Sonucunuz",
+      "sealedResult": "bir sonuç, şifreli",
+      "sealedResultNote": "Zincir üzerinde şifreli, ve yalnızca ait olduğu cüzdan tarafından okunabilir.",
+      "notReachedUnknown": "Yürüyüş henüz size ulaşmadı, ve bu çekilişin penceresi zincirden dönmedi, dolayısıyla sayfa hala ilerletilip ilerletilemeyeceğini söyleyemez.",
+      "notReachedYet": "Yürüyüş henüz size ulaşmadı. Ulaşana kadar bu çekiliş, kazanmış olun ya da olmayın, sizin için hiçbir rakam tutmaz.",
+      "missedWindow": "Yürüyüş size ulaşmadan pencere kapandı, dolayısıyla bu çekiliş size hiçbir şey ödemez ve para kademelere geri döndü. Artık kimse onu değerlendiremez.",
+      "yourPrize": "Ödülünüz",
+      "yourPrizeSpoken": "{drawId} çekilişindeki ödülünüz",
+      "yourWeight": "Ağırlığınız",
+      "yourWeightSpoken": "{drawId} çekilişindeki ağırlığınız",
+      "noPrize": "Bu çekilişte ödül yok. Ağırlığınız sayıldı ve eşikler sizin lehinize düşmedi.",
+      "claimed": "Çoktan çekildi. Kasanın bu cüzdana borcu yok, dolayısıyla bu ödül gizli bakiyenizde. Çekiliş rakamı kayıt olarak saklar."
+    }
+  },
+
+  "describe": {
+    "unreadBadge": "okunamadı",
+    "unread": "Bu çekiliş henüz zincirden dönmedi, dolayısıyla altındaki hiçbir şey kesin değil. Sayfa sormayı sürdürüyor.",
+    "notClosedBadge": "kapatılmadı",
+    "notClosed": "Dönem bitti ve bu çekiliş kapatılmayı bekliyor. Onu siz dahil herkes kapatabilir.",
+    "missedBadge": "kaçırıldı",
+    "missed": "Bu çekilişi son tarihinden önce kimse kapatmadı, dolayısıyla hiçbir şey ödemez. Likiditesi hiç taşınmadı ve sonraki kapatma onu yeniden teklif eder.",
+    "closedBadge": "kanıt bekleniyor",
+    "closed": "Kapandı. Tohum, aralık, boş olmama bayrağı ve hasat yayımlandı ve Zama'nın anahtar yönetim servisinin açık metinlerini imzalamasını bekliyor. Herkes onları alıp çekilişe ödül verebilir.",
+    "emptyBadge": "boş",
+    "empty": "Bu dönem boyunca kimse bakiye tutmadı, dolayısıyla tartılacak bir şey yoktu. Teklif edilen likidite doğrudan kademelere geri döndü.",
+    "skippedBadge": "atlandı",
+    "skipped": "Ödül adımı çekilişin penceresinden sonra gerçekleşti, dolayısıyla hiçbir ödül ödenmedi. Likidite kademelere geri döndü ve hasat yine de kayda geçti.",
+    "awardedBadge": "ödül verildi",
+    "awardedAllDisconnected": "Ödül verildi, ve yürüyüş içindeki her tasarruf sahibine ulaştı. İçinde nerede durduğunuzu görmek için bir cüzdan bağlayın.",
+    "awardedDisconnected": "Ödül verildi. Değerlendirme yürüyüşü hala sürüyor. İçinde nerede durduğunuzu görmek için bir cüzdan bağlayın.",
+    "awardedAllOutside": "Ödül verildi ve her tasarruf sahibi değerlendirildi. Bu cüzdan o sırada havuzda değildi.",
+    "awardedOutside": "Ödül verildi. Değerlendirme yürüyüşü hala sürüyor, ve bu cüzdan onun içinde değil.",
+    "awardedAll": "Ödül verildi, ve yürüyüş içindeki her tasarruf sahibine ulaştı. Her sonuç sabit ve yazılı.",
+    "awarded": "Ödül verildi. Bu andan itibaren her sonuç çoktan belirlenmiştir: eşikler herkese açıktır ve ağırlıklar artık değişemez. Değerlendirme onları yalnızca yazıya döker."
+  },
+
+  "run": {
+    "title": "Çekiliş çalıştır",
+    "subtitle": "Bir çekiliş beş işlem sürer. Her biri, sizinki dahil her cüzdan tarafından çağrılabilir.",
+    "connect": "Bunlardan herhangi birini göndermek için bir cüzdan bağlayın. Hiçbiri sözleşmelerin tanıdığı bir ayrıcalık gerektirmez, ve hiçbiri belirli bir tasarruf sahibine yöneltilemez.",
+    "connectNote": "Aşağıdaki beş adım her durumda zincirden okur, dolayısıyla ekrana, bir şey bağlamadan önce bakmaya değer.",
+    "waitingFor": "Havuz neyi bekliyor",
+    "nothing": "Hiçbir şey",
+    "ordering": " Ayrıca kapatılmaya hazır bir çekiliş de var. Önce sonlandırma ve mutabakat gelir, çünkü sonraki kapatmanın ödüllerini boyutlandırdığı para, bir devrin serbest bıraktığı paradır.",
+    "unknownDue": "Hangi adımın sırası geldiğini söyleyen okumalar henüz zincirden dönmedi.",
+    "idleWithClock": "Ya keeper yetişti ya da bu dönem hala sürüyor. {time} içinde bitiyor.",
+    "idle": "Ya keeper yetişti ya da bu dönem hala sürüyor.",
+    "railLabel": "Beş adım, bir çekilişin onlara ihtiyaç duyduğu sırayla",
+    "unknownStep": "Bu adımın kullanılabilir olup olmadığı henüz zincirden dönmedi.",
+    "chip": {
+      "due": "sırası geldi",
+      "ready": "hazır",
+      "unknown": "bilinmiyor",
+      "notYet": "henüz değil"
+    },
+    "blocked": {
+      "connect": "Bunu göndermek için bir cüzdan bağlayın.",
+      "network": "Cüzdanınız başka bir ağda.",
+      "busy": "Zaten yolda olan başka bir işlem var."
+    },
+    "close": {
+      "title": "Kapatma",
+      "headline": "{drawId} çekilişini kapat",
+      "headlineIdle": "Bir çekilişi kapat",
+      "button": "Kapat",
+      "does": "Her kademenin ödül büyüklüğünü içinde duran paradan sabitler, o parayı çekilişin içine taşır, getiri kaynağını hasat eder, ve biz dahil kimsenin okuyamayacağı şifreli bir tohum çeker.",
+      "paused": "Ödül havuzu duraklatıldı, dolayısıyla hiçbir çekiliş kapatılamaz.",
+      "readyDeadline": "Çekiliş {drawId} bir {time} daha kapatılabilir. Ondan sonra atlanır ve parası kademelerde kalır.",
+      "ready": "Çekiliş {drawId} kapatılmayı bekliyor.",
+      "waitingClock": "Bekleyen çekiliş yok. Çekiliş {drawId}, bu dönem bittiğinde, {time} içinde kapatılabilir hale gelir.",
+      "waiting": "Kapatılmayı bekleyen çekiliş yok."
+    },
+    "award": {
+      "title": "Ödül adımı",
+      "headline": "{drawId} çekilişine ödül ver",
+      "headlineIdle": "Bir çekilişe ödül ver",
+      "button": "Ödül ver",
+      "does": "Kapatmanın yayımladığı dört değerin açık halini, anahtar yönetim servisinin üzerlerindeki imzasıyla birlikte havuza verir. Havuz o imzayı zincir üzerinde doğrular, hasadı kademelere işler ve çekilişi açar. Kazananlar bu anda belirlenir.",
+      "ready": "Çekiliş {drawId} kapandı ve bekliyor. Önce dört kanıt alınır, ki bu birkaç saniye sürer, sonra cüzdanınız sizden imza ister.",
+      "waiting": "Ödül adımını bekleyen kapanmış bir çekiliş yok."
+    },
+    "advance": {
+      "title": "İlerletme",
+      "headline": "{drawId} çekilişini ilerlet",
+      "headlineIdle": "Bir çekilişi ilerlet",
+      "button": "İlerlet",
+      "does": "Tasarruf sahibi listesinde tohumun belirlediği bir noktadan yürür ve her tasarruf sahibinin hesabına, yayımlanan eşiklerin kazandığını söylediği tutarı geçirir. Çağıran bir çağrının kaç tasarruf sahibini kapsayacağını seçer, hangilerini olduğunu asla, dolayısıyla bunu göndermek çekilişte kim olduğunuz hakkında hiçbir şey söylemez.",
+      "readyCount": "Çekiliş {drawId} üzerinde {total} tasarruf sahibinden {cursor} tanesi tamamlandı. Her çağrı ortak yürüyüşü en fazla {batch} kadar ileri taşır, ki bir işlemin ödediği budur.",
+      "ready": "Çekiliş {drawId} üzerinde hala kapsanacak tasarruf sahipleri var. Her çağrı ortak yürüyüşü en fazla {batch} kadar ileri taşır, ki bir işlemin ödediği budur.",
+      "waiting": "Ödül verilmiş hiçbir çekilişin penceresi içinde kalan tasarruf sahibi yok."
+    },
+    "finalize": {
+      "title": "Sonlandırma",
+      "headline": "{drawId} çekilişini sonlandır",
+      "headlineIdle": "Bir çekilişi sonlandır",
+      "button": "Sonlandır",
+      "does": "Pencere bittiğinde her kademenin ödenmemiş kalanını o kademenin şifreli devrine katlar, ve sırası gelen her kademenin devrini yayımlar.",
+      "ready": "Çekiliş {drawId} penceresini tamamladı, dolayısıyla ondan başka bir şey hesaplara geçirilemez.",
+      "waitingClock": "Hiçbir pencere bitmedi. Çekiliş {drawId}, {time} içinde sonlandırılabilir.",
+      "waiting": "Penceresi bitip de sonlandırılmamış bir çekiliş yok."
+    },
+    "reconcile": {
+      "title": "Mutabakat",
+      "headline": "Mutabakat: {tier} kademesi",
+      "headlineIdle": "Bir kademede mutabakat yap",
+      "button": "Mutabakat yap",
+      "does": "Yayımlanmış bir devrin açık metnini alır, onu havuza kanıtlar ve parayı o kademenin açık likiditesine geri işler, böylece sonraki kapatma onu yeniden teklif edebilir.",
+      "ready": "{drawId} çekilişinde {tier} kademesi devrini yayımladı.",
+      "readyMore": "{count, plural, one { Arkasında {shown} kademe daha var, ve her basış bir tanesini yapar.} other { Arkasında {shown} kademe daha var, ve her basış bir tanesini yapar.}}",
+      "waiting": "Geri işlenmeyi bekleyen devri olan bir kademe yok."
+    },
+    "who": {
+      "label": "Bunları kim gönderir",
+      "oneStart": "Çalıştırdığımız bir keeper havuzu izler ve bunların her birini sırası geldiğinde gönderir, dolayısıyla sıradan bir saatte bu ekranda yapılacak bir şey yoktur.",
+      "onePeriod": " Buradaki bir dönem {period}, dolayısıyla beşlik bir tam tur o sıklıkta gönderilir.",
+      "oneEnd": " Keeper'ın sözleşmelerin tanıdığı hiçbir ayrıcalığı yoktur. Kötüye kullanabileceği iki şey, yani hangi tasarruf sahiplerinin değerlendirileceğini ve ödüllerin hangi sırada ödeneceğini seçmek, hiçbir çağırana açık seçimler değildir.",
+      "two": "Ödül adımı ile mutabakat, zincir dışından bir şeye ihtiyaç duyan iki adımdır. Tarayıcınız, havuzun yayımladığı değerlerin açık halini Zama'nın relayer'ından ister, ödül adımı için dört değer ve mutabakat için bir tane, anahtar yönetim servisinin üzerlerindeki imzasıyla birlikte. Bu, keeper'ın yaptığı çağrının aynısıdır, ve sözleşme imzayı kendisi kontrol eder, dolayısıyla bir tarayıcı okuduğu şey hakkında yalan söyleyemez.",
+      "three": "Keeper durursa hiçbir şey kaybolmaz. Hiç kapatılmayan bir çekiliş parasını kademelerde tutar ve yeniden teklif edilir, ve hiç mutabakat yapılmayan bir devir, indiği andan sonraki ilk kapatma tarafından geri katlanır. Takılmış bir keeper havuza çekilişe mal olur, paraya değil, ve buradaki her cüzdan onları yeniden başlatabilir.",
+      "periodHours": "{count, plural, one {bir saat} other {{shown} saat}}",
+      "periodMinutes": "{count} dakika",
+      "periodSeconds": "{count} saniye"
+    },
+    "stand": {
+      "label": "Çekilişler nerede duruyor",
+      "period": "İçinde bulunulan dönem",
+      "periodNote": "{time} içinde bitiyor",
+      "savers": "Tasarruf sahipleri",
+      "saversNote": "Tam bir yürüyüşün ne kadar yol alması gerektiği",
+      "lastClosed": "Son kapatılan çekiliş",
+      "lastClosedNone": "henüz yok",
+      "vaultUnknown": "kasa durumu bilinmiyor",
+      "vaultPaused": "kasa duraklatıldı",
+      "vaultRunning": "kasa çalışıyor",
+      "poolUnknown": "ödül havuzu durumu bilinmiyor",
+      "poolPaused": "ödül havuzu duraklatıldı",
+      "poolRunning": "ödül havuzu çalışıyor"
+    }
+  },
+
+  "verify": {
+    "title": "Bir çekilişi kendiniz kontrol edin.",
+    "lede": "Cüzdan gerekmez. Buradaki her sayı doğrudan sözleşmelerden okunur, ve eşikler kasanın kendi <code>thresholdOf</code> view'ından gelir, ki bu, sonucu belirleyen aritmetiğin aynısıdır. Bu sayfada, birinciyle çelişecek ikinci bir uygulama yok.",
+    "noPool": "{symbol} için kontrol edilecek havuz yok.",
+    "noPoolBody": "{reason}, dolayısıyla Hearth üzerinde hiç kasa açmadı ve burada çekiliş yok. Yukarıdaki listeden bir token seçin.",
+    "unreachable": "Sepolia'ya ulaşılamadı.",
+    "unreachableBody": "Bu sayfa kasayı ve havuzu bir RPC uç noktası üzerinden okur, ve o okuma başarısız oldu, dolayısıyla gösterecek bir şeyi yok. Çekilişlerin kendisi her durumda zincirde.",
+    "tryAgain": "Yeniden deneyin",
+    "reading": "Çekilişler Sepolia'dan okunuyor.",
+    "noneYet": "Henüz hiçbir çekiliş kapatılmadı, dolayısıyla kontrol edilecek bir şey yok. İlki, 1. dönem bitip biri onu kapattığında belirir.",
+    "oneNotClosed": "Çekiliş {drawId} henüz kapatılmadı, dolayısıyla kontrol edilecek bir şey yok.",
+    "rangeNotClosed": "{first} ile {last} arasındaki çekilişler kapatılmadı, dolayısıyla burada kontrol edilecek bir şey yok. Daha eskisi blok gezgininde.",
+    "drawButton": "Çekiliş {drawId}",
+    "facts": {
+      "title": "Çekiliş {drawId}",
+      "periodCovered": "Kapsanan dönem",
+      "periodEnded": "{stamp} bitti",
+      "windowEnds": "Pencere bitişi",
+      "seed": "Tohum",
+      "seedUnpublished": "henüz yayımlanmadı",
+      "bracket": "Aralık",
+      "bracketUnset": "henüz belirlenmedi",
+      "bracketNote": "{count} bakiye saniyesi",
+      "prizeSizes": "Ödül büyüklükleri",
+      "prizeSizesNote": "büyük / orta / sık",
+      "harvest": "Kayda geçen hasat",
+      "walkSavers": "Yürüyüşteki tasarruf sahipleri",
+      "walkNotStarted": "başlamadı",
+      "walkPosition": "Yürüyüş konumu",
+      "walkProgress": "{total} içinde {cursor}",
+      "finalized": "Sonlandırıldı",
+      "yes": "evet",
+      "no": "hayır",
+      "note": "Tohum, Zama'nın yardımcı işlemcisi içinde şifreli veri olarak üretilir, dolayısıyla çekildiğinde kimse onu görmez, ve bir çekilişi kapatmak tam olarak bir kez başarılı olur, dolayısıyla ikinci bir atış yoktur. Aralık, havuzun toplam ağırlığının üzerindeki en küçük ikinin kuvvetidir, ve tam toplamın yerine yayımlanır, çünkü arka arkaya iki tam toplam, tek başına hareket eden birinin yatırdığı tutarı çözerdi."
+    },
+    "tiers": {
+      "title": "Her kademe ne teklif etti, ne ödedi",
+      "hint": "tasarım gereği herkese açık",
+      "each": "her biri {amount} {symbol}",
+      "offered": "teklif edildi",
+      "returned": "ödenmeden geri döndü",
+      "notReconciled": "henüz mutabakat yapılmadı",
+      "paid": "ödenen ödüller",
+      "paidUnknown": "mutabakata kadar bilinmiyor",
+      "paidInexact": "tam olarak türetilemiyor",
+      "note": "Ödenen ödüller, açık sayılardan hesaplanır: kademenin teklif ettiği tutardan ödenmeden geri gelen çıkarılır, ve ödül büyüklüğüne bölünür. Çekilişin içine şifreli bir devir binmediği her durumda tam çıkar, ve bu dağıtım her kademede her çekilişte mutabakat yaptığı için genelde öyle olur. Kime ödendiğini asla söylemez."
+    },
+    "thresholds": {
+      "title": "Bir adres için eşikler",
+      "hint": "thresholdOf üzerinden okundu",
+      "body": "Herhangi bir adresi yapıştırın. Kasa, o adresin bu çekilişte her kademenin her ödülünde aşması gereken tam ağırlığı döndürür. Onu, o tasarruf sahibinin kendi çözülmüş ağırlığıyla karşılaştırın, sonuç tutar: ağırlıkları eşiğin kesin olarak üzerinde olduğunda ödülü kazanmışlardır.",
+      "fieldName": "Kontrol edilecek bir adres",
+      "invalid": "Bu geçerli bir Ethereum adresi değil.",
+      "notAwarded": "Çekiliş {drawId} ödül adımını geçmedi, dolayısıyla henüz tohumu ve eşikleri yok.",
+      "row": "{index}. {tier} ödül",
+      "reading": "okunuyor",
+      "rowFailed": "Düğüm bu ödül için thresholdOf sorusuna cevap vermedi. Çekilişle ilgili hiçbir şey değişmedi, yalnızca bu sayfanın ona bakışı.",
+      "noCounts": "Bu çekilişin ödül sayıları okunamadı, dolayısıyla bu sayfa kaç eşik olduğunu söyleyemez. Birazdan yeniden deneyin.",
+      "outOfRange": "aralık dışında, dolayısıyla kazanılamaz",
+      "unit": "bakiye saniyesi"
+    },
+    "transactions": {
+      "title": "İşlemler",
+      "hint": "Etherscan'de",
+      "none": "Son birkaç saatlik bloklarda bu çekilişe ait bir şey yok. Daha eski geçmiş blok gezgininde.",
+      "block": "blok {block}",
+      "open": "Havuzu aç",
+      "closed": "Kapatıldı",
+      "awarded": "Ödül verildi",
+      "markedEmpty": "Boş işaretlendi",
+      "markedSkipped": "Atlandı işaretlendi",
+      "finalized": "Sonlandırıldı",
+      "reconciled": "Kademe mutabakatı",
+      "withTier": "{label} ({tier})"
+    }
+  },
+
+  "lab": {
+    "pill": "Lab sayfası",
+    "title": "Çekiliş töreni",
+    "lede": "Siteden bağlantı verilmedi. Aşağıdaki her sayı, Sepolia'daki sözleşmelerden canlı okunur: mühürlü handle'lar, anahtar yönetim servisinin imzaladığı tohum, çekilişin karşı koştuğu aralık, ve bir cüzdanın aşması gereken tam eşikler.",
+    "noPool": "{symbol} için açılacak havuz yok.",
+    "noPoolBody": "{reason}, dolayısıyla Hearth üzerinde hiç kasa açmadı. Havuzu olan bir token seçin.",
+    "noDraw": "Açılacak, ödül verilmiş bir çekiliş henüz yok.",
+    "noDrawBody": "Tören, kapatılmış ve ödül verilmiş bir çekilişe ihtiyaç duyar. Havuzdaki çekiliş panelinden bir tane çalıştırın, sonra geri gelin.",
+    "drawButton": "Çekiliş {drawId}",
+    "openSeal": "Mührü aç",
+    "again": "Yeniden çalıştır",
+    "stages": {
+      "sealed": "mühürlü",
+      "seed": "tohum açılıyor",
+      "bracket": "aralık",
+      "thresholds": "eşikler düşüyor",
+      "mine": "kendi sonucunuz"
+    },
+    "seals": {
+      "title": "Kapatma neyi yayımladı",
+      "hint": "dört handle, tam olarak bu sırada",
+      "seed": "tohum",
+      "scale": "ölçek sayısı",
+      "nonEmpty": "boş değil",
+      "harvest": "hasat",
+      "unpublished": "yayımlanmadı",
+      "note": "Havuz dört açık metni o sırada yeniden kodlar ve anahtar yönetim servisinin o kodlama üzerindeki imzasını zincir üzerinde kontrol eder, dolayısıyla onları başka bir sırada istemek ödül adımını geri döndürür. Burada sıra bir kolaylık değil, sözleşmenin kendisidir."
+    },
+    "seed": {
+      "title": "Tohum açılıyor",
+      "note": "Zama'nın yardımcı işlemcisi içinde şifreli veri olarak üretildi, dolayısıyla çekildiğinde kimse onu görmedi. Dönem bittiğinde yayımlandı, anahtar yönetim servisi tarafından imzalandı, ve bu çekilişte başka hiçbir şeye izin verilmeden önce havuz tarafından zincir üzerinde doğrulandı. Ödül büyüklükleri, bu sayı var olmadan, kapanışta çoktan sabitlenmişti."
+    },
+    "bracket": {
+      "title": "Aralık",
+      "unit": "{count} bakiye saniyesi",
+      "note": "Çekiliş, havuzun toplam ağırlığının üzerindeki en küçük ikinin kuvvetine karşı koşar, asla toplamın kendisine değil. Tam toplamı yayımlamak, arka arkaya iki toplamdan ve kendi işleminin zaman damgasından yola çıkarak herkesin, tek başına hareket eden birinin yatırdığı tutarı çözmesine izin verirdi."
+    },
+    "thresholds": {
+      "title": "Eşikler düşüyor",
+      "connectHint": "kendinizinkini görmek için bir cüzdan bağlayın",
+      "connectBody": "Eşikler adres başınadır ve herkese açıktır. Bir cüzdan bağlayın, bu çekilişin her ödülünde aşması gereken tam sayı burada belirsin, bu sayfa tarafından değil, kasa tarafından hesaplanmış olarak.",
+      "row": "{index}. {tier} ödül",
+      "reading": "okunuyor",
+      "outOfRange": "aralık dışında",
+      "note": "Eşiği aşın, ödül sizin olsun. Bunlar kasanın kendi view'ından gelir, yani sonucu belirleyen aritmetiğin aynısından, dolayısıyla burada birinciyle çelişecek ikinci bir uygulama yok."
+    },
+    "mine": {
+      "title": "Ve yalnızca size özel",
+      "connectBody": "Bir cüzdan bağlayın, bu kart üzerinde yargılandığı ağırlıkla ve çekiliş {drawId} tarafından ödenen tutarla dolsun, tarayıcınızda ve başka hiçbir yerde çözülmüş olarak.",
+      "nothing": "Bu cüzdanın çekiliş {drawId} içinde hiç ağırlığı yok, dolayısıyla açılacak kendine ait bir şey de yok. Yalnızca yürüyüşün içinde olan bir tasarruf sahibinin burada ağırlığı ve hesabına geçen tutarı olur.",
+      "weight": "Ağırlığınız",
+      "weightUnit": "dönem boyunca bakiye saniyesi",
+      "paid": "Bu çekiliş size ne ödedi",
+      "paidUnit": "{symbol}, kazancınıza geçirildi",
+      "sealAgain": "Yeniden mühürle",
+      "decrypt": "Sonucumu çöz",
+      "denied": "Reddedildi: bu değerler başka bir cüzdana ait.",
+      "note": "Bu kartın üzerindeki her şey herkese açıktır ve herkes kontrol edebilir. Bu kart değil: bu değerlerin sahibi olan cüzdandan tek bir EIP-712 imzası ister, ve Zama'nın erişim kontrol listesi başka herkesi reddeder. İki paragrafta bütün ürün budur."
+    }
+  },
+
+  "docs": {
+    "title": "Dokümantasyon",
+    "kicker": "Dokümantasyon",
+    "heading": "Yazılı kayıt",
+    "count": "{count, plural, one {{shown} sayfa} other {{shown} sayfa}}. Her biri, depoda <path>docs/</path> altındaki bir dosyadır, burada işlenmiş halde.",
+    "contents": "İçindekiler",
+    "close": "Kapat",
+    "overview": "Genel bakış",
+    "nav": "Dokümantasyon",
+    "search": "Dokümantasyonda ara",
+    "noResults": "Buna uyan bir şey yok.",
+    "outline": "Bu sayfada",
+    "nearby": "Yakın sayfalar",
+    "previous": "Önceki",
+    "next": "Sonraki",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "copyManual": "Ctrl C tuşlarına basın",
+    "copyLabel": "Bu bloğu kopyala",
+    "diagramWide": "Sütundan geniş. Yana kaydırın.",
+    "diagramFailed": "Bu diyagram çizilemedi. Kaynağı aşağıda.",
+    "rendererFailed": "Diyagram işleyicisi yüklenemedi. Kaynak aşağıda.",
+    "fallbackNote": "Bu sayfa henüz çevrilmedi, dolayısıyla İngilizce gösteriliyor.",
+    "sections": {
+      "reference": "Referans",
+      "attackLogs": "Saldırı kayıtları",
+      "gettingstarted": "Başlarken",
+      "concepts": "Kavramlar",
+      "security": "Güvenlik",
+      "operations": "Operasyon"
+    }
+  },
+
+  "errors": {
+    "notFound": {
+      "title": "Bu adreste bir şey yok.",
+      "body": "Sayfa taşındı, bağlantı yanlış yazıldı, ya da içindeki token bu sürümün dağıtıldığı tokenlerden biri değil. Havuzun kendisi zincirde ve her durumda etkilenmedi.",
+      "home": "Başa dön",
+      "pool": "Havuzu aç",
+      "docs": "Dokümanları okuyun"
+    },
+    "crashed": {
+      "title": "Bu ekran bozuldu, para bozulmadı.",
+      "body": "Sayfanın kendi içinde bir şey hata verdi. Hiçbir şey imzalanmadı ve gönderilmedi, dolayısıyla bakiyeniz tam olarak olduğu yerde. Bu ekranı yeniden yüklemek güvenli.",
+      "digest": "Referans {digest}",
+      "home": "Başa dön",
+      "retry": "Bu ekranı yeniden deneyin"
+    },
+    "unknown": "Bir şeyler ters gitti.",
+    "userRejected": "İsteği cüzdanınızda geri çevirdiniz. Hiçbir şey gönderilmedi.",
+    "signingRejected": "İmzayı cüzdanınızda geri çevirdiniz. Hiçbir şey gönderilmedi.",
+    "notConnected": "Önce bir cüzdan bağlayın.",
+    "decryptNotConnected": "Kendi değerlerinizin şifresini çözmek için bir cüzdan bağlayın.",
+    "addressesMissing": "Hearth adresleri yapılandırılmadı, dolayısıyla hiçbir şey gönderilemez.",
+    "drawNotWaiting": "Çekiliş {drawId} ödül adımını beklemiyor, dolayısıyla gönderilecek bir şey yok.",
+    "insufficientAllowance": "Sarmalayıcının tokeninizden o kadarını almasına henüz izin verilmiyor. Önce onaylayın.",
+    "insufficientErc20": "Bu cüzdanda yeterli açık test tokeni yok. Faucet'ten biraz basın.",
+    "insufficientConfidential": "Gizli tokenden yeterli yok. Önce açık olandan biraz gizleyin.",
+    "chainMismatch": "Cüzdanınız uygulamadan farklı bir ağda. Onu Sepolia'ya geçirin.",
+    "notEntitled": "Bu cüzdanın o değeri okumasına izin yok. O değer başka bir adrese ait.",
+    "noCiphertext": "Burada henüz şifreli bir değer yok, ki bu sıfır bakiye demektir.",
+    "relayerRateLimited": "Zama'nın relayer'ı bu tarayıcıya hız sınırı uyguluyor. Birkaç saniye bekleyip yeniden sorun.",
+    "relayerUnreachable": "Zama'nın relayer'ına ulaşılamadı. Birazdan yeniden sorun.",
+    "relayerUnreachableStatus": "Zama'nın relayer'ına ulaşılamadı (HTTP {status}). Birazdan yeniden sorun.",
+    "rpcRateLimited": "Sepolia düğümü bu tarayıcıya hız sınırı uyguluyor. Birkaç saniye bekleyip yeniden sorun.",
+    "noGas": "Gas ödemek için yeterli Sepolia ETH'si yok. Herhangi bir Sepolia faucet'i onu doldurur.",
+    "relayerBehind": "Zama'nın relayer'ı o bloğa henüz yetişmedi. Birazdan yeniden sorun.",
+    "EnforcedPause": "Kasa duraklatıldı, dolayısıyla yatırmalar ve çekiliş kapatma durduruldu. Çekim hala çalışıyor.",
+    "NotASaver": "Bu cüzdan hiç para yatırmadı, dolayısıyla çekilecek bir şey yok.",
+    "NotTheAsset": "Yalnızca bu kasanın dağıtıldığı gizli token kabul edilir. O tokeni gizleyip yeniden deneyin.",
+    "DrawNotAwarded": "O çekilişe henüz ödül verilmedi, dolayısıyla değerlendirilecek bir şey yok. Önce kapatın ve ödül verin.",
+    "EvaluationWindowClosed": "O çekilişin iki dönemlik penceresi bitti. Artık değerlendirilemez, ve hiçbir şey ödemez.",
+    "EvaluationWindowOpen": "O çekiliş hala değerlendirilebilir, dolayısıyla henüz sonlandırılamaz. Pencerenin bitmesini bekleyin.",
+    "AlreadyFinalized": "O çekiliş zaten sonlandırıldı. Üzerinde yapılacak bir şey kalmadı.",
+    "DrawNotOpen": "O çekiliş hiç kapatılmadı, dolayısıyla sonlandırılacak bir şey yok.",
+    "AlreadyClosed": "O çekilişi önce başkası kapattı. Sıradaki adım ödül adımı.",
+    "NothingToClose": "Şu anda kapatılmayı bekleyen bir çekiliş yok.",
+    "CloseWindowClosed": "O çekilişin kapatma son tarihi geçti. Likiditesi kademelere geri döner ve sonraki çekiliş onu yeniden teklif eder.",
+    "WrongStatus": "Bu işlem gerçekleşmeden önce çekiliş ilerledi. Sayfayı yenileyin ve şimdi nerede olduğuna bakın.",
+    "CarryNotPending": "O kademenin bekleyen, yayımlanmış bir devri yok, dolayısıyla mutabakat yapılacak bir şey yok.",
+    "InvalidKMSSignatures": "Anahtar yönetim servisinin imzası zincir üzerinde doğrulanmadı. Şifre çözmeyi yeniden isteyin."
+  },
+
+  "format": {
+    "pending": "...",
+    "dust": "<0,01",
+    "now": "şimdi",
+    "seconds": "{seconds} sn",
+    "minutesSeconds": "{minutes} dk {seconds} sn",
+    "hoursMinutes": "{hours} sa {minutes} dk",
+    "agoSeconds": "{count} sn önce",
+    "agoMinutes": "{count} dk önce",
+    "agoHours": "{count} sa önce",
+    "agoDays": "{count} gün önce",
+    "notYet": "henüz değil",
+    "utc": "{stamp} UTC",
+    "oddsNever": "asla",
+    "oddsEveryDraw": "her çekilişte",
+    "oddsOneIn": "{count} çekilişte 1",
+    "balanceSeconds": "bakiye saniyesi"
+  },
+
+  "meta": {
+    "titleDefault": "Hearth, kimsenin içini göremediği ödüllü tasarruf",
+    "titleTemplate": "{title} | Hearth",
+    "description": "Zama Protocol üzerinde gizli ve kayıpsız ödüllü tasarruf. Yatırmalar, bakiyeler ve kazançlar zincir üzerinde şifreli kalır, ödüller getiriden çekilir ve olasılıklar zaman ağırlıklı bakiyenizle orantılıdır, ve anapara istediğiniz anda tam olarak geri gelir.",
+    "ogTitle": "Hearth",
+    "ogDescription": "Zama Protocol üzerinde gizli ve kayıpsız ödüllü tasarruf.",
+    "how": {
+      "title": "Nasıl çalışır",
+      "description": "Gizli bir token yatırın, bakiyenizi şifreli tutun, olasılıklarını zaman ağırlıklı bakiyenizin belirlediği ve getiriden çekilen ödüller kazanın, ve istediğiniz zaman çekin."
+    },
+    "verify": {
+      "title": "Bir çekilişi doğrulayın",
+      "description": "Bir çekilişin tohumunu, aralığını, hasadını ve ödül büyüklüklerini doğrudan sözleşmelerden okuyun, ve herhangi bir adresin aşması gereken tam eşiği alın."
+    },
+    "lab": {
+      "title": "Çekiliş töreni",
+      "description": "Bir lab sayfası: mühürlü tohumun açılışı, aralık, eşikler ve bir tasarruf sahibinin kendi sonucu."
+    },
+    "docs": {
+      "title": "Dokümantasyon",
+      "description": "Bir çekilişin nasıl işlediği, olasılıkların nasıl hesaplandığı, ödül parasının nereden geldiği, neyin gizli kaldığı, ve bildiğimiz her dikiş."
+    },
+    "dashboard": {
+      "title": "{symbol} gösterge paneli",
+      "titleFallback": "Gösterge paneli",
+      "description": "Bu cüzdanın elinde ne var, ödül havuzu ne değerinde, ve sıradaki adım ne, tasarruf sahiplerine ait her tutar zincir üzerinde şifreliyken."
+    },
+    "deposit": {
+      "title": "{symbol} yatır",
+      "titleFallback": "Yatırma",
+      "description": "Test {underlyingSymbol} alın, {symbol} olarak gizleyin, sonra Hearth kasasına yatırın.",
+      "descriptionFallback": "Test tokenini alın, gizleyin, sonra Hearth kasasına yatırın."
+    },
+    "withdraw": {
+      "title": "{symbol} çek",
+      "titleFallback": "Çekim",
+      "description": "Anaparayı ve kazancı Hearth kasasından çıkarın, sonra {symbol} tokeninin gizliliğini kaldırıp {underlyingSymbol} tokenine dönün.",
+      "descriptionFallback": "Anaparayı ve kazancı Hearth kasasından çıkarın, sonra gizliliği kaldırıp açık tokene dönün."
+    },
+    "draws": {
+      "title": "Çekilişlerim",
+      "description": "Son çekilişlerin her birinin ne ödediği, ve size ne ödediği, ağırlığınız ve ödülünüz siz açana kadar şifreliyken."
+    },
+    "run": {
+      "title": "Çekiliş çalıştır",
+      "description": "Kapatma, ödül adımı, ilerletme, sonlandırma ve mutabakat. Bir Hearth çekilişinin her adımı her cüzdan tarafından çağrılabilir."
+    }
+  }
+}

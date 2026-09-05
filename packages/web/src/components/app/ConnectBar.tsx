@@ -1,28 +1,44 @@
 "use client";
 
-import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
+import { useTranslations } from "next-intl";
+import { useAccount, useDisconnect, useSwitchChain } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { CHAIN_ID } from "@/lib/chain/addresses";
+import { WALLET_DOWNLOAD_URL } from "@/lib/chain/wagmi";
 import { shortAddress } from "@/lib/format";
+import { useWallets } from "@/hooks/useWallets";
 
 export function ConnectBar() {
+  const t = useTranslations("console.wallet");
   const { address, isConnected, chainId } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
+  const wallets = useWallets();
   const { disconnect } = useDisconnect();
   const { switchChain, isPending: switching } = useSwitchChain();
 
-  const injected = connectors.find((connector) => connector.type === "injected") ?? connectors[0];
   const wrongChain = isConnected && chainId !== CHAIN_ID;
 
   if (!isConnected) {
+    if (!wallets.primary) {
+      return (
+        <a
+          href={WALLET_DOWNLOAD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-lg border border-hairlineStrong px-4 py-2.5 text-[14px] font-medium text-parchment transition-colors hover:bg-hover"
+        >
+          {t("getWallet")}
+        </a>
+      );
+    }
+
     return (
       <button
         type="button"
-        onClick={() => injected && connect({ connector: injected })}
-        disabled={isPending || !injected}
+        onClick={() => wallets.primary && wallets.connect(wallets.primary)}
+        disabled={wallets.isPending}
         className="rounded-lg bg-flameFill px-4 py-2.5 text-[14px] font-medium text-onFlame transition-transform duration-200 hover:scale-[1.03] disabled:opacity-50"
       >
-        {isPending ? "Connecting..." : injected ? "Connect wallet" : "No wallet found"}
+        {wallets.isPending ? t("connecting") : wallets.primaryIsScan ? t("scan") : t("connect")}
       </button>
     );
   }
@@ -35,7 +51,7 @@ export function ConnectBar() {
         disabled={switching}
         className="rounded-lg border border-bad/50 bg-bad/10 px-4 py-2.5 text-[14px] font-medium text-bad transition-colors hover:bg-bad/15"
       >
-        {switching ? "Switching..." : "Switch to Sepolia"}
+        {switching ? t("switching") : t("switchTo", { network: "Sepolia" })}
       </button>
     );
   }
@@ -53,14 +69,8 @@ export function ConnectBar() {
         onClick={() => disconnect()}
         className="hidden text-[13px] text-faint transition-colors hover:text-parchment sm:block"
       >
-        Disconnect
+        {t("disconnect")}
       </button>
     </div>
   );
-}
-
-/** True only when a wallet is connected and pointed at the network Hearth is deployed on. */
-export function useReady() {
-  const { isConnected, chainId } = useAccount();
-  return isConnected && chainId === CHAIN_ID;
 }

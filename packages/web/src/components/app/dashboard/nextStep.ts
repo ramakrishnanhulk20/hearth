@@ -11,12 +11,20 @@ export type NextStepKey =
   | "result"
   | "settled";
 
+/**
+ * The one thing to do next, named rather than written out.
+ *
+ * `title`, `detail` and `cta` are keys in the `nextStep` namespace and `values` is what they take.
+ * The card that shows the step is the piece that knows the language, which is also why the choice
+ * itself stays a pure function of what the chain said and can be reasoned about on its own.
+ */
 export type NextStep = {
   key: NextStepKey;
   title: string;
   detail: string;
   /** Null when there is nothing to press, which is what a read still in flight looks like. */
   cta: string | null;
+  values?: Record<string, string | number>;
   href?: string;
   /** Set when the button does something to the wallet instead of moving to another screen. */
   act?: "connect" | "switch";
@@ -26,13 +34,18 @@ export type NextStep = {
 export type NextStepInput = {
   connected: boolean;
   wrongNetwork: boolean;
+  /** The confidential token and the plain one under it, so every sentence names the right money. */
+  symbol: string;
+  underlyingSymbol: string;
+  /** Where this pool's screens live, as in /app/usdc. Every link a step offers hangs off it. */
+  base: string;
   /**
    * False while the saver batch is in flight or came back empty. Every field below it falls back
    * to zero inside the hook, so a step chosen without this would send a funded wallet to the
    * faucet and a depositor back to the start.
    */
   positionKnown: boolean;
-  usdc: bigint;
+  underlyingBalance: bigint;
   /** This address has wrapped at some point. The amount it holds is encrypted and not knowable. */
   hasConfidential: boolean;
   isSaver: boolean;
@@ -55,13 +68,15 @@ export type NextStepInput = {
  * decrypt them on this page, so an unopened position never produces a claim.
  */
 export function chooseNextStep(state: NextStepInput): NextStep {
+  const tokens = { symbol: state.symbol, underlyingSymbol: state.underlyingSymbol };
+
   if (!state.connected) {
     return {
       key: "connect",
-      title: "Connect a wallet to begin.",
-      detail:
-        "Hearth runs on Ethereum Sepolia. You need a little test ETH for gas, and the test USDC is one click away once a wallet is connected.",
-      cta: "Connect wallet",
+      title: "connectTitle",
+      detail: "connectDetail",
+      cta: "connectCta",
+      values: tokens,
       act: "connect",
     };
   }
@@ -69,96 +84,81 @@ export function chooseNextStep(state: NextStepInput): NextStep {
   if (state.wrongNetwork) {
     return {
       key: "switch",
-      title: "This wallet is pointed at another network.",
-      detail:
-        "The pool figures on this page are read from Sepolia either way. Nothing can be signed or sent until the wallet is on it too.",
-      cta: "Switch to Sepolia",
+      title: "switchTitle",
+      detail: "switchDetail",
+      cta: "switchCta",
       act: "switch",
     };
   }
 
   if (!state.positionKnown) {
-    return {
-      key: "reading",
-      title: "Reading this wallet from the chain.",
-      detail:
-        "The next step appears once the reads land. Naming one from a balance that has not arrived would point you at the wrong screen.",
-      cta: null,
-    };
+    return { key: "reading", title: "readingTitle", detail: "readingDetail", cta: null };
   }
 
-  if (!state.isSaver && !state.hasConfidential && state.usdc === 0n) {
+  if (!state.isSaver && !state.hasConfidential && state.underlyingBalance === 0n) {
     return {
       key: "faucet",
-      title: "Get some test USDC.",
-      detail:
-        "Zama's mock USDC has an open mint capped at a million tokens a call. It is worth nothing, so take more than you need.",
-      cta: "Get test USDC",
-      href: "/app/deposit",
+      title: "faucetTitle",
+      detail: "faucetDetail",
+      cta: "faucetCta",
+      values: tokens,
+      href: `${state.base}/deposit`,
     };
   }
 
   if (!state.hasConfidential) {
     return {
       key: "shield",
-      title: "Shield your USDC.",
-      detail:
-        "Shielding turns plain USDC into the confidential kind. That step is public by nature, and it is the last thing about this money anyone can read.",
-      cta: "Shield USDC",
-      href: "/app/deposit",
+      title: "shieldTitle",
+      detail: "shieldDetail",
+      cta: "shieldCta",
+      values: tokens,
+      href: `${state.base}/deposit`,
     };
   }
 
   if (!state.isSaver) {
     return {
       key: "deposit",
-      title: "Put your confidential USDC into the pool.",
-      detail:
-        "The amount is encrypted in your browser before it is sent, so the vault credits a number it cannot read. Your odds follow what you hold.",
-      cta: "Deposit",
-      href: "/app/deposit",
+      title: "depositTitle",
+      detail: "depositDetail",
+      cta: "depositCta",
+      values: tokens,
+      href: `${state.base}/deposit`,
     };
   }
 
   if (state.winnings !== null && state.winnings > 0n) {
     return {
       key: "claim",
-      title: "You have winnings waiting.",
-      detail:
-        "Claiming is an ordinary withdrawal for that amount. On chain it has the same shape as any other withdrawal, which is what stops it naming the winner.",
-      cta: "Claim your winnings",
-      href: "/app/withdraw",
+      title: "claimTitle",
+      detail: "claimDetail",
+      cta: "claimCta",
+      href: `${state.base}/withdraw`,
     };
   }
 
   if (!state.drawsKnown) {
-    return {
-      key: "reading",
-      title: "Reading the recent draws.",
-      detail:
-        "The next step appears once they land. Naming one from a draw list that has not arrived would point you at the wrong screen.",
-      cta: null,
-    };
+    return { key: "reading", title: "readingDrawsTitle", detail: "readingDrawsDetail", cta: null };
   }
 
   if (state.resultDrawId !== null) {
     return {
       key: "result",
-      title: `Draw ${state.resultDrawId} has your result written.`,
-      detail:
-        "The walk reached this wallet, so whether it won is already decided and stored. It stays sealed until you open it, which costs a signature and no gas.",
-      cta: `Open draw ${state.resultDrawId}`,
-      href: "/app/draws",
+      title: "resultTitle",
+      detail: "resultDetail",
+      cta: "resultCta",
+      values: { drawId: state.resultDrawId },
+      href: `${state.base}/draws`,
     };
   }
 
   return {
     key: "settled",
-    title: "Nothing needs doing right now.",
-    detail:
-      "Your deposit sits in the pool and earns odds for every second it stays there. The next draw closes at the end of the period, and anyone can close it.",
-    cta: "Add to your deposit",
-    href: "/app/deposit",
+    title: "settledTitle",
+    detail: "settledDetail",
+    cta: "settledCta",
+    href: `${state.base}/deposit`,
     tone: "quiet",
   };
 }

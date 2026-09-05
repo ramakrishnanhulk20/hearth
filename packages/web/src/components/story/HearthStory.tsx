@@ -3,14 +3,18 @@
 import { AdaptiveDpr, Environment, Lightformer, Preload, Scroll, ScrollControls, useScroll } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
-import { useEffect, useMemo, useRef } from "react";
+import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useReducedMotion } from "framer-motion";
-import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import * as THREE from "three";
-import type { PoolStats } from "@/lib/chain/read";
+import type { PoolPrize, PoolStats } from "@/lib/chain/read";
+import { Link } from "@/i18n/navigation";
+import { localeEntry } from "@/i18n/routing";
 import { SealedHandle } from "@/components/home/SealedHandle";
+import { ScrollCue } from "./ScrollCue";
+import { PoolShelf } from "./PoolShelf";
 import { DepositCoins, DrawSpark, FocalFlame, FlameCrowd, SealPulse, useFlameField } from "@/components/scene/flames";
-import { formatAmount } from "@/lib/format";
+import { useFormat } from "@/hooks/useFormat";
 
 /** Scroll progress republished as plain numbers, so the overlay never re-renders per frame. */
 const depositSignal = { current: 0 };
@@ -141,143 +145,201 @@ function World() {
   );
 }
 
-/** The six captions, written once and laid out twice: over the scene, or stacked in a still page. */
-const CAPTIONS: { page: number; align: "left" | "right"; body: React.ReactNode }[] = [
-  {
-    page: 0,
-    align: "left",
-    body: (
-      <>
-        <p className="label mb-5">Confidential prize savings</p>
-        <h2
-          className="max-w-[16ch] font-display text-[clamp(2.2rem,6vw,5rem)] leading-[0.95] tracking-tightest text-white"
-          style={{ fontWeight: 740 }}
-        >
-          One hearth. Lit only for the person who keeps it.
-        </h2>
-      </>
-    ),
-  },
-  {
-    page: 1,
-    align: "left",
-    body: (
-      <>
-        <p className="label mb-5">You deposit</p>
-        <h2
-          className="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
-          style={{ fontWeight: 740 }}
-        >
-          You fill it, and the amount seals shut.
-        </h2>
-        <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed text-white/55">
-          The amount is encrypted in your browser and stays a ciphertext on chain. From here on the
-          number is yours alone, and Zama&apos;s access control list is what enforces that.
-        </p>
-        <Ciphertext />
-      </>
-    ),
-  },
-  {
-    page: 3,
-    align: "right",
-    body: (
-      <>
-        <h2
-          className="ml-auto max-w-[18ch] text-right font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
-          style={{ fontWeight: 740 }}
-        >
-          And it is one of many.
-        </h2>
-        <p className="ml-auto mt-4 max-w-[36ch] text-right text-[15px] leading-relaxed text-white/55">
-          Every saver&apos;s balance burns and not one of them can be read from outside. The pool never
-          publishes its exact total either, only the power of two it sits under, because the exact
-          total would give away a lone mover&apos;s deposit.
-        </p>
-      </>
-    ),
-  },
-  {
-    page: 4,
-    align: "left",
-    body: (
-      <>
-        <p className="label mb-5">The draw</p>
-        <h2
-          className="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
-          style={{ fontWeight: 740 }}
-        >
-          A seed nobody can see, drawn inside the coprocessor.
-        </h2>
-        <p className="mt-4 max-w-[36ch] text-[15px] leading-relaxed text-white/55">
-          Prize sizes are fixed before the seed exists, so nobody can read a seed, work out that they
-          won, and make the win bigger. When the period ends the seed is published with a signature
-          the contract checks on chain.
-        </p>
-      </>
-    ),
-  },
-  {
-    page: 6,
-    align: "right",
-    body: (
-      <>
-        <p className="label mb-5 justify-end">The win</p>
-        <h2
-          className="ml-auto max-w-[18ch] text-right font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
-          style={{ fontWeight: 740 }}
-        >
-          One hearth burns brighter.
-        </h2>
-        <p className="ml-auto mt-4 max-w-[38ch] text-right text-[15px] leading-relaxed text-white/55">
-          Odds are proportional to the balance held across the whole period, so a deposit made just
-          before the draw earns only the fraction of the period it was there. The prize lands in an
-          encrypted winnings balance, and a claim is an ordinary withdrawal.
-        </p>
-      </>
-    ),
-  },
-];
+/**
+ * The five captions, written once and laid out twice: over the scene, or stacked in a still page.
+ *
+ * The alignment mirrors with the language. A caption pinned to the right of an English page belongs
+ * on the left of an Arabic one, because both are the far side of the reading line, and a scene the
+ * camera flies through in one direction should not have its words on the wrong side of it.
+ */
+type CaptionSpec = { page: number; align: "start" | "end"; body: React.ReactNode };
 
-export function HearthStory({ stats }: { stats?: PoolStats | null }) {
+function useCaptions(): CaptionSpec[] {
+  const t = useTranslations("landing.story");
+  const locale = useLocale();
+
+  return [
+    {
+      page: 0,
+      align: "start",
+      body: (
+        <>
+          <p className="label mb-5">{t("one.kicker")}</p>
+          <h2
+            className="max-w-[16ch] font-display text-[clamp(2.2rem,6vw,5rem)] leading-[0.95] tracking-tightest text-white"
+            style={{ fontWeight: 740 }}
+          >
+            {t("one.title")}
+          </h2>
+        </>
+      ),
+    },
+    {
+      page: 1,
+      align: "start",
+      body: (
+        <>
+          <p className="label mb-5">{t("two.kicker")}</p>
+          <h2
+            className="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
+            style={{ fontWeight: 740 }}
+          >
+            {t("two.title")}
+          </h2>
+          <p className="mt-4 max-w-[34ch] text-[15px] leading-relaxed text-white/55">{t("two.body")}</p>
+          <Ciphertext locale={localeEntry(locale).intl} />
+        </>
+      ),
+    },
+    {
+      page: 3,
+      align: "end",
+      body: (
+        <>
+          <h2
+            className="ms-auto max-w-[18ch] text-end font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
+            style={{ fontWeight: 740 }}
+          >
+            {t("three.title")}
+          </h2>
+          <p className="ms-auto mt-4 max-w-[36ch] text-end text-[15px] leading-relaxed text-white/55">
+            {t("three.body")}
+          </p>
+        </>
+      ),
+    },
+    {
+      page: 4,
+      align: "start",
+      body: (
+        <>
+          <p className="label mb-5">{t("four.kicker")}</p>
+          <h2
+            className="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
+            style={{ fontWeight: 740 }}
+          >
+            {t("four.title")}
+          </h2>
+          <p className="mt-4 max-w-[36ch] text-[15px] leading-relaxed text-white/55">{t("four.body")}</p>
+        </>
+      ),
+    },
+    {
+      page: 6,
+      align: "end",
+      body: (
+        <>
+          <p className="label mb-5 justify-end">{t("five.kicker")}</p>
+          <h2
+            className="ms-auto max-w-[18ch] text-end font-display text-[clamp(2rem,5.5vw,4.6rem)] leading-[0.98] tracking-tightest text-white"
+            style={{ fontWeight: 740 }}
+          >
+            {t("five.title")}
+          </h2>
+          <p className="ms-auto mt-4 max-w-[38ch] text-end text-[15px] leading-relaxed text-white/55">
+            {t("five.body")}
+          </p>
+        </>
+      ),
+    },
+  ];
+}
+
+/**
+ * Whether this browser can open a WebGL context at all.
+ *
+ * Asked once, before the canvas is built, because a machine with WebGL switched off or a driver
+ * on a blocklist throws at context creation and the whole landing page goes blank. The story is
+ * the same words either way, so there is a page version of it to fall back to.
+ */
+function canDrawWebGL(): boolean {
+  try {
+    const probe = document.createElement("canvas");
+    return Boolean(probe.getContext("webgl2") ?? probe.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The last line of defence around the scene.
+ *
+ * The probe above catches a browser with no WebGL. This catches everything after that: a context
+ * lost mid-build, a shader the driver refuses, a postprocessing pass that will not compile. Any
+ * of those used to take the landing page down to a blank screen with the error only in the
+ * console, which is the first five seconds of the whole project.
+ */
+class SceneBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+export function HearthStory({ stats, pools = [] }: { stats?: PoolStats | null; pools?: PoolPrize[] }) {
   const reduced = useReducedMotion();
+  const captions = useCaptions();
+  // This component only ever mounts in the browser: the landing page loads it with ssr off, so
+  // there is no server render for the probe to disagree with.
+  const [webgl] = useState(canDrawWebGL);
 
   // A reader who has asked for reduced motion gets the same words with no WebGL context, no camera
-  // flight and no scroll hijack.
-  if (reduced) return <StillStory stats={stats ?? null} />;
+  // flight and no scroll hijack. So does a browser that cannot give us a context.
+  if (reduced || !webgl) {
+    return <StillStory stats={stats ?? null} pools={pools} captions={captions} note={!webgl} />;
+  }
 
   return (
-    <div className="h-[100svh] w-full bg-[#050505]">
-      <Canvas
-        camera={{ position: [0.7, 0.15, 4.3], fov: 38 }}
-        dpr={[1, 1.75]}
-        gl={{ antialias: true, powerPreference: "high-performance" }}
-      >
-        <EffectComposer>
-          <Bloom intensity={0.75} luminanceThreshold={0.72} luminanceSmoothing={0.28} mipmapBlur radius={0.7} />
-          <Vignette eskil={false} offset={0.2} darkness={0.85} />
-        </EffectComposer>
+    <SceneBoundary fallback={<StillStory stats={stats ?? null} pools={pools} captions={captions} note />}>
+      <div className="h-[100svh] w-full bg-[#050505]">
+        <Canvas
+          camera={{ position: [0.7, 0.15, 4.3], fov: 38 }}
+          dpr={[1, 1.75]}
+          gl={{ antialias: true, powerPreference: "high-performance" }}
+        >
+          <EffectComposer>
+            <Bloom intensity={0.75} luminanceThreshold={0.72} luminanceSmoothing={0.28} mipmapBlur radius={0.7} />
+            <Vignette eskil={false} offset={0.2} darkness={0.85} />
+          </EffectComposer>
 
-        <ScrollControls pages={PAGES} damping={0.25}>
-          <World />
-          <Scroll html style={{ width: "100%" }}>
-            {CAPTIONS.map((caption) => (
-              <Caption key={caption.page} page={caption.page} align={caption.align}>
-                {caption.body}
-              </Caption>
-            ))}
-          </Scroll>
-        </ScrollControls>
-        <AdaptiveDpr pixelated />
-        <Preload all />
-      </Canvas>
+          <ScrollControls pages={PAGES} damping={0.25}>
+            <World />
+            <Scroll html style={{ width: "100%" }}>
+              {captions.map((caption) => (
+                <Caption key={caption.page} page={caption.page} align={caption.align}>
+                  {caption.body}
+                </Caption>
+              ))}
+            </Scroll>
+          </ScrollControls>
+          <AdaptiveDpr pixelated />
+          <Preload all />
+        </Canvas>
 
-      <CloseOverlay stats={stats ?? null} />
-    </div>
+        <CloseOverlay stats={stats ?? null} pools={pools} />
+        <ScrollCue />
+      </div>
+    </SceneBoundary>
   );
 }
 
-function StillStory({ stats }: { stats: PoolStats | null }) {
+function StillStory({
+  stats,
+  pools,
+  captions,
+  note = false,
+}: {
+  stats: PoolStats | null;
+  pools: PoolPrize[];
+  captions: CaptionSpec[];
+  /** True only when this is standing in for a scene that could not run, never for reduced motion. */
+  note?: boolean;
+}) {
   return (
     <div className="relative w-full bg-[#050505]">
       <div
@@ -292,14 +354,16 @@ function StillStory({ stats }: { stats: PoolStats | null }) {
       />
 
       <div className="relative mx-auto flex w-full max-w-[92rem] flex-col gap-20 px-6 pb-20 pt-32 lg:gap-28 lg:px-16">
-        {CAPTIONS.map((caption) => (
-          <section key={caption.page} className={caption.align === "right" ? "text-right" : ""}>
+        {note && <NoWebglNote />}
+
+        {captions.map((caption) => (
+          <section key={caption.page} className={caption.align === "end" ? "text-end" : ""}>
             {caption.body}
           </section>
         ))}
 
         <section className="grid grid-cols-1 items-end gap-8 border-t border-white/10 pt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)]">
-          <CloseContent stats={stats} />
+          <CloseContent stats={stats} pools={pools} />
         </section>
       </div>
 
@@ -308,7 +372,18 @@ function StillStory({ stats }: { stats: PoolStats | null }) {
   );
 }
 
-function CloseOverlay({ stats }: { stats: PoolStats | null }) {
+/** Said once, at the top of the page version, so a blank-looking landing is never a mystery. */
+function NoWebglNote() {
+  const t = useTranslations("landing");
+
+  return (
+    <p className="max-w-[52ch] rounded-e-lg border-s-2 border-s-flame/60 bg-flame/[0.06] px-4 py-3 text-[13px] leading-relaxed text-white/60">
+      {t("noWebgl")}
+    </p>
+  );
+}
+
+function CloseOverlay({ stats, pools }: { stats: PoolStats | null; pools: PoolPrize[] }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inner = useRef<HTMLDivElement | null>(null);
   const foot = useRef<HTMLElement | null>(null);
@@ -353,7 +428,7 @@ function CloseOverlay({ stats }: { stats: PoolStats | null }) {
         // the footer, which is what a laptop at 617 pixels of height was doing.
         className="pointer-events-none mx-auto grid max-h-[100svh] w-full max-w-[92rem] grid-cols-1 items-end gap-8 overflow-y-auto px-6 pb-24 pt-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)] lg:px-16"
       >
-        <CloseContent stats={stats} />
+        <CloseContent stats={stats} pools={pools} />
       </div>
 
       <StoryFooter footRef={foot} pinned />
@@ -361,23 +436,22 @@ function CloseOverlay({ stats }: { stats: PoolStats | null }) {
   );
 }
 
-function CloseContent({ stats }: { stats: PoolStats | null }) {
+function CloseContent({ stats, pools }: { stats: PoolStats | null; pools: PoolPrize[] }) {
+  const t = useTranslations("landing.close");
+  const format = useFormat();
   const grand = stats?.nextPrize[0] ?? null;
 
   return (
     <>
       <div>
-        <p className="label mb-5">Try it</p>
+        <p className="label mb-5">{t("kicker")}</p>
         <h2
           className="max-w-[15ch] font-display text-[clamp(2.2rem,7vw,6rem)] leading-[0.9] tracking-tightest text-white"
           style={{ fontWeight: 760 }}
         >
-          Save in the dark.
+          {t("title")}
         </h2>
-        <p className="mt-5 max-w-[40ch] text-[16px] leading-relaxed text-white/60">
-          Deposit test USDC on Sepolia, run a draw yourself, and check that only you can read your own
-          balance. It costs nothing but a little test ETH.
-        </p>
+        <p className="mt-5 max-w-[40ch] text-[16px] leading-relaxed text-white/60">{t("body")}</p>
 
         <div className="mt-8 flex flex-wrap items-center gap-5">
           <Link
@@ -385,31 +459,39 @@ function CloseContent({ stats }: { stats: PoolStats | null }) {
             prefetch
             className="group inline-flex items-center gap-2.5 rounded-lg bg-flameFill px-6 py-3.5 text-[15px] font-medium text-onFlame transition-transform duration-200 hover:scale-[1.02]"
           >
-            Open the pool
-            <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">
+            {t("open")}
+            <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
               &rarr;
             </span>
           </Link>
-          {grand !== null && grand > 0n && (
+          {grand !== null && grand > 0n && stats && (
             <span className="text-[14px] text-white/55">
-              <span className="font-display tabular-nums text-flame" style={{ fontWeight: 620 }}>
-                {formatAmount(grand)} USDC
-              </span>{" "}
-              grand prize next draw
+              {t.rich("grandPrize", {
+                amount: format.amount(grand, stats.decimals),
+                symbol: stats.symbol,
+                figure: (chunks) => (
+                  <span className="font-display tabular-nums text-flame" style={{ fontWeight: 620 }}>
+                    {chunks}
+                  </span>
+                ),
+              })}
             </span>
           )}
           {stats && (
-            <span className="text-[14px] tabular-nums text-white/45">
-              {stats.savers} saver{stats.savers === 1 ? "" : "s"} · period {stats.period}
+            <span className="text-[14px] tabular-nums text-white/55">
+              {t("saversPeriod", {
+                count: stats.savers,
+                shown: format.count(stats.savers),
+                period: stats.period,
+              })}
             </span>
           )}
         </div>
         {stats === null && (
-          <p className="mt-4 max-w-[42ch] text-[13px] leading-relaxed text-white/40">
-            Sepolia is not answering right now, so the live figures are missing. The pool is
-            unaffected: it lives on chain, not here.
-          </p>
+          <p className="mt-4 max-w-[42ch] text-[13px] leading-relaxed text-white/55">{t("offline")}</p>
         )}
+
+        <PoolShelf pools={pools} />
       </div>
 
       <SealedHandle handle={stats?.sealedHandle ?? null} owner={stats?.sealedOwner ?? null} />
@@ -424,6 +506,8 @@ function StoryFooter({
   footRef?: React.MutableRefObject<HTMLElement | null>;
   pinned?: boolean;
 }) {
+  const t = useTranslations("landing.footer");
+
   return (
     <footer
       ref={footRef}
@@ -433,16 +517,16 @@ function StoryFooter({
       }`}
     >
       <div className="mx-auto flex max-w-[92rem] flex-col items-center justify-between gap-3 text-[13px] sm:flex-row">
-        <span className="text-white/45">Hearth, confidential no-loss prize savings</span>
+        <span className="text-white/55">{t("tagline")}</span>
         <nav className="flex flex-wrap items-center justify-center gap-5">
           <Link href="/how" prefetch className="text-white/55 transition-colors hover:text-white">
-            How it works
+            {t("how")}
           </Link>
           <Link href="/verify" prefetch className="text-white/55 transition-colors hover:text-white">
-            Verify a draw
+            {t("verify")}
           </Link>
           <Link href="/docs" className="text-white/55 transition-colors hover:text-white">
-            Docs
+            {t("docs")}
           </Link>
           <a
             href="https://docs.zama.ai/protocol"
@@ -450,7 +534,7 @@ function StoryFooter({
             rel="noopener noreferrer"
             className="text-flame/80 transition-colors hover:text-flame"
           >
-            Built on the Zama Protocol
+            {t("zama")}
           </a>
         </nav>
       </div>
@@ -463,10 +547,22 @@ const HEX = "0123456789abcdef";
 const SEALED_SAMPLE = "0x7d41f0a9c26be835";
 
 /** The deposit amount counting up, then turning into the ciphertext handle it becomes on chain. */
-function Ciphertext() {
+/**
+ * The grouping tag arrives as a prop rather than from a hook.
+ *
+ * This renders inside the WebGL canvas, and react-three-fiber gives its children their own React
+ * root: a context provider mounted outside the canvas is not visible to them, so any hook that
+ * reads context throws here. Everything this needs is resolved by the caption above and handed
+ * down as a plain string.
+ */
+function Ciphertext({ locale }: { locale: string }) {
   const node = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => {
+    const grouping = new Intl.NumberFormat(`${locale}-u-nu-latn`, {
+      maximumFractionDigits: 0,
+    });
+
     let shownText: string | null = null;
     let shownSealed: boolean | null = null;
 
@@ -498,7 +594,7 @@ function Ciphertext() {
       const progress = depositSignal.current;
       const sealed = progress >= 0.9;
       if (!sealed) {
-        text = `$${Math.round((progress / 0.9) * 500).toLocaleString("en-US")}`;
+        text = `$${grouping.format(Math.round((progress / 0.9) * 500))}`;
       } else if (now - scrambledAt >= 90) {
         // Eleven changes a second. At sixty it reads as a flicker rather than as a value nobody
         // can pin down.
@@ -510,7 +606,7 @@ function Ciphertext() {
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [locale]);
 
   return (
     <p
@@ -525,18 +621,18 @@ function Ciphertext() {
 function Caption({
   children,
   page,
-  align = "left",
+  align = "start",
 }: {
   children: React.ReactNode;
   page: number;
-  align?: "left" | "right";
+  align?: "start" | "end";
 }) {
   return (
     <div
-      className="pointer-events-none absolute left-0 flex w-full items-center px-6 lg:px-16"
+      className="pointer-events-none absolute start-0 flex w-full items-center px-6 lg:px-16"
       style={{ top: `${page * 100}svh`, height: "100svh" }}
     >
-      <div className={`mx-auto w-full max-w-[92rem] ${align === "right" ? "text-right" : ""}`}>{children}</div>
+      <div className={`mx-auto w-full max-w-[92rem] ${align === "end" ? "text-end" : ""}`}>{children}</div>
     </div>
   );
 }

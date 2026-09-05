@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { CARD_PROSE, Card, CardPill, PageHeader } from "@/components/app/console";
 import { useActions } from "@/hooks/useActions";
@@ -15,6 +16,7 @@ import { DrawCard } from "./DrawCard";
  * hands back the same in-flight batch the shell's banners are already watching.
  */
 export function DrawsScreen() {
+  const t = useTranslations("draws");
   const config = useHearthConfig();
   const pool = usePoolState();
   const saver = useSaverState(config);
@@ -39,18 +41,20 @@ export function DrawsScreen() {
   // pool that is not true. The draw ids are derived from the period, so before that read lands
   // there is nothing to derive them from.
   const empty = !pool.known.period
-    ? "Reading the pool."
+    ? t("emptyReading")
     : pool.period <= 1
-      ? "No period has finished yet, so there is no draw to show. The first one appears as soon as period 1 is over."
-      : "The draws could not be read just now. They are on chain either way; this page retries on its own.";
+      ? t("emptyNone")
+      : t("emptyFailed");
 
   return (
     <>
       <PageHeader
-        title="My draws"
-        subtitle="Each recent draw, its public prize numbers, and your own weight and prize behind the eye."
+        title={t("title")}
+        subtitle={t("subtitle")}
         right={
-          <CardPill>{pool.known.period ? `${draws.length} most recent` : "reading"}</CardPill>
+          <CardPill>
+            {pool.known.period ? t("count", { count: draws.length }) : t("reading")}
+          </CardPill>
         }
       />
 

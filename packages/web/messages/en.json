@@ -1,0 +1,981 @@
+{
+  "chrome": {
+    "home": "Hearth, home",
+    "nav": {
+      "pool": "The pool",
+      "verify": "Verify",
+      "how": "How it works",
+      "docs": "Docs"
+    },
+    "menu": {
+      "open": "Open the menu",
+      "close": "Close the menu",
+      "label": "Site menu"
+    },
+    "footer": {
+      "tagline": "Confidential no-loss prize savings",
+      "zama": "Built on the Zama Protocol",
+      "disclaimer": "A demonstration on the Sepolia test network. The tokens are test tokens with no value, the yield is a sponsor-funded balance rather than a real strategy, and nothing here is financial advice."
+    },
+    "language": {
+      "trigger": "Language: {name}. Change it",
+      "list": "Pick a language",
+      "heading": "Language",
+      "note": "Translated by hand. A page we have not reached yet reads in English.",
+      "current": "current"
+    }
+  },
+
+  "landing": {
+    "scrollCue": "Scroll",
+    "noWebgl": "This browser could not start the 3D scene, so the story is here as a page instead. Nothing else on the site needs it.",
+    "header": {
+      "how": "How it works",
+      "open": "Open the pool"
+    },
+    "story": {
+      "one": {
+        "kicker": "Confidential prize savings",
+        "title": "One hearth. Lit only for the person who keeps it."
+      },
+      "two": {
+        "kicker": "You deposit",
+        "title": "You fill it, and the amount seals shut.",
+        "body": "The amount is encrypted in your browser and stays a ciphertext on chain. From here on the number is yours alone, and Zama's access control list is what enforces that."
+      },
+      "three": {
+        "title": "And it is one of many.",
+        "body": "Every saver's balance burns and not one of them can be read from outside. The pool never publishes its exact total either, only the power of two it sits under, because the exact total would give away a lone mover's deposit."
+      },
+      "four": {
+        "kicker": "The draw",
+        "title": "A seed nobody can see, drawn inside the coprocessor.",
+        "body": "Prize sizes are fixed before the seed exists, so nobody can read a seed, work out that they won, and make the win bigger. When the period ends the seed is published with a signature the contract checks on chain."
+      },
+      "five": {
+        "kicker": "The win",
+        "title": "One hearth burns brighter.",
+        "body": "Odds are proportional to the balance held across the whole period, so a deposit made just before the draw earns only the fraction of the period it was there. The prize lands in an encrypted winnings balance, and a claim is an ordinary withdrawal."
+      }
+    },
+    "close": {
+      "kicker": "Try it",
+      "title": "Save in the dark.",
+      "body": "Deposit a confidential test token on Sepolia, run a draw yourself, and check that only you can read your own balance. It costs nothing but a little test ETH.",
+      "open": "Open the pool",
+      "grandPrize": "<figure>{amount} {symbol}</figure> grand prize next draw",
+      "saversPeriod": "{count, plural, one {{shown} saver} other {{shown} savers}} · period {period}",
+      "offline": "Sepolia is not answering right now, so the live figures are missing. The pool is unaffected: it lives on chain, not here."
+    },
+    "shelf": {
+      "heading": "Pick your token",
+      "unread": "unread",
+      "note": "Grand prize on each pool right now, read from the chain. Same vault, same draw, same privacy, one per confidential token."
+    },
+    "sealed": {
+      "heading": "A saver's balance",
+      "empty": "Nobody has deposited yet. As soon as somebody does, their encrypted balance appears here and you can try to open it.",
+      "try": "Try to open it",
+      "asking": "Asking Zama's key management service",
+      "askingWait": "Usually a few seconds.",
+      "askingLong": "{seconds}s so far. It is a live network, so this sometimes takes a while.",
+      "refused": "Refused.",
+      "refusedNote": "That came from Zama's key management service, not from this page. Only the wallet holding this balance can read it, and no administrator can override that.",
+      "unreachable": "Could not reach the decryption service.",
+      "unreachableNote": "That is a network problem rather than a refusal, so it proves nothing either way. Worth trying again in a moment.",
+      "again": "Try again",
+      "leaked": "It decrypted, and it should not have.",
+      "leakedNote": "The service returned {value}. Please tell us, because this is the one result this product is built to make impossible."
+    },
+    "footer": {
+      "tagline": "Hearth, confidential no-loss prize savings",
+      "how": "How it works",
+      "verify": "Verify a draw",
+      "docs": "Docs",
+      "zama": "Built on the Zama Protocol"
+    }
+  },
+
+  "how": {
+    "kicker": "A two-minute guide",
+    "title": "How Hearth works",
+    "lede": "Save together, win a prize paid out of yield, and never lose your deposit. The money is invisible. The fairness is not.",
+    "steps": {
+      "one": {
+        "title": "Shield, then deposit",
+        "body": "Turn a plain test token into its confidential twin, then put part of it into the pool for that token. Shielding is public and depositing is not, which is exactly why they are two buttons: doing both in one click publishes the size of your deposit to anyone reading the chain."
+      },
+      "two": {
+        "title": "Your odds are your average balance",
+        "body": "Not your balance at the moment of the draw, your balance across the whole period. Deposit five minutes before the period ends and you get one twelfth of the odds of having held the same amount all period. That is what stops somebody flashing a big balance in just before each draw and taking the prize."
+      },
+      "three": {
+        "title": "The draw closes, and a seed is drawn",
+        "body": "Prize sizes are fixed first, before any random number exists. Then the seed is generated as a ciphertext inside Zama's coprocessor, so nobody sees it when it is drawn and there is no second roll. When the period is over the seed is published with a signature the contract checks on chain."
+      },
+      "four": {
+        "title": "Everyone's result is already decided",
+        "body": "From the moment the seed is verified, the thresholds are public numbers anyone can recompute and the weights can no longer change. Evaluation just writes down what is already true, walking the saver list from a point the seed picked. Nobody chooses who is evaluated or in what order."
+      },
+      "five": {
+        "title": "You look, and only you",
+        "body": "Press Reveal and sign a message. That signature proves to Zama's relayer that you control the address, and it hands back the plaintext of values the contract granted you: your principal, your winnings, your weight and your credit for each draw. It costs no gas and writes nothing."
+      },
+      "six": {
+        "title": "Take it out whenever",
+        "body": "Withdrawals pay from winnings first, then principal, in one confidential transfer clamped on chain to what you hold. A claim is the same call with the same shape as any other withdrawal, so there is no transaction type that names the winners."
+      }
+    },
+    "private": {
+      "title": "Encrypted, readable only by you",
+      "note": "your own values",
+      "one": "Your principal",
+      "two": "Your unclaimed winnings",
+      "three": "Your time-weighted balance in every draw",
+      "four": "What each draw paid you, so whether you won"
+    },
+    "public": {
+      "title": "Public, so the pool can be trusted",
+      "note": "anyone can check",
+      "one": "The seed of each draw, and its signature",
+      "two": "The bracket the draw ran against",
+      "three": "Each tier's prize size and liquidity",
+      "four": "How many prizes a tier paid, one draw later",
+      "five": "Which addresses deposited, and when"
+    },
+    "leaks": {
+      "title": "Named honestly: what leaks",
+      "oneLead": "Shielding and unshielding are public.",
+      "oneBody": "Turning a public token into a confidential one is by definition a public act. If somebody can pin your balance, usually by watching a public shield followed by a deposit of the same size, then your result in every draw from then on is public arithmetic, because the thresholds are public by design.",
+      "twoLead": "Below three savers the bracket is nearly personal.",
+      "twoBody": "With one saver it is that saver's weight to within a factor of two. The app says so on the page when it happens.",
+      "threeLead": "Each tier publishes how many prizes it paid,",
+      "threeBody": "one draw later, never to whom. That is the same step that returns unwon money to the public pot, which is what lets the jackpot accumulate where you can watch it. It slowly narrows a balance that never moves.",
+      "fourLead": "The token is Zama's, and it is upgradeable.",
+      "fourBody": "Its owner can appoint observers able to decrypt every amount that moves through the token, retroactively. Hearth's own ledger is not readable by them, and the app shows a banner if an observer is ever appointed."
+    },
+    "closing": "You can watch a whole draw happen and still not say who won. That is the point, and it is the one thing only fully homomorphic encryption makes possible.",
+    "open": "Open the pool",
+    "check": "Check a draw yourself"
+  },
+
+  "console": {
+    "shell": {
+      "openMenu": "Open the console menu",
+      "closeMenu": "Close the console menu",
+      "menuLabel": "Console menu",
+      "loading": "Lighting the hearth"
+    },
+    "sidebar": {
+      "nav": "Console",
+      "dashboard": "Dashboard",
+      "deposit": "Deposit",
+      "withdraw": "Withdraw",
+      "draws": "My draws",
+      "run": "Run a draw",
+      "anyone": "Anyone",
+      "anyoneTitle": "Every step of a draw is callable by any wallet",
+      "docs": "Docs",
+      "verify": "Verify"
+    },
+    "wallet": {
+      "connect": "Connect wallet",
+      "connecting": "Connecting",
+      "scan": "Scan with a phone",
+      "getWallet": "Get a wallet",
+      "noneLead": "This browser has no wallet in it. ",
+      "noneLink": "Pick one from ethereum.org",
+      "noneTail": ", add a little Sepolia test ETH, and come back. Everything on this screen is free to read without one.",
+      "switching": "Switching",
+      "switchTo": "Switch to {network}",
+      "options": "Wallet options",
+      "explorer": "View on Etherscan",
+      "disconnect": "Disconnect"
+    },
+    "connect": {
+      "prompt": "Connect a wallet first."
+    },
+    "note": {
+      "encrypting": "encrypting and proving, about ten seconds",
+      "signing": "confirm in your wallet",
+      "mining": "waiting for the transaction to be mined",
+      "done": "done",
+      "busy": "That press was ignored: {label} is already running and one wallet signs one transaction at a time. Wait for the line above to finish.",
+      "line": "{label}: {state}",
+      "explorer": "View the transaction on Etherscan",
+      "dismiss": "Dismiss"
+    },
+    "actions": {
+      "mint": "Get test tokens",
+      "approve": "Approve the wrapper",
+      "wrap": "Shield into the confidential token",
+      "deposit": "Deposit",
+      "withdraw": "Withdraw",
+      "withdrawAll": "Withdraw everything",
+      "close": "Close draw {drawId}",
+      "award": "Award draw {drawId}",
+      "advance": "Advance draw {drawId}",
+      "finalize": "Finalize draw {drawId}",
+      "reconcile": "Reconcile tier {tier}",
+      "askingSeed": "asking Zama's key management service for the seed",
+      "seedSealing": "the seed is published but not decryptable yet, asking again",
+      "askingCarry": "asking for the tier's unpaid liquidity"
+    },
+    "reveal": {
+      "signing": "sign the request in your wallet, it costs no gas",
+      "asking": "decrypting in your browser",
+      "sealing": "the value was just written and is not decryptable yet, asking again",
+      "newKey": "a KMS share failed, retrying with a new key",
+      "elapsed": "{seconds}s so far, usually a few",
+      "stopWaiting": "Stop waiting",
+      "denied": "Zama's relayer refused: this wallet is not the one these values belong to.",
+      "reveal": "Reveal {label}",
+      "hide": "Hide {label}",
+      "sealAgain": "Seal it again",
+      "cost": "Reveal, one signature, no gas",
+      "encrypted": "{label}, encrypted",
+      "encryptedAlone": "encrypted",
+      "partial": "The relayer answered without this value, so the total is not known."
+    },
+    "unknown": {
+      "word": "unknown",
+      "default": "This has not come back from the chain yet."
+    },
+    "amount": {
+      "max": "Max",
+      "allOfIt": "All of it",
+      "maxFor": "{max}: {name}",
+      "shape": "Numbers only. A point or a comma marks the decimals, one at most, and thousands are not grouped.",
+      "precision": "{symbol} has {decimals} decimals, so anything finer than {smallest} cannot be sent.",
+      "zero": "Enter an amount above zero."
+    },
+    "banners": {
+      "wrongNetwork": "Your wallet is on the wrong network.",
+      "wrongNetworkBody": "Hearth is deployed on Ethereum Sepolia. Nothing on this page will read or write until your wallet is on it.",
+      "switch": "Switch to Sepolia",
+      "denied": "This address is on the token's deny list.",
+      "deniedBody": "{symbol} refuses every transfer in or out of this address, so deposits and withdrawals will revert. That is the token owner's setting, not ours.",
+      "tokenPaused": "The {symbol} token is paused.",
+      "tokenPausedBody": "Shielding, transferring and unshielding are all stopped at the token layer. Hearth's own contracts are unaffected, but nothing can move until Zama unpauses it.",
+      "vaultPaused": "The vault is paused.",
+      "vaultPausedBody": "New deposits and draw closing are stopped. Withdrawing, evaluation, awarding and finalizing are never pausable, so your money is still yours to take out.",
+      "poolPaused": "The prize pool is paused.",
+      "poolPausedBody": "Draws cannot be closed. Awarding, evaluation, reconciliation and withdrawals continue.",
+      "observers": "The token owner has appointed {count, plural, one {{shown} observer} other {{shown} observers}}.",
+      "observersBody": "An observer on {symbol} can decrypt every amount that moves through the token, including deposits and payouts, and retroactively. Hearth's own ledger, your principal, winnings, weight and credit, is not readable by them.",
+      "upgraded": "The {symbol} token has been upgraded.",
+      "upgradedBody": "It now runs implementation {implementation}, which is not the one whose source we read line by line. Its behaviour on Hearth's handles could have changed.",
+      "unknownImplementation": "an unknown",
+      "thinSet": "Only {count, plural, one {{shown} saver} other {{shown} savers}} in the pool right now.",
+      "thinSetBody": "Below {minimum} savers the published bracket is close to personal information: with one saver it is that saver's weight to within a factor of two, and with two each can bound the other. Amounts stay encrypted either way, but the privacy is thin until more people join.",
+      "noKeeper": "No draw has been advanced in the last few hours.",
+      "noKeeperBody": "Every step of a draw is callable by anyone. Run a draw, in the sidebar, offers all five. A stalled keeper costs draws, never money.",
+      "keeperLate": "The last draw step landed {ago}, longer than one period.",
+      "keeperLateFrom": "Sent by {address}. ",
+      "keeperLateBody": "Nobody has to wait for a keeper: Run a draw closes, awards, evaluates, finalizes and reconciles from your own wallet.",
+      "keeperLink": "See it on Etherscan",
+      "tokenUnread": "The token's own state could not be read.",
+      "tokenUnreadBody": "Hearth checks {symbol} for observers, for a pause and for a block on your address on every visit, and those reads did not answer. Nothing on chain has changed, only this page's view of it. It does mean the token warnings on this screen are missing because nothing was read, not because there was nothing to report.",
+      "historyDown": "The draw history is unavailable.",
+      "historyDownBody": "{detail} Every figure on the screens themselves still comes straight from the chain."
+    },
+    "unsupported": {
+      "subtitle": "Hearth cannot open a pool on this token, so there is nothing here to sign.",
+      "pill": "not supported",
+      "notDeployed": "not deployed",
+      "whyLabel": "Why this token has no pool",
+      "whyOne": "This token's mint is restricted to its issuer, so Hearth cannot open a pool on it. Pick another pool.",
+      "whyTwo": "A Hearth pool needs savers to be able to get the plain token first and shield it themselves. {name} is issued by Zama on Sepolia and its underlying can only be minted by the address that deployed it, so nobody but the issuer can shield into it and a vault over it would sit empty. That is the token's setting, not a limit in the contracts here: the vault takes any confidential token that follows the standard.",
+      "reason": "Reason",
+      "confidentialToken": "Confidential token",
+      "underlying": "Underlying",
+      "publishedBy": "Published by",
+      "zamaList": "Zama's Sepolia addresses",
+      "pickLabel": "Pick a pool that is open",
+      "pickNote": "Every pool above is the same vault, the same draw and the same privacy, over a different confidential token. Your position in one says nothing about your position in another."
+    }
+  },
+
+  "picker": {
+    "trigger": "Saving in {symbol}. Change token",
+    "list": "Pick a token",
+    "saveIn": "Save in",
+    "grandPrize": "Grand prize",
+    "unread": "unread",
+    "savingPool": "saving pool",
+    "notSupported": "not supported",
+    "zamaList": "Zama's list",
+    "reasons": {
+      "restrictedMint": "mint restricted to the issuer"
+    }
+  },
+
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "What you hold, what the pool is doing, and the one thing to do next.",
+    "next": "Next",
+    "position": {
+      "label": "What you hold",
+      "open": "open in this browser",
+      "sealed": "sealed on chain",
+      "principal": "Principal",
+      "principalNote": "What you have saved. Your odds are weighted by this across the whole period.",
+      "principalSpoken": "your principal",
+      "winnings": "Unclaimed winnings",
+      "winningsNote": "Prize money credited to you and not yet withdrawn. It earns no odds of its own.",
+      "winningsSpoken": "your unclaimed winnings",
+      "outside": "This wallet is not in the pool right now. Deposit and both figures start filling in.",
+      "footConnect": "Connect a wallet to open your own. Nobody else can, and Zama's access list on chain enforces that rather than this page promising it.",
+      "footNetwork": "Opening these needs a signature on Sepolia. Switch the wallet over and the eye works again.",
+      "footOpen": "Only this browser saw those figures. Nothing was written to the chain and nothing was sent to a server.",
+      "footSealed": "The eye asks Zama's relayer to decrypt values this address owns. One signature, no gas, no transaction."
+    },
+    "pool": {
+      "label": "The pool right now",
+      "pill": "public to everyone",
+      "savers": "Savers",
+      "saversUnknown": "The saver count has not come back from the chain yet.",
+      "liquidity": "Prize liquidity",
+      "liquidityUnknown": "One of the three tier balances has not come back yet, and a partial sum is not the pool.",
+      "period": "Period",
+      "periodUnknown": "The current period has not come back from the chain yet.",
+      "endsIn": "Ends in",
+      "endsUnknown": "The end of this period has not come back from the chain yet.",
+      "tier": "Tier",
+      "chance": "Chance",
+      "prizeEach": "Prize each ({symbol})",
+      "prizeCount": "{count, plural, one {{shown} prize a draw} other {{shown} prizes a draw}}",
+      "prizeCountUnknown": "prize count unknown",
+      "carryWaiting": "carry from draw {drawId} waiting",
+      "oddsUnknown": "This tier's odds have not come back from the chain yet.",
+      "nextPrizeUnknown": "This tier's next prize has not come back from the chain yet.",
+      "footOne": "Each prize is half of its tier's liquidity divided by the prize count, fixed at the close before the random seed exists. What nobody wins is published one draw later and offered again.",
+      "footBracket": "Odds are drawn against a bracket of <bracket>2^{bits}</bracket>, published with the draw.",
+      "footBracketUnknown": "The bracket those odds are drawn against has not come back from the chain yet."
+    },
+    "tiers": {
+      "grand": "Grand",
+      "mid": "Mid",
+      "frequent": "Frequent"
+    },
+    "tiersLower": {
+      "grand": "grand",
+      "mid": "mid",
+      "frequent": "frequent"
+    }
+  },
+
+  "nextStep": {
+    "connectTitle": "Connect a wallet to begin.",
+    "connectDetail": "Hearth runs on Ethereum Sepolia. You need a little test ETH for gas, and the test {underlyingSymbol} is one click away once a wallet is connected.",
+    "connectCta": "Connect wallet",
+    "switchTitle": "This wallet is pointed at another network.",
+    "switchDetail": "The pool figures on this page are read from Sepolia either way. Nothing can be signed or sent until the wallet is on it too.",
+    "switchCta": "Switch to Sepolia",
+    "readingTitle": "Reading this wallet from the chain.",
+    "readingDetail": "The next step appears once the reads land. Naming one from a balance that has not arrived would point you at the wrong screen.",
+    "faucetTitle": "Get some test {underlyingSymbol}.",
+    "faucetDetail": "The mock {underlyingSymbol} has an open mint capped at a million tokens a call. It is worth nothing, so take more than you need.",
+    "faucetCta": "Get test {underlyingSymbol}",
+    "shieldTitle": "Shield your {underlyingSymbol}.",
+    "shieldDetail": "Shielding turns plain {underlyingSymbol} into {symbol}. That step is public by nature, and it is the last thing about this money anyone can read.",
+    "shieldCta": "Shield {underlyingSymbol}",
+    "depositTitle": "Put your {symbol} into the pool.",
+    "depositDetail": "The amount is encrypted in your browser before it is sent, so the vault credits a number it cannot read. Your odds follow what you hold.",
+    "depositCta": "Deposit",
+    "claimTitle": "You have winnings waiting.",
+    "claimDetail": "Claiming is an ordinary withdrawal for that amount. On chain it has the same shape as any other withdrawal, which is what stops it naming the winner.",
+    "claimCta": "Claim your winnings",
+    "readingDrawsTitle": "Reading the recent draws.",
+    "readingDrawsDetail": "The next step appears once they land. Naming one from a draw list that has not arrived would point you at the wrong screen.",
+    "resultTitle": "Draw {drawId} has your result written.",
+    "resultDetail": "The walk reached this wallet, so whether it won is already decided and stored. It stays sealed until you open it, which costs a signature and no gas.",
+    "resultCta": "Open draw {drawId}",
+    "settledTitle": "Nothing needs doing right now.",
+    "settledDetail": "Your deposit sits in the pool and earns odds for every second it stays there. The next draw closes at the end of the period, and anyone can close it.",
+    "settledCta": "Add to your deposit",
+    "noWallet": "No wallet found"
+  },
+
+  "deposit": {
+    "title": "Deposit",
+    "subtitle": "Get test {underlying}, shield it into {confidential}, then put it into the vault.",
+    "connect": "Connect a wallet on Sepolia to deposit. The three steps below are what getting money into the pool takes, and the screen opens whichever one your wallet is actually up to.",
+    "connectNote": "You will need a little Sepolia ETH for gas. The test {underlying} is one click away once you are connected.",
+    "lowGas": "This wallet holds almost no Sepolia ETH, so a transaction will fail before it is sent. Any Sepolia faucet tops it up: the Google Cloud Web3 faucet, Alchemy's or Chainlink's. A tenth of an ETH is far more than enough.",
+    "inWallet": "In your wallet",
+    "inWalletSpoken": "your {symbol} balance",
+    "inWalletUnknown": "In your wallet: ",
+    "faucet": {
+      "title": "Get test {underlying}",
+      "held": "{amount} {underlying} in your wallet.",
+      "heldSummary": "{amount} {underlying} in your wallet. ",
+      "more": "Get a million more",
+      "unread": "Your wallet balance has not come back from the chain yet.",
+      "button": "Get test {underlying}",
+      "note": "The mock {underlying} has an open mint capped at one million tokens a call. It is worth nothing, so ask for more than you need."
+    },
+    "shield": {
+      "title": "Shield your {underlying}",
+      "summary": "Shielded. The balance is sealed, so only you can read what is in it. ",
+      "more": "Shield more",
+      "body": "Shielding turns plain {underlying} into {confidential}, and it is public. The wrapper contract emits the plaintext amount, the ERC-20 transfer carries it again, and there is no way around that: turning a public token into a confidential one is by definition a public act.",
+      "youShield": "You shield",
+      "fieldName": "Amount of {underlying} to shield",
+      "balance": "{amount} {underlying} in your wallet",
+      "tooMuch": "You hold {amount} {underlying}. Ask for less, or mint more first.",
+      "youReceive": "You receive",
+      "rateUnknown": "The wrapper rate has not come back from the chain yet.",
+      "rateOne": "The wrapper is one to one, so you receive exactly what you shield.",
+      "rateOther": "The wrapper takes {rate} units of {underlying} for one unit of {confidential}.",
+      "why": "This is why shielding and depositing are two buttons and not one. Shield a round number, at a time of your choosing, and deposit part of it later. Anyone who can pin your balance can compute whether you won in every draw from then on, because the thresholds are public by design.",
+      "approve": "Approve the wrapper",
+      "button": "Shield",
+      "approveNote": "One approval, and every shield after it is a single transaction. It lets the {confidential} wrapper contract pull {underlying} out of this wallet and reaches nothing else you own. {underlying} is a Sepolia test token from the faucet button above, with no value on any real network. The shield button takes over once the approval is mined.",
+      "waiting": "Your balances have not come back from the chain yet, so this is held until they do.",
+      "skip": "Deposit what you already hold instead"
+    },
+    "vault": {
+      "title": "Deposit into the vault",
+      "body": "The amount is encrypted in your browser with a zero-knowledge proof, then sent in one transaction. The vault credits exactly what the token says actually moved, so asking for more than you hold moves nothing at all rather than failing loudly. Open the eye below if you are not sure what you have.",
+      "closedNotAwarded": "A draw is closed and waiting for its award right now. Depositing is still allowed; this money counts from this moment on, weighted by the part of the current period that is still to run.",
+      "youDeposit": "You deposit",
+      "fieldName": "Amount of {confidential} to deposit",
+      "cap": "The vault caps one saver at {amount} {confidential}, so this would be refused and refunded inside the same transaction.",
+      "tooMuch": "You hold {amount} {confidential}. Asking for more is not refused on chain: the token moves what you have, which here is nothing, and the transaction still succeeds.",
+      "sealedNote": "Your balance is sealed, so this screen cannot check the amount against it. A deposit above what you hold moves nothing and still costs a transaction. Open the eye above and the field is checked for you.",
+      "button": "Deposit",
+      "paused": "The vault is paused, so deposits are refused. Withdrawing still works."
+    }
+  },
+
+  "withdraw": {
+    "title": "Withdraw",
+    "subtitle": "Two stages: out of the vault, then back into {underlying}. Principal is never locked, including in the middle of a draw.",
+    "connect": "Connect a wallet to withdraw. Stage one takes principal and winnings out of the vault, stage two turns {confidential} back into {underlying}.",
+    "connectNote": "Nothing here is ever locked. Principal comes back in full whenever you ask, including in the middle of a draw.",
+    "tabs": {
+      "label": "Withdraw stages",
+      "vault": "Out of the vault",
+      "unshield": "Back to the plain token",
+      "unfinished": "has something unfinished"
+    },
+    "pending": {
+      "title": "An unshield was submitted and never finished.",
+      "body": "The confidential tokens are already burned and the {underlying} is waiting on the wrapper. Sending the second transaction releases it. ",
+      "link": "See the unshield",
+      "finish": "Finish the unshield"
+    },
+    "vault": {
+      "reading": "Reading what this wallet holds in the vault.",
+      "unavailable": "The reads for this wallet did not come back, so this screen cannot say what the vault holds for you. Reload once the network is answering.",
+      "neverDepositedLead": "This wallet has never deposited, so the vault holds nothing for it and a withdrawal would be refused on chain. ",
+      "depositFirst": "Deposit first",
+      "neverDepositedTail": ", or use stage two if you are holding {confidential} you want back as {underlying}.",
+      "youWithdraw": "You withdraw",
+      "fieldName": "Amount to withdraw from the vault",
+      "inVault": "In the vault",
+      "inVaultSpoken": "your vault balance",
+      "clamped": "That is more than you hold. The vault sends the {amount} you hold and stops there.",
+      "revealNote": "Reveal to cap this field and see the split. Skipping it is safe: the vault clamps the amount on chain either way.",
+      "youReceive": "You receive",
+      "receiveBalance": "In your wallet, still encrypted. Stage two turns it back into {underlying}.",
+      "split": "{winnings} of that comes out of winnings and {principal} out of principal, in one transfer that looks the same either way.",
+      "splitSealed": "Reveal your vault balance to see how this splits between winnings and principal.",
+      "button": "Withdraw",
+      "everything": "Withdraw everything",
+      "everythingNote": "Withdrawing everything needs no reveal and no encrypted input. The vault adds your principal to your winnings on chain and sends the total, so neither you nor this page has to know it first.",
+      "howLabel": "How a withdrawal is paid",
+      "howOne": "Winnings go first, then principal, in one confidential transfer. Nothing about the transfer says which parts it was made of.",
+      "howTwo": "The amount is clamped on chain to the smallest of what you ask for, what you hold, and what the vault holds, because a confidential transfer moves the whole amount or nothing at all. An over-large request sends everything you hold instead of failing, which is also why nobody can find your balance by asking for too much and watching what happens.",
+      "howWindow": "A draw window is open right now. Withdrawing is allowed and does not change the odds already fixed for you. Any prize from that draw lands in your winnings, for a later withdrawal.",
+      "howThree": "Principal is never locked. There is no notice period, no penalty and no waiting for a draw to end."
+    },
+    "unshield": {
+      "youUnshield": "You unshield",
+      "fieldName": "Amount of {confidential} to unshield",
+      "inWallet": "In your wallet",
+      "inWalletSpoken": "your {confidential} balance",
+      "tooMuch": "You hold {amount} {confidential}. Asking for more is not refused on chain: it spends both transactions and moves nothing.",
+      "revealNote": "Reveal to cap this field. An unshield of more than you hold is not refused, it just moves nothing.",
+      "youReceive": "You receive",
+      "receiveBalance": "{underlying} in your wallet, spendable anywhere.",
+      "receiveNote": "This figure goes on chain in the clear. The first of the two transactions is what publishes it.",
+      "button": "Unshield",
+      "unfinished": "A new unshield has to wait until the one above is finished. Only one is remembered at a time, and starting another would leave the first with its tokens burned and nothing to release them.",
+      "unwrapping": "Unshield: your wallet asks twice. First for a signature so the wrapper can read your confidential balance, which costs no gas, then for the transaction itself.",
+      "waiting": "Unshield submitted. Waiting for Zama's protocol to publish the cleartext and its proof.",
+      "finalizing": "Finalizing: confirm the second transaction to release the {underlying}.",
+      "done": "Unshielded. Your {underlying} balance went up by {amount}, read off the chain after the second transaction.",
+      "doneUnchecked": "Unshielded. Both transactions landed, but the {underlying} balance could not be read back, so this screen cannot say what arrived. Check your wallet.",
+      "nothingMoved": "Nothing moved. Both transactions landed and your {underlying} balance is exactly what it was, which happens when the amount was above your confidential balance: the wrapper releases nothing rather than refusing. Open the balance with the eye above and use All of it.",
+      "whyLabel": "Why this takes two transactions",
+      "whyOne": "The wrapper burns the encrypted amount and publishes it first, then releases the plain tokens once Zama's protocol has produced the cleartext and its proof. Those are two separate calls, and the second one can be sent later if you close the tab between them.",
+      "whyTwo": "Your wallet also asks for a signature before the first transaction, because the wrapper reads your confidential balance to check the amount. That prompt is a signature and not a transaction, and it costs no gas.",
+      "whyThree": "Worth knowing before you empty it: shield in and unshield out in full, and the difference between the two public totals is a lower bound on everything you have ever won. Unshield in round numbers, or leave a standing confidential balance behind."
+    }
+  },
+
+  "draws": {
+    "title": "My draws",
+    "subtitle": "Each recent draw, its public prize numbers, and your own weight and prize behind the eye.",
+    "count": "{count} most recent",
+    "reading": "reading",
+    "emptyReading": "Reading the pool.",
+    "emptyNone": "No period has finished yet, so there is no draw to show. The first one appears as soon as period 1 is over.",
+    "emptyFailed": "The draws could not be read just now. They are on chain either way; this page retries on its own.",
+    "card": {
+      "label": "Draw {drawId}",
+      "claimNote": "Claiming is an ordinary withdrawal for exactly that amount. On chain it has the same shape as any other withdrawal, which is what stops a claim naming the winner.",
+      "claim": "Claim {amount} {symbol}",
+      "advanceNote": "Advancing moves the shared walk on by up to {batch} savers, in the order this draw's seed set. It cannot be aimed at you, so pressing it says nothing about whether you won.",
+      "advance": "Advance the draw",
+      "waitingLead": "This step is open to anybody. ",
+      "waitingLink": "Run a draw",
+      "waitingTail": " has it.",
+      "periodEnded": "Period {drawId} ended",
+      "periodEndedUnknown": "The end of this period has not come back from the chain yet.",
+      "closeDeadline": "Close deadline",
+      "closeDeadlineUnknown": "This draw's close deadline has not come back from the chain yet.",
+      "passed": "passed",
+      "prizeWindow": "Prize window",
+      "windowUnknown": "This draw's window has not come back from the chain yet.",
+      "windowLeft": "{time} left",
+      "windowClosed": "closed",
+      "bracket": "Bracket",
+      "bracketNote": "published in place of the pool's total weight",
+      "walk": "Walk",
+      "walkNotStarted": "not started",
+      "walkProgress": "{cursor} of {total}",
+      "walkNote": "up to {batch} savers per call",
+      "prizeWorth": "What one prize was worth",
+      "noPrizeMoney": "This draw offered no prize money: no harvest had been booked yet when it closed.",
+      "yourResult": "Your result",
+      "sealedResult": "a result, encrypted",
+      "sealedResultNote": "Encrypted on chain, and readable only by the wallet it belongs to.",
+      "notReachedUnknown": "The walk has not reached you yet, and this draw's window has not come back from the chain, so the page cannot say whether it can still be advanced.",
+      "notReachedYet": "The walk has not reached you yet. Until it does, this draw holds no figure for you, won or not.",
+      "missedWindow": "The window closed before the walk reached you, so this draw pays you nothing and the money went back to the tiers. Nobody can evaluate it now.",
+      "yourPrize": "Your prize",
+      "yourPrizeSpoken": "your prize in draw {drawId}",
+      "yourWeight": "Your weight",
+      "yourWeightSpoken": "your weight in draw {drawId}",
+      "noPrize": "No prize this draw. Your weight was counted and the thresholds did not fall your way.",
+      "claimed": "Already taken out. The vault owes this wallet nothing, so this prize is in your confidential balance. The draw keeps the figure as its record."
+    }
+  },
+
+  "describe": {
+    "unreadBadge": "unread",
+    "unread": "This draw has not come back from the chain yet, so nothing below it is a fact. The page keeps asking.",
+    "notClosedBadge": "not closed",
+    "notClosed": "The period is over and this draw is waiting to be closed. Anyone can close it, including you.",
+    "missedBadge": "missed",
+    "missed": "Nobody closed this draw before its deadline, so it pays nothing. Its liquidity was never moved and the next close offers it again.",
+    "closedBadge": "awaiting the proof",
+    "closed": "Closed. The seed, the bracket, the non-empty flag and the harvest are published and waiting for Zama's key management service to sign their cleartexts. Anyone can fetch them and award the draw.",
+    "emptyBadge": "empty",
+    "empty": "Nobody held a balance during this period, so there was nothing to weigh. The offered liquidity went straight back to the tiers.",
+    "skippedBadge": "skipped",
+    "skipped": "The award landed after the draw's window, so no prize was paid. The liquidity went back to the tiers and the harvest was still booked.",
+    "awardedBadge": "awarded",
+    "awardedAllDisconnected": "Awarded, and the walk has reached every saver in it. Connect a wallet to see where you stood in it.",
+    "awardedDisconnected": "Awarded. The evaluation walk is still running. Connect a wallet to see where you stand in it.",
+    "awardedAllOutside": "Awarded and every saver evaluated. This wallet was not in the pool at the time.",
+    "awardedOutside": "Awarded. The evaluation walk is still running, and this wallet is not in it.",
+    "awardedAll": "Awarded, and the walk has reached every saver in it. Every result is fixed and written.",
+    "awarded": "Awarded. From this moment every result is already decided: the thresholds are public and the weights can no longer change. Evaluation only writes them down."
+  },
+
+  "run": {
+    "title": "Run a draw",
+    "subtitle": "A draw takes five transactions. Every one of them is callable by any wallet, yours included.",
+    "connect": "Connect a wallet to send any of these. None of them needs a privilege the contracts recognise, and none of them can be aimed at a particular saver.",
+    "connectNote": "The five steps below read from the chain either way, so the screen is worth looking at before you connect anything.",
+    "waitingFor": "What the pool is waiting for",
+    "nothing": "Nothing",
+    "ordering": " A draw is ready to close as well. Finalizing and reconciling go first, because the money a carry frees is what the next close sizes its prizes from.",
+    "unknownDue": "The reads that say which step is due have not come back from the chain yet.",
+    "idleWithClock": "Either the keeper has kept up or this period is still running. It ends in {time}.",
+    "idle": "Either the keeper has kept up or this period is still running.",
+    "railLabel": "The five steps, in the order a draw needs them",
+    "unknownStep": "Whether this step is available has not come back from the chain yet.",
+    "chip": {
+      "due": "due now",
+      "ready": "ready",
+      "unknown": "unknown",
+      "notYet": "not yet"
+    },
+    "blocked": {
+      "connect": "Connect a wallet to send this.",
+      "network": "Your wallet is on another network.",
+      "busy": "Another transaction is already in flight."
+    },
+    "close": {
+      "title": "Close",
+      "headline": "Close draw {drawId}",
+      "headlineIdle": "Close a draw",
+      "button": "Close",
+      "does": "Fixes each tier's prize size from the money sitting in it, moves that money into the draw, harvests the yield source, and draws an encrypted seed that nobody, us included, can read.",
+      "paused": "The prize pool is paused, so no draw can be closed.",
+      "readyDeadline": "Draw {drawId} can be closed for another {time}. Past that it is skipped and its money stays in the tiers.",
+      "ready": "Draw {drawId} is waiting to be closed.",
+      "waitingClock": "No draw is waiting. Draw {drawId} becomes closable in {time}, when this period ends.",
+      "waiting": "No draw is waiting to be closed."
+    },
+    "award": {
+      "title": "Award",
+      "headline": "Award draw {drawId}",
+      "headlineIdle": "Award a draw",
+      "button": "Award",
+      "does": "Hands the pool the cleartexts of the four values the close published, with the key management service's signature over them. The pool checks that signature on chain, books the harvest into the tiers and opens the draw. Winners are decided at this moment.",
+      "ready": "Draw {drawId} is closed and waiting. The four proofs are fetched first, which takes a few seconds, and then your wallet asks you to sign.",
+      "waiting": "No closed draw is waiting for its award."
+    },
+    "advance": {
+      "title": "Advance",
+      "headline": "Advance draw {drawId}",
+      "headlineIdle": "Advance a draw",
+      "button": "Advance",
+      "does": "Walks the saver list from a point the seed decides and credits each saver what the published thresholds say they won. The caller chooses how many savers a call covers, never which ones, so sending this says nothing about who you are in the draw.",
+      "readyCount": "{cursor} of {total} savers done on draw {drawId}. Each call moves the shared walk on by up to {batch}, which is what one transaction pays for.",
+      "ready": "Draw {drawId} still has savers to cover. Each call moves the shared walk on by up to {batch}, which is what one transaction pays for.",
+      "waiting": "No awarded draw has savers left inside its window."
+    },
+    "finalize": {
+      "title": "Finalize",
+      "headline": "Finalize draw {drawId}",
+      "headlineIdle": "Finalize a draw",
+      "button": "Finalize",
+      "does": "Folds every tier's unpaid remainder into that tier's encrypted carry once the window is over, and publishes the carry of each tier whose turn it is.",
+      "ready": "Draw {drawId} has finished its window, so nothing more can be credited from it.",
+      "waitingClock": "No window has ended. Draw {drawId} can be finalized in {time}.",
+      "waiting": "No draw has finished its window without being finalized."
+    },
+    "reconcile": {
+      "title": "Reconcile",
+      "headline": "Reconcile the {tier} tier",
+      "headlineIdle": "Reconcile a tier",
+      "button": "Reconcile",
+      "does": "Fetches the cleartext of a published carry, proves it to the pool and books the money back into that tier's plaintext liquidity, so the next close can offer it again.",
+      "ready": "The {tier} tier published its carry at draw {drawId}.",
+      "readyMore": "{count, plural, one { {shown} more tier is behind it, and each press does one.} other { {shown} more tiers are behind it, and each press does one.}}",
+      "waiting": "No tier has a carry waiting to be booked back."
+    },
+    "who": {
+      "label": "Who sends these",
+      "oneStart": "A keeper we run watches the pool and sends each of these as it comes due, so in an ordinary hour there is nothing on this screen to do.",
+      "onePeriod": " A period here is {period}, so a full round of five goes out that often.",
+      "oneEnd": " The keeper holds no privilege the contracts recognise. The two things it could have abused, picking which savers get evaluated and picking the order prizes are paid in, are not choices any caller has.",
+      "two": "Award and reconcile are the two steps that need something from off chain. Your browser asks Zama's relayer for the cleartext of what the pool published, four values for an award and one for a reconcile, together with the key management service's signature over them. That is the same call the keeper makes, and the contract checks the signature itself, so a browser cannot lie about what it read.",
+      "three": "If the keeper stops, nothing is lost. A draw that is never closed keeps its money in the tiers and is offered again, and a carry that is never reconciled is folded back by the first close after it lands. A stalled keeper costs the pool draws, not money, and any wallet here can start them again.",
+      "periodHours": "{count, plural, one {one hour} other {{shown} hours}}",
+      "periodMinutes": "{count} minutes",
+      "periodSeconds": "{count} seconds"
+    },
+    "stand": {
+      "label": "Where the draws stand",
+      "period": "Current period",
+      "periodNote": "Ends in {time}",
+      "savers": "Savers",
+      "saversNote": "How far a full walk has to travel",
+      "lastClosed": "Last closed draw",
+      "lastClosedNone": "none yet",
+      "vaultUnknown": "vault state unknown",
+      "vaultPaused": "vault paused",
+      "vaultRunning": "vault running",
+      "poolUnknown": "prize pool state unknown",
+      "poolPaused": "prize pool paused",
+      "poolRunning": "prize pool running"
+    }
+  },
+
+  "verify": {
+    "title": "Check a draw yourself.",
+    "lede": "No wallet needed. Every number here is read straight from the contracts, and the thresholds come from the vault's own <code>thresholdOf</code> view, which is the same arithmetic that decided the outcome. There is no second implementation on this page to disagree with the first.",
+    "noPool": "{symbol} has no pool to check.",
+    "noPoolBody": "{reason}, so Hearth never opened a vault on it and there is no draw here. Pick a token from the list above.",
+    "unreachable": "Could not reach Sepolia.",
+    "unreachableBody": "This page reads the vault and the pool over an RPC endpoint, and that read failed, so it has nothing to show. The draws themselves are on chain either way.",
+    "tryAgain": "Try again",
+    "reading": "Reading the draws from Sepolia.",
+    "noneYet": "No draw has been closed yet, so there is nothing to check. The first one appears once period 1 is over and somebody closes it.",
+    "oneNotClosed": "Draw {drawId} has not been closed yet, so there is nothing to check.",
+    "rangeNotClosed": "Draws {first} to {last} have not been closed, so there is nothing to check here. Anything older is on the explorer.",
+    "drawButton": "Draw {drawId}",
+    "facts": {
+      "title": "Draw {drawId}",
+      "periodCovered": "Period covered",
+      "periodEnded": "ended {stamp}",
+      "windowEnds": "Window ends",
+      "seed": "Seed",
+      "seedUnpublished": "not published yet",
+      "bracket": "Bracket",
+      "bracketUnset": "not set yet",
+      "bracketNote": "{count} balance-seconds",
+      "prizeSizes": "Prize sizes",
+      "prizeSizesNote": "grand / mid / frequent",
+      "harvest": "Harvest booked",
+      "walkSavers": "Savers in the walk",
+      "walkNotStarted": "not started",
+      "walkPosition": "Walk position",
+      "walkProgress": "{cursor} of {total}",
+      "finalized": "Finalized",
+      "yes": "yes",
+      "no": "no",
+      "note": "The seed is generated as a ciphertext inside Zama's coprocessor, so nobody sees it when it is drawn, and closing a draw succeeds exactly once, so there is no second roll. The bracket is the smallest power of two above the pool's aggregate weight, published instead of the exact aggregate because two consecutive exact totals would solve for a lone mover's deposit."
+    },
+    "tiers": {
+      "title": "What each tier offered and paid",
+      "hint": "public by design",
+      "each": "{amount} {symbol} each",
+      "offered": "offered",
+      "returned": "returned unpaid",
+      "notReconciled": "not reconciled yet",
+      "paid": "prizes paid",
+      "paidUnknown": "unknown until reconciled",
+      "paidInexact": "not exactly derivable",
+      "note": "Prizes paid is worked out from the public numbers: what the tier offered, minus what came back unpaid, divided by the prize size. It comes out exact whenever no encrypted carry rode along into the draw, and this deployment reconciles every tier every draw so that it usually does. It never says who was paid."
+    },
+    "thresholds": {
+      "title": "Thresholds for an address",
+      "hint": "read from thresholdOf",
+      "body": "Paste any address. The vault returns the exact weight that address had to beat in every prize of every tier for this draw. Compare it against that saver's own decrypted weight and the outcome checks out: they won a prize exactly when their weight was strictly above its threshold.",
+      "fieldName": "An address to check",
+      "invalid": "That is not a valid Ethereum address.",
+      "notAwarded": "Draw {drawId} is not awarded, so it has no seed and no thresholds yet.",
+      "row": "{tier} prize {index}",
+      "reading": "reading",
+      "rowFailed": "The node did not answer thresholdOf for this prize. Nothing about the draw has changed, only this page's view of it.",
+      "noCounts": "The prize counts for this draw could not be read, so this page cannot say how many thresholds there are. Try again in a moment.",
+      "outOfRange": "out of range, so unwinnable",
+      "unit": "balance-seconds"
+    },
+    "transactions": {
+      "title": "The transactions",
+      "hint": "on Etherscan",
+      "none": "Nothing for this draw in the last few hours of blocks. Older history is on the explorer.",
+      "block": "block {block}",
+      "open": "Open the pool",
+      "closed": "Closed",
+      "awarded": "Awarded",
+      "markedEmpty": "Marked empty",
+      "markedSkipped": "Marked skipped",
+      "finalized": "Finalized",
+      "reconciled": "Tier reconciled",
+      "withTier": "{label} ({tier})"
+    }
+  },
+
+  "lab": {
+    "pill": "Lab page",
+    "title": "The draw ceremony",
+    "lede": "Not linked from the site. Every number below is read live from the contracts on Sepolia: the sealed handles, the seed the key management service signed, the bracket the draw ran against, and the exact thresholds a wallet had to beat.",
+    "noPool": "{symbol} has no pool to open.",
+    "noPoolBody": "{reason}, so Hearth never opened a vault on it. Pick a token that has one.",
+    "noDraw": "No awarded draw to open yet.",
+    "noDrawBody": "The ceremony needs a draw that has been closed and awarded. Run one from the draw panel in the pool, then come back.",
+    "drawButton": "Draw {drawId}",
+    "openSeal": "Open the seal",
+    "again": "Run it again",
+    "stages": {
+      "sealed": "sealed",
+      "seed": "the seed opens",
+      "bracket": "the bracket",
+      "thresholds": "the thresholds fall",
+      "mine": "your own result"
+    },
+    "seals": {
+      "title": "What the close published",
+      "hint": "four handles, in this exact order",
+      "seed": "seed",
+      "scale": "scale count",
+      "nonEmpty": "non-empty",
+      "harvest": "harvest",
+      "unpublished": "not published",
+      "note": "The pool re-encodes the four cleartexts in that order and checks the key management service's signature over that encoding on chain, so asking for them in any other order makes the award revert. Order is the contract here, not a convenience."
+    },
+    "seed": {
+      "title": "The seed opens",
+      "note": "Generated as a ciphertext inside Zama's coprocessor, so nobody saw it when it was drawn. Published once the period ended, signed by the key management service, and verified on chain by the pool before anything else in this draw was allowed to happen. Prize sizes were already fixed at the close, before this number existed."
+    },
+    "bracket": {
+      "title": "The bracket",
+      "unit": "{count} balance-seconds",
+      "note": "The draw runs against the smallest power of two above the pool's aggregate weight, never the aggregate itself. Publishing the exact total would let anyone solve for a lone mover's deposit from two consecutive totals and the timestamp of their own transaction."
+    },
+    "thresholds": {
+      "title": "The thresholds fall",
+      "connectHint": "connect a wallet to see your own",
+      "connectBody": "Thresholds are per address and public. Connect a wallet and the exact number it had to beat in every prize of this draw appears here, computed by the vault, not by this page.",
+      "row": "{tier} prize {index}",
+      "reading": "reading",
+      "outOfRange": "out of range",
+      "note": "Beat the threshold and the prize is yours. These come from the vault's own view, the same arithmetic that decided the outcome, so there is no second implementation here to disagree with the first."
+    },
+    "mine": {
+      "title": "And only for you",
+      "connectBody": "Connect a wallet and this card fills in with the weight it was judged on and what draw {drawId} paid it, decrypted in your browser and nowhere else.",
+      "nothing": "This wallet holds no weight in draw {drawId}, so there is nothing of its own to open. Only a saver who was in the walk has a weight and a credit here.",
+      "weight": "Your weight",
+      "weightUnit": "balance-seconds over the period",
+      "paid": "What this draw paid you",
+      "paidUnit": "{symbol}, credited to your winnings",
+      "sealAgain": "Seal it again",
+      "decrypt": "Decrypt my result",
+      "denied": "Refused: these values belong to another wallet.",
+      "note": "Everything above this card is public and anyone can check it. This card is not: it takes one EIP-712 signature from the wallet that owns these values, and Zama's access control list refuses everybody else. That is the whole product in two paragraphs."
+    }
+  },
+
+  "docs": {
+    "title": "Documentation",
+    "kicker": "Documentation",
+    "heading": "The written record",
+    "count": "{count, plural, one {{shown} page} other {{shown} pages}}. Every one of them is a file in the repository under <path>docs/</path>, rendered here.",
+    "contents": "Contents",
+    "close": "Close",
+    "overview": "Overview",
+    "nav": "Documentation",
+    "search": "Search the documentation",
+    "noResults": "Nothing matches that.",
+    "outline": "On this page",
+    "nearby": "Nearby pages",
+    "previous": "Previous",
+    "next": "Next",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyManual": "Press ctrl C",
+    "copyLabel": "Copy this block",
+    "diagramWide": "Wider than the column. Scroll it sideways.",
+    "diagramFailed": "This diagram did not draw. The source is below.",
+    "rendererFailed": "The diagram renderer did not load. The source is below.",
+    "fallbackNote": "This page has not been translated yet, so it is shown in English.",
+    "sections": {
+      "reference": "Reference",
+      "attackLogs": "Attack logs",
+      "gettingstarted": "Getting started",
+      "concepts": "Concepts",
+      "security": "Security",
+      "operations": "Operations"
+    }
+  },
+
+  "errors": {
+    "notFound": {
+      "title": "There is nothing at this address.",
+      "body": "The page moved, the link was mistyped, or the token in it is not one this build was deployed against. The pool itself is on chain and unaffected either way.",
+      "home": "Back to the start",
+      "pool": "Open the pool",
+      "docs": "Read the docs"
+    },
+    "crashed": {
+      "title": "This screen broke, and the money did not.",
+      "body": "Something in the page itself threw. Nothing was signed and nothing was sent, so your balance is exactly where it was. Reloading this screen is safe.",
+      "digest": "Reference {digest}",
+      "home": "Back to the start",
+      "retry": "Try this screen again"
+    },
+    "unknown": "Something went wrong.",
+    "userRejected": "You turned the request down in your wallet. Nothing was sent.",
+    "signingRejected": "You turned the signature down in your wallet. Nothing was sent.",
+    "notConnected": "Connect a wallet first.",
+    "decryptNotConnected": "Connect a wallet to decrypt your own values.",
+    "addressesMissing": "The Hearth addresses are not configured, so nothing can be sent.",
+    "drawNotWaiting": "Draw {drawId} is not waiting for its award, so there is nothing to send.",
+    "insufficientAllowance": "The wrapper is not allowed to take that much of your token yet. Approve it first.",
+    "insufficientErc20": "Not enough of the plain test token in this wallet. Mint some from the faucet.",
+    "insufficientConfidential": "Not enough of the confidential token. Shield some of the plain one first.",
+    "chainMismatch": "Your wallet is on a different network from the app. Switch it to Sepolia.",
+    "notEntitled": "This wallet is not allowed to read that value. It belongs to a different address.",
+    "noCiphertext": "There is no encrypted value here yet, which means a balance of zero.",
+    "relayerRateLimited": "Zama's relayer is rate limiting this browser. Wait a few seconds and ask again.",
+    "relayerUnreachable": "Zama's relayer could not be reached. Ask again in a moment.",
+    "relayerUnreachableStatus": "Zama's relayer could not be reached (HTTP {status}). Ask again in a moment.",
+    "rpcRateLimited": "The Sepolia node is rate limiting this browser. Wait a few seconds and ask again.",
+    "noGas": "Not enough Sepolia ETH to pay for gas. Any Sepolia faucet tops it up.",
+    "relayerBehind": "Zama's relayer has not caught up with that block yet. Ask again in a moment.",
+    "EnforcedPause": "The vault is paused, so deposits and draw closing are stopped. Withdrawing still works.",
+    "NotASaver": "This wallet has never deposited, so there is nothing to withdraw.",
+    "NotTheAsset": "Only the confidential token this vault was deployed with is accepted. Shield that token and try again.",
+    "DrawNotAwarded": "That draw has not been awarded yet, so there is nothing to evaluate. Close and award it first.",
+    "EvaluationWindowClosed": "That draw's two-period window is over. It can no longer be evaluated, and it pays nothing.",
+    "EvaluationWindowOpen": "That draw can still be evaluated, so it cannot be finalized yet. Wait for the window to end.",
+    "AlreadyFinalized": "That draw is already finalized. There is nothing left to do on it.",
+    "DrawNotOpen": "That draw was never closed, so there is nothing to finalize.",
+    "AlreadyClosed": "Somebody closed that draw first. Its award is the next step.",
+    "NothingToClose": "No draw is waiting to be closed right now.",
+    "CloseWindowClosed": "The closing deadline for that draw has passed. Its liquidity goes back to the tiers and the next draw offers it again.",
+    "WrongStatus": "The draw moved on before this transaction landed. Reload and look at where it is now.",
+    "CarryNotPending": "That tier has no published carry waiting, so there is nothing to reconcile.",
+    "InvalidKMSSignatures": "The key management service signature did not verify on chain. Ask for the decryption again."
+  },
+
+  "format": {
+    "pending": "...",
+    "dust": "<0.01",
+    "now": "now",
+    "seconds": "{seconds}s",
+    "minutesSeconds": "{minutes}m {seconds}s",
+    "hoursMinutes": "{hours}h {minutes}m",
+    "agoSeconds": "{count}s ago",
+    "agoMinutes": "{count}m ago",
+    "agoHours": "{count}h ago",
+    "agoDays": "{count}d ago",
+    "notYet": "not yet",
+    "utc": "{stamp} UTC",
+    "oddsNever": "never",
+    "oddsEveryDraw": "every draw",
+    "oddsOneIn": "1 draw in {count}",
+    "balanceSeconds": "balance-seconds"
+  },
+
+  "meta": {
+    "titleDefault": "Hearth, prize savings nobody can see inside",
+    "titleTemplate": "{title} | Hearth",
+    "description": "Confidential no-loss prize savings on the Zama Protocol. Deposits, balances and winnings stay encrypted on chain, prizes are drawn from yield with odds proportional to your time-weighted balance, and principal comes back in full whenever you ask.",
+    "ogTitle": "Hearth",
+    "ogDescription": "Confidential no-loss prize savings on the Zama Protocol.",
+    "how": {
+      "title": "How it works",
+      "description": "Deposit a confidential token, keep your balance encrypted, win prizes drawn from yield with odds set by your time-weighted balance, and withdraw whenever you like."
+    },
+    "verify": {
+      "title": "Verify a draw",
+      "description": "Read a draw's seed, bracket, harvest and prize sizes straight from the contracts, and get the exact threshold any address had to beat."
+    },
+    "lab": {
+      "title": "The draw ceremony",
+      "description": "A lab page: the sealed seed opening, the bracket, the thresholds and one saver's own result."
+    },
+    "docs": {
+      "title": "Documentation",
+      "description": "How a draw works, how odds are computed, where the prize money comes from, what stays private, and every seam we know about."
+    },
+    "dashboard": {
+      "title": "{symbol} dashboard",
+      "titleFallback": "Dashboard",
+      "description": "What this wallet holds, what the prize pool is worth, and the next step, with every saver amount encrypted on chain."
+    },
+    "deposit": {
+      "title": "Deposit {symbol}",
+      "titleFallback": "Deposit",
+      "description": "Get test {underlyingSymbol}, shield it into {symbol}, then deposit it into the Hearth vault.",
+      "descriptionFallback": "Get the test token, shield it, then deposit it into the Hearth vault."
+    },
+    "withdraw": {
+      "title": "Withdraw {symbol}",
+      "titleFallback": "Withdraw",
+      "description": "Take principal and winnings out of the Hearth vault, then unshield {symbol} back into {underlyingSymbol}.",
+      "descriptionFallback": "Take principal and winnings out of the Hearth vault, then unshield back into the plain token."
+    },
+    "draws": {
+      "title": "My draws",
+      "description": "What each recent draw paid, and what it paid you, with your weight and prize encrypted until you open them."
+    },
+    "run": {
+      "title": "Run a draw",
+      "description": "Close, award, advance, finalize and reconcile. Every step of a Hearth draw is callable by any wallet."
+    }
+  }
+}

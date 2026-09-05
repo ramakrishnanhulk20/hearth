@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseAbiItem } from "viem";
-import { HEARTH } from "@/lib/chain/addresses";
+import { findPool } from "@/lib/chain/pools";
 import { serverClient } from "@/lib/chain/read";
 
 /**
@@ -9,9 +9,14 @@ import { serverClient } from "@/lib/chain/read";
  *
  * It runs on the server because a log query over a day of Sepolia blocks is far past what the
  * free public node the browser talks to will answer. The browser reads state; this reads history.
+ *
+ * The pool is a query parameter and not a default, because every deployment has its own vault and
+ * its own prize pool and their logs have nothing to do with each other.
  */
 
-export const revalidate = 20;
+// The pool comes in on the query string, so there is nothing here that could be rendered once
+// and served to everybody.
+export const dynamic = "force-dynamic";
 
 /** About ten hours of Sepolia blocks at twelve seconds each, so several full draw windows. */
 const LOOKBACK_BLOCKS = 3_000n;
@@ -43,11 +48,16 @@ export type Activity = {
   lastKeeper: { block: number; tx: string; from: string | null; kind: string; secondsAgo: number } | null;
 };
 
-export async function GET() {
-  const { vault, pool } = HEARTH;
-  if (!vault || !pool) {
-    return NextResponse.json({ error: "The Hearth addresses are not configured." }, { status: 503 });
+export async function GET(request: Request) {
+  const slug = new URL(request.url).searchParams.get("pool") ?? "";
+  const entry = findPool(slug);
+  if (entry === null) {
+    return NextResponse.json({ error: `There is no pool called "${slug}".` }, { status: 404 });
   }
+  if (entry.status !== "open") {
+    return NextResponse.json({ error: `${entry.symbol} has no pool, so it has no draw history.` }, { status: 404 });
+  }
+  const { vault, pool } = entry;
 
   try {
     const latest = await serverClient.getBlock({ blockTag: "latest" });

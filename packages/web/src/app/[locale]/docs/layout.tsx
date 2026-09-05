@@ -1,11 +1,20 @@
+import { setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { getDocsIndex } from "@/lib/docs/content";
 import { DocsShell } from "./DocsShell";
 import "./docs.css";
 
-export default async function DocsLayout({ children }: { children: ReactNode }) {
-  const { sections, search } = await getDocsIndex();
+export default async function DocsLayout({
+  children,
+  params,
+}: {
+  children: ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const { sections, search } = await getDocsIndex(locale);
 
   return (
     <main className="grain relative min-h-[100svh] bg-ink">

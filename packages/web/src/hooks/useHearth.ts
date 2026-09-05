@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { Address, Hex } from "viem";
 import { useAccount, useBalance, useReadContracts } from "wagmi";
 import { HEARTH_POOL_ABI, HEARTH_SOURCE_ABI, HEARTH_VAULT_ABI, CONFIDENTIAL_ASSET_ABI } from "@/lib/chain/abis";
-import { CHAIN_ID, HEARTH, MIN_ANONYMITY_SET } from "@/lib/chain/addresses";
+import { CHAIN_ID, MIN_ANONYMITY_SET } from "@/lib/chain/addresses";
+import { faucetAmount, underlyingDecimals, type Pool } from "@/lib/chain/pools";
+import { useCurrentPool } from "@/components/app/PoolProvider";
 import { useHydrated } from "./useHydrated";
 import { ERC20_ABI, REVIEWED_IMPLEMENTATION, TOKEN_GOVERNANCE_ABI } from "@/lib/chain/tokenAbi";
 import type { Activity } from "@/app/api/activity/route";
@@ -32,8 +34,25 @@ function handle(raw: unknown): Hex | null {
   return asHex;
 }
 
-/** Everything about the deployment that never changes, so it is read once and cached hard. */
+/** Everything about the pool on screen that never changes, so it is read once and cached hard. */
 export type HearthConfig = {
+  slug: string;
+  /** The confidential token's name and ticker, and the plain token underneath it. */
+  name: string;
+  symbol: string;
+  underlyingSymbol: string;
+  /** The scale every vault figure, prize and credit on this pool is counted in. */
+  decimals: number;
+  /**
+   * The scale the plain ERC-20 uses, worked out from the wrapper's rate rather than stored. The
+   * two differ wherever the underlying carries more decimals than the confidential token, which
+   * is every wrapper over an 18-decimal token.
+   */
+  underlyingDecimals: number;
+  /** True for a token Hearth cannot open a pool on. Every address below it is null. */
+  restricted: boolean;
+  /** Why the token is refused, in words a saver can act on. */
+  reason: string | null;
   vault: Address | null;
   pool: Address | null;
   source: Address | null;
@@ -42,14 +61,19 @@ export type HearthConfig = {
   periodLength: number;
   firstPeriodAt: number;
   maxPrincipal: bigint;
-  /** Underlying units per confidential unit. One on Sepolia, where both sides use 6 decimals. */
+  /** Underlying units per confidential unit. One wherever both sides use the same decimals. */
   rate: bigint;
+  /** What the faucet asks the mock underlying for: its per-call cap of a million whole tokens. */
+  faucet: bigint;
   maxBatch: bigint;
   ready: boolean;
 };
 
 export function useHearthConfig(): HearthConfig {
-  const vault = HEARTH.vault;
+  const entry: Pool = useCurrentPool();
+  const open = entry.status === "open" ? entry : null;
+  const vault = open?.vault ?? null;
+
   const { data } = useReadContracts({
     query: { enabled: vault !== null, staleTime: Number.POSITIVE_INFINITY, gcTime: Number.POSITIVE_INFINITY },
     contracts: vault
@@ -63,7 +87,10 @@ export function useHearthConfig(): HearthConfig {
       : [],
   });
 
-  const asset = value<Address | undefined>(data as never, 0, undefined) ?? null;
+  // The deployment file says which token this pool is on, and the vault is asked anyway. A pool
+  // that answered with a different asset would be one the file has gone stale on, and the chain
+  // is the one of the two that cannot be stale.
+  const asset = value<Address | undefined>(data as never, 0, undefined) ?? open?.asset ?? null;
 
   const { data: assetData } = useReadContracts({
     query: { enabled: asset !== null, staleTime: Number.POSITIVE_INFINITY, gcTime: Number.POSITIVE_INFINITY },
@@ -75,24 +102,35 @@ export function useHearthConfig(): HearthConfig {
       : [],
   });
 
-  const underlying = value<Address | undefined>(assetData as never, 0, undefined) ?? null;
+  const underlying = value<Address | undefined>(assetData as never, 0, undefined) ?? open?.underlying ?? null;
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    const decimals = open?.decimals ?? 6;
+    const rate = value<bigint>(assetData as never, 1, 1n);
+
+    return {
+      slug: entry.slug,
+      name: entry.name,
+      symbol: entry.symbol,
+      underlyingSymbol: entry.underlyingSymbol,
+      decimals,
+      underlyingDecimals: underlyingDecimals(decimals, rate),
+      restricted: entry.status === "restricted",
+      reason: entry.status === "restricted" ? entry.reason : null,
       vault,
-      pool: HEARTH.pool,
-      source: HEARTH.source,
+      pool: open?.pool ?? null,
+      source: open?.source ?? null,
       asset,
       underlying,
-      periodLength: Number(value<bigint>(data as never, 1, 3600n)),
-      firstPeriodAt: Number(value<bigint>(data as never, 2, 0n)),
+      periodLength: Number(value<bigint>(data as never, 1, BigInt(open?.periodLength ?? 3600))),
+      firstPeriodAt: Number(value<bigint>(data as never, 2, BigInt(open?.firstPeriodAt ?? 0))),
       maxPrincipal: value<bigint>(data as never, 3, 0n),
-      rate: value<bigint>(assetData as never, 1, 1n),
+      rate,
+      faucet: faucetAmount(decimals, rate),
       maxBatch: value<bigint>(data as never, 4, 4n),
       ready: vault !== null && asset !== null && underlying !== null,
-    }),
-    [vault, asset, underlying, data, assetData],
-  );
+    };
+  }, [entry, open, vault, asset, underlying, data, assetData]);
 }
 
 export type Tier = {
@@ -152,7 +190,11 @@ export type PoolState = {
 const UTILISATION_BPS = 5000n;
 
 export function usePoolState(): PoolState {
-  const { vault, pool, source } = HEARTH;
+  const entry = useCurrentPool();
+  const open = entry.status === "open" ? entry : null;
+  const vault = open?.vault ?? null;
+  const pool = open?.pool ?? null;
+  const source = open?.source ?? null;
   const enabled = vault !== null && pool !== null && source !== null;
 
   const hydrated = useHydrated();
@@ -267,7 +309,9 @@ export type SaverState = {
   connected: boolean;
   wrongNetwork: boolean;
   ethBalance: bigint;
-  usdc: bigint;
+  /** The plain ERC-20 sitting in the wallet, in the underlying's own decimals. */
+  underlyingBalance: bigint;
+  /** What the wrapper is allowed to take of it, in the same decimals. */
   allowance: bigint;
   confidentialHandle: Hex | null;
   isSaver: boolean;
@@ -316,7 +360,7 @@ export function useSaverState(config: HearthConfig): SaverState {
       connected,
       wrongNetwork: isConnected && chainId !== CHAIN_ID,
       ethBalance: eth?.value ?? 0n,
-      usdc: value<bigint>(data as never, 0, 0n),
+      underlyingBalance: value<bigint>(data as never, 0, 0n),
       allowance: value<bigint>(data as never, 1, 0n),
       confidentialHandle: handle(value<unknown>(data as never, 2, null)),
       isSaver: value<boolean>(data as never, 3, false),
@@ -379,7 +423,10 @@ export type DrawsState = {
 };
 
 export function useDraws(period: number): DrawsState {
-  const { vault, pool } = HEARTH;
+  const entry = useCurrentPool();
+  const open = entry.status === "open" ? entry : null;
+  const vault = open?.vault ?? null;
+  const pool = open?.pool ?? null;
   const { address } = useAccount();
   const me = (address ?? NOBODY) as Address;
 
@@ -486,7 +533,12 @@ export type TokenLayer = {
   /** Null while the read is in flight or the node refuses the storage read. */
   implementation: string | null;
   upgraded: boolean;
-  reachable: boolean;
+  /**
+   * True once the token's own reads have finished and answered with nothing. Every field above is
+   * a fallback in that state, and the privacy banners are drawn from those fields, so a screen
+   * that ignored this would quietly say "no observers, not paused" about a token it never read.
+   */
+  unread: boolean;
 };
 
 /**
@@ -499,7 +551,8 @@ export function useTokenLayer(config: HearthConfig): TokenLayer {
   const me = (address ?? NOBODY) as Address;
   const asset = config.asset;
 
-  const { data } = useReadContracts({
+  const hydrated = useHydrated();
+  const { data: liveData, isLoading } = useReadContracts({
     query: { enabled: asset !== null, refetchInterval: 60_000 },
     contracts: asset
       ? [
@@ -510,6 +563,10 @@ export function useTokenLayer(config: HearthConfig): TokenLayer {
         ]
       : [],
   });
+
+  // Same reason as the pool and saver batches: wagmi can answer from cache before React finishes
+  // hydrating, and the server had no answer at all.
+  const data = hydrated ? liveData : undefined;
 
   const [implementation, setImplementation] = useState<string | null>(null);
   useEffect(() => {
@@ -544,20 +601,25 @@ export function useTokenLayer(config: HearthConfig): TokenLayer {
       blocked: value<boolean>(data as never, 3, false),
       implementation,
       upgraded: implementation !== null && implementation !== REVIEWED_IMPLEMENTATION,
-      reachable: data !== undefined,
+      unread: hydrated && asset !== null && !isLoading && data === undefined,
     };
-  }, [data, implementation]);
+  }, [data, implementation, hydrated, asset, isLoading]);
 }
 
+/** The draw history for the pool on screen. The route reads the chain; this asks the route. */
 export function useActivity(): { activity: Activity | null; error: string | null } {
+  const { slug, status } = useCurrentPool();
   const [activity, setActivity] = useState<Activity | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // A token with no pool has no draws, so asking would only produce a refusal to report.
+    if (status !== "open") return;
+
     let cancelled = false;
     const load = async () => {
       try {
-        const response = await fetch("/api/activity", { cache: "no-store" });
+        const response = await fetch(`/api/activity?pool=${encodeURIComponent(slug)}`, { cache: "no-store" });
         const body = await response.json();
         if (cancelled) return;
         if (!response.ok) {
@@ -570,13 +632,26 @@ export function useActivity(): { activity: Activity | null; error: string | null
         if (!cancelled) setError("Could not reach this app's own server to read the draw history.");
       }
     };
+    // A tab nobody is looking at has nothing to update, and this poll reaches our own server,
+    // which reaches an archive node. It stops while the tab is hidden and catches up the moment
+    // it comes back, so what a reader sees on their return is fresh rather than half an hour old.
+    const tick = () => {
+      if (document.hidden) return;
+      void load();
+    };
+    const onVisible = () => {
+      if (!document.hidden) void load();
+    };
+
     void load();
-    const timer = setInterval(load, 30_000);
+    const timer = setInterval(tick, 30_000);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       cancelled = true;
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, []);
+  }, [slug, status]);
 
   return { activity, error };
 }

@@ -1,5 +1,10 @@
 import type { DrawView, SaverState } from "@/hooks/useHearth";
 
+/**
+ * What a draw's status means, named rather than written out. `badge` and `line` are keys in the
+ * `describe` namespace, so the card that draws them says them in the reader's language and this
+ * file stays a pure function of what the chain returned.
+ */
 export type DrawSummary = {
   badge: string;
   tone: "quiet" | "flame" | "good" | "bad";
@@ -9,96 +14,58 @@ export type DrawSummary = {
 };
 
 /**
- * What a draw's status means, in the words a saver needs rather than the enum the pool stores.
- *
  * The unread case comes first because every field under `known` is a fallback until the pool's
  * drawOf read lands, and a zero close deadline would otherwise print as "missed", which is a
  * statement about the chain that we cannot make.
  */
 export function describe(draw: DrawView, saver: SaverState, now: number): DrawSummary {
   if (!draw.known) {
-    return {
-      badge: "unread",
-      tone: "quiet",
-      line: "This draw has not come back from the chain yet, so nothing below it is a fact. The page keeps asking.",
-      waitingOnRun: false,
-    };
+    return { badge: "unreadBadge", tone: "quiet", line: "unread", waitingOnRun: false };
   }
 
   if (draw.status === "none") {
     if (now < draw.closeDeadline) {
-      return {
-        badge: "not closed",
-        tone: "quiet",
-        line: "The period is over and this draw is waiting to be closed. Anyone can close it, including you.",
-        waitingOnRun: true,
-      };
+      return { badge: "notClosedBadge", tone: "quiet", line: "notClosed", waitingOnRun: true };
     }
-    return {
-      badge: "missed",
-      tone: "bad",
-      line: "Nobody closed this draw before its deadline, so it pays nothing. Its liquidity was never moved and the next close offers it again.",
-      waitingOnRun: false,
-    };
+    return { badge: "missedBadge", tone: "bad", line: "missed", waitingOnRun: false };
   }
 
   if (draw.status === "closed") {
-    return {
-      badge: "awaiting the proof",
-      tone: "flame",
-      line: "Closed. The seed, the bracket, the non-empty flag and the harvest are published and waiting for Zama's key management service to sign their cleartexts. Anyone can fetch them and award the draw.",
-      waitingOnRun: true,
-    };
+    return { badge: "closedBadge", tone: "flame", line: "closed", waitingOnRun: true };
   }
 
   if (draw.status === "empty") {
-    return {
-      badge: "empty",
-      tone: "quiet",
-      line: "Nobody held a balance during this period, so there was nothing to weigh. The offered liquidity went straight back to the tiers.",
-      waitingOnRun: false,
-    };
+    return { badge: "emptyBadge", tone: "quiet", line: "empty", waitingOnRun: false };
   }
 
   if (draw.status === "skipped") {
-    return {
-      badge: "skipped",
-      tone: "quiet",
-      line: "The award landed after the draw's window, so no prize was paid. The liquidity went back to the tiers and the harvest was still booked.",
-      waitingOnRun: false,
-    };
+    return { badge: "skippedBadge", tone: "quiet", line: "skipped", waitingOnRun: false };
   }
 
   const evaluatedAll = draw.walkCount > 0 && draw.cursor >= draw.walkCount;
 
   if (!saver.connected) {
     return {
-      badge: "awarded",
+      badge: "awardedBadge",
       tone: "good",
-      line: evaluatedAll
-        ? "Awarded, and the walk has reached every saver in it. Connect a wallet to see where you stood in it."
-        : "Awarded. The evaluation walk is still running. Connect a wallet to see where you stand in it.",
+      line: evaluatedAll ? "awardedAllDisconnected" : "awardedDisconnected",
       waitingOnRun: false,
     };
   }
 
   if (!saver.isSaver) {
     return {
-      badge: "awarded",
+      badge: "awardedBadge",
       tone: "good",
-      line: evaluatedAll
-        ? "Awarded and every saver evaluated. This wallet was not in the pool at the time."
-        : "Awarded. The evaluation walk is still running, and this wallet is not in it.",
+      line: evaluatedAll ? "awardedAllOutside" : "awardedOutside",
       waitingOnRun: false,
     };
   }
 
   return {
-    badge: "awarded",
+    badge: "awardedBadge",
     tone: "good",
-    line: evaluatedAll
-      ? "Awarded, and the walk has reached every saver in it. Every result is fixed and written."
-      : "Awarded. From this moment every result is already decided: the thresholds are public and the weights can no longer change. Evaluation only writes them down.",
+    line: evaluatedAll ? "awardedAll" : "awarded",
     waitingOnRun: false,
   };
 }

@@ -1,8 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { Hex } from "viem";
 import { Spinner } from "@/components/ui";
-import { formatAmount } from "@/lib/format";
+import { useElapsed } from "@/hooks/useElapsed";
+import { useFormat } from "@/hooks/useFormat";
+import { useErrorText } from "@/hooks/useErrorText";
 import type { RevealRequest, RevealScope } from "@/hooks/useReveal";
 import { EyeIcon, EyeOffIcon } from "./icons";
 
@@ -28,7 +31,8 @@ export function SealedValue({
   requests,
   label,
   unit,
-  format = formatAmount,
+  decimals = 6,
+  format: formatValue,
   size = "base",
   eye = true,
   disabled = false,
@@ -41,12 +45,16 @@ export function SealedValue({
   /** What the number is, for a reader who cannot see the label beside it. */
   label: string;
   unit?: string;
+  /** The token's scale. Money figures pass their pool's; a weight passes its own format instead. */
+  decimals?: number;
   format?: (value: bigint) => string;
   size?: "base" | "large";
   /** False for the second and third figures in a card, so one eye serves the whole card. */
   eye?: boolean;
   disabled?: boolean;
 }) {
+  const t = useTranslations("console.reveal");
+  const format = useFormat();
   const { state, open } = scope;
   const value = scope.read(handle);
   const shown = open && value !== null;
@@ -60,11 +68,11 @@ export function SealedValue({
             className={`font-display tabular-nums leading-none tracking-tight text-parchment ${SIZES[size]}`}
             style={{ fontWeight: 620 }}
           >
-            {format(value)}
+            {formatValue ? formatValue(value) : format.amount(value, decimals)}
           </span>
         ) : (
           <>
-            <span className="sr-only">{label}, encrypted</span>
+            <span className="sr-only">{t("encrypted", { label })}</span>
             <span
               aria-hidden
               className={`font-display leading-none tracking-[0.14em] text-seal ${SIZES[size]}`}
@@ -106,11 +114,12 @@ export function RevealEye({
   disabled = false,
 }: {
   scope: RevealScope;
-  /** Said out loud after "Reveal" or "Hide", so it reads as a sentence: "Reveal your principal". */
+  /** Slotted into "Reveal {label}", so it reads as a sentence: "Reveal your principal". */
   label: string;
   onReveal: () => void;
   disabled?: boolean;
 }) {
+  const t = useTranslations("console.reveal");
   const working = scope.state.kind === "working";
 
   return (
@@ -118,14 +127,19 @@ export function RevealEye({
       type="button"
       onClick={() => (scope.open ? scope.hide() : onReveal())}
       disabled={disabled || working}
-      aria-label={scope.open ? `Hide ${label}` : `Reveal ${label}`}
-      title={scope.open ? "Seal it again" : "Reveal, one signature, no gas"}
-      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-flameInk disabled:opacity-50"
+      aria-label={scope.open ? t("hide", { label }) : t("reveal", { label })}
+      title={scope.open ? t("sealAgain") : t("cost")}
+      // The eye stays 28 pixels because it sits inline with a figure. The invisible square
+      // around it is 44, which is what a thumb needs.
+      className="relative inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted transition-colors after:absolute after:-inset-2 after:content-[''] hover:bg-hover hover:text-flameInk disabled:opacity-50"
     >
       {working ? <Spinner size={15} /> : scope.open ? <EyeOffIcon size={17} /> : <EyeIcon size={17} />}
     </button>
   );
 }
+
+/** Past this many seconds a reveal stops looking quick and starts looking stuck. */
+const PATIENCE = 5;
 
 /**
  * What the reveal is doing, or why it refused. Rendered by whichever figure owns the eye.
@@ -133,28 +147,49 @@ export function RevealEye({
  * The live region stays in the page while the scope is sealed, holding nothing, because a screen
  * reader only announces a region that was already there when its text changed. It carries no gap
  * of its own for the same reason: an empty one must take no space.
+ *
+ * Past five seconds the wait names itself and offers a way out. The relayer can spend the better
+ * part of a minute waiting for a freshly written value to become decryptable, and a spinner with
+ * no clock and no exit is indistinguishable from a hang.
  */
 export function RevealNote({ scope }: { scope: RevealScope }) {
+  const t = useTranslations("console.reveal");
+  const errorText = useErrorText();
   const { state } = scope;
+  const working = state.kind === "working";
+  const elapsed = useElapsed(working);
 
   const text =
     state.kind === "working"
-      ? state.note
+      ? t(state.note)
       : state.kind === "denied"
-        ? "Zama's relayer refused: this wallet is not the one these values belong to."
+        ? t("denied")
         : state.kind === "failed"
-          ? state.error.message
+          ? errorText(state.error)
           : null;
 
   return (
-    <span
-      role="status"
-      aria-live="polite"
-      className={`text-[12.5px] leading-snug ${state.kind === "working" ? "text-muted" : "text-bad"} ${
-        text === null ? "" : "mt-1"
-      }`}
-    >
-      {text}
+    <span className={text === null ? "" : "mt-1 inline-flex flex-col gap-1"}>
+      <span
+        role="status"
+        aria-live="polite"
+        className={`text-[12.5px] leading-snug ${working ? "text-muted" : "text-bad"}`}
+      >
+        {text}
+      </span>
+
+      {working && elapsed >= PATIENCE && (
+        <span className="inline-flex items-center gap-3 text-[12.5px] leading-snug">
+          <span className="tabular-nums text-muted">{t("elapsed", { seconds: elapsed })}</span>
+          <button
+            type="button"
+            onClick={scope.hide}
+            className="text-flameInk underline-offset-2 hover:underline"
+          >
+            {t("stopWaiting")}
+          </button>
+        </span>
+      )}
     </span>
   );
 }

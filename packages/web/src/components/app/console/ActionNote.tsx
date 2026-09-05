@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Spinner } from "@/components/ui";
 import { txUrl } from "@/lib/chain/addresses";
-import type { Phase } from "@/hooks/useActions";
+import type { ActionLabel, Phase } from "@/hooks/useActions";
+import { useErrorText } from "@/hooks/useErrorText";
 import { INLINE_LINK } from "./typography";
 
 export type NoteTone = "working" | "good" | "bad";
@@ -19,17 +21,13 @@ const TEXT: Record<NoteTone, string> = {
   bad: "text-bad",
 };
 
-const WORKING: Record<string, string> = {
-  encrypting: "encrypting and proving, about ten seconds",
-  signing: "confirm in your wallet",
-  mining: "waiting for the transaction to be mined",
-};
-
 export type ActionNoteProps = {
   tone: NoteTone;
   /** Null while nothing is happening, which leaves the region in the page with nothing in it. */
   text: string | null;
   hash?: string | null;
+  /** Set when a second control was pressed while this one was running. */
+  refused?: string | null;
   /** Passed only once the run has settled, because there is nothing to dismiss before that. */
   onDismiss?: () => void;
 };
@@ -37,13 +35,15 @@ export type ActionNoteProps = {
 /**
  * Where an action has got to, under the control that started it.
  *
- * The console draws its own rather than using the shared PhaseNote, which paints itself on the
- * landing page's translucent glass and would sit inside a console card as a second panel.
+ * The console draws its own note rather than reusing the landing page's, which paints itself on
+ * translucent glass and would sit inside a console card as a second panel.
  *
  * The live region is mounted whatever the action is doing, empty included, because a screen
  * reader only announces a region that was already in the page when its text changed.
  */
-export function ActionNote({ tone, text, hash, onDismiss }: ActionNoteProps) {
+export function ActionNote({ tone, text, hash, refused, onDismiss }: ActionNoteProps) {
+  const t = useTranslations("console.note");
+
   return (
     <div role="status" aria-live="polite" aria-atomic="true">
       {text !== null && (
@@ -55,6 +55,9 @@ export function ActionNote({ tone, text, hash, onDismiss }: ActionNoteProps) {
           )}
           <div className="min-w-0 flex-1">
             <p className={`text-[13px] leading-relaxed ${TEXT[tone]}`}>{text}</p>
+            {/* A refused press is not a failure of the thing that is running, so it sits under
+                that line rather than replacing it. */}
+            {refused && <p className="mt-1.5 text-[12.5px] leading-relaxed text-warn">{refused}</p>}
             {hash && (
               <a
                 href={txUrl(hash)}
@@ -62,7 +65,7 @@ export function ActionNote({ tone, text, hash, onDismiss }: ActionNoteProps) {
                 rel="noopener noreferrer"
                 className={`mt-1 inline-block text-[12.5px] ${INLINE_LINK}`}
               >
-                View the transaction on Etherscan
+                {t("explorer")}
               </a>
             )}
           </div>
@@ -72,7 +75,7 @@ export function ActionNote({ tone, text, hash, onDismiss }: ActionNoteProps) {
               onClick={onDismiss}
               className="shrink-0 text-[12.5px] text-muted transition-colors hover:text-parchment"
             >
-              Dismiss
+              {t("dismiss")}
             </button>
           )}
         </div>
@@ -86,20 +89,48 @@ export function ActionNote({ tone, text, hash, onDismiss }: ActionNoteProps) {
  *
  * Deposit, withdraw, draws and run all drive one useActions instance, so they all report through
  * this rather than each writing the stage names out again.
+ *
+ * It is a hook rather than a plain function because the stage names, the action name and the
+ * failure all come out of three different message namespaces, and every one of them belongs to
+ * the language the screen is being read in.
  */
-export function phaseNote(phase: Phase, label: string, onDismiss: () => void): ActionNoteProps {
-  if (phase.kind === "idle") {
-    return { tone: "working", text: null, hash: null };
-  }
-  if (phase.kind === "error") {
-    return { tone: "bad", text: phase.error.message, hash: null, onDismiss };
-  }
-  if (phase.kind === "done") {
-    return { tone: "good", text: `${label}: done`, hash: phase.hash, onDismiss };
-  }
-  return {
-    tone: "working",
-    text: phase.kind === "decrypting" ? `${label}: ${phase.note}` : `${label}: ${WORKING[phase.kind] ?? phase.kind}`,
-    hash: phase.kind === "mining" ? phase.hash : null,
+export function usePhaseNote(): (
+  phase: Phase,
+  label: ActionLabel | null,
+  onDismiss: () => void,
+  blockedBy?: ActionLabel | null,
+) => ActionNoteProps {
+  const note = useTranslations("console.note");
+  const actions = useTranslations("console.actions");
+  const errorText = useErrorText();
+
+  return (phase, label, onDismiss, blockedBy) => {
+    const refused = blockedBy ? note("busy", { label: actions(blockedBy.key, blockedBy.values) }) : null;
+
+    if (phase.kind === "idle" || label === null) {
+      return { tone: "working", text: null, hash: null };
+    }
+
+    const name = actions(label.key, label.values);
+
+    if (phase.kind === "error") {
+      return { tone: "bad", text: errorText(phase.error), hash: null, refused, onDismiss };
+    }
+    if (phase.kind === "done") {
+      return {
+        tone: "good",
+        text: note("line", { label: name, state: note("done") }),
+        hash: phase.hash,
+        refused,
+        onDismiss,
+      };
+    }
+    const state = phase.kind === "decrypting" ? actions(phase.note) : note(phase.kind);
+    return {
+      tone: "working",
+      text: note("line", { label: name, state }),
+      hash: phase.kind === "mining" ? phase.hash : null,
+      refused,
+    };
   };
 }

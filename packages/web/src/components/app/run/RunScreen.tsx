@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useAccount } from "wagmi";
 import {
   ActionNote,
@@ -9,10 +10,10 @@ import {
   ConnectPrompt,
   Stat,
   Unknown,
-  phaseNote,
+  usePhaseNote,
 } from "@/components/app/console";
-import { CHAIN_ID, EVALUATE_BATCH, TIER_NAMES } from "@/lib/chain/addresses";
-import { countdown } from "@/lib/format";
+import { CHAIN_ID, EVALUATE_BATCH, TIER_KEYS } from "@/lib/chain/addresses";
+import { useFormat } from "@/hooks/useFormat";
 import { useActions } from "@/hooks/useActions";
 import { useDraws, useHearthConfig, useNow, usePoolState } from "@/hooks/useHearth";
 import { StepRail, type Availability, type RunStep } from "./StepRail";
@@ -29,17 +30,11 @@ const DUE_ORDER: StepKey[] = ["finalize", "reconcile", "close", "award", "advanc
 
 const UNKNOWN: Availability = { kind: "unknown" };
 
-/** The period as a person would say it, so the keeper's cadence is read rather than typed here. */
-function periodLabel(seconds: number): string {
-  if (seconds % 3600 === 0) {
-    const hours = seconds / 3600;
-    return hours === 1 ? "one hour" : `${hours} hours`;
-  }
-  if (seconds % 60 === 0) return `${seconds / 60} minutes`;
-  return `${seconds} seconds`;
-}
-
 export function RunScreen() {
+  const t = useTranslations("run");
+  const tiersLower = useTranslations("dashboard.tiersLower");
+  const format = useFormat();
+  const phaseNote = usePhaseNote();
   const config = useHearthConfig();
   const pool = usePoolState();
   const { draws, refetch: refetchDraws } = useDraws(pool.period);
@@ -57,6 +52,21 @@ export function RunScreen() {
   const refresh = () => {
     pool.refetch();
     refetchDraws();
+  };
+
+  /**
+   * The period as a person would say it, so the keeper's cadence is read rather than typed here.
+   *
+   * Both the number and the figure to print go in: languages that inflect around a count need
+   * the number to pick the arm, and the figure itself is formatted here so its digits stay
+   * Western in every language.
+   */
+  const periodLabel = (seconds: number): string => {
+    const say = (key: string, value: number) =>
+      t(key, { count: value, shown: format.count(value) });
+    if (seconds % 3600 === 0) return say("who.periodHours", seconds / 3600);
+    if (seconds % 60 === 0) return say("who.periodMinutes", seconds / 60);
+    return say("who.periodSeconds", seconds);
   };
 
   // PoolKnown carries no flag for the pause reads or the published carries, so each of those
@@ -88,31 +98,34 @@ export function RunScreen() {
     !pool.known.closableDraw || !poolAnswered
       ? UNKNOWN
       : pool.poolPaused
-        ? { kind: "waiting", note: "The prize pool is paused, so no draw can be closed." }
+        ? { kind: "waiting", note: t("close.paused") }
         : closable > 0
           ? {
               kind: "ready",
               note:
                 pool.closeDeadline > 0
-                  ? `Draw ${closable} can be closed for another ${countdown(pool.closeDeadline, now)}. Past that it is skipped and its money stays in the tiers.`
-                  : `Draw ${closable} is waiting to be closed.`,
+                  ? t("close.readyDeadline", {
+                      drawId: closable,
+                      time: format.countdown(pool.closeDeadline, now),
+                    })
+                  : t("close.ready", { drawId: closable }),
             }
           : {
               kind: "waiting",
               note:
                 pool.known.period && pool.periodEndsAt > 0
-                  ? `No draw is waiting. Draw ${pool.period} becomes closable in ${countdown(pool.periodEndsAt, now)}, when this period ends.`
-                  : "No draw is waiting to be closed.",
+                  ? t("close.waitingClock", {
+                      drawId: pool.period,
+                      time: format.countdown(pool.periodEndsAt, now),
+                    })
+                  : t("close.waiting"),
             };
 
   const awardAvailability: Availability = !drawsAnswered
     ? UNKNOWN
     : awaiting
-      ? {
-          kind: "ready",
-          note: `Draw ${awaiting.drawId} is closed and waiting. The four proofs are fetched first, which takes a few seconds, and then your wallet asks you to sign.`,
-        }
-      : { kind: "waiting", note: "No closed draw is waiting for its award." };
+      ? { kind: "ready", note: t("award.ready", { drawId: awaiting.drawId }) }
+      : { kind: "waiting", note: t("award.waiting") };
 
   const walkTotal = evaluating
     ? evaluating.walkCount > 0
@@ -129,24 +142,32 @@ export function RunScreen() {
           kind: "ready",
           note:
             walkTotal !== null
-              ? `${evaluating.cursor} of ${walkTotal} savers done on draw ${evaluating.drawId}. Each call moves the shared walk on by up to ${String(EVALUATE_BATCH)}, which is what one transaction pays for.`
-              : `Draw ${evaluating.drawId} still has savers to cover. Each call moves the shared walk on by up to ${String(EVALUATE_BATCH)}, which is what one transaction pays for.`,
+              ? t("advance.readyCount", {
+                  cursor: format.count(evaluating.cursor),
+                  total: format.count(walkTotal),
+                  drawId: evaluating.drawId,
+                  batch: String(EVALUATE_BATCH),
+                })
+              : t("advance.ready", {
+                  drawId: evaluating.drawId,
+                  batch: String(EVALUATE_BATCH),
+                }),
         }
-      : { kind: "waiting", note: "No awarded draw has savers left inside its window." };
+      : { kind: "waiting", note: t("advance.waiting") };
 
   const finalizeAvailability: Availability = !drawsAnswered
     ? UNKNOWN
     : finalizable
-      ? {
-          kind: "ready",
-          note: `Draw ${finalizable.drawId} has finished its window, so nothing more can be credited from it.`,
-        }
+      ? { kind: "ready", note: t("finalize.ready", { drawId: finalizable.drawId }) }
       : {
           kind: "waiting",
           note:
             finalizeSoon && finalizeSoon.windowEndsAt > 0
-              ? `No window has ended. Draw ${finalizeSoon.drawId} can be finalized in ${countdown(finalizeSoon.windowEndsAt, now)}.`
-              : "No draw has finished its window without being finalized.",
+              ? t("finalize.waitingClock", {
+                  drawId: finalizeSoon.drawId,
+                  time: format.countdown(finalizeSoon.windowEndsAt, now),
+                })
+              : t("finalize.waiting"),
         };
 
   const reconcileAvailability: Availability = !vaultAnswered
@@ -155,12 +176,18 @@ export function RunScreen() {
       ? {
           kind: "ready",
           note:
-            `The ${TIER_NAMES[firstPending.index].toLowerCase()} tier published its carry at draw ${firstPending.tier.carryPublishedAt}.` +
+            t("reconcile.ready", {
+              tier: tiersLower(TIER_KEYS[firstPending.index]),
+              drawId: firstPending.tier.carryPublishedAt,
+            }) +
             (pendingTiers.length > 1
-              ? ` ${pendingTiers.length - 1} more ${pendingTiers.length === 2 ? "tier is" : "tiers are"} behind it, and each press does one.`
+              ? t("reconcile.readyMore", {
+                  count: pendingTiers.length - 1,
+                  shown: format.count(pendingTiers.length - 1),
+                })
               : ""),
         }
-      : { kind: "waiting", note: "No tier has a carry waiting to be booked back." };
+      : { kind: "waiting", note: t("reconcile.waiting") };
 
   const availabilities: Record<StepKey, Availability> = {
     close: closeAvailability,
@@ -173,83 +200,87 @@ export function RunScreen() {
   const dueKey = DUE_ORDER.find((key) => availabilities[key].kind === "ready") ?? null;
 
   const blocked = !isConnected
-    ? "Connect a wallet to send this."
+    ? t("blocked.connect")
     : chainId !== CHAIN_ID
-      ? "Your wallet is on another network."
+      ? t("blocked.network")
       : actions.busy
-        ? "Another transaction is already in flight."
+        ? t("blocked.busy")
         : null;
 
   const reason = (key: StepKey): string | null => {
     const availability = availabilities[key];
-    if (availability.kind === "unknown") return "Whether this step is available has not come back from the chain yet.";
+    if (availability.kind === "unknown") return t("unknownStep");
     if (availability.kind === "waiting") return availability.note;
     return blocked;
   };
 
-  const running = (label: string) => actions.busy && actions.label === label;
+  const running = (key: string) => actions.busy && actions.label?.key === key;
 
   const steps: RunStep[] = [
     {
       key: "close",
-      title: "Close",
-      headline: closable > 0 ? `Close draw ${closable}` : "Close a draw",
-      does: "Fixes each tier's prize size from the money sitting in it, moves that money into the draw, harvests the yield source, and draws an encrypted seed that nobody, us included, can read.",
+      title: t("close.title"),
+      headline: closable > 0 ? t("close.headline", { drawId: closable }) : t("close.headlineIdle"),
+      does: t("close.does"),
       availability: closeAvailability,
       due: dueKey === "close",
-      buttonLabel: "Close",
+      buttonLabel: t("close.button"),
       onRun: closable > 0 ? () => actions.closeDraw(closable, refresh) : undefined,
-      busy: running(`Close draw ${closable}`),
+      busy: running("close"),
       blocked: reason("close"),
     },
     {
       key: "award",
-      title: "Award",
-      headline: awaiting ? `Award draw ${awaiting.drawId}` : "Award a draw",
-      does: "Hands the pool the cleartexts of the four values the close published, with the key management service's signature over them. The pool checks that signature on chain, books the harvest into the tiers and opens the draw. Winners are decided at this moment.",
+      title: t("award.title"),
+      headline: awaiting ? t("award.headline", { drawId: awaiting.drawId }) : t("award.headlineIdle"),
+      does: t("award.does"),
       availability: awardAvailability,
       due: dueKey === "award",
-      buttonLabel: "Award",
+      buttonLabel: t("award.button"),
       onRun: awaiting ? () => actions.awardDraw(awaiting.drawId, refresh) : undefined,
-      busy: awaiting !== undefined && running(`Award draw ${awaiting.drawId}`),
+      busy: awaiting !== undefined && running("award"),
       blocked: reason("award"),
     },
     {
       key: "advance",
-      title: "Advance",
-      headline: evaluating ? `Advance draw ${evaluating.drawId}` : "Advance a draw",
-      does: "Walks the saver list from a point the seed decides and credits each saver what the published thresholds say they won. The caller chooses how many savers a call covers, never which ones, so sending this says nothing about who you are in the draw.",
+      title: t("advance.title"),
+      headline: evaluating
+        ? t("advance.headline", { drawId: evaluating.drawId })
+        : t("advance.headlineIdle"),
+      does: t("advance.does"),
       availability: advanceAvailability,
       due: dueKey === "advance",
-      buttonLabel: "Advance",
+      buttonLabel: t("advance.button"),
       onRun: evaluating ? () => actions.evaluate(evaluating.drawId, EVALUATE_BATCH, refresh) : undefined,
-      busy: evaluating !== undefined && running(`Advance draw ${evaluating.drawId}`),
+      busy: evaluating !== undefined && running("advance"),
       blocked: reason("advance"),
     },
     {
       key: "finalize",
-      title: "Finalize",
-      headline: finalizable ? `Finalize draw ${finalizable.drawId}` : "Finalize a draw",
-      does: "Folds every tier's unpaid remainder into that tier's encrypted carry once the window is over, and publishes the carry of each tier whose turn it is.",
+      title: t("finalize.title"),
+      headline: finalizable
+        ? t("finalize.headline", { drawId: finalizable.drawId })
+        : t("finalize.headlineIdle"),
+      does: t("finalize.does"),
       availability: finalizeAvailability,
       due: dueKey === "finalize",
-      buttonLabel: "Finalize",
+      buttonLabel: t("finalize.button"),
       onRun: finalizable ? () => actions.finalizeDraw(finalizable.drawId, refresh) : undefined,
-      busy: finalizable !== undefined && running(`Finalize draw ${finalizable.drawId}`),
+      busy: finalizable !== undefined && running("finalize"),
       blocked: reason("finalize"),
     },
     {
       key: "reconcile",
-      title: "Reconcile",
+      title: t("reconcile.title"),
       headline: firstPending
-        ? `Reconcile the ${TIER_NAMES[firstPending.index].toLowerCase()} tier`
-        : "Reconcile a tier",
-      does: "Fetches the cleartext of a published carry, proves it to the pool and books the money back into that tier's plaintext liquidity, so the next close can offer it again.",
+        ? t("reconcile.headline", { tier: tiersLower(TIER_KEYS[firstPending.index]) })
+        : t("reconcile.headlineIdle"),
+      does: t("reconcile.does"),
       availability: reconcileAvailability,
       due: dueKey === "reconcile",
-      buttonLabel: "Reconcile",
+      buttonLabel: t("reconcile.button"),
       onRun: firstPending ? () => actions.reconcile(firstPending.index, refresh) : undefined,
-      busy: firstPending !== undefined && running(`Reconcile tier ${firstPending.index}`),
+      busy: firstPending !== undefined && running("reconcile"),
       blocked: reason("reconcile"),
     },
   ];
@@ -261,97 +292,72 @@ export function RunScreen() {
 
   return (
     <div className="flex flex-col gap-4">
-      <ConnectPrompt note="The five steps below read from the chain either way, so the screen is worth looking at before you connect anything.">
-        Connect a wallet to send any of these. None of them needs a privilege the contracts
-        recognise, and none of them can be aimed at a particular saver.
-      </ConnectPrompt>
+      <ConnectPrompt note={t("connectNote")}>{t("connect")}</ConnectPrompt>
 
       <Card tone={dueStep ? "accent" : "plain"}>
         <Stat
-          label="What the pool is waiting for"
+          label={t("waitingFor")}
           accent={Boolean(dueStep)}
-          value={dueStep ? dueStep.headline : anyUnknown ? <Unknown /> : "Nothing"}
+          value={dueStep ? dueStep.headline : anyUnknown ? <Unknown /> : t("nothing")}
           note={
             dueStep ? (
               <>
                 {dueStep.availability.kind === "ready" ? dueStep.availability.note : null}
-                {orderingApplies && (
-                  <>
-                    {" "}
-                    A draw is ready to close as well. Finalizing and reconciling go first, because the
-                    money a carry frees is what the next close sizes its prizes from.
-                  </>
-                )}
+                {orderingApplies && t("ordering")}
               </>
             ) : anyUnknown ? (
-              "The reads that say which step is due have not come back from the chain yet."
+              t("unknownDue")
             ) : pool.known.period && pool.periodEndsAt > 0 ? (
-              `Either the keeper has kept up or this period is still running. It ends in ${countdown(pool.periodEndsAt, now)}.`
+              t("idleWithClock", { time: format.countdown(pool.periodEndsAt, now) })
             ) : (
-              "Either the keeper has kept up or this period is still running."
+              t("idle")
             )
           }
         />
       </Card>
 
-      <Card label="The five steps, in the order a draw needs them">
+      <Card label={t("railLabel")}>
         <StepRail steps={steps} />
       </Card>
 
-      <ActionNote {...phaseNote(actions.phase, actions.label, actions.reset)} />
+      <ActionNote {...phaseNote(actions.phase, actions.label, actions.reset, actions.blockedBy)} />
 
-      <Card label="Who sends these">
+      <Card label={t("who.label")}>
         <div className={`flex max-w-[68ch] flex-col gap-3 ${CARD_PROSE}`}>
           <p>
-            A keeper we run watches the pool and sends each of these as it comes due, so in an ordinary
-            hour there is nothing on this screen to do.
-            {config.ready
-              ? ` A period here is ${periodLabel(config.periodLength)}, so a full round of five goes out that often.`
-              : ""}{" "}
-            The keeper holds no privilege the contracts recognise. The two things it could have abused,
-            picking which savers get evaluated and picking the order prizes are paid in, are not choices
-            any caller has.
+            {t("who.oneStart")}
+            {config.ready ? t("who.onePeriod", { period: periodLabel(config.periodLength) }) : ""}
+            {t("who.oneEnd")}
           </p>
-          <p>
-            Award and reconcile are the two steps that need something from off chain. Your browser asks
-            Zama&apos;s relayer for the cleartext of what the pool published, four values for an award and
-            one for a reconcile, together with the key management service&apos;s signature over them. That
-            is the same call the keeper makes, and the contract checks the signature itself, so a browser
-            cannot lie about what it read.
-          </p>
-          <p>
-            If the keeper stops, nothing is lost. A draw that is never closed keeps its money in the tiers
-            and is offered again, and a carry that is never reconciled is folded back by the first close
-            after it lands. A stalled keeper costs the pool draws, not money, and any wallet here can start
-            them again.
-          </p>
+          <p>{t("who.two")}</p>
+          <p>{t("who.three")}</p>
         </div>
       </Card>
 
-      <Card label="Where the draws stand">
+      <Card label={t("stand.label")}>
         <div className="grid gap-6 sm:grid-cols-3">
           <Stat
-            label="Current period"
-            value={pool.known.period ? pool.period : <Unknown />}
+            label={t("stand.period")}
+            value={pool.known.period ? format.count(pool.period) : <Unknown />}
             note={
               pool.known.period && pool.periodEndsAt > 0
-                ? `Ends in ${countdown(pool.periodEndsAt, now)}`
+                ? t("stand.periodNote", { time: format.countdown(pool.periodEndsAt, now) })
                 : undefined
             }
           />
           <Stat
-            label="Savers"
-            value={pool.known.savers ? pool.savers : <Unknown />}
-            note="How far a full walk has to travel"
+            label={t("stand.savers")}
+            value={pool.known.savers ? format.count(pool.savers) : <Unknown />}
+            note={t("stand.saversNote")}
           />
           <Stat
-            label="Last closed draw"
+            label={t("stand.lastClosed")}
             value={
               pool.known.lastClosedDraw ? (
                 pool.lastClosedDraw === 0 ? (
-                  "none yet"
+                  t("stand.lastClosedNone")
                 ) : (
-                  pool.lastClosedDraw
+                  format.count(pool.lastClosedDraw)
                 )
               ) : (
                 <Unknown />
@@ -362,14 +368,18 @@ export function RunScreen() {
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
           <CardPill tone={!vaultAnswered ? "quiet" : pool.vaultPaused ? "warn" : "good"}>
-            {!vaultAnswered ? "vault state unknown" : pool.vaultPaused ? "vault paused" : "vault running"}
+            {!vaultAnswered
+              ? t("stand.vaultUnknown")
+              : pool.vaultPaused
+                ? t("stand.vaultPaused")
+                : t("stand.vaultRunning")}
           </CardPill>
           <CardPill tone={!poolAnswered ? "quiet" : pool.poolPaused ? "warn" : "good"}>
             {!poolAnswered
-              ? "prize pool state unknown"
+              ? t("stand.poolUnknown")
               : pool.poolPaused
-                ? "prize pool paused"
-                : "prize pool running"}
+                ? t("stand.poolPaused")
+                : t("stand.poolRunning")}
           </CardPill>
         </div>
       </Card>

@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { DocSection, SearchRow } from "@/lib/docs/types";
+import { sectionName } from "./sectionName";
 
 const MAX_RESULTS = 12;
 
@@ -33,6 +34,7 @@ export function DocsNav({
   onNavigate?: () => void;
   autoFocus?: boolean;
 }) {
+  const t = useTranslations("docs");
   const pathname = usePathname();
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -107,8 +109,8 @@ export function DocsNav({
             setCursor(0);
           }}
           onKeyDown={onKeyDown}
-          placeholder="Search the documentation"
-          aria-label="Search the documentation"
+          placeholder={t("search")}
+          aria-label={t("search")}
           className="docs-search-input"
         />
         {query.length === 0 && autoFocus && <span className="docs-search-key">/</span>}
@@ -116,7 +118,7 @@ export function DocsNav({
 
       {results ? (
         <div className="docs-results">
-          {results.length === 0 && <p className="docs-result-empty">Nothing matches that.</p>}
+          {results.length === 0 && <p className="docs-result-empty">{t("noResults")}</p>}
           {results.map((row, index) => (
             <Link
               key={`${row.href}-${index}`}
@@ -131,16 +133,18 @@ export function DocsNav({
             >
               <span className="docs-result-heading">{row.heading ?? row.title}</span>
               <span className="docs-result-page">
-                {row.heading ? `${row.section} · ${row.title}` : row.section}
+                {row.heading
+                  ? `${sectionName(t, row.section)} · ${row.title}`
+                  : sectionName(t, row.section)}
               </span>
             </Link>
           ))}
         </div>
       ) : (
-        <nav aria-label="Documentation">
+        <nav aria-label={t("nav")}>
           {sections.map((section) => (
             <div key={section.name} className="docs-nav-section">
-              <p className="docs-nav-label">{section.name}</p>
+              <p className="docs-nav-label">{sectionName(t, section.name)}</p>
               <div className="docs-nav-list">
                 {section.pages.map((page) => (
                   <Link

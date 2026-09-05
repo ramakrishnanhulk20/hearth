@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
+import { useAccount, useDisconnect, useSwitchChain } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { addressUrl, CHAIN_ID } from "@/lib/chain/addresses";
-import { wagmiConfig } from "@/lib/chain/wagmi";
+import { wagmiConfig, WALLET_DOWNLOAD_URL } from "@/lib/chain/wagmi";
 import { shortAddress } from "@/lib/format";
+import { useWallets } from "@/hooks/useWallets";
 import { ChainIcon, MoreIcon } from "./icons";
 
 /** The network Hearth is deployed on, named by wagmi rather than typed into this file. */
@@ -20,8 +22,9 @@ const NETWORK = wagmiConfig.chains.find((chain) => chain.id === CHAIN_ID)?.name 
  * upwards would open past the top of the window.
  */
 export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) {
+  const t = useTranslations("console.wallet");
   const { address, isConnected, chainId } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
+  const wallets = useWallets();
   const { disconnect } = useDisconnect();
   const { switchChain, isPending: switching } = useSwitchChain();
 
@@ -46,18 +49,33 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
     };
   }, [menuOpen]);
 
-  const injected = connectors.find((connector) => connector.type === "injected") ?? connectors[0];
   const wrongChain = isConnected && chainId !== CHAIN_ID;
 
   if (!isConnected) {
+    // No extension and no WalletConnect is a browser this app cannot be used from, and the rail
+    // is the wrong place for a paragraph about it. The link is the whole answer here, and the
+    // screens carry the sentence.
+    if (!wallets.primary) {
+      return (
+        <a
+          href={WALLET_DOWNLOAD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full rounded-lg border border-hairlineStrong px-3 py-2.5 text-center text-[13.5px] font-medium text-parchment transition-colors hover:bg-hover"
+        >
+          {t("getWallet")}
+        </a>
+      );
+    }
+
     return (
       <button
         type="button"
-        onClick={() => injected && connect({ connector: injected })}
-        disabled={isPending || !injected}
+        onClick={() => wallets.primary && wallets.connect(wallets.primary)}
+        disabled={wallets.isPending}
         className="w-full rounded-lg bg-flameFill px-3 py-2.5 text-[13.5px] font-semibold text-onFlame transition-all duration-200 hover:shadow-ember disabled:opacity-50"
       >
-        {isPending ? "Connecting" : injected ? "Connect wallet" : "No wallet found"}
+        {wallets.isPending ? t("connecting") : wallets.primaryIsScan ? t("scan") : t("connect")}
       </button>
     );
   }
@@ -70,7 +88,7 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
         disabled={switching}
         className="w-full rounded-lg border border-bad/45 bg-bad/[0.08] px-3 py-2.5 text-[13px] font-medium text-bad transition-colors hover:bg-bad/[0.14]"
       >
-        {switching ? "Switching" : `Switch to ${NETWORK}`}
+        {switching ? t("switching") : t("switchTo", { network: NETWORK })}
       </button>
     );
   }
@@ -87,8 +105,10 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
           onClick={() => setMenuOpen((was) => !was)}
           aria-expanded={menuOpen}
           aria-haspopup="menu"
-          aria-label="Wallet options"
-          className="-mr-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-parchment"
+          aria-label={t("options")}
+          // The dot stays 24 pixels because the chip is 44 tall and a bigger square would crowd
+          // the address beside it. The invisible square around it is what a thumb actually hits.
+          className="relative -me-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-muted transition-colors after:absolute after:-inset-[10px] after:content-[''] hover:bg-hover hover:text-parchment"
         >
           <MoreIcon size={16} />
         </button>
@@ -99,7 +119,7 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
       {menuOpen && (
         <div
           role="menu"
-          className={`panel-glare absolute right-0 z-50 w-full min-w-[180px] overflow-hidden rounded-xl border border-hairlineStrong bg-surface py-1 shadow-popover ${
+          className={`panel-glare absolute end-0 z-50 w-full min-w-[180px] overflow-hidden rounded-xl border border-hairlineStrong bg-surface py-1 shadow-popover ${
             placement === "down" ? "top-[calc(100%+6px)]" : "bottom-[calc(100%+6px)]"
           }`}
         >
@@ -112,7 +132,7 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
               onClick={() => setMenuOpen(false)}
               className="block px-3 py-2 text-[13px] text-muted transition-colors hover:bg-hover hover:text-parchment"
             >
-              View on Etherscan
+              {t("explorer")}
             </a>
           )}
           <button
@@ -122,9 +142,9 @@ export function WalletChip({ placement = "up" }: { placement?: "up" | "down" }) 
               setMenuOpen(false);
               disconnect();
             }}
-            className="block w-full px-3 py-2 text-left text-[13px] text-muted transition-colors hover:bg-hover hover:text-parchment"
+            className="block w-full px-3 py-2 text-start text-[13px] text-muted transition-colors hover:bg-hover hover:text-parchment"
           >
-            Disconnect
+            {t("disconnect")}
           </button>
         </div>
       )}

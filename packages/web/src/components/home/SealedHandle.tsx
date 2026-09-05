@@ -1,8 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { Address, Hex } from "viem";
+import { useElapsed } from "@/hooks/useElapsed";
 import { shortAddress } from "@/lib/format";
+
+/** Past this many seconds the wait stops being quick and gets a number on it. */
+const PATIENCE = 5;
 
 type Outcome =
   | { state: "idle" }
@@ -19,7 +24,9 @@ type Outcome =
  * than any sentence about privacy this page could write.
  */
 export function SealedHandle({ handle, owner }: { handle: Hex | null; owner: Address | null }) {
+  const t = useTranslations("landing.sealed");
   const [outcome, setOutcome] = useState<Outcome>({ state: "idle" });
+  const elapsed = useElapsed(outcome.state === "asking");
 
   async function attempt() {
     if (!handle) return;
@@ -42,11 +49,8 @@ export function SealedHandle({ handle, owner }: { handle: Hex | null; owner: Add
   if (!handle) {
     return (
       <div className="glass p-5 sm:p-6">
-        <p className="text-[11px] uppercase tracking-label text-faint">A saver&apos;s balance</p>
-        <p className="mt-4 text-[14px] leading-relaxed text-muted">
-          Nobody has deposited yet. As soon as somebody does, their encrypted balance appears here and
-          you can try to open it.
-        </p>
+        <p className="text-[11px] uppercase tracking-label text-faint">{t("heading")}</p>
+        <p className="mt-4 text-[14px] leading-relaxed text-muted">{t("empty")}</p>
       </div>
     );
   }
@@ -54,7 +58,7 @@ export function SealedHandle({ handle, owner }: { handle: Hex | null; owner: Add
   return (
     <div className="glass p-5 sm:p-6">
       <div className="flex items-baseline justify-between gap-4">
-        <p className="text-[11px] uppercase tracking-label text-faint">A saver&apos;s balance</p>
+        <p className="text-[11px] uppercase tracking-label text-faint">{t("heading")}</p>
         {owner && <span className="font-sans text-[11px] tabular-nums text-faint">{shortAddress(owner)}</span>}
       </div>
 
@@ -70,53 +74,54 @@ export function SealedHandle({ handle, owner }: { handle: Hex | null; owner: Add
             onClick={attempt}
             className="w-full rounded-lg border border-hairline px-4 py-3 text-[14px] text-parchment transition-colors duration-200 hover:border-flame/50 hover:bg-flame/[0.06] hover:text-flame"
           >
-            Try to open it
+            {t("try")}
           </button>
         )}
 
         {outcome.state === "asking" && (
-          <p className="flex items-center gap-2.5 py-3 text-[14px] text-muted">
-            <span className="block h-1.5 w-1.5 animate-pulse rounded-full bg-flame" />
-            Asking Zama&apos;s key management service
-          </p>
+          <div className="py-3">
+            <p className="flex items-center gap-2.5 text-[14px] text-muted">
+              <span className="block h-1.5 w-1.5 animate-pulse rounded-full bg-flame" />
+              {t("asking")}
+            </p>
+            {/* An honest label on a wait nobody can predict. The key management service usually
+                answers in a second or two and occasionally takes far longer, and a pulsing dot
+                says the same thing at both. */}
+            <p className="mt-1.5 ps-4 text-[12.5px] tabular-nums text-faint">
+              {elapsed >= PATIENCE ? t("askingLong", { seconds: elapsed }) : t("askingWait")}
+            </p>
+          </div>
         )}
 
         {outcome.state === "refused" && (
           <div>
-            <p className="text-[14px] font-medium text-flame">Refused.</p>
-            <p className="mt-2 border-l-2 border-flame/40 pl-3 text-[12.5px] leading-relaxed text-muted">
+            <p className="text-[14px] font-medium text-flame">{t("refused")}</p>
+            <p className="mt-2 border-s-2 border-flame/40 ps-3 text-[12.5px] leading-relaxed text-muted">
               {outcome.detail}
             </p>
-            <p className="mt-2.5 text-[13px] leading-relaxed text-faint">
-              That came from Zama&apos;s key management service, not from this page. Only the wallet
-              holding this balance can read it, and no administrator can override that.
-            </p>
+            <p className="mt-2.5 text-[13px] leading-relaxed text-faint">{t("refusedNote")}</p>
           </div>
         )}
 
         {outcome.state === "unreachable" && (
           <div>
-            <p className="text-[14px] text-parchment">Could not reach the decryption service.</p>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-faint">
-              That is a network problem rather than a refusal, so it proves nothing either way. Worth
-              trying again in a moment.
-            </p>
+            <p className="text-[14px] text-parchment">{t("unreachable")}</p>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-faint">{t("unreachableNote")}</p>
             <button
               type="button"
               onClick={attempt}
               className="mt-3 w-full rounded-lg border border-hairline px-4 py-3 text-[14px] text-parchment transition-colors duration-200 hover:border-flame/50 hover:bg-flame/[0.06] hover:text-flame"
             >
-              Try again
+              {t("again")}
             </button>
           </div>
         )}
 
         {outcome.state === "leaked" && (
           <div>
-            <p className="text-[14px] font-medium text-bad">It decrypted, and it should not have.</p>
+            <p className="text-[14px] font-medium text-bad">{t("leaked")}</p>
             <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-              The service returned {outcome.value}. Please tell us, because this is the one result this
-              product is built to make impossible.
+              {t("leakedNote", { value: outcome.value })}
             </p>
           </div>
         )}

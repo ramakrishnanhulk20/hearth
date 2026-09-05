@@ -20,6 +20,7 @@ export type DocEntry = {
   href: string;
   title: string;
   summary: string;
+  /** A key in the `docs.sections` namespace, or the folder's own name where none is set. */
   section: string;
   kind: DocKind;
 };
@@ -32,6 +33,8 @@ export type DocSection = {
 export type DocPage = DocEntry & {
   html: string;
   headings: Heading[];
+  /** True when this language has no file for the page yet, so the English one is being shown. */
+  englishFallback: boolean;
 };
 
 /** One hit the search box can offer: a page, or a heading inside a page. */

@@ -1,11 +1,11 @@
 /**
  * The two ABIs no artifact in this repo can supply.
  *
- * ERC20_ABI is the public underlying. `mint` is on Zama's USDCMock and has no owner check; a
- * production USDC has no such function, which is why it is grouped here rather than treated as
+ * ERC20_ABI is the public underlying. `mint` is on Zama's mock tokens and has no owner check; a
+ * production token has no such function, which is why it is grouped here rather than treated as
  * standard.
  *
- * TOKEN_GOVERNANCE_ABI is what Zama's cUSDCMock adds on top of the OpenZeppelin wrapper: an
+ * TOKEN_GOVERNANCE_ABI is what Zama's confidential wrappers add on top of the OpenZeppelin one: an
  * observer list whose members can user-decrypt every handle the token holds rights on, a pause,
  * and a deny list. Reading the current state is stronger than watching for the events that set
  * it, because state is true whatever block range the app happens to look at. Verified against the

@@ -1,0 +1,964 @@
+{
+  "chrome": {
+    "home": "Hearth, beranda",
+    "nav": {
+      "pool": "Pool",
+      "verify": "Verifikasi",
+      "how": "Cara kerjanya",
+      "docs": "Dokumen"
+    },
+    "menu": {
+      "open": "Buka menu",
+      "close": "Tutup menu",
+      "label": "Menu situs"
+    },
+    "footer": {
+      "tagline": "Tabungan berhadiah rahasia tanpa kehilangan modal",
+      "zama": "Dibangun di atas Zama Protocol",
+      "disclaimer": "Sebuah demonstrasi di jaringan uji Sepolia. Tokennya adalah token uji tanpa nilai, imbal hasilnya adalah saldo yang didanai sponsor dan bukan strategi sungguhan, dan tidak ada di sini yang merupakan nasihat keuangan."
+    },
+    "language": {
+      "trigger": "Bahasa: {name}. Ubah",
+      "list": "Pilih bahasa",
+      "heading": "Bahasa",
+      "note": "Diterjemahkan dengan tangan. Halaman yang belum kami capai tampil dalam bahasa Inggris.",
+      "current": "saat ini"
+    }
+  },
+  "landing": {
+    "scrollCue": "Gulir",
+    "noWebgl": "Peramban ini tidak bisa menjalankan adegan 3D-nya, jadi ceritanya disajikan sebagai halaman biasa. Tidak ada bagian lain di situs ini yang membutuhkannya.",
+    "header": {
+      "how": "Cara kerjanya",
+      "open": "Buka pool"
+    },
+    "story": {
+      "one": {
+        "kicker": "Tabungan berhadiah yang rahasia",
+        "title": "Satu perapian. Menyala hanya untuk orang yang menjaganya."
+      },
+      "two": {
+        "kicker": "Anda menyetor",
+        "title": "Anda mengisinya, dan jumlahnya tersegel rapat.",
+        "body": "Jumlahnya dienkripsi di peramban Anda dan tetap menjadi ciphertext di on-chain. Mulai dari sini angka itu milik Anda sendiri, dan daftar kontrol akses milik Zama-lah yang menegakkannya."
+      },
+      "three": {
+        "title": "Dan ia satu dari banyak.",
+        "body": "Saldo tiap penabung menyala dan tak satu pun bisa dibaca dari luar. Pool juga tidak pernah mempublikasikan total persisnya, hanya pangkat dua yang menaunginya, karena total persisnya akan membocorkan setoran satu-satunya orang yang bergerak."
+      },
+      "four": {
+        "kicker": "Undiannya",
+        "title": "Seed yang tak bisa dilihat siapa pun, ditarik di dalam koprosesor.",
+        "body": "Besar hadiah ditetapkan sebelum seed itu ada, jadi tidak ada yang bisa membaca sebuah seed, menghitung bahwa dia menang, lalu memperbesar kemenangannya. Ketika periodenya berakhir, seed dipublikasikan dengan tanda tangan yang diperiksa kontrak di on-chain."
+      },
+      "five": {
+        "kicker": "Kemenangannya",
+        "title": "Satu perapian menyala lebih terang.",
+        "body": "Peluang sebanding dengan saldo yang dipegang sepanjang periode, jadi setoran yang dibuat tepat sebelum undian hanya memperoleh porsi periode selama ia ada di sana. Hadiahnya mendarat di saldo kemenangan terenkripsi, dan sebuah klaim adalah penarikan biasa."
+      }
+    },
+    "close": {
+      "kicker": "Coba sendiri",
+      "title": "Menabung dalam gelap.",
+      "body": "Setor token uji rahasia di Sepolia, jalankan sendiri sebuah undian, dan periksa bahwa hanya Anda yang bisa membaca saldo Anda sendiri. Biayanya tidak lebih dari sedikit ETH uji.",
+      "open": "Buka pool",
+      "grandPrize": "hadiah utama <figure>{amount} {symbol}</figure> di undian berikutnya",
+      "saversPeriod": "{count, plural, other {{shown} penabung}} · periode {period}",
+      "offline": "Sepolia sedang tidak menjawab, jadi angka live-nya tidak ada. Pool tidak terpengaruh: ia hidup di on-chain, bukan di sini."
+    },
+    "shelf": {
+      "heading": "Pilih token Anda",
+      "unread": "belum terbaca",
+      "note": "Hadiah utama tiap pool saat ini, dibaca dari rantai. Vault yang sama, undian yang sama, privasi yang sama, satu untuk tiap token rahasia."
+    },
+    "sealed": {
+      "heading": "Saldo seorang penabung",
+      "empty": "Belum ada yang menyetor. Begitu ada yang menyetor, saldo terenkripsinya muncul di sini dan Anda bisa mencoba membukanya.",
+      "try": "Coba buka",
+      "asking": "Meminta ke layanan pengelolaan kunci Zama",
+      "askingWait": "Biasanya beberapa detik.",
+      "askingLong": "{seconds} dtk sejauh ini. Ini jaringan live, jadi kadang butuh waktu.",
+      "refused": "Ditolak.",
+      "refusedNote": "Penolakan itu datang dari layanan pengelolaan kunci Zama, bukan dari halaman ini. Hanya dompet pemegang saldo ini yang bisa membacanya, dan tidak ada administrator yang bisa membatalkan aturan itu.",
+      "unreachable": "Tidak bisa menghubungi layanan dekripsi.",
+      "unreachableNote": "Itu masalah jaringan, bukan penolakan, jadi ia tidak membuktikan apa pun. Layak dicoba lagi sebentar lagi.",
+      "again": "Coba lagi",
+      "leaked": "Nilainya terdekripsi, dan itu seharusnya tidak terjadi.",
+      "leakedNote": "Layanannya mengembalikan {value}. Tolong beri tahu kami, karena inilah satu-satunya hasil yang dibangun produk ini untuk dibuat mustahil."
+    },
+    "footer": {
+      "tagline": "Hearth, tabungan berhadiah rahasia tanpa kehilangan modal",
+      "how": "Cara kerjanya",
+      "verify": "Verifikasi sebuah undian",
+      "docs": "Dokumen",
+      "zama": "Dibangun di atas Zama Protocol"
+    }
+  },
+  "how": {
+    "kicker": "Panduan dua menit",
+    "title": "Cara kerja Hearth",
+    "lede": "Menabung bersama, memenangkan hadiah yang dibayar dari imbal hasil, dan tidak pernah kehilangan setoran Anda. Uangnya tak terlihat. Keadilannya terlihat.",
+    "steps": {
+      "one": {
+        "title": "Shield, lalu setor",
+        "body": "Ubah token uji biasa menjadi kembaran rahasianya, lalu masukkan sebagiannya ke pool untuk token itu. Shield bersifat publik dan setoran tidak, dan justru itulah alasannya ada dua tombol: melakukan keduanya dalam satu klik mempublikasikan besar setoran Anda kepada siapa pun yang membaca rantai."
+      },
+      "two": {
+        "title": "Peluang Anda adalah saldo rata-rata Anda",
+        "body": "Bukan saldo Anda pada saat undian, melainkan saldo Anda sepanjang periode. Setor lima menit sebelum periode berakhir dan Anda mendapat seperdua belas peluang dibanding memegang jumlah yang sama sepanjang periode. Itulah yang mencegah seseorang mengibaskan saldo besar tepat sebelum tiap undian lalu mengambil hadiahnya."
+      },
+      "three": {
+        "title": "Undian ditutup, dan sebuah seed ditarik",
+        "body": "Besar hadiah ditetapkan lebih dulu, sebelum ada angka acak sama sekali. Lalu seed dihasilkan sebagai ciphertext di dalam koprosesor Zama, jadi tidak ada yang melihatnya saat ia ditarik dan tidak ada lemparan kedua. Ketika periodenya usai, seed dipublikasikan dengan tanda tangan yang diperiksa kontrak di on-chain."
+      },
+      "four": {
+        "title": "Hasil semua orang sudah ditentukan",
+        "body": "Sejak seed terverifikasi, ambang batasnya adalah angka publik yang bisa dihitung ulang siapa saja dan bobotnya tidak bisa berubah lagi. Evaluasi sekadar menuliskan apa yang sudah benar, menelusuri daftar penabung dari titik yang dipilih seed. Tidak ada yang memilih siapa yang dievaluasi atau dalam urutan apa."
+      },
+      "five": {
+        "title": "Anda melihatnya, dan hanya Anda",
+        "body": "Tekan Buka lalu tanda tangani sebuah pesan. Tanda tangan itu membuktikan kepada relayer Zama bahwa Anda menguasai alamat tersebut, dan ia mengembalikan teks terang dari nilai-nilai yang diizinkan kontrak untuk Anda: dana pokok Anda, kemenangan Anda, bobot Anda dan kredit Anda untuk tiap undian. Tidak ada biaya gas dan tidak ada yang ditulis."
+      },
+      "six": {
+        "title": "Ambil kapan saja",
+        "body": "Penarikan dibayar dari kemenangan lebih dulu, lalu dana pokok, dalam satu transfer rahasia yang dibatasi di on-chain sebesar yang Anda pegang. Sebuah klaim adalah panggilan yang sama dengan bentuk yang sama seperti penarikan lain mana pun, jadi tidak ada jenis transaksi yang menyebut nama pemenang."
+      }
+    },
+    "private": {
+      "title": "Terenkripsi, hanya bisa dibaca Anda",
+      "note": "nilai-nilai Anda sendiri",
+      "one": "Dana pokok Anda",
+      "two": "Kemenangan Anda yang belum diklaim",
+      "three": "Saldo tertimbang waktu Anda di tiap undian",
+      "four": "Berapa yang dibayarkan tiap undian kepada Anda, jadi apakah Anda menang"
+    },
+    "public": {
+      "title": "Publik, supaya pool bisa dipercaya",
+      "note": "siapa pun bisa memeriksa",
+      "one": "Seed tiap undian, dan tanda tangannya",
+      "two": "Bracket yang menjadi pembanding undian",
+      "three": "Besar hadiah dan likuiditas tiap tier",
+      "four": "Berapa hadiah yang dibayar sebuah tier, satu undian kemudian",
+      "five": "Alamat mana yang menyetor, dan kapan"
+    },
+    "leaks": {
+      "title": "Disebut dengan jujur: apa yang bocor",
+      "oneLead": "Shield dan unshield bersifat publik.",
+      "oneBody": "Mengubah token publik menjadi token rahasia menurut definisinya adalah tindakan publik. Kalau seseorang bisa mematok saldo Anda, biasanya dengan mengamati shield publik yang diikuti setoran berukuran sama, maka hasil Anda di tiap undian sejak saat itu menjadi aritmetika publik, karena ambang batas bersifat publik menurut desain.",
+      "twoLead": "Di bawah tiga penabung, bracket nyaris bersifat pribadi.",
+      "twoBody": "Dengan satu penabung, ia adalah bobot penabung itu dalam rentang faktor dua. Aplikasi mengatakannya di halaman ketika hal itu terjadi.",
+      "threeLead": "Tiap tier mempublikasikan berapa hadiah yang dibayarnya,",
+      "threeBody": "satu undian kemudian, tidak pernah kepada siapa. Itu langkah yang sama yang mengembalikan uang tak termenangkan ke pot publik, dan itulah yang membuat jackpot menumpuk di tempat Anda bisa menontonnya. Ia perlahan mempersempit saldo yang tidak pernah bergerak.",
+      "fourLead": "Tokennya milik Zama, dan ia bisa ditingkatkan.",
+      "fourBody": "Pemiliknya bisa menunjuk pengamat yang mampu mendekripsi tiap jumlah yang berpindah lewat token itu, secara surut. Buku besar Hearth sendiri tidak bisa mereka baca, dan aplikasi menampilkan spanduk kalau seorang pengamat pernah ditunjuk."
+    },
+    "closing": "Anda bisa menyaksikan seluruh undian berlangsung dan tetap tidak bisa menyebut siapa yang menang. Itulah intinya, dan itulah satu hal yang hanya dimungkinkan oleh enkripsi homomorfik penuh.",
+    "open": "Buka pool",
+    "check": "Periksa sendiri sebuah undian"
+  },
+  "console": {
+    "shell": {
+      "openMenu": "Buka menu konsol",
+      "closeMenu": "Tutup menu konsol",
+      "menuLabel": "Menu konsol",
+      "loading": "Menyalakan perapian"
+    },
+    "sidebar": {
+      "nav": "Konsol",
+      "dashboard": "Dasbor",
+      "deposit": "Setor",
+      "withdraw": "Tarik",
+      "draws": "Undian saya",
+      "run": "Jalankan undian",
+      "anyone": "Siapa saja",
+      "anyoneTitle": "Tiap langkah sebuah undian bisa dipanggil dompet mana pun",
+      "docs": "Dokumen",
+      "verify": "Verifikasi"
+    },
+    "wallet": {
+      "connect": "Hubungkan dompet",
+      "connecting": "Menghubungkan",
+      "scan": "Pindai dengan ponsel",
+      "getWallet": "Dapatkan dompet",
+      "noneLead": "Peramban ini tidak punya dompet di dalamnya. ",
+      "noneLink": "Pilih satu dari ethereum.org",
+      "noneTail": ", tambahkan sedikit ETH uji Sepolia, lalu kembali. Semua di layar ini gratis dibaca tanpa dompet.",
+      "switching": "Memindahkan",
+      "switchTo": "Pindah ke {network}",
+      "options": "Opsi dompet",
+      "explorer": "Lihat di Etherscan",
+      "disconnect": "Putuskan"
+    },
+    "connect": {
+      "prompt": "Hubungkan dompet dulu."
+    },
+    "note": {
+      "encrypting": "mengenkripsi dan membuktikan, sekitar sepuluh detik",
+      "signing": "konfirmasi di dompet Anda",
+      "mining": "menunggu transaksinya ditambang",
+      "done": "selesai",
+      "busy": "Tekanan itu diabaikan: {label} sedang berjalan dan satu dompet menandatangani satu transaksi pada satu waktu. Tunggu baris di atas selesai.",
+      "line": "{label}: {state}",
+      "explorer": "Lihat transaksinya di Etherscan",
+      "dismiss": "Tutup"
+    },
+    "actions": {
+      "mint": "Ambil token uji",
+      "approve": "Setujui wrapper",
+      "wrap": "Shield menjadi token rahasia",
+      "deposit": "Setor",
+      "withdraw": "Tarik",
+      "withdrawAll": "Tarik semuanya",
+      "close": "Tutup undian {drawId}",
+      "award": "Tetapkan hadiah undian {drawId}",
+      "advance": "Majukan undian {drawId}",
+      "finalize": "Finalisasi undian {drawId}",
+      "reconcile": "Rekonsiliasi tier {tier}",
+      "askingSeed": "meminta seed ke layanan pengelolaan kunci Zama",
+      "seedSealing": "seed sudah dipublikasikan tetapi belum bisa didekripsi, meminta lagi",
+      "askingCarry": "meminta likuiditas tier yang belum terbayar"
+    },
+    "reveal": {
+      "signing": "tanda tangani permintaannya di dompet Anda, tanpa biaya gas",
+      "asking": "mendekripsi di peramban Anda",
+      "sealing": "nilainya baru saja ditulis dan belum bisa didekripsi, meminta lagi",
+      "newKey": "satu share KMS gagal, mencoba lagi dengan kunci baru",
+      "elapsed": "{seconds} dtk sejauh ini, biasanya beberapa detik",
+      "stopWaiting": "Berhenti menunggu",
+      "denied": "Relayer Zama menolak: dompet ini bukan pemilik nilai-nilai tersebut.",
+      "reveal": "Buka {label}",
+      "hide": "Sembunyikan {label}",
+      "sealAgain": "Segel lagi",
+      "cost": "Buka, satu tanda tangan, tanpa gas",
+      "encrypted": "{label}, terenkripsi",
+      "encryptedAlone": "terenkripsi",
+      "partial": "Relayer menjawab tanpa nilai ini, jadi totalnya tidak diketahui."
+    },
+    "unknown": {
+      "word": "tidak diketahui",
+      "default": "Ini belum kembali dari rantai."
+    },
+    "amount": {
+      "max": "Maks",
+      "allOfIt": "Semuanya",
+      "maxFor": "{max}: {name}",
+      "shape": "Hanya angka. Tanda desimal boleh titik atau koma, paling banyak satu, dan tanpa pemisah ribuan.",
+      "precision": "{symbol} punya {decimals} desimal, jadi apa pun yang lebih halus dari {smallest} tidak bisa dikirim.",
+      "zero": "Masukkan jumlah di atas nol."
+    },
+    "banners": {
+      "wrongNetwork": "Dompet Anda ada di jaringan yang salah.",
+      "wrongNetworkBody": "Hearth di-deploy di Ethereum Sepolia. Tidak ada di halaman ini yang membaca atau menulis sampai dompet Anda berada di sana.",
+      "switch": "Pindah ke Sepolia",
+      "denied": "Alamat ini ada di daftar tolak milik token.",
+      "deniedBody": "{symbol} menolak tiap transfer masuk atau keluar dari alamat ini, jadi setoran dan penarikan akan gagal. Itu pengaturan pemilik token, bukan pengaturan kami.",
+      "tokenPaused": "Token {symbol} sedang dijeda.",
+      "tokenPausedBody": "Shield, transfer dan unshield semuanya berhenti di lapisan token. Kontrak Hearth sendiri tidak terpengaruh, tetapi tidak ada yang bisa bergerak sampai Zama melepas jedanya.",
+      "vaultPaused": "Vault sedang dijeda.",
+      "vaultPausedBody": "Setoran baru dan penutupan undian berhenti. Penarikan, evaluasi, penetapan hadiah dan finalisasi tidak pernah bisa dijeda, jadi uang Anda tetap bisa Anda ambil.",
+      "poolPaused": "Prize pool sedang dijeda.",
+      "poolPausedBody": "Undian tidak bisa ditutup. Penetapan hadiah, evaluasi, rekonsiliasi dan penarikan tetap berjalan.",
+      "observers": "Pemilik token telah menunjuk {count, plural, other {{shown} pengamat}}.",
+      "observersBody": "Seorang pengamat di {symbol} bisa mendekripsi tiap jumlah yang berpindah lewat token itu, termasuk setoran dan pembayaran, dan secara surut. Buku besar Hearth sendiri, yaitu dana pokok, kemenangan, bobot dan kredit Anda, tidak bisa mereka baca.",
+      "upgraded": "Token {symbol} telah ditingkatkan.",
+      "upgradedBody": "Ia kini menjalankan implementasi {implementation}, yang bukan implementasi yang sumbernya kami baca baris per baris. Perilakunya terhadap handle milik Hearth bisa saja berubah.",
+      "unknownImplementation": "yang tidak dikenal",
+      "thinSet": "Baru {count, plural, other {{shown} penabung}} di pool ini saat ini.",
+      "thinSetBody": "Di bawah {minimum} penabung, bracket yang dipublikasikan mendekati informasi pribadi: dengan satu penabung ia adalah bobot penabung itu dalam rentang faktor dua, dan dengan dua orang masing-masing bisa membatasi yang lain. Jumlahnya tetap terenkripsi bagaimanapun, tetapi privasinya tipis sampai lebih banyak orang bergabung.",
+      "noKeeper": "Tidak ada undian yang dimajukan dalam beberapa jam terakhir.",
+      "noKeeperBody": "Tiap langkah sebuah undian bisa dipanggil siapa saja. Jalankan undian, di bilah samping, menawarkan kelimanya. Keeper yang macet membuat undian hilang, tidak pernah uang.",
+      "keeperLate": "Langkah undian terakhir mendarat {ago}, lebih lama daripada satu periode.",
+      "keeperLateFrom": "Dikirim oleh {address}. ",
+      "keeperLateBody": "Tidak ada yang harus menunggu keeper: Jalankan undian menutup, menetapkan hadiah, mengevaluasi, memfinalisasi dan merekonsiliasi dari dompet Anda sendiri.",
+      "keeperLink": "Lihat di Etherscan",
+      "tokenUnread": "Status token itu sendiri tidak bisa dibaca.",
+      "tokenUnreadBody": "Hearth memeriksa {symbol} untuk pengamat, untuk jeda dan untuk pemblokiran atas alamat Anda pada tiap kunjungan, dan pembacaan itu tidak menjawab. Tidak ada yang berubah di on-chain, hanya pandangan halaman ini terhadapnya. Artinya peringatan token di layar ini hilang karena tidak ada yang terbaca, bukan karena tidak ada yang perlu dilaporkan.",
+      "historyDown": "Riwayat undian tidak tersedia.",
+      "historyDownBody": "{detail} Tiap angka di layar-layarnya sendiri tetap datang langsung dari rantai."
+    },
+    "unsupported": {
+      "subtitle": "Hearth tidak bisa membuka pool di token ini, jadi tidak ada yang perlu ditandatangani di sini.",
+      "pill": "tidak didukung",
+      "notDeployed": "belum di-deploy",
+      "whyLabel": "Mengapa token ini tidak punya pool",
+      "whyOne": "Mint token ini dibatasi untuk penerbitnya, jadi Hearth tidak bisa membuka pool di atasnya. Pilih pool lain.",
+      "whyTwo": "Sebuah pool Hearth butuh penabung yang bisa memperoleh token biasanya lebih dulu lalu meng-shield-nya sendiri. {name} diterbitkan Zama di Sepolia dan token dasarnya hanya bisa dicetak alamat yang men-deploy-nya, jadi tidak ada selain penerbit yang bisa meng-shield ke dalamnya dan vault di atasnya akan kosong. Itu pengaturan token, bukan batasan kontrak di sini: vault menerima token rahasia mana pun yang mengikuti standarnya.",
+      "reason": "Alasan",
+      "confidentialToken": "Token rahasia",
+      "underlying": "Token dasar",
+      "publishedBy": "Diterbitkan oleh",
+      "zamaList": "Alamat Sepolia milik Zama",
+      "pickLabel": "Pilih pool yang terbuka",
+      "pickNote": "Tiap pool di atas adalah vault yang sama, undian yang sama dan privasi yang sama, di atas token rahasia yang berbeda. Posisi Anda di satu pool tidak mengatakan apa pun tentang posisi Anda di pool lain."
+    }
+  },
+  "picker": {
+    "trigger": "Menabung dalam {symbol}. Ganti token",
+    "list": "Pilih token",
+    "saveIn": "Menabung dalam",
+    "grandPrize": "Hadiah utama",
+    "unread": "belum terbaca",
+    "savingPool": "pool tabungan",
+    "notSupported": "tidak didukung",
+    "zamaList": "Daftar Zama",
+    "reasons": {
+      "restrictedMint": "pencetakan dibatasi untuk penerbit saja"
+    }
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "subtitle": "Apa yang Anda pegang, apa yang sedang dilakukan pool, dan satu hal yang perlu dilakukan berikutnya.",
+    "next": "Berikutnya",
+    "position": {
+      "label": "Yang Anda pegang",
+      "open": "terbuka di peramban ini",
+      "sealed": "tersegel di on-chain",
+      "principal": "Dana pokok",
+      "principalNote": "Yang sudah Anda tabung. Peluang Anda ditimbang oleh angka ini sepanjang periode.",
+      "principalSpoken": "dana pokok Anda",
+      "winnings": "Kemenangan belum diklaim",
+      "winningsNote": "Uang hadiah yang dikreditkan kepada Anda dan belum ditarik. Ia tidak menghasilkan peluang tersendiri.",
+      "winningsSpoken": "kemenangan Anda yang belum diklaim",
+      "outside": "Dompet ini sedang tidak berada di pool. Setor, dan kedua angkanya mulai terisi.",
+      "footConnect": "Hubungkan dompet untuk membuka milik Anda sendiri. Tidak ada orang lain yang bisa, dan daftar akses Zama di on-chain yang menegakkannya, bukan janji halaman ini.",
+      "footNetwork": "Membuka angka-angka ini perlu tanda tangan di Sepolia. Pindahkan dompetnya dan ikon matanya berfungsi lagi.",
+      "footOpen": "Hanya peramban ini yang melihat angka-angka itu. Tidak ada yang ditulis ke rantai dan tidak ada yang dikirim ke server.",
+      "footSealed": "Ikon mata meminta relayer Zama mendekripsi nilai yang dimiliki alamat ini. Satu tanda tangan, tanpa gas, tanpa transaksi."
+    },
+    "pool": {
+      "label": "Pool saat ini",
+      "pill": "publik untuk semua orang",
+      "savers": "Penabung",
+      "saversUnknown": "Jumlah penabung belum kembali dari rantai.",
+      "liquidity": "Likuiditas hadiah",
+      "liquidityUnknown": "Satu dari tiga saldo tier belum kembali, dan jumlah sebagian bukanlah isi pool.",
+      "period": "Periode",
+      "periodUnknown": "Periode saat ini belum kembali dari rantai.",
+      "endsIn": "Berakhir dalam",
+      "endsUnknown": "Akhir periode ini belum kembali dari rantai.",
+      "tier": "Tier",
+      "chance": "Peluang",
+      "prizeEach": "Tiap hadiah ({symbol})",
+      "prizeCount": "{count, plural, other {{shown} hadiah per undian}}",
+      "prizeCountUnknown": "jumlah hadiah tidak diketahui",
+      "carryWaiting": "carry dari undian {drawId} menunggu",
+      "oddsUnknown": "Peluang tier ini belum kembali dari rantai.",
+      "nextPrizeUnknown": "Hadiah berikutnya tier ini belum kembali dari rantai.",
+      "footOne": "Tiap hadiah adalah setengah dari likuiditas tier-nya dibagi jumlah hadiah, ditetapkan pada penutupan sebelum seed acak ada. Yang tidak dimenangkan siapa pun dipublikasikan satu undian kemudian dan ditawarkan lagi.",
+      "footBracket": "Peluang diundi terhadap bracket <bracket>2^{bits}</bracket>, yang dipublikasikan bersama undiannya.",
+      "footBracketUnknown": "Bracket yang menjadi pembanding peluang itu belum kembali dari rantai."
+    },
+    "tiers": {
+      "grand": "Utama",
+      "mid": "Menengah",
+      "frequent": "Sering"
+    },
+    "tiersLower": {
+      "grand": "utama",
+      "mid": "menengah",
+      "frequent": "sering"
+    }
+  },
+  "nextStep": {
+    "connectTitle": "Hubungkan dompet untuk memulai.",
+    "connectDetail": "Hearth berjalan di Ethereum Sepolia. Anda butuh sedikit ETH uji untuk gas, dan {underlyingSymbol} uji tinggal satu klik begitu dompet terhubung.",
+    "connectCta": "Hubungkan dompet",
+    "switchTitle": "Dompet ini mengarah ke jaringan lain.",
+    "switchDetail": "Angka pool di halaman ini dibaca dari Sepolia bagaimanapun juga. Tidak ada yang bisa ditandatangani atau dikirim sampai dompetnya juga di sana.",
+    "switchCta": "Pindah ke Sepolia",
+    "readingTitle": "Membaca dompet ini dari rantai.",
+    "readingDetail": "Langkah berikutnya muncul begitu pembacaannya mendarat. Menyebut satu langkah dari saldo yang belum tiba akan mengarahkan Anda ke layar yang salah.",
+    "faucetTitle": "Ambil sedikit {underlyingSymbol} uji.",
+    "faucetDetail": "Mock {underlyingSymbol} punya mint terbuka yang dibatasi satu juta token per panggilan. Ia tidak bernilai, jadi ambil lebih banyak dari yang Anda butuhkan.",
+    "faucetCta": "Ambil {underlyingSymbol} uji",
+    "shieldTitle": "Shield {underlyingSymbol} Anda.",
+    "shieldDetail": "Shield mengubah {underlyingSymbol} biasa menjadi {symbol}. Langkah itu publik menurut sifatnya, dan itulah hal terakhir tentang uang ini yang bisa dibaca siapa pun.",
+    "shieldCta": "Shield {underlyingSymbol}",
+    "depositTitle": "Masukkan {symbol} Anda ke pool.",
+    "depositDetail": "Jumlahnya dienkripsi di peramban Anda sebelum dikirim, jadi vault mengkreditkan angka yang tidak bisa dibacanya. Peluang Anda mengikuti apa yang Anda pegang.",
+    "depositCta": "Setor",
+    "claimTitle": "Ada kemenangan yang menunggu Anda.",
+    "claimDetail": "Klaim adalah penarikan biasa sebesar jumlah itu. Di on-chain bentuknya sama dengan penarikan lain mana pun, dan itulah yang mencegahnya menyebut nama pemenang.",
+    "claimCta": "Klaim kemenangan Anda",
+    "readingDrawsTitle": "Membaca undian-undian terakhir.",
+    "readingDrawsDetail": "Langkah berikutnya muncul begitu semuanya mendarat. Menyebut satu langkah dari daftar undian yang belum tiba akan mengarahkan Anda ke layar yang salah.",
+    "resultTitle": "Undian {drawId} sudah menuliskan hasil Anda.",
+    "resultDetail": "Penelusurannya mencapai dompet ini, jadi menang atau tidak sudah ditentukan dan tersimpan. Ia tetap tersegel sampai Anda membukanya, yang butuh satu tanda tangan dan tanpa gas.",
+    "resultCta": "Buka undian {drawId}",
+    "settledTitle": "Tidak ada yang perlu dilakukan sekarang.",
+    "settledDetail": "Setoran Anda duduk di pool dan memperoleh peluang tiap detik ia berada di sana. Undian berikutnya ditutup pada akhir periode, dan siapa saja bisa menutupnya.",
+    "settledCta": "Tambah setoran Anda",
+    "noWallet": "Dompet tidak ditemukan"
+  },
+  "deposit": {
+    "title": "Setor",
+    "subtitle": "Ambil {underlying} uji, shield menjadi {confidential}, lalu masukkan ke vault.",
+    "connect": "Hubungkan dompet di Sepolia untuk menyetor. Tiga langkah di bawah adalah yang dibutuhkan untuk memasukkan uang ke pool, dan layar ini membuka langkah mana pun yang sedang jadi giliran dompet Anda.",
+    "connectNote": "Anda butuh sedikit ETH Sepolia untuk gas. {underlying} uji tinggal satu klik begitu Anda terhubung.",
+    "lowGas": "Dompet ini hampir tidak memegang ETH Sepolia, jadi transaksinya akan gagal sebelum terkirim. Faucet Sepolia mana pun bisa mengisinya: faucet Google Cloud Web3, faucet Alchemy atau Chainlink. Sepersepuluh ETH sudah jauh lebih dari cukup.",
+    "inWallet": "Di dompet Anda",
+    "inWalletSpoken": "saldo {symbol} Anda",
+    "inWalletUnknown": "Di dompet Anda: ",
+    "faucet": {
+      "title": "Ambil {underlying} uji",
+      "held": "{amount} {underlying} di dompet Anda.",
+      "heldSummary": "{amount} {underlying} di dompet Anda. ",
+      "more": "Ambil sejuta lagi",
+      "unread": "Saldo dompet Anda belum kembali dari rantai.",
+      "button": "Ambil {underlying} uji",
+      "note": "Mock {underlying} punya mint terbuka yang dibatasi satu juta token per panggilan. Ia tidak bernilai, jadi mintalah lebih banyak dari yang Anda butuhkan."
+    },
+    "shield": {
+      "title": "Shield {underlying} Anda",
+      "summary": "Ter-shield. Saldonya tersegel, jadi hanya Anda yang bisa membaca isinya. ",
+      "more": "Shield lagi",
+      "body": "Shield mengubah {underlying} biasa menjadi {confidential}, dan itu bersifat publik. Kontrak wrapper memancarkan jumlah teks terangnya, transfer ERC-20 membawanya lagi, dan tidak ada cara menghindarinya: mengubah token publik menjadi token rahasia menurut definisinya adalah tindakan publik.",
+      "youShield": "Anda shield",
+      "fieldName": "Jumlah {underlying} yang di-shield",
+      "balance": "{amount} {underlying} di dompet Anda",
+      "tooMuch": "Anda memegang {amount} {underlying}. Minta lebih sedikit, atau cetak lebih banyak dulu.",
+      "youReceive": "Anda menerima",
+      "rateUnknown": "Rate wrapper belum kembali dari rantai.",
+      "rateOne": "Wrapper-nya satu banding satu, jadi Anda menerima persis sebanyak yang Anda shield.",
+      "rateOther": "Wrapper mengambil {rate} unit {underlying} untuk satu unit {confidential}.",
+      "why": "Inilah alasan shield dan setor adalah dua tombol, bukan satu. Shield angka bulat, pada waktu yang Anda pilih, lalu setor sebagiannya kemudian. Siapa pun yang bisa mematok saldo Anda bisa menghitung apakah Anda menang di tiap undian sejak saat itu, karena ambang batas bersifat publik menurut desain.",
+      "approve": "Setujui wrapper",
+      "button": "Shield",
+      "approveNote": "Satu persetujuan, dan tiap shield sesudahnya adalah satu transaksi. Ia mengizinkan kontrak wrapper {confidential} menarik {underlying} dari dompet ini dan tidak menjangkau apa pun lain milik Anda. {underlying} adalah token uji Sepolia dari tombol faucet di atas, tanpa nilai di jaringan sungguhan mana pun. Tombol shield mengambil alih begitu persetujuannya ditambang.",
+      "waiting": "Saldo Anda belum kembali dari rantai, jadi langkah ini ditahan sampai saldonya tiba.",
+      "skip": "Setor saja yang sudah Anda pegang"
+    },
+    "vault": {
+      "title": "Setor ke vault",
+      "body": "Jumlahnya dienkripsi di peramban Anda dengan bukti tanpa pengetahuan, lalu dikirim dalam satu transaksi. Vault mengkreditkan persis yang menurut token benar-benar berpindah, jadi meminta lebih banyak dari yang Anda pegang tidak memindahkan apa pun alih-alih gagal dengan keras. Buka ikon mata di bawah kalau Anda tidak yakin punya berapa.",
+      "closedNotAwarded": "Sebuah undian sedang tertutup dan menunggu penetapan hadiahnya. Menyetor tetap diizinkan; uang ini dihitung sejak saat ini, ditimbang oleh bagian periode berjalan yang masih tersisa.",
+      "youDeposit": "Anda menyetor",
+      "fieldName": "Jumlah {confidential} yang disetor",
+      "cap": "Vault membatasi satu penabung pada {amount} {confidential}, jadi ini akan ditolak dan dikembalikan di dalam transaksi yang sama.",
+      "tooMuch": "Anda memegang {amount} {confidential}. Meminta lebih banyak tidak ditolak di on-chain: token memindahkan yang Anda punya, yang di sini berarti tidak ada, dan transaksinya tetap berhasil.",
+      "sealedNote": "Saldo Anda tersegel, jadi layar ini tidak bisa memeriksa jumlahnya terhadap saldo itu. Setoran di atas yang Anda pegang tidak memindahkan apa pun dan tetap menghabiskan satu transaksi. Buka ikon mata di atas dan kolomnya diperiksa untuk Anda.",
+      "button": "Setor",
+      "paused": "Vault sedang dijeda, jadi setoran ditolak. Penarikan tetap berfungsi."
+    }
+  },
+  "withdraw": {
+    "title": "Tarik",
+    "subtitle": "Dua tahap: keluar dari vault, lalu kembali menjadi {underlying}. Dana pokok tidak pernah terkunci, termasuk di tengah sebuah undian.",
+    "connect": "Hubungkan dompet untuk menarik. Tahap satu mengeluarkan dana pokok dan kemenangan dari vault, tahap dua mengubah {confidential} kembali menjadi {underlying}.",
+    "connectNote": "Tidak ada di sini yang pernah terkunci. Dana pokok kembali utuh kapan pun Anda minta, termasuk di tengah sebuah undian.",
+    "tabs": {
+      "label": "Tahap penarikan",
+      "vault": "Keluar dari vault",
+      "unshield": "Kembali ke token biasa",
+      "unfinished": "ada yang belum selesai"
+    },
+    "pending": {
+      "title": "Sebuah unshield dikirim dan tidak pernah selesai.",
+      "body": "Token rahasianya sudah dibakar dan {underlying}-nya menunggu di wrapper. Mengirim transaksi kedua akan melepaskannya. ",
+      "link": "Lihat unshield-nya",
+      "finish": "Selesaikan unshield"
+    },
+    "vault": {
+      "reading": "Membaca yang dipegang dompet ini di vault.",
+      "unavailable": "Pembacaan untuk dompet ini tidak kembali, jadi layar ini tidak bisa mengatakan apa yang dipegang vault untuk Anda. Muat ulang begitu jaringannya menjawab.",
+      "neverDepositedLead": "Dompet ini belum pernah menyetor, jadi vault tidak memegang apa pun untuknya dan penarikan akan ditolak di on-chain. ",
+      "depositFirst": "Setor dulu",
+      "neverDepositedTail": ", atau pakai tahap dua kalau Anda memegang {confidential} yang ingin Anda ambil kembali sebagai {underlying}.",
+      "youWithdraw": "Anda menarik",
+      "fieldName": "Jumlah yang ditarik dari vault",
+      "inVault": "Di vault",
+      "inVaultSpoken": "saldo vault Anda",
+      "clamped": "Itu lebih banyak dari yang Anda pegang. Vault mengirim {amount} yang Anda pegang dan berhenti di situ.",
+      "revealNote": "Buka nilainya untuk membatasi kolom ini dan melihat pembagiannya. Melewatinya aman: vault membatasi jumlahnya di on-chain bagaimanapun juga.",
+      "youReceive": "Anda menerima",
+      "receiveBalance": "Di dompet Anda, masih terenkripsi. Tahap dua mengubahnya kembali menjadi {underlying}.",
+      "split": "{winnings} dari itu keluar dari kemenangan dan {principal} dari dana pokok, dalam satu transfer yang terlihat sama bagaimanapun juga.",
+      "splitSealed": "Buka saldo vault Anda untuk melihat pembagiannya antara kemenangan dan dana pokok.",
+      "button": "Tarik",
+      "everything": "Tarik semuanya",
+      "everythingNote": "Menarik semuanya tidak butuh pembukaan nilai dan tidak butuh masukan terenkripsi. Vault menambahkan dana pokok Anda ke kemenangan Anda di on-chain lalu mengirim totalnya, jadi baik Anda maupun halaman ini tidak perlu tahu angkanya lebih dulu.",
+      "howLabel": "Bagaimana sebuah penarikan dibayar",
+      "howOne": "Kemenangan lebih dulu, lalu dana pokok, dalam satu transfer rahasia. Tidak ada apa pun tentang transfer itu yang menyebut ia terdiri dari bagian yang mana.",
+      "howTwo": "Jumlahnya dibatasi di on-chain pada yang terkecil di antara yang Anda minta, yang Anda pegang, dan yang dipegang vault, karena transfer rahasia memindahkan seluruh jumlahnya atau tidak sama sekali. Permintaan yang terlalu besar mengirim semua yang Anda pegang alih-alih gagal, dan itu juga alasan tidak ada yang bisa menemukan saldo Anda dengan meminta terlalu banyak lalu mengamati apa yang terjadi.",
+      "howWindow": "Sebuah jendela undian sedang terbuka. Menarik diizinkan dan tidak mengubah peluang yang sudah ditetapkan untuk Anda. Hadiah apa pun dari undian itu mendarat di kemenangan Anda, untuk penarikan berikutnya.",
+      "howThree": "Dana pokok tidak pernah terkunci. Tidak ada masa pemberitahuan, tidak ada denda dan tidak ada menunggu undian berakhir."
+    },
+    "unshield": {
+      "youUnshield": "Anda unshield",
+      "fieldName": "Jumlah {confidential} yang di-unshield",
+      "inWallet": "Di dompet Anda",
+      "inWalletSpoken": "saldo {confidential} Anda",
+      "tooMuch": "Anda memegang {amount} {confidential}. Meminta lebih banyak tidak ditolak di on-chain: ia menghabiskan kedua transaksi dan tidak memindahkan apa pun.",
+      "revealNote": "Buka nilainya untuk membatasi kolom ini. Unshield melebihi yang Anda pegang tidak ditolak, ia hanya tidak memindahkan apa pun.",
+      "youReceive": "Anda menerima",
+      "receiveBalance": "{underlying} di dompet Anda, bisa dibelanjakan di mana saja.",
+      "receiveNote": "Angka ini masuk ke rantai dalam bentuk terang. Transaksi pertama dari dua transaksi itulah yang mempublikasikannya.",
+      "button": "Unshield",
+      "unfinished": "Unshield baru harus menunggu sampai yang di atas selesai. Hanya satu yang diingat pada satu waktu, dan memulai yang lain akan meninggalkan yang pertama dengan tokennya terbakar dan tidak ada yang melepaskannya.",
+      "unwrapping": "Unshield: dompet Anda meminta dua kali. Pertama tanda tangan supaya wrapper bisa membaca saldo rahasia Anda, yang tanpa biaya gas, lalu transaksinya sendiri.",
+      "waiting": "Unshield terkirim. Menunggu protokol Zama mempublikasikan teks terang dan buktinya.",
+      "finalizing": "Memfinalisasi: konfirmasi transaksi kedua untuk melepaskan {underlying}.",
+      "done": "Ter-unshield. Saldo {underlying} Anda naik {amount}, dibaca dari rantai setelah transaksi kedua.",
+      "doneUnchecked": "Ter-unshield. Kedua transaksi mendarat, tetapi saldo {underlying} tidak bisa dibaca kembali, jadi layar ini tidak bisa mengatakan berapa yang tiba. Periksa dompet Anda.",
+      "nothingMoved": "Tidak ada yang berpindah. Kedua transaksi mendarat dan saldo {underlying} Anda persis seperti sebelumnya, yang terjadi ketika jumlahnya di atas saldo rahasia Anda: wrapper tidak melepaskan apa pun alih-alih menolak. Buka saldonya dengan ikon mata di atas lalu pakai Semuanya.",
+      "whyLabel": "Mengapa ini butuh dua transaksi",
+      "whyOne": "Wrapper membakar jumlah terenkripsinya dan mempublikasikannya lebih dulu, lalu melepaskan token biasanya begitu protokol Zama menghasilkan teks terang dan buktinya. Itu dua panggilan terpisah, dan yang kedua bisa dikirim belakangan kalau Anda menutup tab di antara keduanya.",
+      "whyTwo": "Dompet Anda juga meminta tanda tangan sebelum transaksi pertama, karena wrapper membaca saldo rahasia Anda untuk memeriksa jumlahnya. Permintaan itu adalah tanda tangan, bukan transaksi, dan tanpa biaya gas.",
+      "whyThree": "Perlu diketahui sebelum Anda mengosongkannya: shield masuk dan unshield keluar sepenuhnya, dan selisih antara dua total publik itu adalah batas bawah atas semua yang pernah Anda menangkan. Unshield dalam angka bulat, atau tinggalkan saldo rahasia yang tetap ada."
+    }
+  },
+  "draws": {
+    "title": "Undian saya",
+    "subtitle": "Tiap undian terakhir, angka hadiah publiknya, serta bobot dan hadiah Anda sendiri di balik ikon mata.",
+    "count": "{count} terbaru",
+    "reading": "membaca",
+    "emptyReading": "Membaca pool.",
+    "emptyNone": "Belum ada periode yang selesai, jadi belum ada undian untuk ditampilkan. Yang pertama muncul begitu periode 1 usai.",
+    "emptyFailed": "Undian tidak bisa dibaca barusan. Semuanya ada di rantai bagaimanapun juga; halaman ini mencoba lagi dengan sendirinya.",
+    "card": {
+      "label": "Undian {drawId}",
+      "claimNote": "Klaim adalah penarikan biasa sebesar persis jumlah itu. Di on-chain bentuknya sama dengan penarikan lain mana pun, dan itulah yang mencegah sebuah klaim menyebut nama pemenang.",
+      "claim": "Klaim {amount} {symbol}",
+      "advanceNote": "Memajukan menggeser penelusuran bersama sampai {batch} penabung, dalam urutan yang ditetapkan seed undian ini. Ia tidak bisa diarahkan kepada Anda, jadi menekannya tidak mengatakan apa pun tentang apakah Anda menang.",
+      "advance": "Majukan undiannya",
+      "waitingLead": "Langkah ini terbuka untuk siapa saja. ",
+      "waitingLink": "Jalankan undian",
+      "waitingTail": " memilikinya.",
+      "periodEnded": "Periode {drawId} berakhir",
+      "periodEndedUnknown": "Akhir periode ini belum kembali dari rantai.",
+      "closeDeadline": "Tenggat penutupan",
+      "closeDeadlineUnknown": "Tenggat penutupan undian ini belum kembali dari rantai.",
+      "passed": "lewat",
+      "prizeWindow": "Jendela hadiah",
+      "windowUnknown": "Jendela undian ini belum kembali dari rantai.",
+      "windowLeft": "sisa {time}",
+      "windowClosed": "tertutup",
+      "bracket": "Bracket",
+      "bracketNote": "dipublikasikan sebagai ganti total bobot pool",
+      "walk": "Penelusuran",
+      "walkNotStarted": "belum mulai",
+      "walkProgress": "{cursor} dari {total}",
+      "walkNote": "sampai {batch} penabung per panggilan",
+      "prizeWorth": "Berapa nilai satu hadiah",
+      "noPrizeMoney": "Undian ini tidak menawarkan uang hadiah: belum ada panen yang dibukukan saat ia ditutup.",
+      "yourResult": "Hasil Anda",
+      "sealedResult": "sebuah hasil, terenkripsi",
+      "sealedResultNote": "Terenkripsi di on-chain, dan hanya bisa dibaca dompet pemiliknya.",
+      "notReachedUnknown": "Penelusurannya belum mencapai Anda, dan jendela undian ini belum kembali dari rantai, jadi halaman ini tidak bisa mengatakan apakah ia masih bisa dimajukan.",
+      "notReachedYet": "Penelusurannya belum mencapai Anda. Sampai itu terjadi, undian ini tidak memegang angka apa pun untuk Anda, menang atau tidak.",
+      "missedWindow": "Jendelanya tertutup sebelum penelusuran mencapai Anda, jadi undian ini tidak membayar Anda apa pun dan uangnya kembali ke tier-tier. Tidak ada yang bisa mengevaluasinya sekarang.",
+      "yourPrize": "Hadiah Anda",
+      "yourPrizeSpoken": "hadiah Anda di undian {drawId}",
+      "yourWeight": "Bobot Anda",
+      "yourWeightSpoken": "bobot Anda di undian {drawId}",
+      "noPrize": "Tidak ada hadiah di undian ini. Bobot Anda dihitung dan ambang batasnya tidak berpihak kepada Anda.",
+      "claimed": "Sudah diambil. Vault tidak berutang apa pun kepada dompet ini, jadi hadiah ini ada di saldo rahasia Anda. Undiannya menyimpan angkanya sebagai catatan."
+    }
+  },
+  "describe": {
+    "unreadBadge": "belum terbaca",
+    "unread": "Undian ini belum kembali dari rantai, jadi tidak ada di bawahnya yang merupakan fakta. Halaman ini terus bertanya.",
+    "notClosedBadge": "belum ditutup",
+    "notClosed": "Periodenya usai dan undian ini menunggu ditutup. Siapa saja bisa menutupnya, termasuk Anda.",
+    "missedBadge": "terlewat",
+    "missed": "Tidak ada yang menutup undian ini sebelum tenggatnya, jadi ia tidak membayar apa pun. Likuiditasnya tidak pernah dipindahkan dan penutupan berikutnya menawarkannya lagi.",
+    "closedBadge": "menunggu buktinya",
+    "closed": "Tertutup. Seed, bracket, bendera tidak-kosong dan panennya sudah dipublikasikan dan menunggu layanan pengelolaan kunci Zama menandatangani teks terangnya. Siapa saja bisa mengambilnya dan menetapkan hadiah undiannya.",
+    "emptyBadge": "kosong",
+    "empty": "Tidak ada yang memegang saldo selama periode ini, jadi tidak ada yang perlu ditimbang. Likuiditas yang ditawarkan langsung kembali ke tier-tier.",
+    "skippedBadge": "dilewati",
+    "skipped": "Penetapan hadiah mendarat setelah jendela undiannya, jadi tidak ada hadiah yang dibayar. Likuiditasnya kembali ke tier-tier dan panennya tetap dibukukan.",
+    "awardedBadge": "ditetapkan",
+    "awardedAllDisconnected": "Hadiah ditetapkan, dan penelusurannya sudah mencapai tiap penabung di dalamnya. Hubungkan dompet untuk melihat posisi Anda di dalamnya.",
+    "awardedDisconnected": "Hadiah ditetapkan. Penelusuran evaluasinya masih berjalan. Hubungkan dompet untuk melihat posisi Anda di dalamnya.",
+    "awardedAllOutside": "Hadiah ditetapkan dan tiap penabung sudah dievaluasi. Dompet ini tidak berada di pool pada saat itu.",
+    "awardedOutside": "Hadiah ditetapkan. Penelusuran evaluasinya masih berjalan, dan dompet ini tidak ada di dalamnya.",
+    "awardedAll": "Hadiah ditetapkan, dan penelusurannya sudah mencapai tiap penabung di dalamnya. Tiap hasil sudah tetap dan tertulis.",
+    "awarded": "Hadiah ditetapkan. Sejak saat ini tiap hasil sudah ditentukan: ambang batasnya publik dan bobotnya tidak bisa berubah lagi. Evaluasi hanya menuliskannya."
+  },
+  "run": {
+    "title": "Jalankan undian",
+    "subtitle": "Sebuah undian butuh lima transaksi. Tiap satu di antaranya bisa dipanggil dompet mana pun, termasuk dompet Anda.",
+    "connect": "Hubungkan dompet untuk mengirim salah satunya. Tidak ada yang butuh hak istimewa yang dikenali kontrak, dan tidak ada yang bisa diarahkan ke penabung tertentu.",
+    "connectNote": "Kelima langkah di bawah membaca dari rantai bagaimanapun juga, jadi layar ini layak dilihat sebelum Anda menghubungkan apa pun.",
+    "waitingFor": "Apa yang sedang ditunggu pool",
+    "nothing": "Tidak ada",
+    "ordering": " Sebuah undian juga siap ditutup. Finalisasi dan rekonsiliasi lebih dulu, karena uang yang dibebaskan sebuah carry itulah yang menjadi ukuran hadiah pada penutupan berikutnya.",
+    "unknownDue": "Pembacaan yang menyatakan langkah mana yang jatuh tempo belum kembali dari rantai.",
+    "idleWithClock": "Entah keeper-nya sudah mengejar atau periode ini masih berjalan. Ia berakhir dalam {time}.",
+    "idle": "Entah keeper-nya sudah mengejar atau periode ini masih berjalan.",
+    "railLabel": "Lima langkahnya, dalam urutan yang dibutuhkan sebuah undian",
+    "unknownStep": "Apakah langkah ini tersedia belum kembali dari rantai.",
+    "chip": {
+      "due": "jatuh tempo",
+      "ready": "siap",
+      "unknown": "tidak diketahui",
+      "notYet": "belum"
+    },
+    "blocked": {
+      "connect": "Hubungkan dompet untuk mengirim ini.",
+      "network": "Dompet Anda ada di jaringan lain.",
+      "busy": "Transaksi lain sedang berjalan."
+    },
+    "close": {
+      "title": "Tutup",
+      "headline": "Tutup undian {drawId}",
+      "headlineIdle": "Tutup sebuah undian",
+      "button": "Tutup",
+      "does": "Menetapkan besar hadiah tiap tier dari uang yang duduk di dalamnya, memindahkan uang itu ke dalam undian, memanen sumber imbal hasil, dan menarik seed terenkripsi yang tidak bisa dibaca siapa pun, termasuk kami.",
+      "paused": "Prize pool sedang dijeda, jadi tidak ada undian yang bisa ditutup.",
+      "readyDeadline": "Undian {drawId} masih bisa ditutup selama {time}. Lewat dari itu ia dilewati dan uangnya tetap di tier-tier.",
+      "ready": "Undian {drawId} menunggu ditutup.",
+      "waitingClock": "Tidak ada undian yang menunggu. Undian {drawId} bisa ditutup dalam {time}, ketika periode ini berakhir.",
+      "waiting": "Tidak ada undian yang menunggu ditutup."
+    },
+    "award": {
+      "title": "Tetapkan",
+      "headline": "Tetapkan hadiah undian {drawId}",
+      "headlineIdle": "Tetapkan hadiah undian",
+      "button": "Tetapkan",
+      "does": "Menyerahkan kepada pool teks terang dari empat nilai yang dipublikasikan penutupan, beserta tanda tangan layanan pengelolaan kunci atasnya. Pool memeriksa tanda tangan itu di on-chain, membukukan panennya ke tier-tier dan membuka undiannya. Pemenang ditentukan pada saat ini.",
+      "ready": "Undian {drawId} sudah tertutup dan menunggu. Empat buktinya diambil lebih dulu, yang butuh beberapa detik, lalu dompet Anda meminta Anda menandatangani.",
+      "waiting": "Tidak ada undian tertutup yang menunggu penetapan hadiahnya."
+    },
+    "advance": {
+      "title": "Majukan",
+      "headline": "Majukan undian {drawId}",
+      "headlineIdle": "Majukan sebuah undian",
+      "button": "Majukan",
+      "does": "Menelusuri daftar penabung dari titik yang ditentukan seed dan mengkreditkan tiap penabung sebesar yang dinyatakan ambang batas publik. Pemanggil memilih berapa banyak penabung yang dicakup satu panggilan, tidak pernah yang mana, jadi mengirim ini tidak mengatakan apa pun tentang siapa Anda di undian itu.",
+      "readyCount": "{cursor} dari {total} penabung selesai di undian {drawId}. Tiap panggilan menggeser penelusuran bersama sampai {batch}, dan itulah yang dibayar satu transaksi.",
+      "ready": "Undian {drawId} masih punya penabung yang harus dicakup. Tiap panggilan menggeser penelusuran bersama sampai {batch}, dan itulah yang dibayar satu transaksi.",
+      "waiting": "Tidak ada undian yang sudah ditetapkan hadiahnya yang masih punya penabung di dalam jendelanya."
+    },
+    "finalize": {
+      "title": "Finalisasi",
+      "headline": "Finalisasi undian {drawId}",
+      "headlineIdle": "Finalisasi sebuah undian",
+      "button": "Finalisasi",
+      "does": "Melipat sisa tiap tier yang belum terbayar ke dalam carry terenkripsi tier itu begitu jendelanya usai, dan mempublikasikan carry tiap tier yang sedang gilirannya.",
+      "ready": "Undian {drawId} sudah menyelesaikan jendelanya, jadi tidak ada lagi yang bisa dikreditkan darinya.",
+      "waitingClock": "Belum ada jendela yang berakhir. Undian {drawId} bisa difinalisasi dalam {time}.",
+      "waiting": "Tidak ada undian yang jendelanya usai tanpa difinalisasi."
+    },
+    "reconcile": {
+      "title": "Rekonsiliasi",
+      "headline": "Rekonsiliasi tier {tier}",
+      "headlineIdle": "Rekonsiliasi sebuah tier",
+      "button": "Rekonsiliasi",
+      "does": "Mengambil teks terang dari carry yang dipublikasikan, membuktikannya ke pool dan membukukan uangnya kembali ke likuiditas terang tier itu, supaya penutupan berikutnya bisa menawarkannya lagi.",
+      "ready": "Tier {tier} mempublikasikan carry-nya di undian {drawId}.",
+      "readyMore": "{count, plural, other { {shown} tier lagi menunggu di belakangnya, dan tiap tekanan mengerjakan satu.}}",
+      "waiting": "Tidak ada tier yang punya carry menunggu untuk dibukukan kembali."
+    },
+    "who": {
+      "label": "Siapa yang mengirimnya",
+      "oneStart": "Sebuah keeper yang kami jalankan mengawasi pool dan mengirim tiap langkah ini saat jatuh tempo, jadi pada jam biasa tidak ada yang perlu dikerjakan di layar ini.",
+      "onePeriod": " Satu periode di sini adalah {period}, jadi satu putaran penuh berisi lima langkah keluar sesering itu.",
+      "oneEnd": " Keeper tidak memegang hak istimewa yang dikenali kontrak. Dua hal yang bisa saja disalahgunakannya, yaitu memilih penabung mana yang dievaluasi dan memilih urutan hadiah dibayar, bukan pilihan yang dimiliki pemanggil mana pun.",
+      "two": "Tetapkan dan rekonsiliasi adalah dua langkah yang butuh sesuatu dari luar rantai. Peramban Anda meminta relayer Zama teks terang dari yang dipublikasikan pool, empat nilai untuk penetapan hadiah dan satu untuk rekonsiliasi, beserta tanda tangan layanan pengelolaan kunci atasnya. Itu panggilan yang sama dengan yang dilakukan keeper, dan kontraknya memeriksa sendiri tanda tangannya, jadi sebuah peramban tidak bisa berbohong soal apa yang dibacanya.",
+      "three": "Kalau keeper berhenti, tidak ada yang hilang. Undian yang tidak pernah ditutup menyimpan uangnya di tier-tier dan ditawarkan lagi, dan carry yang tidak pernah direkonsiliasi dilipat kembali oleh penutupan pertama setelah ia mendarat. Keeper yang macet membuat pool kehilangan undian, bukan uang, dan dompet mana pun di sini bisa memulainya lagi.",
+      "periodHours": "{count, plural, other {{shown} jam}}",
+      "periodMinutes": "{count} menit",
+      "periodSeconds": "{count} detik"
+    },
+    "stand": {
+      "label": "Posisi undian saat ini",
+      "period": "Periode berjalan",
+      "periodNote": "Berakhir dalam {time}",
+      "savers": "Penabung",
+      "saversNote": "Sejauh apa satu penelusuran penuh harus berjalan",
+      "lastClosed": "Undian terakhir yang ditutup",
+      "lastClosedNone": "belum ada",
+      "vaultUnknown": "status vault tidak diketahui",
+      "vaultPaused": "vault dijeda",
+      "vaultRunning": "vault berjalan",
+      "poolUnknown": "status prize pool tidak diketahui",
+      "poolPaused": "prize pool dijeda",
+      "poolRunning": "prize pool berjalan"
+    }
+  },
+  "verify": {
+    "title": "Periksa sendiri sebuah undian.",
+    "lede": "Tidak perlu dompet. Tiap angka di sini dibaca langsung dari kontrak, dan ambang batasnya berasal dari view <code>thresholdOf</code> milik vault sendiri, yaitu aritmetika yang sama yang menentukan hasilnya. Tidak ada implementasi kedua di halaman ini yang bisa berbeda dengan yang pertama.",
+    "noPool": "{symbol} tidak punya pool untuk diperiksa.",
+    "noPoolBody": "{reason}, jadi Hearth tidak pernah membuka vault di atasnya dan tidak ada undian di sini. Pilih token dari daftar di atas.",
+    "unreachable": "Tidak bisa menghubungi Sepolia.",
+    "unreachableBody": "Halaman ini membaca vault dan pool lewat endpoint RPC, dan pembacaan itu gagal, jadi tidak ada yang bisa ditampilkan. Undiannya sendiri ada di rantai bagaimanapun juga.",
+    "tryAgain": "Coba lagi",
+    "reading": "Membaca undian dari Sepolia.",
+    "noneYet": "Belum ada undian yang ditutup, jadi belum ada yang bisa diperiksa. Yang pertama muncul begitu periode 1 usai dan seseorang menutupnya.",
+    "oneNotClosed": "Undian {drawId} belum ditutup, jadi belum ada yang bisa diperiksa.",
+    "rangeNotClosed": "Undian {first} sampai {last} belum ditutup, jadi belum ada yang bisa diperiksa di sini. Yang lebih lama ada di explorer.",
+    "drawButton": "Undian {drawId}",
+    "facts": {
+      "title": "Undian {drawId}",
+      "periodCovered": "Periode yang dicakup",
+      "periodEnded": "berakhir {stamp}",
+      "windowEnds": "Jendela berakhir",
+      "seed": "Seed",
+      "seedUnpublished": "belum dipublikasikan",
+      "bracket": "Bracket",
+      "bracketUnset": "belum ditetapkan",
+      "bracketNote": "{count} saldo-detik",
+      "prizeSizes": "Besar hadiah",
+      "prizeSizesNote": "utama / menengah / sering",
+      "harvest": "Panen dibukukan",
+      "walkSavers": "Penabung dalam penelusuran",
+      "walkNotStarted": "belum mulai",
+      "walkPosition": "Posisi penelusuran",
+      "walkProgress": "{cursor} dari {total}",
+      "finalized": "Difinalisasi",
+      "yes": "ya",
+      "no": "tidak",
+      "note": "Seed dihasilkan sebagai ciphertext di dalam koprosesor Zama, jadi tidak ada yang melihatnya saat ia ditarik, dan menutup sebuah undian berhasil tepat satu kali, jadi tidak ada lemparan kedua. Bracket adalah pangkat dua terkecil di atas bobot agregat pool, dipublikasikan sebagai ganti agregat persisnya karena dua total persis berurutan akan memecahkan setoran satu-satunya orang yang bergerak."
+    },
+    "tiers": {
+      "title": "Apa yang ditawarkan dan dibayar tiap tier",
+      "hint": "publik menurut desain",
+      "each": "{amount} {symbol} masing-masing",
+      "offered": "ditawarkan",
+      "returned": "kembali tanpa dibayar",
+      "notReconciled": "belum direkonsiliasi",
+      "paid": "hadiah dibayar",
+      "paidUnknown": "tidak diketahui sampai direkonsiliasi",
+      "paidInexact": "tidak bisa diturunkan persis",
+      "note": "Hadiah yang dibayar dihitung dari angka publik: yang ditawarkan tier itu, dikurangi yang kembali tanpa dibayar, dibagi besar hadiahnya. Hasilnya persis kapan pun tidak ada carry terenkripsi yang ikut masuk ke undian itu, dan deployment ini merekonsiliasi tiap tier tiap undian sehingga biasanya begitu. Ia tidak pernah menyebut siapa yang dibayar."
+    },
+    "thresholds": {
+      "title": "Ambang batas untuk sebuah alamat",
+      "hint": "dibaca dari thresholdOf",
+      "body": "Tempel alamat mana pun. Vault mengembalikan bobot persis yang harus dilewati alamat itu di tiap hadiah tiap tier untuk undian ini. Bandingkan dengan bobot terdekripsi penabung itu sendiri dan hasilnya cocok: mereka menang sebuah hadiah tepat ketika bobot mereka benar-benar di atas ambang batasnya.",
+      "fieldName": "Alamat yang diperiksa",
+      "invalid": "Itu bukan alamat Ethereum yang sah.",
+      "notAwarded": "Undian {drawId} belum ditetapkan hadiahnya, jadi ia belum punya seed dan belum punya ambang batas.",
+      "row": "hadiah {index} tier {tier}",
+      "reading": "membaca",
+      "rowFailed": "Node tidak menjawab thresholdOf untuk hadiah ini. Tidak ada yang berubah pada undiannya, hanya pandangan halaman ini terhadapnya.",
+      "noCounts": "Jumlah hadiah untuk undian ini tidak bisa dibaca, jadi halaman ini tidak bisa mengatakan ada berapa ambang batas. Coba lagi sebentar lagi.",
+      "outOfRange": "di luar jangkauan, jadi tidak bisa dimenangkan",
+      "unit": "saldo-detik"
+    },
+    "transactions": {
+      "title": "Transaksinya",
+      "hint": "di Etherscan",
+      "none": "Tidak ada apa pun untuk undian ini di blok beberapa jam terakhir. Riwayat lebih lama ada di explorer.",
+      "block": "blok {block}",
+      "open": "Buka pool",
+      "closed": "Ditutup",
+      "awarded": "Hadiah ditetapkan",
+      "markedEmpty": "Ditandai kosong",
+      "markedSkipped": "Ditandai dilewati",
+      "finalized": "Difinalisasi",
+      "reconciled": "Tier direkonsiliasi",
+      "withTier": "{label} ({tier})"
+    }
+  },
+  "lab": {
+    "pill": "Halaman lab",
+    "title": "Upacara undian",
+    "lede": "Tidak ditautkan dari situs. Tiap angka di bawah dibaca live dari kontrak di Sepolia: handle yang tersegel, seed yang ditandatangani layanan pengelolaan kunci, bracket yang menjadi pembanding undian, dan ambang batas persis yang harus dilewati sebuah dompet.",
+    "noPool": "{symbol} tidak punya pool untuk dibuka.",
+    "noPoolBody": "{reason}, jadi Hearth tidak pernah membuka vault di atasnya. Pilih token yang punya pool.",
+    "noDraw": "Belum ada undian yang ditetapkan hadiahnya untuk dibuka.",
+    "noDrawBody": "Upacara ini butuh undian yang sudah ditutup dan ditetapkan hadiahnya. Jalankan satu dari panel undian di pool, lalu kembali ke sini.",
+    "drawButton": "Undian {drawId}",
+    "openSeal": "Buka segelnya",
+    "again": "Jalankan lagi",
+    "stages": {
+      "sealed": "tersegel",
+      "seed": "seed terbuka",
+      "bracket": "bracket",
+      "thresholds": "ambang batas jatuh",
+      "mine": "hasil Anda sendiri"
+    },
+    "seals": {
+      "title": "Apa yang dipublikasikan penutupan",
+      "hint": "empat handle, dalam urutan persis ini",
+      "seed": "seed",
+      "scale": "hitungan skala",
+      "nonEmpty": "tidak kosong",
+      "harvest": "panen",
+      "unpublished": "belum dipublikasikan",
+      "note": "Pool menyandikan ulang keempat teks terang itu dalam urutan tersebut dan memeriksa tanda tangan layanan pengelolaan kunci atas sandi itu di on-chain, jadi meminta keempatnya dalam urutan lain membuat penetapan hadiahnya gagal. Urutan adalah kontraknya di sini, bukan sekadar kemudahan."
+    },
+    "seed": {
+      "title": "Seed terbuka",
+      "note": "Dihasilkan sebagai ciphertext di dalam koprosesor Zama, jadi tidak ada yang melihatnya saat ia ditarik. Dipublikasikan begitu periodenya berakhir, ditandatangani layanan pengelolaan kunci, dan diverifikasi di on-chain oleh pool sebelum hal lain di undian ini boleh terjadi. Besar hadiah sudah ditetapkan pada penutupan, sebelum angka ini ada."
+    },
+    "bracket": {
+      "title": "Bracket",
+      "unit": "{count} saldo-detik",
+      "note": "Undian berjalan terhadap pangkat dua terkecil di atas bobot agregat pool, tidak pernah terhadap agregatnya sendiri. Mempublikasikan total persisnya akan memungkinkan siapa pun memecahkan setoran satu-satunya orang yang bergerak dari dua total berurutan dan stempel waktu transaksinya sendiri."
+    },
+    "thresholds": {
+      "title": "Ambang batas jatuh",
+      "connectHint": "hubungkan dompet untuk melihat milik Anda sendiri",
+      "connectBody": "Ambang batas bersifat per alamat dan publik. Hubungkan dompet dan angka persis yang harus dilewatinya di tiap hadiah undian ini muncul di sini, dihitung oleh vault, bukan oleh halaman ini.",
+      "row": "hadiah {index} tier {tier}",
+      "reading": "membaca",
+      "outOfRange": "di luar jangkauan",
+      "note": "Lewati ambang batasnya dan hadiahnya milik Anda. Angka-angka ini datang dari view milik vault sendiri, aritmetika yang sama yang menentukan hasilnya, jadi tidak ada implementasi kedua di sini yang bisa berbeda dengan yang pertama."
+    },
+    "mine": {
+      "title": "Dan hanya untuk Anda",
+      "connectBody": "Hubungkan dompet dan kartu ini terisi dengan bobot yang menjadi dasar penilaiannya dan berapa yang dibayar undian {drawId} kepadanya, didekripsi di peramban Anda dan tidak di tempat lain.",
+      "nothing": "Dompet ini tidak memegang bobot di undian {drawId}, jadi tidak ada miliknya sendiri untuk dibuka. Hanya penabung yang berada di dalam penelusuran yang punya bobot dan kredit di sini.",
+      "weight": "Bobot Anda",
+      "weightUnit": "saldo-detik sepanjang periode",
+      "paid": "Berapa yang dibayar undian ini kepada Anda",
+      "paidUnit": "{symbol}, dikreditkan ke kemenangan Anda",
+      "sealAgain": "Segel lagi",
+      "decrypt": "Dekripsi hasil saya",
+      "denied": "Ditolak: nilai-nilai ini milik dompet lain.",
+      "note": "Semua di atas kartu ini bersifat publik dan siapa pun bisa memeriksanya. Kartu ini tidak: ia butuh satu tanda tangan EIP-712 dari dompet pemilik nilai-nilai ini, dan daftar kontrol akses Zama menolak semua orang lain. Itulah seluruh produk ini dalam dua paragraf."
+    }
+  },
+  "docs": {
+    "title": "Dokumentasi",
+    "kicker": "Dokumentasi",
+    "heading": "Catatan tertulisnya",
+    "count": "{count, plural, other {{shown} halaman}}. Tiap satu di antaranya adalah berkas di repositori di bawah <path>docs/</path>, dirender di sini.",
+    "contents": "Isi",
+    "close": "Tutup",
+    "overview": "Ikhtisar",
+    "nav": "Dokumentasi",
+    "search": "Cari di dokumentasi",
+    "noResults": "Tidak ada yang cocok.",
+    "outline": "Di halaman ini",
+    "nearby": "Halaman terdekat",
+    "previous": "Sebelumnya",
+    "next": "Berikutnya",
+    "copy": "Salin",
+    "copied": "Tersalin",
+    "copyManual": "Tekan ctrl C",
+    "copyLabel": "Salin blok ini",
+    "diagramWide": "Lebih lebar dari kolomnya. Gulir ke samping.",
+    "diagramFailed": "Diagram ini tidak tergambar. Sumbernya ada di bawah.",
+    "rendererFailed": "Perender diagramnya tidak termuat. Sumbernya ada di bawah.",
+    "fallbackNote": "Halaman ini belum diterjemahkan, jadi ia ditampilkan dalam bahasa Inggris.",
+    "sections": {
+      "reference": "Rujukan",
+      "attackLogs": "Log serangan",
+      "gettingstarted": "Memulai",
+      "concepts": "Konsep",
+      "security": "Keamanan",
+      "operations": "Operasi"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Tidak ada apa pun di alamat ini.",
+      "body": "Halamannya pindah, tautannya salah ketik, atau tokennya bukan token yang menjadi sasaran deploy build ini. Pool-nya sendiri ada di rantai dan tidak terpengaruh.",
+      "home": "Kembali ke awal",
+      "pool": "Buka pool",
+      "docs": "Baca dokumennya"
+    },
+    "crashed": {
+      "title": "Layar ini rusak, uangnya tidak.",
+      "body": "Ada sesuatu di halaman ini yang melempar galat. Tidak ada yang ditandatangani dan tidak ada yang dikirim, jadi saldo Anda persis di tempatnya. Memuat ulang layar ini aman.",
+      "digest": "Rujukan {digest}",
+      "home": "Kembali ke awal",
+      "retry": "Coba layar ini lagi"
+    },
+    "unknown": "Ada yang tidak beres.",
+    "userRejected": "Anda menolak permintaannya di dompet. Tidak ada yang dikirim.",
+    "signingRejected": "Anda menolak tanda tangannya di dompet. Tidak ada yang dikirim.",
+    "notConnected": "Hubungkan dompet dulu.",
+    "decryptNotConnected": "Hubungkan dompet untuk mendekripsi nilai-nilai Anda sendiri.",
+    "addressesMissing": "Alamat Hearth belum dikonfigurasi, jadi tidak ada yang bisa dikirim.",
+    "drawNotWaiting": "Undian {drawId} tidak sedang menunggu penetapan hadiahnya, jadi tidak ada yang perlu dikirim.",
+    "insufficientAllowance": "Wrapper belum diizinkan mengambil token Anda sebanyak itu. Setujui dulu.",
+    "insufficientErc20": "Token uji biasa di dompet ini tidak cukup. Cetak sebagian dari faucet.",
+    "insufficientConfidential": "Token rahasianya tidak cukup. Shield sebagian token biasanya dulu.",
+    "chainMismatch": "Dompet Anda ada di jaringan yang berbeda dari aplikasi. Pindahkan ke Sepolia.",
+    "notEntitled": "Dompet ini tidak diizinkan membaca nilai itu. Nilainya milik alamat lain.",
+    "noCiphertext": "Belum ada nilai terenkripsi di sini, yang berarti saldonya nol.",
+    "relayerRateLimited": "Relayer Zama sedang membatasi laju peramban ini. Tunggu beberapa detik lalu minta lagi.",
+    "relayerUnreachable": "Relayer Zama tidak bisa dihubungi. Minta lagi sebentar lagi.",
+    "relayerUnreachableStatus": "Relayer Zama tidak bisa dihubungi (HTTP {status}). Minta lagi sebentar lagi.",
+    "rpcRateLimited": "Node Sepolia sedang membatasi laju peramban ini. Tunggu beberapa detik lalu minta lagi.",
+    "noGas": "ETH Sepolia tidak cukup untuk membayar gas. Faucet Sepolia mana pun bisa mengisinya.",
+    "relayerBehind": "Relayer Zama belum mengejar blok itu. Minta lagi sebentar lagi.",
+    "EnforcedPause": "Vault sedang dijeda, jadi setoran dan penutupan undian berhenti. Penarikan tetap berfungsi.",
+    "NotASaver": "Dompet ini belum pernah menyetor, jadi tidak ada yang bisa ditarik.",
+    "NotTheAsset": "Hanya token rahasia yang menjadi dasar deploy vault ini yang diterima. Shield token itu lalu coba lagi.",
+    "DrawNotAwarded": "Undian itu belum ditetapkan hadiahnya, jadi tidak ada yang bisa dievaluasi. Tutup dan tetapkan hadiahnya dulu.",
+    "EvaluationWindowClosed": "Jendela dua periode undian itu sudah usai. Ia tidak bisa dievaluasi lagi, dan ia tidak membayar apa pun.",
+    "EvaluationWindowOpen": "Undian itu masih bisa dievaluasi, jadi ia belum bisa difinalisasi. Tunggu jendelanya berakhir.",
+    "AlreadyFinalized": "Undian itu sudah difinalisasi. Tidak ada lagi yang perlu dikerjakan padanya.",
+    "DrawNotOpen": "Undian itu tidak pernah ditutup, jadi tidak ada yang bisa difinalisasi.",
+    "AlreadyClosed": "Seseorang menutup undian itu lebih dulu. Penetapan hadiahnya adalah langkah berikutnya.",
+    "NothingToClose": "Tidak ada undian yang menunggu ditutup saat ini.",
+    "CloseWindowClosed": "Tenggat penutupan untuk undian itu sudah lewat. Likuiditasnya kembali ke tier-tier dan undian berikutnya menawarkannya lagi.",
+    "WrongStatus": "Undiannya sudah berpindah status sebelum transaksi ini mendarat. Muat ulang lalu lihat di mana posisinya sekarang.",
+    "CarryNotPending": "Tier itu tidak punya carry terpublikasi yang menunggu, jadi tidak ada yang perlu direkonsiliasi.",
+    "InvalidKMSSignatures": "Tanda tangan layanan pengelolaan kunci tidak lolos verifikasi di on-chain. Minta dekripsinya lagi."
+  },
+  "format": {
+    "pending": "...",
+    "dust": "<0,01",
+    "now": "sekarang",
+    "seconds": "{seconds} dtk",
+    "minutesSeconds": "{minutes} mnt {seconds} dtk",
+    "hoursMinutes": "{hours} j {minutes} mnt",
+    "agoSeconds": "{count} dtk lalu",
+    "agoMinutes": "{count} mnt lalu",
+    "agoHours": "{count} j lalu",
+    "agoDays": "{count} hr lalu",
+    "notYet": "belum",
+    "utc": "{stamp} UTC",
+    "oddsNever": "tidak pernah",
+    "oddsEveryDraw": "tiap undian",
+    "oddsOneIn": "1 undian dari {count}",
+    "balanceSeconds": "saldo-detik"
+  },
+  "meta": {
+    "titleDefault": "Hearth, tabungan berhadiah yang tak bisa diintip siapa pun",
+    "titleTemplate": "{title} | Hearth",
+    "description": "Tabungan berhadiah rahasia tanpa kehilangan modal di Zama Protocol. Setoran, saldo dan kemenangan tetap terenkripsi di on-chain, hadiah diundi dari imbal hasil dengan peluang sebanding dengan saldo tertimbang waktu Anda, dan dana pokok kembali utuh kapan pun Anda minta.",
+    "ogTitle": "Hearth",
+    "ogDescription": "Tabungan berhadiah rahasia tanpa kehilangan modal di Zama Protocol.",
+    "how": {
+      "title": "Cara kerjanya",
+      "description": "Setor token rahasia, biarkan saldo Anda terenkripsi, menangkan hadiah yang diundi dari imbal hasil dengan peluang yang ditentukan saldo tertimbang waktu Anda, dan tarik kapan pun Anda mau."
+    },
+    "verify": {
+      "title": "Verifikasi sebuah undian",
+      "description": "Baca seed, bracket, panen dan besar hadiah sebuah undian langsung dari kontrak, dan dapatkan ambang batas persis yang harus dilewati alamat mana pun."
+    },
+    "lab": {
+      "title": "Upacara undian",
+      "description": "Sebuah halaman lab: seed tersegel yang terbuka, bracket, ambang batas dan hasil seorang penabung sendiri."
+    },
+    "docs": {
+      "title": "Dokumentasi",
+      "description": "Cara sebuah undian berjalan, cara peluang dihitung, dari mana uang hadiahnya berasal, apa yang tetap privat, dan tiap celah yang kami ketahui."
+    },
+    "dashboard": {
+      "title": "Dasbor {symbol}",
+      "titleFallback": "Dasbor",
+      "description": "Apa yang dipegang dompet ini, berapa nilai prize pool, dan langkah berikutnya, dengan tiap jumlah penabung terenkripsi di on-chain."
+    },
+    "deposit": {
+      "title": "Setor {symbol}",
+      "titleFallback": "Setor",
+      "description": "Ambil {underlyingSymbol} uji, shield menjadi {symbol}, lalu setor ke vault Hearth.",
+      "descriptionFallback": "Ambil token ujinya, shield, lalu setor ke vault Hearth."
+    },
+    "withdraw": {
+      "title": "Tarik {symbol}",
+      "titleFallback": "Tarik",
+      "description": "Keluarkan dana pokok dan kemenangan dari vault Hearth, lalu unshield {symbol} kembali menjadi {underlyingSymbol}.",
+      "descriptionFallback": "Keluarkan dana pokok dan kemenangan dari vault Hearth, lalu unshield kembali menjadi token biasa."
+    },
+    "draws": {
+      "title": "Undian saya",
+      "description": "Berapa yang dibayar tiap undian terakhir, dan berapa yang dibayarkannya kepada Anda, dengan bobot dan hadiah Anda terenkripsi sampai Anda membukanya."
+    },
+    "run": {
+      "title": "Jalankan undian",
+      "description": "Tutup, tetapkan hadiah, majukan, finalisasi dan rekonsiliasi. Tiap langkah undian Hearth bisa dipanggil dompet mana pun."
+    }
+  }
+}

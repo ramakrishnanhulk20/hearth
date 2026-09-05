@@ -1,10 +1,19 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 /**
  * The wait while a console screen loads.
  *
- * It fills the main column instead of covering the viewport, because the rail, the wallet chip
- * and the network chip stay usable while a route is still coming.
+ * It fills the main column instead of covering the viewport, because the rail, the pool picker,
+ * the wallet chip and the network chip stay usable while a route is still coming.
+ *
+ * It sits under the pool segment and not above it, so the redirect at /app and the refusal of an
+ * unknown token both answer with their own status code instead of flushing this shell first.
  */
 export default function Loading() {
+  const t = useTranslations("console.shell");
+
   return (
     <div className="flex min-h-[54vh] flex-col items-center justify-center gap-5">
       <svg width="54" height="54" viewBox="0 0 24 24" aria-hidden>
@@ -22,7 +31,7 @@ export default function Loading() {
           fill="rgb(var(--flame-ink))"
         />
       </svg>
-      <p className="text-[13px] tracking-wide text-muted">Lighting the hearth</p>
+      <p className="text-[13px] tracking-wide text-muted">{t("loading")}</p>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useConnect, useSwitchChain } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { CAP_LABEL, PrimaryButton, PrimaryLink } from "@/components/app/console";
@@ -13,11 +14,18 @@ import type { NextStep } from "./nextStep";
  * the two cards that explain it.
  */
 export function NextAction({ step }: { step: NextStep }) {
+  const t = useTranslations("nextStep");
+  const dashboard = useTranslations("dashboard");
+
   return (
     <section className="mb-6">
-      <p className={CAP_LABEL}>Next</p>
-      <p className="mt-2.5 text-[19px] font-semibold leading-snug text-parchment">{step.title}</p>
-      <p className="mt-2 max-w-[68ch] text-[13.5px] leading-relaxed text-muted">{step.detail}</p>
+      <p className={CAP_LABEL}>{dashboard("next")}</p>
+      <p className="mt-2.5 text-[19px] font-semibold leading-snug text-parchment">
+        {t(step.title, step.values)}
+      </p>
+      <p className="mt-2 max-w-[68ch] text-[13.5px] leading-relaxed text-muted">
+        {t(step.detail, step.values)}
+      </p>
       {/* The one place the console's primary control is not the foot of a form, so it is capped
           to something the width of its own words. Run edge to edge here and a bar of flame wider
           than the sentence explaining it is the first and loudest thing on the app. */}
@@ -32,8 +40,11 @@ export function NextAction({ step }: { step: NextStep }) {
 
 /** The console's primary control, as a button where the step is something the wallet does. */
 function Control({ step }: { step: NextStep }) {
+  const t = useTranslations("nextStep");
   const { connect, connectors, isPending } = useConnect();
   const { switchChain, isPending: switching } = useSwitchChain();
+
+  const cta = step.cta === null ? "" : t(step.cta, step.values);
 
   if (step.act === "connect") {
     const injected = connectors.find((connector) => connector.type === "injected") ?? connectors[0];
@@ -43,7 +54,7 @@ function Control({ step }: { step: NextStep }) {
         disabled={!injected}
         onClick={() => injected && connect({ connector: injected })}
       >
-        {injected ? step.cta : "No wallet found"}
+        {injected ? cta : t("noWallet")}
       </PrimaryButton>
     );
   }
@@ -51,14 +62,14 @@ function Control({ step }: { step: NextStep }) {
   if (step.act === "switch") {
     return (
       <PrimaryButton busy={switching} onClick={() => switchChain({ chainId: sepolia.id })}>
-        {step.cta}
+        {cta}
       </PrimaryButton>
     );
   }
 
   return (
     <PrimaryLink href={step.href ?? "/app"} tone={step.tone === "quiet" ? "quiet" : "flame"}>
-      {step.cta}
+      {cta}
     </PrimaryLink>
   );
 }

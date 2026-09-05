@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useAccount, useBalance } from "wagmi";
 import {
   ActionNote,
   AmountCard,
+  PageHeader,
   CARD_NOTE,
   CARD_PROSE,
   ConnectPrompt,
@@ -14,39 +16,45 @@ import {
   SealedLine,
   StepList,
   Unknown,
-  phaseNote,
+  usePhaseNote,
   type Step,
   type StepStatus,
 } from "@/components/app/console";
-import { PROBLEMS, exactAmount } from "@/components/app/amount";
+import { problemText, exactAmount } from "@/components/app/amount";
 import { useTokenSymbols } from "@/components/app/useTokenSymbols";
-import { FAUCET_AMOUNT } from "@/lib/chain/addresses";
-import { formatAmount, parseAmount } from "@/lib/format";
+import { parseAmount } from "@/lib/format";
+import { useFormat } from "@/hooks/useFormat";
 import { useActions } from "@/hooks/useActions";
 import { useDraws, useHearthConfig, usePoolState, useSaverState } from "@/hooks/useHearth";
-import { useReveal, type RevealRequest } from "@/hooks/useReveal";
+import { useReveal, WALLET_SCOPE, type RevealRequest } from "@/hooks/useReveal";
 
 /** A little Sepolia ETH is needed for gas, and no faucet of ours can provide it. */
 const GAS_FLOOR = 2_000_000_000_000_000n;
 
 /**
- * The confidential USDC sitting in the wallet, opened on its own.
+ * What the wrapper is approved for, once.
  *
- * It is a different contract and a different question from the principal and winnings the other
- * screens open, so revealing it here leaves those sealed.
+ * Approving the exact amount every time meant two transactions on every shield, which is the one
+ * thing about this flow a saver notices. The allowance reaches one contract, the confidential
+ * wrapper for one token, and that token is a faucet-minted Sepolia mock with no value anywhere.
+ * The screen says both of those things next to the button rather than leaving it to be found.
  */
-const WALLET_SCOPE = "deposit:wallet";
+const WRAPPER_ALLOWANCE = 2n ** 256n - 1n;
 
-type StepKey = "usdc" | "shield" | "deposit";
+type StepKey = "faucet" | "shield" | "deposit";
 
 /**
  * Getting money into the pool, one step at a time.
  *
- * Which step is open comes from the chain rather than from a counter: holding no USDC means the
- * faucet step, holding no confidential balance means the shield step. A saver can reopen a
+ * Which step is open comes from the chain rather than from a counter: holding none of the plain
+ * token means the faucet step, holding no confidential balance means the shield step. A saver can reopen a
  * finished step, and the moment their wallet says the work is done the flow moves on by itself.
  */
 export function DepositFlow() {
+  const t = useTranslations("deposit");
+  const amountWords = useTranslations("console.amount");
+  const format = useFormat();
+  const phaseNote = usePhaseNote();
   const config = useHearthConfig();
   const pool = usePoolState();
   const saver = useSaverState(config);
@@ -70,29 +78,61 @@ export function DepositFlow() {
     refetchDraws();
   };
 
-  const wrapAmount = parseAmount(wrapInput);
-  const depositAmount = parseAmount(depositInput);
+  // The two fields are counted in different scales: the plain token has its own decimals and the
+  // confidential one has the vault's. On a one-to-one wrapper they match, and on any other they do
+  // not, so each field parses against the token it is actually spending.
+  const wrapAmount = parseAmount(wrapInput, config.underlyingDecimals);
+  const depositAmount = parseAmount(depositInput, config.decimals);
+
+  const plain = (value: bigint) => format.amount(value, config.underlyingDecimals);
+  const sealed = (value: bigint) => format.amount(value, config.decimals);
 
   // Every balance below is a fallback until this is true, and a fallback is not a balance.
   const balancesKnown = saver.connected && !saver.isLoading && !saver.unavailable;
 
   const wrapProblem = (() => {
-    if (!wrapAmount.ok) return wrapAmount.reason === "empty" ? null : PROBLEMS[wrapAmount.reason];
-    if (balancesKnown && wrapAmount.value > saver.usdc) {
-      return `You hold ${formatAmount(saver.usdc)} USDC. Ask for less, or mint more test USDC first.`;
+    if (!wrapAmount.ok) {
+      return wrapAmount.reason === "empty"
+        ? null
+        : problemText(wrapAmount.reason, config.underlyingDecimals, symbols.underlying, amountWords);
+    }
+    if (balancesKnown && wrapAmount.value > saver.underlyingBalance) {
+      return t("shield.tooMuch", {
+        amount: plain(saver.underlyingBalance),
+        underlying: symbols.underlying,
+      });
     }
     return null;
   })();
+
+  const walletScope = reveal.scope(WALLET_SCOPE);
+  const walletHeld = walletScope.read(saver.confidentialHandle);
 
   const depositProblem = (() => {
-    if (!depositAmount.ok) return depositAmount.reason === "empty" ? null : PROBLEMS[depositAmount.reason];
+    if (!depositAmount.ok) {
+      return depositAmount.reason === "empty"
+        ? null
+        : problemText(depositAmount.reason, config.decimals, symbols.confidential, amountWords);
+    }
     if (config.maxPrincipal > 0n && depositAmount.value > config.maxPrincipal) {
-      return `The vault caps one saver at ${formatAmount(config.maxPrincipal)} USDC, so this would be refused and refunded inside the same transaction.`;
+      return t("vault.cap", {
+        amount: sealed(config.maxPrincipal),
+        confidential: symbols.confidential,
+      });
+    }
+    // Only when the figure is open, because that is the only moment the screen holds the balance
+    // as a fact. The token moves what the wallet actually has and the vault credits that, so an
+    // over-large deposit is not refused anywhere: it costs a transaction and moves nothing.
+    if (walletHeld !== null && depositAmount.value > walletHeld) {
+      return t("vault.tooMuch", {
+        amount: sealed(walletHeld),
+        confidential: symbols.confidential,
+      });
     }
     return null;
   })();
 
-  const holdsUsdc = balancesKnown && saver.usdc > 0n;
+  const holdsPlain = balancesKnown && saver.underlyingBalance > 0n;
   const holdsConfidential = balancesKnown && saver.confidentialHandle !== null;
   // An unread allowance is not a short allowance, so this waits for the read rather than
   // naming a figure the screen does not have.
@@ -101,13 +141,11 @@ export function DepositFlow() {
   const lowGas = gas.isSuccess && gas.data.value < GAS_FLOOR;
   const acting = !saver.connected || saver.wrongNetwork || money.busy;
 
-  const derived: StepKey = !holdsUsdc ? "usdc" : !holdsConfidential ? "shield" : "deposit";
+  const derived: StepKey = !holdsPlain ? "faucet" : !holdsConfidential ? "shield" : "deposit";
   const activeKey = saver.connected ? (chosen ?? derived) : null;
   const statusOf = (key: StepKey, done: boolean): StepStatus =>
     key === activeKey ? "active" : done ? "done" : "todo";
 
-  const walletScope = reveal.scope(WALLET_SCOPE);
-  const walletHeld = walletScope.read(saver.confidentialHandle);
   const sealedRequests: RevealRequest[] = config.asset
     ? [{ handle: saver.confidentialHandle, contractAddress: config.asset }]
     : [];
@@ -116,43 +154,53 @@ export function DepositFlow() {
   // They share a scope because they are the same value, so opening it once opens it for both.
   const walletBalance = balancesKnown ? (
     <SealedLine
-      label="In your wallet"
-      spoken="your confidential USDC balance"
+      label={t("inWallet")}
+      spoken={t("inWalletSpoken", { symbol: symbols.confidential })}
       scope={walletScope}
       amount={walletHeld}
+      unit={symbols.confidential}
+      decimals={config.decimals}
       disabled={config.asset === null || saver.wrongNetwork}
       onReveal={() => config.asset && walletScope.reveal(sealedRequests)}
     />
   ) : (
     <span>
-      In your wallet: <Unknown scale="inline" />
+      {t("inWalletUnknown")}
+      <Unknown scale="inline" />
     </span>
   );
 
   const rateNote = !config.ready
-    ? "The wrapper rate has not come back from the chain yet."
+    ? t("shield.rateUnknown")
     : config.rate === 1n
-      ? "The wrapper is one to one, so you receive exactly what you shield."
-      : `The wrapper takes ${config.rate.toString()} units of USDC for one unit of confidential USDC.`;
+      ? t("shield.rateOne")
+      : t("shield.rateOther", {
+          rate: config.rate.toString(),
+          underlying: symbols.underlying,
+          confidential: symbols.confidential,
+        });
 
   const receives =
-    wrapAmount.ok && config.ready && config.rate > 0n ? formatAmount(wrapAmount.value / config.rate) : null;
+    wrapAmount.ok && config.ready && config.rate > 0n ? sealed(wrapAmount.value / config.rate) : null;
 
   const steps: Step[] = [
     {
-      key: "usdc",
-      title: "Get test USDC",
-      status: statusOf("usdc", holdsUsdc),
+      key: "faucet",
+      title: t("faucet.title", { underlying: symbols.underlying }),
+      status: statusOf("faucet", holdsPlain),
       summary: (
         <>
-          {`${formatAmount(saver.usdc)} USDC in your wallet. `}
+          {t("faucet.heldSummary", {
+            amount: plain(saver.underlyingBalance),
+            underlying: symbols.underlying,
+          })}
           <button
             type="button"
-            onClick={() => money.mint(FAUCET_AMOUNT, refresh)}
+            onClick={() => money.mint(config.faucet, refresh)}
             disabled={acting}
             className={`${INLINE_LINK} disabled:opacity-50`}
           >
-            Get a million more
+            {t("faucet.more")}
           </button>
         </>
       ),
@@ -160,71 +208,80 @@ export function DepositFlow() {
         <div className="flex flex-col gap-3.5">
           <p className={CARD_PROSE}>
             {balancesKnown
-              ? `${formatAmount(saver.usdc)} USDC in your wallet.`
-              : "Your wallet balance has not come back from the chain yet."}
+              ? t("faucet.held", {
+                  amount: plain(saver.underlyingBalance),
+                  underlying: symbols.underlying,
+                })
+              : t("faucet.unread")}
           </p>
           {/* The only step with no field above it, so the button has no column width to match and
               is capped to its own words instead. Every other primary control on this screen sits
               under a full-width amount card and lines up with it. */}
           <div className="sm:max-w-[20rem]">
             <PrimaryButton
-              onClick={() => money.mint(FAUCET_AMOUNT, refresh)}
+              onClick={() => money.mint(config.faucet, refresh)}
               disabled={acting}
-              busy={money.busy && money.label === "Get test USDC"}
+              busy={money.busy && money.label?.key === "mint"}
             >
-              Get test USDC
+              {t("faucet.button", { underlying: symbols.underlying })}
             </PrimaryButton>
           </div>
-          <p className={CARD_NOTE}>
-            Zama&apos;s mock USDC has an open mint capped at one million tokens a call. It is worth
-            nothing, so ask for more than you need.
-          </p>
+          <p className={CARD_NOTE}>{t("faucet.note", { underlying: symbols.underlying })}</p>
         </div>
       ),
     },
     {
       key: "shield",
-      title: "Shield your USDC",
+      title: t("shield.title", { underlying: symbols.underlying }),
       status: statusOf("shield", holdsConfidential),
       summary: (
         <>
-          Shielded. The balance is sealed, so only you can read what is in it.{" "}
+          {t("shield.summary")}
           <button type="button" onClick={() => setChosen("shield")} className={INLINE_LINK}>
-            Shield more
+            {t("shield.more")}
           </button>
         </>
       ),
       body: (
         <div className="flex flex-col gap-4">
           <p className={CARD_PROSE}>
-            Shielding wraps plain USDC into the confidential kind, and it is public. The wrapper emits
-            the plaintext amount, the ERC-20 transfer carries it again, and there is no way around
-            that: turning a public token into a confidential one is by definition a public act.
+            {t("shield.body", {
+              underlying: symbols.underlying,
+              confidential: symbols.confidential,
+            })}
           </p>
 
           <AmountCard
-            label="You shield"
-            name="Amount of USDC to shield"
+            label={t("shield.youShield")}
+            name={t("shield.fieldName", { underlying: symbols.underlying })}
             value={wrapInput}
             onChange={setWrapInput}
-            token={symbols.usdc}
-            onMax={balancesKnown ? () => setWrapInput(exactAmount(saver.usdc)) : undefined}
-            maxLabel="All of it"
+            token={symbols.underlying}
+            onMax={
+              balancesKnown
+                ? () => setWrapInput(exactAmount(saver.underlyingBalance, config.underlyingDecimals))
+                : undefined
+            }
+            maxLabel={amountWords("allOfIt")}
             disabled={acting}
             problem={wrapProblem}
             balance={
               balancesKnown ? (
-                `${formatAmount(saver.usdc)} USDC in your wallet`
+                t("shield.balance", {
+                  amount: plain(saver.underlyingBalance),
+                  underlying: symbols.underlying,
+                })
               ) : (
                 <span>
-                  In your wallet: <Unknown scale="inline" />
+                  {t("inWalletUnknown")}
+                  <Unknown scale="inline" />
                 </span>
               )
             }
           />
 
           <ReceiveCard
-            label="You receive"
+            label={t("shield.youReceive")}
             token={symbols.confidential}
             value={receives}
             balance={walletBalance}
@@ -235,19 +292,16 @@ export function DepositFlow() {
               already owns that shape. This is the accent speaking, so it takes the rail's ember
               treatment instead: a lit edge with the wash falling away from it. */}
           <p
-            className={`rounded-r-xl border-l-2 border-l-flame bg-gradient-to-r from-flame/[0.12] via-flame/[0.04] to-flame/0 px-4 py-3.5 ${CARD_NOTE}`}
+            className={`rounded-e-xl border-s-2 border-s-flame bg-gradient-to-r rtl:bg-gradient-to-l from-flame/[0.12] via-flame/[0.04] to-flame/0 px-4 py-3.5 ${CARD_NOTE}`}
           >
-            This is why shielding and depositing are two buttons and not one. Shield a round number, at
-            a time of your choosing, and deposit part of it later. Anyone who can pin your balance can
-            compute whether you won in every draw from then on, because the thresholds are public by
-            design.
+            {t("shield.why")}
           </p>
 
           <PrimaryButton
             onClick={() => {
               if (!wrapAmount.ok) return;
               if (needsApproval) {
-                money.approve(wrapAmount.value, refresh);
+                money.approve(WRAPPER_ALLOWANCE, refresh);
                 return;
               }
               money.wrap(wrapAmount.value, () => {
@@ -257,27 +311,21 @@ export function DepositFlow() {
               });
             }}
             disabled={acting || !balancesKnown || !wrapAmount.ok || wrapProblem !== null}
-            busy={
-              money.busy &&
-              (money.label === "Approve the wrapper" || money.label === "Wrap into confidential USDC")
-            }
+            busy={money.busy && (money.label?.key === "approve" || money.label?.key === "wrap")}
           >
-            {needsApproval ? "Approve the wrapper" : "Shield"}
+            {needsApproval ? t("shield.approve") : t("shield.button")}
           </PrimaryButton>
 
           {needsApproval && (
             <p className={CARD_NOTE}>
-              The wrapper is allowed {formatAmount(saver.allowance)} USDC of yours today, which is less
-              than this. Approve first, then shield: two signatures, and the shield button takes over
-              once the approval is mined.
+              {t("shield.approveNote", {
+                underlying: symbols.underlying,
+                confidential: symbols.confidential,
+              })}
             </p>
           )}
 
-          {saver.connected && !balancesKnown && (
-            <p className={CARD_NOTE}>
-              Your balances have not come back from the chain yet, so this is held until they do.
-            </p>
-          )}
+          {saver.connected && !balancesKnown && <p className={CARD_NOTE}>{t("shield.waiting")}</p>}
 
           {chosen === "shield" && holdsConfidential && (
             <button
@@ -285,7 +333,7 @@ export function DepositFlow() {
               onClick={() => setChosen(null)}
               className="self-start text-[12.5px] text-muted underline-offset-2 hover:text-parchment hover:underline"
             >
-              Deposit what you already hold instead
+              {t("shield.skip")}
             </button>
           )}
         </div>
@@ -293,36 +341,30 @@ export function DepositFlow() {
     },
     {
       key: "deposit",
-      title: "Deposit into the vault",
+      title: t("vault.title"),
       status: statusOf("deposit", false),
       body: (
         <div className="flex flex-col gap-4">
-          <p className={CARD_PROSE}>
-            The amount is encrypted in your browser with a zero-knowledge proof, then sent in one
-            transaction. The vault credits exactly what the token says actually moved, so asking for
-            more than you hold moves nothing at all rather than failing loudly. Open the eye below if
-            you are not sure what you have.
-          </p>
+          <p className={CARD_PROSE}>{t("vault.body")}</p>
 
-          {closedNotAwarded && (
-            <p className={CARD_NOTE}>
-              A draw is closed and waiting for its award right now. Depositing is still allowed; this
-              money counts from this moment on, weighted by the part of the current period that is
-              still to run.
-            </p>
-          )}
+          {closedNotAwarded && <p className={CARD_NOTE}>{t("vault.closedNotAwarded")}</p>}
 
           <AmountCard
-            label="You deposit"
-            name="Amount of confidential USDC to deposit"
+            label={t("vault.youDeposit")}
+            name={t("vault.fieldName", { confidential: symbols.confidential })}
             value={depositInput}
             onChange={setDepositInput}
             token={symbols.confidential}
-            onMax={walletHeld !== null ? () => setDepositInput(exactAmount(walletHeld)) : undefined}
-            maxLabel="All of it"
+            onMax={
+              walletHeld !== null
+                ? () => setDepositInput(exactAmount(walletHeld, config.decimals))
+                : undefined
+            }
+            maxLabel={amountWords("allOfIt")}
             disabled={acting || pool.vaultPaused}
             problem={depositProblem}
             balance={walletBalance}
+            note={walletHeld === null ? t("vault.sealedNote") : null}
           />
 
           <PrimaryButton
@@ -340,15 +382,13 @@ export function DepositFlow() {
               !depositAmount.ok ||
               depositProblem !== null
             }
-            busy={money.busy && money.label === "Deposit"}
+            busy={money.busy && money.label?.key === "deposit"}
           >
-            Deposit
+            {t("vault.button")}
           </PrimaryButton>
 
           {pool.vaultPaused && (
-            <p className="text-[12.5px] leading-relaxed text-bad">
-              The vault is paused, so deposits are refused. Withdrawing still works.
-            </p>
+            <p className="text-[12.5px] leading-relaxed text-bad">{t("vault.paused")}</p>
           )}
         </div>
       ),
@@ -356,23 +396,30 @@ export function DepositFlow() {
   ];
 
   return (
-    <div className="flex flex-col gap-4">
-      <ConnectPrompt note="You will need a little Sepolia ETH for gas. The test USDC is one click away once you are connected.">
-        Connect a wallet on Sepolia to deposit. The three steps below are what getting money into the
-        pool takes, and the screen opens whichever one your wallet is actually up to.
-      </ConnectPrompt>
+    <>
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle", {
+          underlying: symbols.underlying,
+          confidential: symbols.confidential,
+        })}
+      />
 
-      {lowGas && (
-        <p className={`panel-glare rounded-card border border-warn/45 bg-warn/[0.08] px-5 py-4 ${CARD_NOTE}`}>
-          This wallet holds almost no Sepolia ETH, so a transaction will fail before it is sent. Any
-          Sepolia faucet tops it up: the Google Cloud Web3 faucet, Alchemy&apos;s or Chainlink&apos;s.
-          A tenth of an ETH is far more than enough.
-        </p>
-      )}
+      <div className="flex flex-col gap-4">
+        <ConnectPrompt note={t("connectNote", { underlying: symbols.underlying })}>
+          {t("connect")}
+        </ConnectPrompt>
 
-      <StepList steps={steps} />
+        {lowGas && (
+          <p className={`panel-glare rounded-card border border-warn/45 bg-warn/[0.08] px-5 py-4 ${CARD_NOTE}`}>
+            {t("lowGas")}
+          </p>
+        )}
 
-      <ActionNote {...phaseNote(money.phase, money.label, money.reset)} />
-    </div>
+        <StepList steps={steps} />
+
+        <ActionNote {...phaseNote(money.phase, money.label, money.reset, money.blockedBy)} />
+      </div>
+    </>
   );
 }

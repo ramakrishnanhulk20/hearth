@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 
 type MermaidApi = {
@@ -50,7 +51,18 @@ const MERMAID_CONFIG = {
   },
 };
 
-function addCopyButtons(root: HTMLElement) {
+/** The four words the finished DOM needs, handed in because it is built outside React. */
+type Words = {
+  copy: string;
+  copied: string;
+  copyManual: string;
+  copyLabel: string;
+  diagramWide: string;
+  diagramFailed: string;
+  rendererFailed: string;
+};
+
+function addCopyButtons(root: HTMLElement, words: Words) {
   const blocks = root.querySelectorAll<HTMLElement>("[data-code]");
 
   for (const block of blocks) {
@@ -59,23 +71,23 @@ function addCopyButtons(root: HTMLElement) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "doc-copy";
-    button.textContent = "Copy";
-    button.setAttribute("aria-label", "Copy this block");
+    button.textContent = words.copy;
+    button.setAttribute("aria-label", words.copyLabel);
 
     button.addEventListener("click", () => {
       const text = block.querySelector("code")?.textContent ?? "";
       navigator.clipboard
         .writeText(text)
         .then(() => {
-          button.textContent = "Copied";
+          button.textContent = words.copied;
           button.dataset.copied = "true";
           window.setTimeout(() => {
-            button.textContent = "Copy";
+            button.textContent = words.copy;
             delete button.dataset.copied;
           }, 1600);
         })
         .catch(() => {
-          button.textContent = "Press ctrl C";
+          button.textContent = words.copyManual;
         });
     });
 
@@ -83,7 +95,7 @@ function addCopyButtons(root: HTMLElement) {
   }
 }
 
-async function drawDiagrams(root: HTMLElement, aborted: () => boolean) {
+async function drawDiagrams(root: HTMLElement, aborted: () => boolean, words: Words) {
   const figures = [...root.querySelectorAll<HTMLElement>("[data-diagram]")];
   if (figures.length === 0) return;
 
@@ -98,7 +110,7 @@ async function drawDiagrams(root: HTMLElement, aborted: () => boolean) {
     mermaid = loaded.default;
     mermaid.initialize(MERMAID_CONFIG);
   } catch {
-    for (const figure of figures) fail(figure, "The diagram renderer did not load. The source is below.");
+    for (const figure of figures) fail(figure, words.rendererFailed);
     return;
   }
 
@@ -121,9 +133,9 @@ async function drawDiagrams(root: HTMLElement, aborted: () => boolean) {
         canvas.insertBefore(drawn, canvas.firstChild);
       }
       figure.dataset.state = "done";
-      hint(figure, canvas);
+      hint(figure, canvas, words.diagramWide);
     } catch {
-      fail(figure, "This diagram did not draw. The source is below.");
+      fail(figure, words.diagramFailed);
     }
   }
 }
@@ -142,13 +154,13 @@ function size(svg: SVGSVGElement) {
   svg.style.minWidth = `${Math.round(natural * SMALLEST_READABLE)}px`;
 }
 
-function hint(figure: HTMLElement, canvas: HTMLElement) {
+function hint(figure: HTMLElement, canvas: HTMLElement, message: string) {
   if (canvas.scrollWidth <= canvas.clientWidth + 1) return;
   if (figure.querySelector(".doc-diagram-hint")) return;
 
   const line = document.createElement("p");
   line.className = "doc-diagram-hint";
-  line.textContent = "Wider than the column. Scroll it sideways.";
+  line.textContent = message;
   figure.appendChild(line);
 }
 
@@ -167,20 +179,31 @@ function fail(figure: HTMLElement, message: string) {
  * needs are attached to the finished DOM instead of being expressed as components.
  */
 export function DocBody({ html }: { html: string }) {
+  const t = useTranslations("docs");
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
 
+    const words: Words = {
+      copy: t("copy"),
+      copied: t("copied"),
+      copyManual: t("copyManual"),
+      copyLabel: t("copyLabel"),
+      diagramWide: t("diagramWide"),
+      diagramFailed: t("diagramFailed"),
+      rendererFailed: t("rendererFailed"),
+    };
+
     let cancelled = false;
-    addCopyButtons(root);
-    void drawDiagrams(root, () => cancelled);
+    addCopyButtons(root, words);
+    void drawDiagrams(root, () => cancelled, words);
 
     return () => {
       cancelled = true;
     };
-  }, [html]);
+  }, [html, t]);
 
   return <div ref={ref} className="doc-prose" dangerouslySetInnerHTML={{ __html: html }} />;
 }

@@ -1,43 +1,33 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { Link } from "@/i18n/navigation";
+import { LOCALE_CODES } from "@/i18n/routing";
+import { alternates } from "@/lib/hreflang";
 
-export const metadata: Metadata = {
-  title: "How it works",
-  description:
-    "Deposit confidential USDC, keep your balance encrypted, win prizes drawn from yield with odds set by your time-weighted balance, and withdraw whenever you like.",
-};
+export function generateStaticParams() {
+  return LOCALE_CODES.map((locale) => ({ locale }));
+}
 
-const STEPS = [
-  {
-    title: "Wrap, then deposit",
-    body: "Turn plain test USDC into confidential USDC, then put part of it into the pool. Wrapping is public and depositing is not, which is exactly why they are two buttons: doing both in one click publishes the size of your deposit to anyone reading the chain.",
-  },
-  {
-    title: "Your odds are your average balance",
-    body: "Not your balance at the moment of the draw, your balance across the whole period. Deposit five minutes before the period ends and you get one twelfth of the odds of having held the same amount all period. That is what stops somebody flashing a big balance in just before each draw and taking the prize.",
-  },
-  {
-    title: "The draw closes, and a seed is drawn",
-    body: "Prize sizes are fixed first, before any random number exists. Then the seed is generated as a ciphertext inside Zama's coprocessor, so nobody sees it when it is drawn and there is no second roll. When the period is over the seed is published with a signature the contract checks on chain.",
-  },
-  {
-    title: "Everyone's result is already decided",
-    body: "From the moment the seed is verified, the thresholds are public numbers anyone can recompute and the weights can no longer change. Evaluation just writes down what is already true, walking the saver list from a point the seed picked. Nobody chooses who is evaluated or in what order.",
-  },
-  {
-    title: "You look, and only you",
-    body: "Press Reveal and sign a message. That signature proves to Zama's relayer that you control the address, and it hands back the plaintext of values the contract granted you: your principal, your winnings, your weight and your credit for each draw. It costs no gas and writes nothing.",
-  },
-  {
-    title: "Take it out whenever",
-    body: "Withdrawals pay from winnings first, then principal, in one confidential transfer clamped on chain to what you hold. A claim is the same call with the same shape as any other withdrawal, so there is no transaction type that names the winners.",
-  },
-];
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "meta.how" });
+  return { title: t("title"), description: t("description"), alternates: alternates("/how", locale) };
+}
 
-export default function HowItWorksPage() {
+const STEPS = ["one", "two", "three", "four", "five", "six"] as const;
+
+export default async function HowItWorksPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "how" });
+
   return (
     <main className="grain relative min-h-[100svh] bg-ink">
       <SmoothScroll />
@@ -56,93 +46,70 @@ export default function HowItWorksPage() {
 
         <div className="mx-auto w-full max-w-[52rem] px-4 pb-24 sm:px-6">
           <section className="fade-rise pt-10 text-center sm:pt-16">
-            <p className="label mb-5 justify-center">A two-minute guide</p>
+            <p className="label mb-5 justify-center">{t("kicker")}</p>
             <h1
               className="mx-auto max-w-[16ch] font-display text-[clamp(2.1rem,6.5vw,4.4rem)] leading-[0.98] tracking-tightest text-parchment"
               style={{ fontWeight: 720 }}
             >
-              How Hearth works
+              {t("title")}
             </h1>
-            <p className="mx-auto mt-5 max-w-[46ch] text-[16px] leading-relaxed text-muted">
-              Save together, win a prize paid out of yield, and never lose your deposit. The money is
-              invisible. The fairness is not.
-            </p>
+            <p className="mx-auto mt-5 max-w-[46ch] text-[16px] leading-relaxed text-muted">{t("lede")}</p>
           </section>
 
           <section className="mt-14 flex flex-col gap-3 sm:mt-20">
             {STEPS.map((step, index) => (
               <Step
-                key={step.title}
+                key={step}
                 n={index + 1}
-                title={step.title}
-                body={step.body}
+                title={t(`steps.${step}.title`)}
+                body={t(`steps.${step}.body`)}
                 last={index === STEPS.length - 1}
               />
             ))}
           </section>
 
           <section className="fade-rise mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Panel title="Encrypted, readable only by you" note="your own values" tone="private">
-              <li>Your principal</li>
-              <li>Your unclaimed winnings</li>
-              <li>Your time-weighted balance in every draw</li>
-              <li>What each draw paid you, so whether you won</li>
+            <Panel title={t("private.title")} note={t("private.note")} tone="private">
+              <li>{t("private.one")}</li>
+              <li>{t("private.two")}</li>
+              <li>{t("private.three")}</li>
+              <li>{t("private.four")}</li>
             </Panel>
-            <Panel title="Public, so the pool can be trusted" note="anyone can check" tone="public">
-              <li>The seed of each draw, and its signature</li>
-              <li>The bracket the draw ran against</li>
-              <li>Each tier&apos;s prize size and liquidity</li>
-              <li>How many prizes a tier paid, one draw later</li>
-              <li>Which addresses deposited, and when</li>
+            <Panel title={t("public.title")} note={t("public.note")} tone="public">
+              <li>{t("public.one")}</li>
+              <li>{t("public.two")}</li>
+              <li>{t("public.three")}</li>
+              <li>{t("public.four")}</li>
+              <li>{t("public.five")}</li>
             </Panel>
           </section>
 
           <section className="fade-rise mt-12 rounded-panel border border-hairline bg-[rgba(10,10,10,0.5)] p-5 sm:p-6">
-            <h2 className="label">Named honestly: what leaks</h2>
+            <h2 className="label">{t("leaks.title")}</h2>
             <ul className="mt-4 flex flex-col gap-3 text-[13.5px] leading-relaxed text-muted">
-              <li>
-                <span className="text-parchment">Wrapping and unwrapping are public.</span> Turning a
-                public token into a confidential one is by definition a public act. If somebody can pin
-                your balance, usually by watching a public wrap followed by a deposit of the same size,
-                then your result in every draw from then on is public arithmetic, because the thresholds
-                are public by design.
-              </li>
-              <li>
-                <span className="text-parchment">Below three savers the bracket is nearly personal.</span>{" "}
-                With one saver it is that saver&apos;s weight to within a factor of two. The app says so
-                on the page when it happens.
-              </li>
-              <li>
-                <span className="text-parchment">Each tier publishes how many prizes it paid,</span> one
-                draw later, never to whom. That is the same step that returns unwon money to the public
-                pot, which is what lets the jackpot accumulate where you can watch it. It slowly narrows
-                a balance that never moves.
-              </li>
-              <li>
-                <span className="text-parchment">The token is Zama&apos;s, and it is upgradeable.</span>{" "}
-                Its owner can appoint observers able to decrypt every amount that moves through the
-                token, retroactively. Hearth&apos;s own ledger is not readable by them, and the app
-                shows a banner if an observer is ever appointed.
-              </li>
+              {(["one", "two", "three", "four"] as const).map((key) => (
+                <li key={key}>
+                  <span className="text-parchment">{t(`leaks.${key}Lead`)}</span> {t(`leaks.${key}Body`)}
+                </li>
+              ))}
             </ul>
           </section>
 
           <section className="fade-rise mt-12 text-center">
-            <p className="mx-auto max-w-[42ch] text-[15px] leading-relaxed text-muted">
-              You can watch a whole draw happen and still not say who won. That is the point, and it is
-              the one thing only fully homomorphic encryption makes possible.
-            </p>
+            <p className="mx-auto max-w-[42ch] text-[15px] leading-relaxed text-muted">{t("closing")}</p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/app"
                 prefetch
                 className="inline-flex items-center gap-2 rounded-lg bg-flameFill px-6 py-3.5 text-[15px] font-medium text-onFlame transition-transform duration-200 hover:scale-[1.02]"
               >
-                Open the pool
-                <span aria-hidden>&rarr;</span>
+                {t("open")}
+                <span aria-hidden className="rtl:-scale-x-100">
+                  &rarr;
+                </span>
               </Link>
               <Link href="/verify" className="text-[14px] text-muted transition-colors hover:text-parchment">
-                Check a draw yourself
+                {t("check")}
               </Link>
             </div>
           </section>
@@ -200,7 +167,7 @@ function Panel({
         </span>
       </div>
       <ul
-        className={`list-disc space-y-2.5 pl-[1.1rem] text-[14px] text-muted ${
+        className={`list-disc space-y-2.5 ps-[1.1rem] text-[14px] text-muted ${
           tone === "private" ? "marker:text-flame/60" : "marker:text-white/30"
         }`}
       >

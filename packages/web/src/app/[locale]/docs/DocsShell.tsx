@@ -1,8 +1,10 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useCallback, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { usePathname } from "@/i18n/navigation";
+import { useDialogFocus } from "@/hooks/useDialogFocus";
 import type { DocSection, SearchRow } from "@/lib/docs/types";
 import { DocsNav } from "./DocsNav";
 
@@ -23,36 +25,27 @@ export function DocsShell({
   search: SearchRow[];
   children: ReactNode;
 }) {
+  const t = useTranslations("docs");
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   const here =
     sections.flatMap((section) => section.pages).find((page) => page.href === pathname)?.title ??
-    "Overview";
+    t("overview");
 
-  useEffect(() => {
-    if (!drawerOpen) return;
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setDrawerOpen(false);
-    };
-    // The drawer covers the page, so the page behind it must not scroll under the reader's thumb.
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-
-    return () => {
-      document.body.style.overflow = previous;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [drawerOpen]);
+  // The same trap the console rail uses. This drawer had Escape and a locked page but nothing
+  // holding Tab, so a reader could tab out of a menu covering the whole screen, and nothing sent
+  // focus back to the button that opened it.
+  useDialogFocus(drawerRef, closeDrawer, drawerOpen);
 
   return (
     <div className="docs-root">
       <div className="docs-bar">
         <button type="button" className="docs-bar-button" onClick={() => setDrawerOpen(true)}>
           <MenuIcon />
-          Contents
+          {t("contents")}
         </button>
         <span className="docs-bar-here">{here}</span>
       </div>
@@ -65,20 +58,20 @@ export function DocsShell({
       </div>
 
       {drawerOpen && (
-        <div className="docs-drawer" role="dialog" aria-modal="true" aria-label="Documentation contents">
-          <div className="docs-drawer-scrim" onClick={() => setDrawerOpen(false)} />
-          <div className="docs-drawer-panel">
+        <div className="docs-drawer" role="dialog" aria-modal="true" aria-label={t("contents")}>
+          <div className="docs-drawer-scrim" onClick={closeDrawer} />
+          <div ref={drawerRef} className="docs-drawer-panel">
             <div className="mb-4 flex items-center justify-between">
-              <span className="docs-nav-label">Contents</span>
+              <span className="docs-nav-label">{t("contents")}</span>
               <button
                 type="button"
-                onClick={() => setDrawerOpen(false)}
+                onClick={closeDrawer}
                 className="text-[12px] text-faint transition-colors hover:text-parchment"
               >
-                Close
+                {t("close")}
               </button>
             </div>
-            <DocsNav sections={sections} search={search} onNavigate={() => setDrawerOpen(false)} />
+            <DocsNav sections={sections} search={search} onNavigate={closeDrawer} />
           </div>
         </div>
       )}

@@ -1,0 +1,964 @@
+{
+  "chrome": {
+    "home": "Hearth, trang chủ",
+    "nav": {
+      "pool": "Pool",
+      "verify": "Kiểm chứng",
+      "how": "Cách hoạt động",
+      "docs": "Tài liệu"
+    },
+    "menu": {
+      "open": "Mở menu",
+      "close": "Đóng menu",
+      "label": "Menu trang"
+    },
+    "footer": {
+      "tagline": "Tiết kiệm trúng thưởng bảo mật, không thua lỗ",
+      "zama": "Xây trên Zama Protocol",
+      "disclaimer": "Bản minh hoạ trên mạng thử nghiệm Sepolia. Token ở đây là token thử nghiệm không có giá trị, phần lợi suất là một khoản do nhà tài trợ nạp vào chứ không phải một chiến lược thật, và không có gì ở đây là lời khuyên tài chính."
+    },
+    "language": {
+      "trigger": "Ngôn ngữ: {name}. Đổi ngôn ngữ",
+      "list": "Chọn một ngôn ngữ",
+      "heading": "Ngôn ngữ",
+      "note": "Dịch bằng tay. Trang nào chúng tôi chưa dịch tới thì đọc bằng tiếng Anh.",
+      "current": "hiện tại"
+    }
+  },
+  "landing": {
+    "scrollCue": "Cuộn",
+    "noWebgl": "Trình duyệt này không khởi động được cảnh 3D, nên câu chuyện được kể ở đây dưới dạng một trang thường. Không phần nào khác của trang web cần tới nó.",
+    "header": {
+      "how": "Cách hoạt động",
+      "open": "Mở pool"
+    },
+    "story": {
+      "one": {
+        "kicker": "Tiết kiệm trúng thưởng bảo mật",
+        "title": "Một bếp lửa. Chỉ sáng cho người giữ nó."
+      },
+      "two": {
+        "kicker": "Bạn gửi tiền",
+        "title": "Bạn đổ đầy nó, và con số đóng kín lại.",
+        "body": "Số tiền được mã hoá ngay trong trình duyệt của bạn và nằm trên chuỗi ở dạng bản mã. Từ đây trở đi con số ấy chỉ của riêng bạn, và danh sách kiểm soát truy cập của Zama là thứ thực thi điều đó."
+      },
+      "three": {
+        "title": "Và nó là một trong rất nhiều.",
+        "body": "Số dư của mọi người gửi đều cháy sáng, mà không đọc được cái nào từ bên ngoài. Pool cũng không bao giờ công bố tổng chính xác của mình, chỉ công bố luỹ thừa hai mà nó nằm dưới, vì tổng chính xác sẽ để lộ khoản gửi của người duy nhất dịch chuyển tiền."
+      },
+      "four": {
+        "kicker": "Kỳ quay",
+        "title": "Một seed không ai nhìn thấy, rút ra bên trong coprocessor.",
+        "body": "Giá trị giải được chốt trước khi seed tồn tại, nên không ai đọc được seed, tính ra rằng mình trúng, rồi làm cho phần thắng lớn thêm. Khi kỳ kết thúc, seed được công bố kèm một chữ ký mà hợp đồng kiểm ngay trên chuỗi."
+      },
+      "five": {
+        "kicker": "Phần thắng",
+        "title": "Một bếp lửa cháy sáng hơn.",
+        "body": "Tỷ lệ trúng tỷ lệ thuận với số dư giữ suốt cả kỳ, nên một khoản gửi ngay trước kỳ quay chỉ ăn được đúng phần kỳ mà nó có mặt. Giải thưởng rơi vào một số dư tiền thưởng đã mã hoá, và việc nhận thưởng chỉ là một lệnh rút bình thường."
+      }
+    },
+    "close": {
+      "kicker": "Thử đi",
+      "title": "Tiết kiệm trong bóng tối.",
+      "body": "Gửi một token bảo mật thử nghiệm trên Sepolia, tự chạy một kỳ quay, và kiểm rằng chỉ mình bạn đọc được số dư của mình. Nó không tốn gì ngoài một ít ETH thử nghiệm.",
+      "open": "Mở pool",
+      "grandPrize": "<figure>{amount} {symbol}</figure> giải lớn ở kỳ quay tới",
+      "saversPeriod": "{count, plural, other {{shown} người gửi}} · kỳ {period}",
+      "offline": "Sepolia đang không trả lời, nên các con số trực tiếp bị thiếu. Pool không bị ảnh hưởng: nó sống trên chuỗi, không sống ở đây."
+    },
+    "shelf": {
+      "heading": "Chọn token của bạn",
+      "unread": "chưa đọc được",
+      "note": "Giải lớn của từng pool ngay lúc này, đọc từ chuỗi. Cùng một vault, cùng một kỳ quay, cùng một mức riêng tư, mỗi token bảo mật một pool."
+    },
+    "sealed": {
+      "heading": "Số dư của một người gửi",
+      "empty": "Chưa ai gửi tiền. Ngay khi có người gửi, số dư đã mã hoá của họ hiện ra ở đây và bạn thử mở được.",
+      "try": "Thử mở nó",
+      "asking": "Đang hỏi dịch vụ quản lý khoá của Zama",
+      "askingWait": "Thường mất vài giây.",
+      "askingLong": "Đã {seconds} giây. Đây là mạng thật, nên đôi lúc phải chờ.",
+      "refused": "Bị từ chối.",
+      "refusedNote": "Câu trả lời đó đến từ dịch vụ quản lý khoá của Zama, không phải từ trang này. Chỉ ví đang giữ số dư này mới đọc được nó, và không quản trị viên nào ghi đè được điều đó.",
+      "unreachable": "Không liên lạc được với dịch vụ giải mã.",
+      "unreachableNote": "Đó là lỗi mạng chứ không phải một lần từ chối, nên nó không chứng minh điều gì. Nên thử lại sau một lát.",
+      "again": "Thử lại",
+      "leaked": "Nó đã giải mã được, và lẽ ra không được phép.",
+      "leakedNote": "Dịch vụ trả về {value}. Xin hãy báo cho chúng tôi, vì đây đúng là kết quả duy nhất mà sản phẩm này sinh ra để làm cho không thể xảy ra."
+    },
+    "footer": {
+      "tagline": "Hearth, tiết kiệm trúng thưởng bảo mật, không thua lỗ",
+      "how": "Cách hoạt động",
+      "verify": "Kiểm chứng một kỳ quay",
+      "docs": "Tài liệu",
+      "zama": "Xây trên Zama Protocol"
+    }
+  },
+  "how": {
+    "kicker": "Hướng dẫn hai phút",
+    "title": "Hearth hoạt động thế nào",
+    "lede": "Tiết kiệm cùng nhau, trúng một giải trả bằng lợi suất, và không bao giờ mất khoản gửi. Tiền thì vô hình. Sự công bằng thì không.",
+    "steps": {
+      "one": {
+        "title": "Shield, rồi gửi tiền",
+        "body": "Biến một token thử nghiệm thường thành bản song sinh bảo mật của nó, rồi bỏ một phần vào pool của token đó. Việc shield là công khai còn việc gửi tiền thì không, và đó chính là lý do chúng là hai cái nút: làm cả hai trong một cú nhấn là công bố kích cỡ khoản gửi của bạn cho bất kỳ ai đọc chuỗi."
+      },
+      "two": {
+        "title": "Tỷ lệ trúng của bạn là số dư trung bình của bạn",
+        "body": "Không phải số dư ở khoảnh khắc quay, mà là số dư suốt cả kỳ. Gửi tiền năm phút trước khi kỳ kết thúc thì bạn chỉ được một phần mười hai tỷ lệ trúng so với việc giữ đúng số tiền ấy cả kỳ. Đó là thứ chặn người ta khoe một số dư lớn ngay trước mỗi kỳ quay rồi ôm giải đi."
+      },
+      "three": {
+        "title": "Kỳ quay đóng lại, và một seed được rút",
+        "body": "Giá trị giải được chốt trước, trước khi tồn tại bất kỳ con số ngẫu nhiên nào. Rồi seed được sinh ra dưới dạng bản mã bên trong coprocessor của Zama, nên không ai nhìn thấy nó lúc rút và không có lần quay thứ hai. Khi kỳ đã kết thúc, seed được công bố kèm một chữ ký mà hợp đồng kiểm ngay trên chuỗi."
+      },
+      "four": {
+        "title": "Kết quả của mọi người đã được quyết định xong",
+        "body": "Từ lúc seed được kiểm chứng, các ngưỡng là những con số công khai ai cũng tính lại được và các trọng số không đổi được nữa. Việc duyệt chỉ ghi lại thứ vốn đã đúng, đi dọc danh sách người gửi từ một điểm do seed chọn. Không ai chọn được ai bị duyệt hay duyệt theo thứ tự nào."
+      },
+      "five": {
+        "title": "Bạn nhìn, và chỉ mình bạn",
+        "body": "Nhấn Mở rồi ký một thông điệp. Chữ ký đó chứng minh với relayer của Zama rằng bạn kiểm soát địa chỉ này, và nó trả về bản rõ của những giá trị mà hợp đồng đã cấp quyền cho bạn: tiền gốc, tiền thưởng, trọng số và khoản ghi có của bạn ở từng kỳ quay. Nó không tốn gas và không ghi gì cả."
+      },
+      "six": {
+        "title": "Rút ra lúc nào cũng được",
+        "body": "Lệnh rút trả từ tiền thưởng trước, rồi tới tiền gốc, trong một lần chuyển bảo mật được kẹp trên chuỗi theo đúng số bạn đang giữ. Việc nhận thưởng là cùng lời gọi đó, cùng hình dạng với mọi lệnh rút khác, nên không có loại giao dịch nào gọi tên người trúng."
+      }
+    },
+    "private": {
+      "title": "Đã mã hoá, chỉ mình bạn đọc được",
+      "note": "giá trị của riêng bạn",
+      "one": "Tiền gốc của bạn",
+      "two": "Tiền thưởng chưa nhận của bạn",
+      "three": "Số dư bình quân theo thời gian của bạn ở mọi kỳ quay",
+      "four": "Mỗi kỳ quay trả cho bạn bao nhiêu, tức là bạn có trúng hay không"
+    },
+    "public": {
+      "title": "Công khai, để pool đáng tin",
+      "note": "ai cũng kiểm được",
+      "one": "Seed của từng kỳ quay, và chữ ký của nó",
+      "two": "Bậc mà kỳ quay chạy trên đó",
+      "three": "Giá trị giải và thanh khoản của từng hạng giải",
+      "four": "Một hạng giải trả bao nhiêu giải, sau đó một kỳ quay",
+      "five": "Những địa chỉ nào đã gửi tiền, và gửi lúc nào"
+    },
+    "leaks": {
+      "title": "Nói thẳng: cái gì bị lộ",
+      "oneLead": "Shield và unshield là công khai.",
+      "oneBody": "Biến một token công khai thành token bảo mật, tự bản chất, là một hành vi công khai. Nếu ai đó ghim được số dư của bạn, thường là bằng cách nhìn một lần shield công khai rồi tới một khoản gửi cùng cỡ, thì kết quả của bạn ở mọi kỳ quay từ đó trở đi là phép tính công khai, vì các ngưỡng vốn công khai theo thiết kế.",
+      "twoLead": "Dưới ba người gửi thì bậc gần như là thông tin cá nhân.",
+      "twoBody": "Với một người gửi, đó chính là trọng số của người ấy trong sai số gấp đôi. Ứng dụng nói thẳng điều đó ngay trên trang khi chuyện xảy ra.",
+      "threeLead": "Mỗi hạng giải công bố nó đã trả bao nhiêu giải,",
+      "threeBody": "sau đó một kỳ quay, và không bao giờ nói trả cho ai. Đó cũng chính là bước đưa tiền không ai trúng về lại quỹ chung công khai, thứ khiến giải độc đắc lớn dần ngay trước mắt bạn. Nó từ từ siết chặt một số dư không bao giờ dịch chuyển.",
+      "fourLead": "Token là của Zama, và nó nâng cấp được.",
+      "fourBody": "Chủ sở hữu của nó có thể chỉ định những người quan sát đọc được mọi số tiền đi qua token, kể cả ngược về quá khứ. Sổ sách riêng của Hearth thì họ không đọc được, và ứng dụng hiện một dải cảnh báo nếu có người quan sát nào được chỉ định."
+    },
+    "closing": "Bạn xem trọn một kỳ quay diễn ra mà vẫn không nói được ai trúng. Đó chính là điểm mấu chốt, và đó là điều duy nhất chỉ mã hoá đồng cấu hoàn toàn mới làm được.",
+    "open": "Mở pool",
+    "check": "Tự kiểm một kỳ quay"
+  },
+  "picker": {
+    "trigger": "Đang tiết kiệm bằng {symbol}. Đổi token",
+    "list": "Chọn một token",
+    "saveIn": "Tiết kiệm bằng",
+    "grandPrize": "Giải lớn",
+    "unread": "chưa đọc được",
+    "savingPool": "pool tiết kiệm",
+    "notSupported": "không hỗ trợ",
+    "zamaList": "Danh sách của Zama",
+    "reasons": {
+      "restrictedMint": "chỉ đơn vị phát hành mới được đúc"
+    }
+  },
+  "console": {
+    "shell": {
+      "openMenu": "Mở menu bảng điều khiển",
+      "closeMenu": "Đóng menu bảng điều khiển",
+      "menuLabel": "Menu bảng điều khiển",
+      "loading": "Đang nhóm bếp lửa"
+    },
+    "sidebar": {
+      "nav": "Điều khiển",
+      "dashboard": "Bảng điều khiển",
+      "deposit": "Gửi tiền",
+      "withdraw": "Rút tiền",
+      "draws": "Kỳ quay của tôi",
+      "run": "Chạy một kỳ quay",
+      "anyone": "Bất kỳ ai",
+      "anyoneTitle": "Mọi bước của một kỳ quay đều gọi được từ bất kỳ ví nào",
+      "docs": "Tài liệu",
+      "verify": "Kiểm chứng"
+    },
+    "wallet": {
+      "connect": "Kết nối ví",
+      "connecting": "Đang kết nối",
+      "scan": "Quét bằng điện thoại",
+      "getWallet": "Lấy một ví",
+      "noneLead": "Trình duyệt này không có ví nào. ",
+      "noneLink": "Chọn một ví ở ethereum.org",
+      "noneTail": ", nạp một ít ETH thử nghiệm Sepolia, rồi quay lại. Mọi thứ trên màn hình này đều đọc được miễn phí mà không cần ví.",
+      "switching": "Đang chuyển",
+      "switchTo": "Chuyển sang {network}",
+      "options": "Tuỳ chọn ví",
+      "explorer": "Xem trên Etherscan",
+      "disconnect": "Ngắt kết nối"
+    },
+    "connect": {
+      "prompt": "Kết nối ví trước đã."
+    },
+    "note": {
+      "encrypting": "đang mã hoá và tạo bằng chứng, khoảng mười giây",
+      "signing": "xác nhận trong ví của bạn",
+      "mining": "đang chờ giao dịch được đưa vào block",
+      "done": "xong",
+      "busy": "Lần nhấn đó bị bỏ qua: {label} đang chạy rồi, và một ví chỉ ký một giao dịch mỗi lần. Chờ dòng phía trên xong đã.",
+      "line": "{label}: {state}",
+      "explorer": "Xem giao dịch trên Etherscan",
+      "dismiss": "Đóng"
+    },
+    "actions": {
+      "mint": "Lấy token thử nghiệm",
+      "approve": "Cấp quyền cho lớp bọc",
+      "wrap": "Shield thành token bảo mật",
+      "deposit": "Gửi tiền",
+      "withdraw": "Rút tiền",
+      "withdrawAll": "Rút tất cả",
+      "close": "Đóng kỳ quay {drawId}",
+      "award": "Trao giải kỳ quay {drawId}",
+      "advance": "Đẩy kỳ quay {drawId} đi tiếp",
+      "finalize": "Chốt kỳ quay {drawId}",
+      "reconcile": "Đối soát hạng giải {tier}",
+      "askingSeed": "đang hỏi dịch vụ quản lý khoá của Zama để lấy seed",
+      "seedSealing": "seed đã công bố nhưng chưa giải mã được, đang hỏi lại",
+      "askingCarry": "đang hỏi phần thanh khoản chưa trả của hạng giải"
+    },
+    "reveal": {
+      "signing": "ký yêu cầu trong ví của bạn, việc này không tốn gas",
+      "asking": "đang giải mã trong trình duyệt của bạn",
+      "sealing": "giá trị vừa được ghi và chưa giải mã được, đang hỏi lại",
+      "newKey": "một phần khoá của KMS bị lỗi, đang thử lại với khoá mới",
+      "elapsed": "đã {seconds} giây, thường chỉ vài giây",
+      "stopWaiting": "Ngừng chờ",
+      "denied": "Relayer của Zama từ chối: ví này không phải chủ của những giá trị đó.",
+      "reveal": "Mở {label}",
+      "hide": "Ẩn {label}",
+      "sealAgain": "Niêm phong lại",
+      "cost": "Mở, một chữ ký, không tốn gas",
+      "encrypted": "{label}, đã mã hoá",
+      "encryptedAlone": "đã mã hoá",
+      "partial": "Relayer trả lời mà thiếu giá trị này, nên chưa biết được tổng."
+    },
+    "unknown": {
+      "word": "chưa rõ",
+      "default": "Cái này chưa về từ chuỗi."
+    },
+    "amount": {
+      "max": "Tối đa",
+      "allOfIt": "Tất cả",
+      "maxFor": "{max}: {name}",
+      "shape": "Chỉ nhập số. Dấu thập phân có thể là dấu chấm hoặc dấu phẩy, nhiều nhất một dấu, và không phân cách hàng nghìn.",
+      "precision": "{symbol} có {decimals} chữ số thập phân, nên không gửi được số nào nhỏ hơn {smallest}.",
+      "zero": "Nhập một số lớn hơn không."
+    },
+    "banners": {
+      "wrongNetwork": "Ví của bạn đang ở sai mạng.",
+      "wrongNetworkBody": "Hearth được triển khai trên Ethereum Sepolia. Không có gì trên trang này đọc hay ghi được cho tới khi ví của bạn ở trên mạng đó.",
+      "switch": "Chuyển sang Sepolia",
+      "denied": "Địa chỉ này nằm trong danh sách chặn của token.",
+      "deniedBody": "{symbol} từ chối mọi lần chuyển vào và ra khỏi địa chỉ này, nên gửi tiền và rút tiền sẽ bị revert. Đó là thiết lập của chủ token, không phải của chúng tôi.",
+      "tokenPaused": "Token {symbol} đang tạm dừng.",
+      "tokenPausedBody": "Shield, chuyển và unshield đều bị dừng ở tầng token. Hợp đồng riêng của Hearth không bị ảnh hưởng, nhưng không gì dịch chuyển được cho tới khi Zama bỏ tạm dừng.",
+      "vaultPaused": "Vault đang tạm dừng.",
+      "vaultPausedBody": "Việc gửi tiền mới và việc đóng kỳ quay bị dừng. Việc rút tiền, duyệt, trao giải và chốt thì không bao giờ tạm dừng được, nên tiền của bạn vẫn là của bạn để rút ra.",
+      "poolPaused": "Prize pool đang tạm dừng.",
+      "poolPausedBody": "Không đóng được kỳ quay nào. Việc trao giải, duyệt, đối soát và rút tiền vẫn chạy.",
+      "observers": "Chủ token đã chỉ định {count, plural, other {{shown} người quan sát}}.",
+      "observersBody": "Một người quan sát trên {symbol} giải mã được mọi số tiền đi qua token, kể cả các khoản gửi và các khoản chi trả, và ngược về cả quá khứ. Sổ sách riêng của Hearth, gồm tiền gốc, tiền thưởng, trọng số và khoản ghi có của bạn, thì họ không đọc được.",
+      "upgraded": "Token {symbol} đã được nâng cấp.",
+      "upgradedBody": "Nó đang chạy bản triển khai {implementation}, không phải bản mà chúng tôi đã đọc mã nguồn từng dòng. Cách nó hành xử với handle của Hearth có thể đã đổi.",
+      "unknownImplementation": "không rõ",
+      "thinSet": "Trong pool lúc này chỉ có {count, plural, other {{shown} người gửi}}.",
+      "thinSetBody": "Dưới {minimum} người gửi thì bậc đã công bố gần như là thông tin cá nhân: với một người gửi, đó là trọng số của người ấy trong sai số gấp đôi, còn với hai người thì mỗi bên chặn được khoảng của bên kia. Số tiền vẫn mã hoá trong cả hai trường hợp, nhưng mức riêng tư còn mỏng cho tới khi có thêm người tham gia.",
+      "noKeeper": "Vài giờ qua chưa có kỳ quay nào được đẩy đi tiếp.",
+      "noKeeperBody": "Mọi bước của một kỳ quay đều gọi được từ bất kỳ ai. Mục Chạy một kỳ quay, ở thanh bên, có đủ cả năm bước. Một keeper đứng máy khiến pool mất kỳ quay, không bao giờ mất tiền.",
+      "keeperLate": "Bước kỳ quay gần nhất diễn ra {ago}, lâu hơn một kỳ.",
+      "keeperLateFrom": "Do {address} gửi. ",
+      "keeperLateBody": "Không ai phải chờ keeper: Chạy một kỳ quay sẽ đóng, trao giải, duyệt, chốt và đối soát ngay từ ví của bạn.",
+      "keeperLink": "Xem trên Etherscan",
+      "tokenUnread": "Không đọc được trạng thái của chính token.",
+      "tokenUnreadBody": "Mỗi lần bạn ghé, Hearth kiểm {symbol} xem có người quan sát nào không, có đang tạm dừng không và địa chỉ của bạn có bị chặn không, và những lần đọc đó không trả lời. Trên chuỗi không có gì đổi, chỉ là cách trang này nhìn thấy nó. Nghĩa là các cảnh báo về token trên màn hình này đang thiếu vì chưa đọc được gì, chứ không phải vì không có gì để báo.",
+      "historyDown": "Không xem được lịch sử kỳ quay.",
+      "historyDownBody": "{detail} Mọi con số trên chính các màn hình vẫn về thẳng từ chuỗi."
+    },
+    "unsupported": {
+      "subtitle": "Hearth không mở được pool trên token này, nên ở đây không có gì để ký.",
+      "pill": "không hỗ trợ",
+      "notDeployed": "chưa triển khai",
+      "whyLabel": "Vì sao token này không có pool",
+      "whyOne": "Quyền mint của token này bị giới hạn cho bên phát hành, nên Hearth không mở được pool trên nó. Hãy chọn pool khác.",
+      "whyTwo": "Một pool Hearth cần người gửi lấy được token thường trước rồi tự shield nó. {name} do Zama phát hành trên Sepolia và token cơ sở của nó chỉ có địa chỉ đã triển khai nó mới mint được, nên ngoài bên phát hành thì không ai shield vào được và một vault trên nó sẽ nằm không. Đó là thiết lập của token, không phải giới hạn trong các hợp đồng ở đây: vault nhận mọi token bảo mật theo đúng chuẩn.",
+      "reason": "Lý do",
+      "confidentialToken": "Token bảo mật",
+      "underlying": "Token cơ sở",
+      "publishedBy": "Phát hành bởi",
+      "zamaList": "Địa chỉ Sepolia của Zama",
+      "pickLabel": "Chọn một pool đang mở",
+      "pickNote": "Mọi pool phía trên đều là cùng một vault, cùng một kỳ quay và cùng một mức riêng tư, chỉ trên một token bảo mật khác. Vị thế của bạn ở pool này không nói gì về vị thế của bạn ở pool kia."
+    }
+  },
+  "dashboard": {
+    "title": "Bảng điều khiển",
+    "subtitle": "Bạn đang giữ gì, pool đang làm gì, và một việc cần làm tiếp theo.",
+    "next": "Tiếp theo",
+    "position": {
+      "label": "Bạn đang giữ",
+      "open": "đang mở trong trình duyệt này",
+      "sealed": "đang niêm phong trên chuỗi",
+      "principal": "Tiền gốc",
+      "principalNote": "Số bạn đã tiết kiệm. Tỷ lệ trúng của bạn được tính theo số này suốt cả kỳ.",
+      "principalSpoken": "tiền gốc của bạn",
+      "winnings": "Tiền thưởng chưa nhận",
+      "winningsNote": "Tiền giải thưởng đã ghi có cho bạn và chưa rút. Bản thân nó không sinh thêm tỷ lệ trúng.",
+      "winningsSpoken": "tiền thưởng chưa nhận của bạn",
+      "outside": "Ví này hiện không ở trong pool. Gửi tiền một lần là cả hai con số bắt đầu có.",
+      "footConnect": "Kết nối ví để mở phần của chính bạn. Không ai khác mở được, và danh sách quyền truy cập của Zama trên chuỗi mới là thứ thực thi điều đó, chứ không phải một lời hứa của trang này.",
+      "footNetwork": "Muốn mở những giá trị này cần một chữ ký trên Sepolia. Chuyển ví sang đó là con mắt hoạt động lại.",
+      "footOpen": "Chỉ trình duyệt này thấy những con số đó. Không có gì được ghi lên chuỗi và không có gì được gửi tới máy chủ nào.",
+      "footSealed": "Con mắt nhờ relayer của Zama giải mã những giá trị mà địa chỉ này sở hữu. Một chữ ký, không gas, không giao dịch."
+    },
+    "pool": {
+      "label": "Pool ngay lúc này",
+      "pill": "công khai với mọi người",
+      "savers": "Người gửi",
+      "saversUnknown": "Số người gửi chưa về từ chuỗi.",
+      "liquidity": "Thanh khoản giải thưởng",
+      "liquidityUnknown": "Một trong ba số dư hạng giải chưa về, và một tổng thiếu thì không phải là pool.",
+      "period": "Kỳ",
+      "periodUnknown": "Kỳ hiện tại chưa về từ chuỗi.",
+      "endsIn": "Kết thúc sau",
+      "endsUnknown": "Thời điểm kết thúc kỳ này chưa về từ chuỗi.",
+      "tier": "Hạng giải",
+      "chance": "Tỷ lệ",
+      "prizeEach": "Mỗi giải ({symbol})",
+      "prizeCount": "{count, plural, other {{shown} giải mỗi kỳ quay}}",
+      "prizeCountUnknown": "chưa rõ số giải",
+      "carryWaiting": "phần dư từ kỳ quay {drawId} đang chờ",
+      "oddsUnknown": "Tỷ lệ trúng của hạng giải này chưa về từ chuỗi.",
+      "nextPrizeUnknown": "Giải kế tiếp của hạng này chưa về từ chuỗi.",
+      "footOne": "Mỗi giải bằng một nửa thanh khoản của hạng đó chia cho số giải, chốt ngay lúc đóng, trước khi seed ngẫu nhiên tồn tại. Phần không ai trúng được công bố sau đó một kỳ quay và lại đem ra.",
+      "footBracket": "Tỷ lệ trúng được quay đối chiếu với một bậc <bracket>2^{bits}</bracket>, công bố cùng kỳ quay.",
+      "footBracketUnknown": "Bậc mà những tỷ lệ đó quay đối chiếu chưa về từ chuỗi."
+    },
+    "tiers": {
+      "grand": "Lớn",
+      "mid": "Vừa",
+      "frequent": "Thường"
+    },
+    "tiersLower": {
+      "grand": "lớn",
+      "mid": "vừa",
+      "frequent": "thường"
+    }
+  },
+  "nextStep": {
+    "connectTitle": "Kết nối ví để bắt đầu.",
+    "connectDetail": "Hearth chạy trên Ethereum Sepolia. Bạn cần một ít ETH thử nghiệm để trả gas, và {underlyingSymbol} thử nghiệm chỉ cách một cú nhấn khi ví đã kết nối.",
+    "connectCta": "Kết nối ví",
+    "switchTitle": "Ví này đang trỏ sang mạng khác.",
+    "switchDetail": "Các con số của pool trên trang này đằng nào cũng đọc từ Sepolia. Nhưng không ký hay gửi được gì cho tới khi ví cũng ở trên đó.",
+    "switchCta": "Chuyển sang Sepolia",
+    "readingTitle": "Đang đọc ví này từ chuỗi.",
+    "readingDetail": "Bước tiếp theo hiện ra khi các lần đọc về tới. Gọi tên một bước từ một số dư chưa về sẽ chỉ bạn sang nhầm màn hình.",
+    "faucetTitle": "Lấy một ít {underlyingSymbol} thử nghiệm.",
+    "faucetDetail": "{underlyingSymbol} giả lập có hàm mint mở, giới hạn một triệu token mỗi lần gọi. Nó không đáng giá gì, nên cứ lấy nhiều hơn bạn cần.",
+    "faucetCta": "Lấy {underlyingSymbol} thử nghiệm",
+    "shieldTitle": "Shield số {underlyingSymbol} của bạn.",
+    "shieldDetail": "Shield biến {underlyingSymbol} thường thành {symbol}. Bước đó công khai theo bản chất, và nó là điều cuối cùng ai đó đọc được về số tiền này.",
+    "shieldCta": "Shield {underlyingSymbol}",
+    "depositTitle": "Bỏ {symbol} của bạn vào pool.",
+    "depositDetail": "Số tiền được mã hoá trong trình duyệt trước khi gửi đi, nên vault ghi có một con số mà chính nó không đọc được. Tỷ lệ trúng của bạn đi theo số bạn giữ.",
+    "depositCta": "Gửi tiền",
+    "claimTitle": "Bạn có tiền thưởng đang chờ.",
+    "claimDetail": "Nhận thưởng là một lệnh rút bình thường đúng bằng số đó. Trên chuỗi nó có hình dạng giống hệt mọi lệnh rút khác, và đó là thứ khiến nó không gọi tên người trúng.",
+    "claimCta": "Nhận tiền thưởng",
+    "readingDrawsTitle": "Đang đọc các kỳ quay gần đây.",
+    "readingDrawsDetail": "Bước tiếp theo hiện ra khi chúng về tới. Gọi tên một bước từ một danh sách kỳ quay chưa về sẽ chỉ bạn sang nhầm màn hình.",
+    "resultTitle": "Kỳ quay {drawId} đã ghi kết quả của bạn.",
+    "resultDetail": "Vòng duyệt đã chạm tới ví này, nên chuyện nó có trúng hay không đã được quyết định và lưu lại. Nó nằm niêm phong cho tới khi bạn mở, việc đó tốn một chữ ký và không tốn gas.",
+    "resultCta": "Mở kỳ quay {drawId}",
+    "settledTitle": "Ngay lúc này không cần làm gì.",
+    "settledDetail": "Khoản gửi của bạn nằm trong pool và sinh tỷ lệ trúng cho từng giây nó ở đó. Kỳ quay tiếp theo đóng lại khi kỳ kết thúc, và ai cũng đóng được.",
+    "settledCta": "Gửi thêm vào khoản của bạn",
+    "noWallet": "Không tìm thấy ví"
+  },
+  "deposit": {
+    "title": "Gửi tiền",
+    "subtitle": "Lấy {underlying} thử nghiệm, shield nó thành {confidential}, rồi bỏ vào vault.",
+    "connect": "Kết nối ví trên Sepolia để gửi tiền. Ba bước dưới đây là tất cả những gì cần để đưa tiền vào pool, và màn hình mở ngay tại bước mà ví của bạn đang dừng.",
+    "connectNote": "Bạn sẽ cần một ít ETH Sepolia để trả gas. {underlying} thử nghiệm chỉ cách một cú nhấn khi đã kết nối.",
+    "lowGas": "Ví này gần như không còn ETH Sepolia, nên giao dịch sẽ hỏng trước khi được gửi đi. Faucet Sepolia nào cũng nạp được: faucet Google Cloud Web3, của Alchemy hoặc của Chainlink. Một phần mười ETH là thừa đủ.",
+    "inWallet": "Trong ví của bạn",
+    "inWalletSpoken": "số dư {symbol} của bạn",
+    "inWalletUnknown": "Trong ví của bạn: ",
+    "faucet": {
+      "title": "Lấy {underlying} thử nghiệm",
+      "held": "{amount} {underlying} trong ví của bạn.",
+      "heldSummary": "{amount} {underlying} trong ví của bạn. ",
+      "more": "Lấy thêm một triệu",
+      "unread": "Số dư ví của bạn chưa về từ chuỗi.",
+      "button": "Lấy {underlying} thử nghiệm",
+      "note": "{underlying} giả lập có hàm mint mở, giới hạn một triệu token mỗi lần gọi. Nó không đáng giá gì, nên cứ xin nhiều hơn bạn cần."
+    },
+    "shield": {
+      "title": "Shield số {underlying} của bạn",
+      "summary": "Đã shield. Số dư đang niêm phong, nên chỉ mình bạn đọc được trong đó có gì. ",
+      "more": "Shield thêm",
+      "body": "Shield biến {underlying} thường thành {confidential}, và việc đó là công khai. Hợp đồng lớp bọc phát ra số tiền ở dạng bản rõ, lần chuyển ERC-20 mang nó thêm lần nữa, và không có cách nào tránh: biến một token công khai thành token bảo mật, tự bản chất, là một hành vi công khai.",
+      "youShield": "Bạn shield",
+      "fieldName": "Số {underlying} muốn shield",
+      "balance": "{amount} {underlying} trong ví của bạn",
+      "tooMuch": "Bạn đang giữ {amount} {underlying}. Xin ít hơn, hoặc mint thêm trước đã.",
+      "youReceive": "Bạn nhận",
+      "rateUnknown": "Tỷ lệ của lớp bọc chưa về từ chuỗi.",
+      "rateOne": "Lớp bọc theo tỷ lệ một đổi một, nên bạn nhận đúng bằng số bạn shield.",
+      "rateOther": "Lớp bọc lấy {rate} đơn vị {underlying} cho một đơn vị {confidential}.",
+      "why": "Đây là lý do shield và gửi tiền là hai cái nút chứ không phải một. Hãy shield một số tròn, vào lúc bạn chọn, rồi gửi một phần của nó sau. Ai ghim được số dư của bạn thì tính được bạn có trúng hay không ở mọi kỳ quay từ đó trở đi, vì các ngưỡng vốn công khai theo thiết kế.",
+      "approve": "Cấp quyền cho lớp bọc",
+      "button": "Shield",
+      "approveNote": "Một lần cấp quyền, và mọi lần shield sau đó chỉ còn một giao dịch. Nó cho hợp đồng lớp bọc {confidential} rút {underlying} khỏi ví này và không chạm tới bất cứ thứ gì khác bạn sở hữu. {underlying} là token thử nghiệm Sepolia lấy từ nút faucet phía trên, không có giá trị trên bất kỳ mạng thật nào. Nút shield nhận việc ngay khi lần cấp quyền vào block.",
+      "waiting": "Số dư của bạn chưa về từ chuỗi, nên bước này chờ tới lúc đó.",
+      "skip": "Gửi luôn số bạn đang giữ"
+    },
+    "vault": {
+      "title": "Gửi vào vault",
+      "body": "Số tiền được mã hoá trong trình duyệt của bạn kèm một bằng chứng không tiết lộ tri thức, rồi gửi đi trong một giao dịch. Vault ghi có đúng bằng số mà token nói là đã thực sự dịch chuyển, nên xin nhiều hơn số bạn giữ thì không có gì dịch chuyển cả chứ không báo lỗi ầm ĩ. Mở con mắt bên dưới nếu bạn không chắc mình có bao nhiêu.",
+      "closedNotAwarded": "Ngay lúc này có một kỳ quay đã đóng và đang chờ trao giải. Việc gửi tiền vẫn được phép; số tiền này tính từ giờ phút này, theo phần kỳ hiện tại còn lại.",
+      "youDeposit": "Bạn gửi",
+      "fieldName": "Số {confidential} muốn gửi",
+      "cap": "Vault giới hạn mỗi người gửi ở {amount} {confidential}, nên khoản này sẽ bị từ chối và hoàn lại ngay trong cùng giao dịch.",
+      "tooMuch": "Bạn đang giữ {amount} {confidential}. Xin nhiều hơn thì trên chuỗi không bị từ chối: token chuyển đúng số bạn có, ở đây là không có gì, và giao dịch vẫn thành công.",
+      "sealedNote": "Số dư của bạn đang niêm phong, nên màn hình này không đối chiếu số tiền với nó được. Một khoản gửi lớn hơn số bạn giữ thì không dịch chuyển gì mà vẫn tốn một giao dịch. Mở con mắt phía trên là ô nhập được kiểm hộ bạn.",
+      "button": "Gửi tiền",
+      "paused": "Vault đang tạm dừng, nên các khoản gửi bị từ chối. Việc rút tiền vẫn chạy."
+    }
+  },
+  "withdraw": {
+    "title": "Rút tiền",
+    "subtitle": "Hai chặng: ra khỏi vault, rồi về lại {underlying}. Tiền gốc không bao giờ bị khoá, kể cả giữa một kỳ quay.",
+    "connect": "Kết nối ví để rút tiền. Chặng một đưa tiền gốc và tiền thưởng ra khỏi vault, chặng hai biến {confidential} về lại {underlying}.",
+    "connectNote": "Ở đây không có gì bị khoá. Tiền gốc về đủ bất cứ lúc nào bạn hỏi, kể cả giữa một kỳ quay.",
+    "tabs": {
+      "label": "Các chặng rút tiền",
+      "vault": "Ra khỏi vault",
+      "unshield": "Về lại token thường",
+      "unfinished": "còn việc dang dở"
+    },
+    "pending": {
+      "title": "Có một lệnh unshield đã gửi mà chưa hoàn tất.",
+      "body": "Số token bảo mật đã bị đốt và {underlying} đang chờ ở lớp bọc. Gửi giao dịch thứ hai là nó được nhả ra. ",
+      "link": "Xem lệnh unshield",
+      "finish": "Hoàn tất unshield"
+    },
+    "vault": {
+      "reading": "Đang đọc số ví này giữ trong vault.",
+      "unavailable": "Các lần đọc cho ví này không về, nên màn hình này không nói được vault đang giữ gì cho bạn. Tải lại khi mạng đã trả lời.",
+      "neverDepositedLead": "Ví này chưa bao giờ gửi tiền, nên vault không giữ gì cho nó và một lệnh rút sẽ bị từ chối trên chuỗi. ",
+      "depositFirst": "Gửi tiền trước",
+      "neverDepositedTail": ", hoặc dùng chặng hai nếu bạn đang giữ {confidential} và muốn lấy lại thành {underlying}.",
+      "youWithdraw": "Bạn rút",
+      "fieldName": "Số tiền muốn rút khỏi vault",
+      "inVault": "Trong vault",
+      "inVaultSpoken": "số dư vault của bạn",
+      "clamped": "Số đó lớn hơn số bạn đang giữ. Vault gửi đúng {amount} bạn có rồi dừng.",
+      "revealNote": "Mở ra để giới hạn ô này và thấy phần chia. Bỏ qua cũng an toàn: đằng nào vault cũng kẹp số tiền lại trên chuỗi.",
+      "youReceive": "Bạn nhận",
+      "receiveBalance": "Vào ví của bạn, vẫn ở dạng mã hoá. Chặng hai biến nó về lại {underlying}.",
+      "split": "Trong đó {winnings} lấy từ tiền thưởng và {principal} lấy từ tiền gốc, trong một lần chuyển trông y hệt nhau trong cả hai trường hợp.",
+      "splitSealed": "Mở số dư vault của bạn để xem phần này chia thế nào giữa tiền thưởng và tiền gốc.",
+      "button": "Rút",
+      "everything": "Rút tất cả",
+      "everythingNote": "Rút tất cả thì không cần mở và không cần đầu vào mã hoá. Vault cộng tiền gốc vào tiền thưởng ngay trên chuỗi rồi gửi tổng đi, nên cả bạn lẫn trang này đều không phải biết trước con số đó.",
+      "howLabel": "Một lệnh rút được trả thế nào",
+      "howOne": "Tiền thưởng đi trước, rồi tới tiền gốc, trong một lần chuyển bảo mật. Không gì trong lần chuyển đó nói nó gồm những phần nào.",
+      "howTwo": "Số tiền được kẹp trên chuỗi về mức nhỏ nhất trong ba thứ: số bạn xin, số bạn giữ, và số vault giữ, vì một lần chuyển bảo mật hoặc chuyển trọn số tiền hoặc không chuyển gì cả. Một yêu cầu quá lớn sẽ gửi đi toàn bộ số bạn giữ thay vì báo lỗi, và đó cũng là lý do không ai tìm ra số dư của bạn bằng cách xin quá nhiều rồi xem chuyện gì xảy ra.",
+      "howWindow": "Ngay lúc này có một cửa sổ kỳ quay đang mở. Rút tiền vẫn được phép và không làm đổi tỷ lệ trúng đã chốt cho bạn. Giải nào từ kỳ quay đó vẫn rơi vào tiền thưởng của bạn, để rút sau.",
+      "howThree": "Tiền gốc không bao giờ bị khoá. Không có thời gian báo trước, không có phạt và không phải chờ một kỳ quay kết thúc."
+    },
+    "unshield": {
+      "youUnshield": "Bạn unshield",
+      "fieldName": "Số {confidential} muốn unshield",
+      "inWallet": "Trong ví của bạn",
+      "inWalletSpoken": "số dư {confidential} của bạn",
+      "tooMuch": "Bạn đang giữ {amount} {confidential}. Xin nhiều hơn thì trên chuỗi không bị từ chối: nó tiêu cả hai giao dịch mà không dịch chuyển gì.",
+      "revealNote": "Mở ra để giới hạn ô này. Một lệnh unshield lớn hơn số bạn giữ không bị từ chối, nó chỉ không dịch chuyển gì.",
+      "youReceive": "Bạn nhận",
+      "receiveBalance": "{underlying} vào ví của bạn, tiêu ở đâu cũng được.",
+      "receiveNote": "Con số này lên chuỗi ở dạng công khai. Giao dịch đầu trong hai giao dịch chính là cái công bố nó.",
+      "button": "Unshield",
+      "unfinished": "Một lệnh unshield mới phải chờ lệnh phía trên hoàn tất. Mỗi lúc chỉ nhớ được một lệnh, và bắt đầu lệnh nữa sẽ khiến lệnh đầu bị đốt token mà không còn gì nhả chúng ra.",
+      "unwrapping": "Unshield: ví của bạn hỏi hai lần. Đầu tiên là một chữ ký để lớp bọc đọc được số dư bảo mật của bạn, việc này không tốn gas, rồi mới tới chính giao dịch.",
+      "waiting": "Đã gửi lệnh unshield. Đang chờ giao thức của Zama công bố bản rõ và bằng chứng của nó.",
+      "finalizing": "Đang hoàn tất: xác nhận giao dịch thứ hai để nhả {underlying} ra.",
+      "done": "Đã unshield. Số dư {underlying} của bạn tăng thêm {amount}, đọc từ chuỗi sau giao dịch thứ hai.",
+      "doneUnchecked": "Đã unshield. Cả hai giao dịch đều vào block, nhưng số dư {underlying} không đọc lại được, nên màn hình này không nói được số nào đã về. Hãy kiểm tra ví của bạn.",
+      "nothingMoved": "Không có gì dịch chuyển. Cả hai giao dịch đều vào block và số dư {underlying} của bạn y như cũ, chuyện đó xảy ra khi số tiền lớn hơn số dư bảo mật của bạn: lớp bọc không nhả gì ra chứ không từ chối. Mở số dư bằng con mắt phía trên rồi dùng Tất cả.",
+      "whyLabel": "Vì sao việc này cần hai giao dịch",
+      "whyOne": "Lớp bọc đốt số tiền đã mã hoá và công bố nó trước, rồi nhả token thường ra khi giao thức của Zama đã tạo xong bản rõ và bằng chứng của nó. Đó là hai lời gọi tách rời, và cái thứ hai gửi sau cũng được nếu bạn đóng tab ở giữa.",
+      "whyTwo": "Ví của bạn cũng hỏi một chữ ký trước giao dịch đầu, vì lớp bọc đọc số dư bảo mật của bạn để kiểm số tiền. Lời nhắc đó là một chữ ký chứ không phải một giao dịch, và nó không tốn gas.",
+      "whyThree": "Nên biết trước khi bạn rút cạn: shield vào rồi unshield ra toàn bộ thì chênh lệch giữa hai tổng công khai đó là cận dưới cho tất cả những gì bạn từng trúng. Hãy unshield theo số tròn, hoặc để lại một số dư bảo mật thường trực."
+    }
+  },
+  "draws": {
+    "title": "Kỳ quay của tôi",
+    "subtitle": "Từng kỳ quay gần đây, các con số giải thưởng công khai của nó, và trọng số cùng phần thưởng của riêng bạn nằm sau con mắt.",
+    "count": "{count} gần đây nhất",
+    "reading": "đang đọc",
+    "emptyReading": "Đang đọc pool.",
+    "emptyNone": "Chưa có kỳ nào kết thúc, nên chưa có kỳ quay nào để xem. Kỳ quay đầu tiên hiện ra ngay khi kỳ 1 kết thúc.",
+    "emptyFailed": "Vừa rồi không đọc được các kỳ quay. Đằng nào chúng cũng nằm trên chuỗi; trang này tự thử lại.",
+    "card": {
+      "label": "Kỳ quay {drawId}",
+      "claimNote": "Nhận thưởng là một lệnh rút bình thường đúng bằng số đó. Trên chuỗi nó có hình dạng giống hệt mọi lệnh rút khác, và đó là thứ khiến việc nhận thưởng không gọi tên người trúng.",
+      "claim": "Nhận {amount} {symbol}",
+      "advanceNote": "Đẩy đi tiếp sẽ đưa vòng duyệt chung tiến thêm tối đa {batch} người gửi, theo thứ tự mà seed của kỳ quay này đặt ra. Nó không nhắm được vào bạn, nên nhấn nút này không nói gì về việc bạn có trúng hay không.",
+      "advance": "Đẩy kỳ quay đi tiếp",
+      "waitingLead": "Bước này ai làm cũng được. ",
+      "waitingLink": "Chạy một kỳ quay",
+      "waitingTail": " có nó.",
+      "periodEnded": "Kỳ {drawId} đã kết thúc",
+      "periodEndedUnknown": "Thời điểm kết thúc kỳ này chưa về từ chuỗi.",
+      "closeDeadline": "Hạn chót đóng",
+      "closeDeadlineUnknown": "Hạn chót đóng của kỳ quay này chưa về từ chuỗi.",
+      "passed": "đã qua",
+      "prizeWindow": "Cửa sổ giải thưởng",
+      "windowUnknown": "Cửa sổ của kỳ quay này chưa về từ chuỗi.",
+      "windowLeft": "còn {time}",
+      "windowClosed": "đã đóng",
+      "bracket": "Bậc",
+      "bracketNote": "công bố thay cho tổng trọng số của pool",
+      "walk": "Vòng duyệt",
+      "walkNotStarted": "chưa bắt đầu",
+      "walkProgress": "{cursor} trên {total}",
+      "walkNote": "tối đa {batch} người gửi mỗi lời gọi",
+      "prizeWorth": "Một giải đáng bao nhiêu",
+      "noPrizeMoney": "Kỳ quay này không có tiền giải thưởng: lúc nó đóng thì chưa có khoản thu hoạch nào được ghi sổ.",
+      "yourResult": "Kết quả của bạn",
+      "sealedResult": "một kết quả, đã mã hoá",
+      "sealedResultNote": "Mã hoá trên chuỗi, và chỉ ví sở hữu nó mới đọc được.",
+      "notReachedUnknown": "Vòng duyệt chưa tới bạn, và cửa sổ của kỳ quay này chưa về từ chuỗi, nên trang không nói được nó còn đẩy đi tiếp được nữa hay không.",
+      "notReachedYet": "Vòng duyệt chưa tới bạn. Cho tới lúc đó, kỳ quay này chưa giữ con số nào cho bạn, trúng hay không.",
+      "missedWindow": "Cửa sổ đóng lại trước khi vòng duyệt tới bạn, nên kỳ quay này không trả gì cho bạn và tiền đã quay về các hạng giải. Bây giờ không ai duyệt nó được nữa.",
+      "yourPrize": "Phần thưởng của bạn",
+      "yourPrizeSpoken": "phần thưởng của bạn ở kỳ quay {drawId}",
+      "yourWeight": "Trọng số của bạn",
+      "yourWeightSpoken": "trọng số của bạn ở kỳ quay {drawId}",
+      "noPrize": "Kỳ quay này không có giải. Trọng số của bạn đã được tính và các ngưỡng không rơi về phía bạn.",
+      "claimed": "Đã rút ra rồi. Vault không còn nợ ví này gì cả, nên phần thưởng này nằm trong số dư bảo mật của bạn. Kỳ quay vẫn giữ con số đó làm bản ghi."
+    }
+  },
+  "describe": {
+    "unreadBadge": "chưa đọc được",
+    "unread": "Kỳ quay này chưa về từ chuỗi, nên không gì phía dưới là sự thật. Trang vẫn hỏi tiếp.",
+    "notClosedBadge": "chưa đóng",
+    "notClosed": "Kỳ đã hết và kỳ quay này đang chờ được đóng. Ai cũng đóng được, kể cả bạn.",
+    "missedBadge": "lỡ hạn",
+    "missed": "Không ai đóng kỳ quay này trước hạn chót, nên nó không trả gì. Thanh khoản của nó chưa hề dịch chuyển và lần đóng sau lại đem nó ra.",
+    "closedBadge": "đang chờ bằng chứng",
+    "closed": "Đã đóng. Seed, bậc, cờ khác rỗng và phần thu hoạch đã được công bố và đang chờ dịch vụ quản lý khoá của Zama ký bản rõ của chúng. Ai cũng lấy được chúng và trao giải cho kỳ quay.",
+    "emptyBadge": "rỗng",
+    "empty": "Không ai giữ số dư trong kỳ này, nên không có gì để cân. Phần thanh khoản đem ra quay thẳng về các hạng giải.",
+    "skippedBadge": "bỏ qua",
+    "skipped": "Lệnh trao giải tới sau cửa sổ của kỳ quay, nên không giải nào được trả. Thanh khoản quay về các hạng giải và phần thu hoạch vẫn được ghi sổ.",
+    "awardedBadge": "đã trao giải",
+    "awardedAllDisconnected": "Đã trao giải, và vòng duyệt đã chạm tới mọi người gửi trong đó. Kết nối ví để xem bạn đã đứng ở đâu trong đó.",
+    "awardedDisconnected": "Đã trao giải. Vòng duyệt vẫn đang chạy. Kết nối ví để xem bạn đang đứng ở đâu trong đó.",
+    "awardedAllOutside": "Đã trao giải và mọi người gửi đều đã được duyệt. Ví này lúc đó không ở trong pool.",
+    "awardedOutside": "Đã trao giải. Vòng duyệt vẫn đang chạy, và ví này không nằm trong đó.",
+    "awardedAll": "Đã trao giải, và vòng duyệt đã chạm tới mọi người gửi trong đó. Mọi kết quả đều đã cố định và đã ghi.",
+    "awarded": "Đã trao giải. Từ khoảnh khắc này mọi kết quả đều đã được quyết định: các ngưỡng là công khai và các trọng số không đổi được nữa. Việc duyệt chỉ ghi chúng lại."
+  },
+  "run": {
+    "title": "Chạy một kỳ quay",
+    "subtitle": "Một kỳ quay cần năm giao dịch. Ví nào cũng gọi được từng cái một, ví của bạn cũng vậy.",
+    "connect": "Kết nối ví để gửi bất kỳ cái nào trong số này. Không cái nào cần một đặc quyền mà hợp đồng công nhận, và không cái nào nhắm được vào một người gửi cụ thể.",
+    "connectNote": "Đằng nào năm bước dưới đây cũng đọc từ chuỗi, nên màn hình này đáng xem trước cả khi bạn kết nối gì.",
+    "waitingFor": "Pool đang chờ gì",
+    "nothing": "Không gì cả",
+    "ordering": " Cũng có một kỳ quay sẵn sàng để đóng. Việc chốt và đối soát đi trước, vì tiền mà một phần dư giải phóng chính là thứ lần đóng kế tiếp dùng để định giá trị giải.",
+    "unknownDue": "Các lần đọc cho biết bước nào tới hạn chưa về từ chuỗi.",
+    "idleWithClock": "Hoặc keeper đã theo kịp, hoặc kỳ này vẫn đang chạy. Nó kết thúc sau {time}.",
+    "idle": "Hoặc keeper đã theo kịp, hoặc kỳ này vẫn đang chạy.",
+    "railLabel": "Năm bước, theo thứ tự mà một kỳ quay cần tới",
+    "unknownStep": "Bước này có sẵn sàng hay không thì chưa về từ chuỗi.",
+    "chip": {
+      "due": "tới hạn",
+      "ready": "sẵn sàng",
+      "unknown": "chưa rõ",
+      "notYet": "chưa tới"
+    },
+    "blocked": {
+      "connect": "Kết nối ví để gửi cái này.",
+      "network": "Ví của bạn đang ở mạng khác.",
+      "busy": "Đã có một giao dịch khác đang bay."
+    },
+    "close": {
+      "title": "Đóng",
+      "headline": "Đóng kỳ quay {drawId}",
+      "headlineIdle": "Đóng một kỳ quay",
+      "button": "Đóng",
+      "does": "Chốt giá trị giải của từng hạng theo số tiền đang nằm trong đó, chuyển số tiền ấy vào kỳ quay, thu hoạch nguồn lợi suất, và rút một seed đã mã hoá mà không ai, kể cả chúng tôi, đọc được.",
+      "paused": "Prize pool đang tạm dừng, nên không kỳ quay nào đóng được.",
+      "readyDeadline": "Kỳ quay {drawId} còn đóng được trong {time} nữa. Quá đó thì nó bị bỏ qua và tiền của nó ở lại trong các hạng giải.",
+      "ready": "Kỳ quay {drawId} đang chờ được đóng.",
+      "waitingClock": "Không có kỳ quay nào đang chờ. Kỳ quay {drawId} đóng được sau {time}, khi kỳ này kết thúc.",
+      "waiting": "Không có kỳ quay nào đang chờ được đóng."
+    },
+    "award": {
+      "title": "Trao giải",
+      "headline": "Trao giải kỳ quay {drawId}",
+      "headlineIdle": "Trao giải một kỳ quay",
+      "button": "Trao giải",
+      "does": "Đưa cho pool bản rõ của bốn giá trị mà lần đóng đã công bố, kèm chữ ký của dịch vụ quản lý khoá trên chúng. Pool kiểm chữ ký đó ngay trên chuỗi, ghi sổ phần thu hoạch vào các hạng giải và mở kỳ quay ra. Người trúng được quyết định ở đúng khoảnh khắc này.",
+      "ready": "Kỳ quay {drawId} đã đóng và đang chờ. Bốn bằng chứng được lấy trước, mất vài giây, rồi ví của bạn mới hỏi bạn ký.",
+      "waiting": "Không có kỳ quay đã đóng nào đang chờ trao giải."
+    },
+    "advance": {
+      "title": "Đi tiếp",
+      "headline": "Đẩy kỳ quay {drawId} đi tiếp",
+      "headlineIdle": "Đẩy một kỳ quay đi tiếp",
+      "button": "Đi tiếp",
+      "does": "Đi dọc danh sách người gửi từ một điểm do seed quyết định và ghi có cho từng người đúng số mà các ngưỡng công khai nói họ trúng. Người gọi chọn một lời gọi phủ bao nhiêu người gửi, không bao giờ chọn được là những ai, nên gửi giao dịch này không nói gì về việc bạn là ai trong kỳ quay.",
+      "readyCount": "Đã xong {cursor} trên {total} người gửi ở kỳ quay {drawId}. Mỗi lời gọi đẩy vòng duyệt chung đi thêm tối đa {batch} người, đó là mức một giao dịch trả nổi.",
+      "ready": "Kỳ quay {drawId} vẫn còn người gửi chưa duyệt. Mỗi lời gọi đẩy vòng duyệt chung đi thêm tối đa {batch} người, đó là mức một giao dịch trả nổi.",
+      "waiting": "Không có kỳ quay đã trao giải nào còn người gửi trong cửa sổ của nó."
+    },
+    "finalize": {
+      "title": "Chốt",
+      "headline": "Chốt kỳ quay {drawId}",
+      "headlineIdle": "Chốt một kỳ quay",
+      "button": "Chốt",
+      "does": "Gộp phần chưa trả của từng hạng giải vào phần dư đã mã hoá của hạng đó khi cửa sổ đã hết, và công bố phần dư của từng hạng tới lượt.",
+      "ready": "Kỳ quay {drawId} đã hết cửa sổ, nên không ghi có thêm được gì từ nó.",
+      "waitingClock": "Chưa cửa sổ nào kết thúc. Kỳ quay {drawId} chốt được sau {time}.",
+      "waiting": "Không có kỳ quay nào hết cửa sổ mà chưa được chốt."
+    },
+    "reconcile": {
+      "title": "Đối soát",
+      "headline": "Đối soát hạng giải {tier}",
+      "headlineIdle": "Đối soát một hạng giải",
+      "button": "Đối soát",
+      "does": "Lấy bản rõ của một phần dư đã công bố, chứng minh nó với pool và ghi tiền ngược vào phần thanh khoản bản rõ của hạng đó, để lần đóng kế tiếp lại đem ra được.",
+      "ready": "Hạng giải {tier} đã công bố phần dư của nó ở kỳ quay {drawId}.",
+      "readyMore": "{count, plural, other { Còn {shown} hạng giải nữa xếp sau nó, và mỗi lần nhấn làm một hạng.}}",
+      "waiting": "Không có hạng giải nào có phần dư đang chờ ghi sổ lại."
+    },
+    "who": {
+      "label": "Ai gửi những cái này",
+      "oneStart": "Một keeper do chúng tôi chạy theo dõi pool và gửi từng bước khi nó tới hạn, nên trong một giờ bình thường thì màn hình này không có việc gì để làm.",
+      "onePeriod": " Một kỳ ở đây là {period}, nên một vòng đủ năm bước đi ra đúng nhịp đó.",
+      "oneEnd": " Keeper không giữ đặc quyền nào mà hợp đồng công nhận. Hai thứ nó có thể lạm dụng, là chọn ai được duyệt và chọn thứ tự trả giải, đều không phải lựa chọn của bất kỳ người gọi nào.",
+      "two": "Trao giải và đối soát là hai bước cần thứ gì đó từ ngoài chuỗi. Trình duyệt của bạn hỏi relayer của Zama bản rõ của những gì pool đã công bố, bốn giá trị cho một lần trao giải và một giá trị cho một lần đối soát, kèm chữ ký của dịch vụ quản lý khoá trên chúng. Đó đúng là lời gọi mà keeper thực hiện, và chính hợp đồng kiểm chữ ký, nên một trình duyệt không nói dối được về thứ nó đọc.",
+      "three": "Nếu keeper dừng, không mất gì cả. Một kỳ quay không bao giờ được đóng thì giữ tiền của nó trong các hạng giải và được đem ra lần nữa, còn một phần dư không được đối soát thì được lần đóng đầu tiên sau đó gộp lại. Một keeper đứng máy khiến pool mất kỳ quay, không mất tiền, và ví nào ở đây cũng khởi động chúng lại được.",
+      "periodHours": "{count, plural, other {{shown} giờ}}",
+      "periodMinutes": "{count} phút",
+      "periodSeconds": "{count} giây"
+    },
+    "stand": {
+      "label": "Các kỳ quay đang ở đâu",
+      "period": "Kỳ hiện tại",
+      "periodNote": "Kết thúc sau {time}",
+      "savers": "Người gửi",
+      "saversNote": "Một vòng duyệt đủ phải đi xa tới đâu",
+      "lastClosed": "Kỳ quay đóng gần nhất",
+      "lastClosedNone": "chưa có",
+      "vaultUnknown": "chưa rõ trạng thái vault",
+      "vaultPaused": "vault đang tạm dừng",
+      "vaultRunning": "vault đang chạy",
+      "poolUnknown": "chưa rõ trạng thái prize pool",
+      "poolPaused": "prize pool đang tạm dừng",
+      "poolRunning": "prize pool đang chạy"
+    }
+  },
+  "verify": {
+    "title": "Tự kiểm một kỳ quay.",
+    "lede": "Không cần ví. Mọi con số ở đây đọc thẳng từ hợp đồng, và các ngưỡng đến từ chính view <code>thresholdOf</code> của vault, tức đúng phép tính đã quyết định kết quả. Trên trang này không có bản triển khai thứ hai nào để mà lệch với bản thứ nhất.",
+    "noPool": "{symbol} không có pool nào để kiểm.",
+    "noPoolBody": "{reason}, nên Hearth chưa bao giờ mở vault trên nó và ở đây không có kỳ quay nào. Hãy chọn một token từ danh sách phía trên.",
+    "unreachable": "Không liên lạc được với Sepolia.",
+    "unreachableBody": "Trang này đọc vault và pool qua một điểm cuối RPC, và lần đọc đó hỏng, nên nó không có gì để hiện. Đằng nào bản thân các kỳ quay cũng nằm trên chuỗi.",
+    "tryAgain": "Thử lại",
+    "reading": "Đang đọc các kỳ quay từ Sepolia.",
+    "noneYet": "Chưa kỳ quay nào được đóng, nên chưa có gì để kiểm. Cái đầu tiên hiện ra khi kỳ 1 kết thúc và có người đóng nó.",
+    "oneNotClosed": "Kỳ quay {drawId} chưa được đóng, nên chưa có gì để kiểm.",
+    "rangeNotClosed": "Kỳ quay {first} tới {last} chưa được đóng, nên ở đây chưa có gì để kiểm. Những cái cũ hơn nằm trên explorer.",
+    "drawButton": "Kỳ quay {drawId}",
+    "facts": {
+      "title": "Kỳ quay {drawId}",
+      "periodCovered": "Kỳ được tính",
+      "periodEnded": "kết thúc {stamp}",
+      "windowEnds": "Cửa sổ kết thúc",
+      "seed": "Seed",
+      "seedUnpublished": "chưa công bố",
+      "bracket": "Bậc",
+      "bracketUnset": "chưa đặt",
+      "bracketNote": "{count} số-dư-giây",
+      "prizeSizes": "Giá trị giải",
+      "prizeSizesNote": "lớn / vừa / thường",
+      "harvest": "Thu hoạch đã ghi sổ",
+      "walkSavers": "Người gửi trong vòng duyệt",
+      "walkNotStarted": "chưa bắt đầu",
+      "walkPosition": "Vị trí vòng duyệt",
+      "walkProgress": "{cursor} trên {total}",
+      "finalized": "Đã chốt",
+      "yes": "có",
+      "no": "không",
+      "note": "Seed được sinh ra dưới dạng bản mã bên trong coprocessor của Zama, nên không ai nhìn thấy nó lúc rút, và việc đóng một kỳ quay chỉ thành công đúng một lần, nên không có lần quay thứ hai. Bậc là luỹ thừa hai nhỏ nhất lớn hơn tổng trọng số của pool, được công bố thay cho tổng chính xác, vì hai tổng chính xác liên tiếp sẽ giải ra được khoản gửi của người duy nhất dịch chuyển tiền."
+    },
+    "tiers": {
+      "title": "Từng hạng giải đem ra và trả bao nhiêu",
+      "hint": "công khai theo thiết kế",
+      "each": "mỗi giải {amount} {symbol}",
+      "offered": "đem ra",
+      "returned": "quay về vì không ai trúng",
+      "notReconciled": "chưa đối soát",
+      "paid": "giải đã trả",
+      "paidUnknown": "chưa rõ cho tới khi đối soát",
+      "paidInexact": "không suy ra chính xác được",
+      "note": "Số giải đã trả được tính từ các con số công khai: phần hạng đó đem ra, trừ đi phần quay về không trả, chia cho giá trị một giải. Nó ra chính xác mỗi khi không có phần dư mã hoá nào đi kèm vào kỳ quay, và bản triển khai này đối soát mọi hạng giải ở mọi kỳ quay nên thường là như vậy. Nó không bao giờ nói ai được trả."
+    },
+    "thresholds": {
+      "title": "Ngưỡng cho một địa chỉ",
+      "hint": "đọc từ thresholdOf",
+      "body": "Dán bất kỳ địa chỉ nào vào. Vault trả về đúng trọng số mà địa chỉ đó phải vượt qua ở từng giải của từng hạng trong kỳ quay này. So nó với trọng số đã giải mã của chính người gửi ấy là kết quả khớp: họ trúng một giải đúng khi trọng số của họ lớn hơn hẳn ngưỡng của giải đó.",
+      "fieldName": "Một địa chỉ để kiểm",
+      "invalid": "Đó không phải một địa chỉ Ethereum hợp lệ.",
+      "notAwarded": "Kỳ quay {drawId} chưa được trao giải, nên nó chưa có seed và chưa có ngưỡng.",
+      "row": "Giải {tier} số {index}",
+      "reading": "đang đọc",
+      "rowFailed": "Node không trả lời thresholdOf cho giải này. Không có gì về kỳ quay thay đổi, chỉ là cách trang này nhìn thấy nó.",
+      "noCounts": "Không đọc được số giải của kỳ quay này, nên trang không nói được có bao nhiêu ngưỡng. Thử lại sau một lát.",
+      "outOfRange": "ngoài khoảng, nên không thể trúng",
+      "unit": "số-dư-giây"
+    },
+    "transactions": {
+      "title": "Các giao dịch",
+      "hint": "trên Etherscan",
+      "none": "Không có gì cho kỳ quay này trong vài giờ block gần nhất. Lịch sử cũ hơn nằm trên explorer.",
+      "block": "block {block}",
+      "open": "Mở pool",
+      "closed": "Đã đóng",
+      "awarded": "Đã trao giải",
+      "markedEmpty": "Đánh dấu rỗng",
+      "markedSkipped": "Đánh dấu bỏ qua",
+      "finalized": "Đã chốt",
+      "reconciled": "Đã đối soát hạng giải",
+      "withTier": "{label} ({tier})"
+    }
+  },
+  "lab": {
+    "pill": "Trang lab",
+    "title": "Nghi thức kỳ quay",
+    "lede": "Không có liên kết nào trên trang web dẫn tới đây. Mọi con số bên dưới đọc trực tiếp từ hợp đồng trên Sepolia: các handle đang niêm phong, seed mà dịch vụ quản lý khoá đã ký, bậc mà kỳ quay chạy trên đó, và đúng những ngưỡng một ví phải vượt qua.",
+    "noPool": "{symbol} không có pool nào để mở.",
+    "noPoolBody": "{reason}, nên Hearth chưa bao giờ mở vault trên nó. Hãy chọn một token có pool.",
+    "noDraw": "Chưa có kỳ quay đã trao giải nào để mở.",
+    "noDrawBody": "Nghi thức này cần một kỳ quay đã đóng và đã trao giải. Chạy một kỳ quay từ bảng kỳ quay trong pool, rồi quay lại.",
+    "drawButton": "Kỳ quay {drawId}",
+    "openSeal": "Mở dấu niêm phong",
+    "again": "Chạy lại",
+    "stages": {
+      "sealed": "đang niêm phong",
+      "seed": "seed mở ra",
+      "bracket": "bậc",
+      "thresholds": "các ngưỡng rơi xuống",
+      "mine": "kết quả của riêng bạn"
+    },
+    "seals": {
+      "title": "Lần đóng đã công bố gì",
+      "hint": "bốn handle, đúng theo thứ tự này",
+      "seed": "seed",
+      "scale": "con đếm thang",
+      "nonEmpty": "khác rỗng",
+      "harvest": "thu hoạch",
+      "unpublished": "chưa công bố",
+      "note": "Pool mã hoá lại bốn bản rõ theo đúng thứ tự đó và kiểm chữ ký của dịch vụ quản lý khoá trên bản mã hoá ấy ngay trên chuỗi, nên xin chúng theo thứ tự nào khác cũng làm lệnh trao giải bị revert. Thứ tự ở đây là điều khoản của hợp đồng, không phải chuyện tiện tay."
+    },
+    "seed": {
+      "title": "Seed mở ra",
+      "note": "Được sinh ra dưới dạng bản mã bên trong coprocessor của Zama, nên không ai nhìn thấy nó lúc rút. Được công bố khi kỳ đã kết thúc, được dịch vụ quản lý khoá ký, và được pool kiểm chứng trên chuỗi trước khi bất cứ điều gì khác trong kỳ quay này được phép xảy ra. Giá trị giải đã chốt từ lúc đóng, trước khi con số này tồn tại."
+    },
+    "bracket": {
+      "title": "Bậc",
+      "unit": "{count} số-dư-giây",
+      "note": "Kỳ quay chạy đối chiếu với luỹ thừa hai nhỏ nhất lớn hơn tổng trọng số của pool, không bao giờ đối chiếu với chính tổng đó. Công bố tổng chính xác sẽ cho bất kỳ ai giải ra khoản gửi của người duy nhất dịch chuyển tiền, chỉ từ hai tổng liên tiếp và dấu thời gian giao dịch của chính họ."
+    },
+    "thresholds": {
+      "title": "Các ngưỡng rơi xuống",
+      "connectHint": "kết nối ví để xem của riêng bạn",
+      "connectBody": "Ngưỡng là theo từng địa chỉ và là công khai. Kết nối ví thì đúng con số mà ví đó phải vượt qua ở từng giải của kỳ quay này hiện ra ở đây, do vault tính chứ không phải trang này tính.",
+      "row": "Giải {tier} số {index}",
+      "reading": "đang đọc",
+      "outOfRange": "ngoài khoảng",
+      "note": "Vượt ngưỡng thì giải là của bạn. Những con số này đến từ chính view của vault, cùng phép tính đã quyết định kết quả, nên ở đây không có bản triển khai thứ hai nào để mà lệch với bản thứ nhất."
+    },
+    "mine": {
+      "title": "Và chỉ dành cho bạn",
+      "connectBody": "Kết nối ví là thẻ này hiện đủ trọng số mà nó được xét và số mà kỳ quay {drawId} đã trả cho nó, giải mã ngay trong trình duyệt của bạn chứ không ở đâu khác.",
+      "nothing": "Ví này không giữ trọng số nào ở kỳ quay {drawId}, nên không có gì của riêng nó để mở. Chỉ người gửi từng nằm trong vòng duyệt mới có trọng số và một khoản ghi có ở đây.",
+      "weight": "Trọng số của bạn",
+      "weightUnit": "số-dư-giây trong cả kỳ",
+      "paid": "Kỳ quay này trả cho bạn bao nhiêu",
+      "paidUnit": "{symbol}, ghi có vào tiền thưởng của bạn",
+      "sealAgain": "Niêm phong lại",
+      "decrypt": "Giải mã kết quả của tôi",
+      "denied": "Bị từ chối: những giá trị này thuộc về một ví khác.",
+      "note": "Mọi thứ phía trên thẻ này đều công khai và ai cũng kiểm được. Thẻ này thì không: nó cần một chữ ký EIP-712 từ chính ví sở hữu các giá trị đó, và danh sách kiểm soát truy cập của Zama từ chối tất cả những người khác. Đó là toàn bộ sản phẩm gói trong hai đoạn."
+    }
+  },
+  "docs": {
+    "title": "Tài liệu",
+    "kicker": "Tài liệu",
+    "heading": "Bản ghi đầy đủ",
+    "count": "{count, plural, other {{shown} trang}}. Mỗi trang là một tệp trong kho mã dưới <path>docs/</path>, được kết xuất ở đây.",
+    "contents": "Mục lục",
+    "close": "Đóng",
+    "overview": "Tổng quan",
+    "nav": "Tài liệu",
+    "search": "Tìm trong tài liệu",
+    "noResults": "Không có gì khớp.",
+    "outline": "Trên trang này",
+    "nearby": "Trang lân cận",
+    "previous": "Trang trước",
+    "next": "Trang sau",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "copyManual": "Nhấn ctrl C",
+    "copyLabel": "Sao chép khối này",
+    "diagramWide": "Rộng hơn cột. Cuộn ngang để xem.",
+    "diagramFailed": "Sơ đồ này không vẽ được. Mã nguồn ở bên dưới.",
+    "rendererFailed": "Bộ vẽ sơ đồ không tải được. Mã nguồn ở bên dưới.",
+    "fallbackNote": "Trang này chưa được dịch, nên nó hiện bằng tiếng Anh.",
+    "sections": {
+      "reference": "Tham chiếu",
+      "attackLogs": "Nhật ký tấn công",
+      "gettingstarted": "Bắt đầu",
+      "concepts": "Khái niệm",
+      "security": "Bảo mật",
+      "operations": "Vận hành"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Không có gì ở địa chỉ này.",
+      "body": "Trang đã chuyển đi, liên kết bị gõ sai, hoặc token trong đó không nằm trong số token mà bản dựng này triển khai. Đằng nào pool cũng nằm trên chuỗi và không bị ảnh hưởng.",
+      "home": "Về đầu trang",
+      "pool": "Mở pool",
+      "docs": "Đọc tài liệu"
+    },
+    "crashed": {
+      "title": "Màn hình này hỏng, còn tiền thì không.",
+      "body": "Có gì đó trong chính trang này ném lỗi. Không có gì được ký và không có gì được gửi đi, nên số dư của bạn vẫn y nguyên. Tải lại màn hình này là an toàn.",
+      "digest": "Mã tham chiếu {digest}",
+      "home": "Về đầu trang",
+      "retry": "Thử lại màn hình này"
+    },
+    "unknown": "Có gì đó không ổn.",
+    "userRejected": "Bạn đã từ chối yêu cầu trong ví. Không có gì được gửi đi.",
+    "signingRejected": "Bạn đã từ chối chữ ký trong ví. Không có gì được gửi đi.",
+    "notConnected": "Kết nối ví trước đã.",
+    "decryptNotConnected": "Kết nối ví để giải mã các giá trị của riêng bạn.",
+    "addressesMissing": "Chưa cấu hình các địa chỉ Hearth, nên không gửi được gì.",
+    "drawNotWaiting": "Kỳ quay {drawId} không đang chờ trao giải, nên không có gì để gửi.",
+    "insufficientAllowance": "Lớp bọc chưa được phép lấy chừng đó token của bạn. Hãy cấp quyền cho nó trước.",
+    "insufficientErc20": "Không đủ token thử nghiệm thường trong ví này. Hãy mint thêm từ faucet.",
+    "insufficientConfidential": "Không đủ token bảo mật. Hãy shield một ít token thường trước.",
+    "chainMismatch": "Ví của bạn đang ở mạng khác với ứng dụng. Hãy chuyển nó sang Sepolia.",
+    "notEntitled": "Ví này không được phép đọc giá trị đó. Nó thuộc về một địa chỉ khác.",
+    "noCiphertext": "Ở đây chưa có giá trị mã hoá nào, tức là số dư bằng không.",
+    "relayerRateLimited": "Relayer của Zama đang giới hạn tần suất với trình duyệt này. Chờ vài giây rồi hỏi lại.",
+    "relayerUnreachable": "Không liên lạc được với relayer của Zama. Hỏi lại sau một lát.",
+    "relayerUnreachableStatus": "Không liên lạc được với relayer của Zama (HTTP {status}). Hỏi lại sau một lát.",
+    "rpcRateLimited": "Node Sepolia đang giới hạn tần suất với trình duyệt này. Chờ vài giây rồi hỏi lại.",
+    "noGas": "Không đủ ETH Sepolia để trả gas. Faucet Sepolia nào cũng nạp được.",
+    "relayerBehind": "Relayer của Zama chưa theo kịp block đó. Hỏi lại sau một lát.",
+    "EnforcedPause": "Vault đang tạm dừng, nên việc gửi tiền và đóng kỳ quay bị dừng. Việc rút tiền vẫn chạy.",
+    "NotASaver": "Ví này chưa bao giờ gửi tiền, nên không có gì để rút.",
+    "NotTheAsset": "Chỉ nhận đúng token bảo mật mà vault này được triển khai cùng. Hãy shield token đó rồi thử lại.",
+    "DrawNotAwarded": "Kỳ quay đó chưa được trao giải, nên chưa có gì để duyệt. Hãy đóng và trao giải cho nó trước.",
+    "EvaluationWindowClosed": "Cửa sổ hai kỳ của kỳ quay đó đã hết. Không duyệt được nữa, và nó không trả gì.",
+    "EvaluationWindowOpen": "Kỳ quay đó vẫn duyệt được, nên chưa chốt được. Hãy chờ cửa sổ kết thúc.",
+    "AlreadyFinalized": "Kỳ quay đó đã chốt rồi. Không còn việc gì trên nó.",
+    "DrawNotOpen": "Kỳ quay đó chưa bao giờ được đóng, nên không có gì để chốt.",
+    "AlreadyClosed": "Có người đóng kỳ quay đó trước rồi. Bước tiếp theo là trao giải cho nó.",
+    "NothingToClose": "Ngay lúc này không có kỳ quay nào đang chờ được đóng.",
+    "CloseWindowClosed": "Hạn chót đóng của kỳ quay đó đã qua. Thanh khoản của nó quay về các hạng giải và kỳ quay sau lại đem ra.",
+    "WrongStatus": "Kỳ quay đã chuyển bước trước khi giao dịch này vào block. Hãy tải lại và xem nó đang ở đâu.",
+    "CarryNotPending": "Hạng giải đó không có phần dư nào đã công bố đang chờ, nên không có gì để đối soát.",
+    "InvalidKMSSignatures": "Chữ ký của dịch vụ quản lý khoá không kiểm chứng được trên chuỗi. Hãy xin giải mã lại."
+  },
+  "format": {
+    "pending": "...",
+    "dust": "<0,01",
+    "now": "bây giờ",
+    "seconds": "{seconds} giây",
+    "minutesSeconds": "{minutes} phút {seconds} giây",
+    "hoursMinutes": "{hours} giờ {minutes} phút",
+    "agoSeconds": "{count} giây trước",
+    "agoMinutes": "{count} phút trước",
+    "agoHours": "{count} giờ trước",
+    "agoDays": "{count} ngày trước",
+    "notYet": "chưa",
+    "utc": "{stamp} UTC",
+    "oddsNever": "không bao giờ",
+    "oddsEveryDraw": "mỗi kỳ quay",
+    "oddsOneIn": "1 trên {count} kỳ quay",
+    "balanceSeconds": "số-dư-giây"
+  },
+  "meta": {
+    "titleDefault": "Hearth, tiết kiệm trúng thưởng mà không ai nhìn được vào trong",
+    "titleTemplate": "{title} | Hearth",
+    "description": "Tiết kiệm trúng thưởng bảo mật, không thua lỗ, trên Zama Protocol. Khoản gửi, số dư và tiền thưởng nằm mã hoá trên chuỗi, giải thưởng được rút ra từ lợi suất với tỷ lệ trúng tỷ lệ thuận với số dư bình quân theo thời gian của bạn, và tiền gốc về đủ bất cứ lúc nào bạn hỏi.",
+    "ogTitle": "Hearth",
+    "ogDescription": "Tiết kiệm trúng thưởng bảo mật, không thua lỗ, trên Zama Protocol.",
+    "how": {
+      "title": "Cách hoạt động",
+      "description": "Gửi một token bảo mật, giữ số dư của bạn ở dạng mã hoá, trúng những giải rút từ lợi suất với tỷ lệ do số dư bình quân theo thời gian của bạn quyết định, và rút ra lúc nào tuỳ bạn."
+    },
+    "verify": {
+      "title": "Kiểm chứng một kỳ quay",
+      "description": "Đọc seed, bậc, phần thu hoạch và giá trị giải của một kỳ quay thẳng từ hợp đồng, và lấy đúng ngưỡng mà một địa chỉ bất kỳ phải vượt qua."
+    },
+    "lab": {
+      "title": "Nghi thức kỳ quay",
+      "description": "Một trang lab: seed đang niêm phong mở ra, bậc, các ngưỡng và kết quả của riêng một người gửi."
+    },
+    "docs": {
+      "title": "Tài liệu",
+      "description": "Một kỳ quay diễn ra thế nào, tỷ lệ trúng tính ra sao, tiền giải thưởng từ đâu ra, cái gì được giữ kín, và mọi đường nối chúng tôi biết."
+    },
+    "dashboard": {
+      "title": "Bảng điều khiển {symbol}",
+      "titleFallback": "Bảng điều khiển",
+      "description": "Ví này đang giữ gì, quỹ giải thưởng đáng bao nhiêu, và bước tiếp theo, với mọi số tiền của người gửi đều mã hoá trên chuỗi."
+    },
+    "deposit": {
+      "title": "Gửi {symbol}",
+      "titleFallback": "Gửi tiền",
+      "description": "Lấy {underlyingSymbol} thử nghiệm, shield nó thành {symbol}, rồi gửi vào vault Hearth.",
+      "descriptionFallback": "Lấy token thử nghiệm, shield nó, rồi gửi vào vault Hearth."
+    },
+    "withdraw": {
+      "title": "Rút {symbol}",
+      "titleFallback": "Rút tiền",
+      "description": "Đưa tiền gốc và tiền thưởng ra khỏi vault Hearth, rồi unshield {symbol} về lại {underlyingSymbol}.",
+      "descriptionFallback": "Đưa tiền gốc và tiền thưởng ra khỏi vault Hearth, rồi unshield về lại token thường."
+    },
+    "draws": {
+      "title": "Kỳ quay của tôi",
+      "description": "Từng kỳ quay gần đây trả bao nhiêu, và trả cho bạn bao nhiêu, với trọng số và phần thưởng của bạn mã hoá cho tới khi bạn mở chúng."
+    },
+    "run": {
+      "title": "Chạy một kỳ quay",
+      "description": "Đóng, trao giải, đi tiếp, chốt và đối soát. Mọi bước của một kỳ quay Hearth đều gọi được từ bất kỳ ví nào."
+    }
+  }
+}

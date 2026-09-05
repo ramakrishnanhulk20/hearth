@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 /**
  * What a figure shows before its read comes back.
  *
@@ -8,9 +12,10 @@
  * the figure was asking, and an answer nobody can read is worse than the zero it replaced.
  */
 export function Unknown({
-  reason = "This has not come back from the chain yet.",
+  reason,
   scale = "figure",
 }: {
+  /** Why this figure is missing, on hover. Falls back to the general sentence. */
   reason?: string;
   /**
    * "figure" shrinks the word inside a 28px headline number. "inline" leaves it at the size of
@@ -18,12 +23,14 @@ export function Unknown({
    */
   scale?: "figure" | "inline";
 }) {
+  const t = useTranslations("console.unknown");
+
   return (
     <span
       className={`text-muted ${scale === "figure" ? "text-[0.62em] font-normal tracking-normal" : ""}`}
-      title={reason}
+      title={reason ?? t("default")}
     >
-      unknown
+      {t("word")}
     </span>
   );
 }

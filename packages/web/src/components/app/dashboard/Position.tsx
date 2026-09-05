@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { CAP_LABEL, CARD_NOTE, Card, CardPill, SealedValue } from "@/components/app/console";
 import type { HearthConfig, SaverState } from "@/hooks/useHearth";
@@ -25,6 +26,7 @@ export function Position({
   /** False while the saver batch is in flight, which is not the same as an empty wallet. */
   known: boolean;
 }) {
+  const t = useTranslations("dashboard.position");
   const vault = config.vault;
   const requests: RevealRequest[] = vault
     ? [
@@ -38,40 +40,36 @@ export function Position({
 
   return (
     <Card
-      label="What you hold"
+      label={t("label")}
       pill={
         <CardPill tone={scope.open ? "flame" : "quiet"}>
-          {scope.open ? "open in this browser" : "sealed on chain"}
+          {scope.open ? t("open") : t("sealed")}
         </CardPill>
       }
-      footer={<p className={CARD_NOTE}>{footnote(saver, scope.open)}</p>}
+      footer={<p className={CARD_NOTE}>{t(footnote(saver, scope.open))}</p>}
     >
       <div className="grid gap-7 sm:grid-cols-2">
-        <Figure
-          label="Principal"
-          note="What you have saved. Your odds are weighted by this across the whole period."
-        >
+        <Figure label={t("principal")} note={t("principalNote")}>
           <SealedValue
             scope={scope}
             handle={saver.principalHandle}
+            decimals={config.decimals}
             requests={requests}
-            label="your principal"
-            unit="USDC"
+            label={t("principalSpoken")}
+            unit={config.symbol}
             size="large"
             disabled={blocked}
           />
         </Figure>
 
-        <Figure
-          label="Unclaimed winnings"
-          note="Prize money credited to you and not yet withdrawn. It earns no odds of its own."
-        >
+        <Figure label={t("winnings")} note={t("winningsNote")}>
           <SealedValue
             scope={scope}
             handle={saver.winningsHandle}
+            decimals={config.decimals}
             requests={requests}
-            label="your unclaimed winnings"
-            unit="USDC"
+            label={t("winningsSpoken")}
+            unit={config.symbol}
             size="large"
             eye={false}
           />
@@ -80,7 +78,7 @@ export function Position({
 
       {outside && (
         <p className="mt-6 border-t border-hairlineSoft pt-4 text-[13.5px] leading-relaxed text-muted">
-          This wallet is not in the pool right now. Deposit and both figures start filling in.
+          {t("outside")}
         </p>
       )}
     </Card>
@@ -97,15 +95,9 @@ function Figure({ label, note, children }: { label: string; note: string; childr
   );
 }
 
+/** Which of the four footnotes this card carries, named rather than written out. */
 function footnote(saver: SaverState, open: boolean): string {
-  if (!saver.connected) {
-    return "Connect a wallet to open your own. Nobody else can, and Zama's access list on chain enforces that rather than this page promising it.";
-  }
-  if (saver.wrongNetwork) {
-    return "Opening these needs a signature on Sepolia. Switch the wallet over and the eye works again.";
-  }
-  if (open) {
-    return "Only this browser saw those figures. Nothing was written to the chain and nothing was sent to a server.";
-  }
-  return "The eye asks Zama's relayer to decrypt values this address owns. One signature, no gas, no transaction.";
+  if (!saver.connected) return "footConnect";
+  if (saver.wrongNetwork) return "footNetwork";
+  return open ? "footOpen" : "footSealed";
 }

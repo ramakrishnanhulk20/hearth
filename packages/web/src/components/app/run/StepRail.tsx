@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { CARD_PROSE, CardPill } from "@/components/app/console";
 import { Spinner } from "@/components/ui";
 
@@ -34,6 +35,8 @@ export type RunStep = {
  * one button with a changing name.
  */
 export function StepRail({ steps }: { steps: RunStep[] }) {
+  const t = useTranslations("run");
+
   return (
     <ol className="flex flex-col">
       {steps.map((step, index) => (
@@ -61,9 +64,7 @@ export function StepRail({ steps }: { steps: RunStep[] }) {
                     step.due ? "text-flameInk" : "text-muted"
                   }`}
                 >
-                  {step.availability.kind === "unknown"
-                    ? "Whether this step is available has not come back from the chain yet."
-                    : step.availability.note}
+                  {step.availability.kind === "unknown" ? t("unknownStep") : step.availability.note}
                 </p>
               </div>
 
@@ -108,10 +109,12 @@ function Marker({ index, step }: { index: number; step: RunStep }) {
  * Not yet and unknown stay quiet, because neither is something a reader can act on.
  */
 function Chip({ step }: { step: RunStep }) {
-  if (step.due) return <CardPill tone="flame">due now</CardPill>;
-  if (step.availability.kind === "ready") return <CardPill tone="good">ready</CardPill>;
-  if (step.availability.kind === "unknown") return <CardPill>unknown</CardPill>;
-  return <CardPill>not yet</CardPill>;
+  const t = useTranslations("run.chip");
+
+  if (step.due) return <CardPill tone="flame">{t("due")}</CardPill>;
+  if (step.availability.kind === "ready") return <CardPill tone="good">{t("ready")}</CardPill>;
+  if (step.availability.kind === "unknown") return <CardPill>{t("unknown")}</CardPill>;
+  return <CardPill>{t("notYet")}</CardPill>;
 }
 
 /**

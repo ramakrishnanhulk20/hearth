@@ -1,0 +1,981 @@
+{
+  "chrome": {
+    "home": "Hearth, accueil",
+    "nav": {
+      "pool": "Le pool",
+      "verify": "Vérifier",
+      "how": "Comment ça marche",
+      "docs": "Docs"
+    },
+    "menu": {
+      "open": "Ouvrir le menu",
+      "close": "Fermer le menu",
+      "label": "Menu du site"
+    },
+    "footer": {
+      "tagline": "Épargne à lots confidentielle et sans perte",
+      "zama": "Bâti sur le protocole Zama",
+      "disclaimer": "Une démonstration sur le réseau de test Sepolia. Les jetons sont des jetons de test sans valeur, le rendement est un solde financé par un sponsor plutôt qu'une vraie stratégie, et rien ici n'est un conseil financier."
+    },
+    "language": {
+      "trigger": "Langue : {name}. En changer",
+      "list": "Choisir une langue",
+      "heading": "Langue",
+      "note": "Traduit à la main. Une page que nous n'avons pas encore atteinte se lit en anglais.",
+      "current": "actuelle"
+    }
+  },
+
+  "landing": {
+    "scrollCue": "Faites défiler",
+    "noWebgl": "Ce navigateur n'a pas pu démarrer la scène 3D, l'histoire est donc ici sous forme de page. Rien d'autre sur le site n'en a besoin.",
+    "header": {
+      "how": "Comment ça marche",
+      "open": "Ouvrir le pool"
+    },
+    "story": {
+      "one": {
+        "kicker": "Épargne à lots confidentielle",
+        "title": "Un seul foyer. Allumé pour la seule personne qui l'entretient."
+      },
+      "two": {
+        "kicker": "Vous déposez",
+        "title": "Vous le remplissez, et le montant se scelle.",
+        "body": "Le montant est chiffré dans votre navigateur et reste un texte chiffré sur la chaîne. À partir de là, le nombre n'appartient qu'à vous, et c'est la liste de contrôle d'accès de Zama qui l'impose."
+      },
+      "three": {
+        "title": "Et il est l'un parmi tant d'autres.",
+        "body": "Le solde de chaque épargnant brûle et pas un seul ne peut être lu de l'extérieur. Le pool ne publie jamais son total exact non plus, seulement la puissance de deux sous laquelle il se range, parce que le total exact trahirait le dépôt d'un épargnant ayant bougé seul."
+      },
+      "four": {
+        "kicker": "Le tirage",
+        "title": "Une graine que personne ne peut voir, tirée dans le coprocesseur.",
+        "body": "La taille des lots est fixée avant que la graine n'existe : personne ne peut donc lire une graine, comprendre qu'il a gagné et agrandir son gain. Quand la période se termine, la graine est publiée avec une signature que le contrat vérifie sur la chaîne."
+      },
+      "five": {
+        "kicker": "Le gain",
+        "title": "Un foyer brûle plus fort.",
+        "body": "Les chances sont proportionnelles au solde détenu sur toute la période : un dépôt fait juste avant le tirage ne gagne que la fraction de période pendant laquelle il était là. Le lot atterrit dans un solde de gains chiffré, et une réclamation est un retrait ordinaire."
+      }
+    },
+    "close": {
+      "kicker": "Essayez",
+      "title": "Épargnez dans le noir.",
+      "body": "Déposez un jeton de test confidentiel sur Sepolia, lancez un tirage vous-même, et vérifiez que vous seul pouvez lire votre propre solde. Cela ne coûte qu'un peu d'ETH de test.",
+      "open": "Ouvrir le pool",
+      "grandPrize": "<figure>{amount} {symbol}</figure> de gros lot au prochain tirage",
+      "saversPeriod": "{count, plural, one {{shown} épargnant} other {{shown} épargnants}} · période {period}",
+      "offline": "Sepolia ne répond pas en ce moment, les chiffres en direct manquent donc. Le pool n'en est pas affecté : il vit sur la chaîne, pas ici."
+    },
+    "shelf": {
+      "heading": "Choisissez votre jeton",
+      "unread": "non lu",
+      "note": "Le gros lot de chaque pool en ce moment, lu sur la chaîne. Même coffre, même tirage, même confidentialité, un par jeton confidentiel."
+    },
+    "sealed": {
+      "heading": "Le solde d'un épargnant",
+      "empty": "Personne n'a encore déposé. Dès que quelqu'un le fera, son solde chiffré apparaîtra ici et vous pourrez essayer de l'ouvrir.",
+      "try": "Essayez de l'ouvrir",
+      "asking": "Demande au service de gestion des clés de Zama",
+      "askingWait": "En général quelques secondes.",
+      "askingLong": "{seconds} s pour l'instant. C'est un réseau en direct, cela prend donc parfois un moment.",
+      "refused": "Refusé.",
+      "refusedNote": "Cela vient du service de gestion des clés de Zama, pas de cette page. Seul le portefeuille qui détient ce solde peut le lire, et aucun administrateur ne peut passer outre.",
+      "unreachable": "Le service de déchiffrement n'a pas pu être joint.",
+      "unreachableNote": "C'est un problème de réseau plutôt qu'un refus : cela ne prouve donc rien dans un sens ni dans l'autre. Cela vaut la peine de réessayer dans un instant.",
+      "again": "Réessayer",
+      "leaked": "Cela s'est déchiffré, et cela n'aurait pas dû.",
+      "leakedNote": "Le service a renvoyé {value}. Dites-le-nous, car c'est le seul résultat que ce produit est bâti pour rendre impossible."
+    },
+    "footer": {
+      "tagline": "Hearth, épargne à lots confidentielle et sans perte",
+      "how": "Comment ça marche",
+      "verify": "Vérifier un tirage",
+      "docs": "Docs",
+      "zama": "Bâti sur le protocole Zama"
+    }
+  },
+
+  "how": {
+    "kicker": "Un guide de deux minutes",
+    "title": "Comment fonctionne Hearth",
+    "lede": "Épargnez ensemble, gagnez un lot payé sur le rendement, et ne perdez jamais votre dépôt. L'argent est invisible. L'équité ne l'est pas.",
+    "steps": {
+      "one": {
+        "title": "Blindez, puis déposez",
+        "body": "Transformez un jeton de test ordinaire en son jumeau confidentiel, puis placez-en une partie dans le pool de ce jeton. Le blindage est public et le dépôt ne l'est pas, et c'est exactement pour cela qu'il y a deux boutons : faire les deux en un clic publie la taille de votre dépôt à qui lit la chaîne."
+      },
+      "two": {
+        "title": "Vos chances, c'est votre solde moyen",
+        "body": "Pas votre solde au moment du tirage, votre solde sur toute la période. Déposez cinq minutes avant la fin de la période et vous obtenez un douzième des chances qu'aurait données le même montant détenu toute la période. C'est ce qui empêche quelqu'un d'exhiber un gros solde juste avant chaque tirage et de rafler le lot."
+      },
+      "three": {
+        "title": "Le tirage se clôture, et une graine est tirée",
+        "body": "La taille des lots est fixée d'abord, avant qu'aucun nombre aléatoire n'existe. La graine est ensuite produite sous forme de texte chiffré dans le coprocesseur de Zama : personne ne la voit au moment du tirage et il n'y a pas de second lancer. Une fois la période terminée, la graine est publiée avec une signature que le contrat vérifie sur la chaîne."
+      },
+      "four": {
+        "title": "Le résultat de chacun est déjà décidé",
+        "body": "Dès que la graine est vérifiée, les seuils sont des nombres publics que n'importe qui peut recalculer et les poids ne peuvent plus changer. L'évaluation ne fait qu'écrire ce qui est déjà vrai, en parcourant la liste des épargnants depuis un point choisi par la graine. Personne ne choisit qui est évalué ni dans quel ordre."
+      },
+      "five": {
+        "title": "Vous regardez, et vous seul",
+        "body": "Appuyez sur Révéler et signez un message. Cette signature prouve au relayer de Zama que vous contrôlez l'adresse, et il renvoie le texte clair des valeurs que le contrat vous a accordées : votre principal, vos gains, votre poids et votre crédit pour chaque tirage. Cela ne coûte pas de gaz et n'écrit rien."
+      },
+      "six": {
+        "title": "Retirez quand vous voulez",
+        "body": "Les retraits paient d'abord sur les gains, ensuite sur le principal, en un seul transfert confidentiel limité sur la chaîne à ce que vous détenez. Une réclamation est le même appel, de la même forme que n'importe quel autre retrait : aucun type de transaction ne nomme donc les gagnants."
+      }
+    },
+    "private": {
+      "title": "Chiffré, lisible par vous seul",
+      "note": "vos propres valeurs",
+      "one": "Votre principal",
+      "two": "Vos gains non réclamés",
+      "three": "Votre solde pondéré par le temps dans chaque tirage",
+      "four": "Ce que chaque tirage vous a payé, donc si vous avez gagné"
+    },
+    "public": {
+      "title": "Public, pour que le pool soit digne de confiance",
+      "note": "n'importe qui peut vérifier",
+      "one": "La graine de chaque tirage, et sa signature",
+      "two": "La tranche contre laquelle le tirage a tourné",
+      "three": "La taille des lots et la liquidité de chaque palier",
+      "four": "Combien de lots un palier a payés, un tirage plus tard",
+      "five": "Quelles adresses ont déposé, et quand"
+    },
+    "leaks": {
+      "title": "Nommé honnêtement : ce qui fuit",
+      "oneLead": "Blinder et déblinder sont publics.",
+      "oneBody": "Transformer un jeton public en jeton confidentiel est par définition un acte public. Si quelqu'un parvient à identifier votre solde, en général en observant un blindage public suivi d'un dépôt du même montant, alors votre résultat à chaque tirage à partir de là devient de l'arithmétique publique, parce que les seuils sont publics par conception.",
+      "twoLead": "En dessous de trois épargnants, la tranche est presque personnelle.",
+      "twoBody": "Avec un seul épargnant, c'est le poids de cet épargnant à un facteur deux près. L'application le dit sur la page quand cela arrive.",
+      "threeLead": "Chaque palier publie combien de lots il a payés,",
+      "threeBody": "un tirage plus tard, jamais à qui. C'est la même étape qui rend l'argent non gagné à la cagnotte publique, ce qui permet au gros lot de grossir là où vous pouvez le regarder. Cela resserre lentement un solde qui ne bouge jamais.",
+      "fourLead": "Le jeton est celui de Zama, et il peut être mis à jour.",
+      "fourBody": "Son propriétaire peut nommer des observateurs capables de déchiffrer chaque montant qui passe par le jeton, rétroactivement. Le registre propre à Hearth ne leur est pas lisible, et l'application affiche une bannière si un observateur est un jour nommé."
+    },
+    "closing": "Vous pouvez regarder un tirage entier se dérouler sans pouvoir dire qui a gagné. C'est tout l'objectif, et c'est la seule chose que seul le chiffrement totalement homomorphe rend possible.",
+    "open": "Ouvrir le pool",
+    "check": "Vérifier un tirage vous-même"
+  },
+
+  "console": {
+    "shell": {
+      "openMenu": "Ouvrir le menu de la console",
+      "closeMenu": "Fermer le menu de la console",
+      "menuLabel": "Menu de la console",
+      "loading": "Allumage du foyer"
+    },
+    "sidebar": {
+      "nav": "Console",
+      "dashboard": "Tableau de bord",
+      "deposit": "Dépôt",
+      "withdraw": "Retrait",
+      "draws": "Mes tirages",
+      "run": "Lancer un tirage",
+      "anyone": "N'importe qui",
+      "anyoneTitle": "Chaque étape d'un tirage est appelable par n'importe quel portefeuille",
+      "docs": "Docs",
+      "verify": "Vérifier"
+    },
+    "wallet": {
+      "connect": "Connecter un portefeuille",
+      "connecting": "Connexion",
+      "scan": "Scanner avec un téléphone",
+      "getWallet": "Obtenir un portefeuille",
+      "noneLead": "Ce navigateur n'a aucun portefeuille. ",
+      "noneLink": "Choisissez-en un sur ethereum.org",
+      "noneTail": ", ajoutez un peu d'ETH de test Sepolia, et revenez. Tout ce qui est sur cet écran se lit gratuitement sans portefeuille.",
+      "switching": "Changement",
+      "switchTo": "Passer sur {network}",
+      "options": "Options du portefeuille",
+      "explorer": "Voir sur Etherscan",
+      "disconnect": "Déconnecter"
+    },
+    "connect": {
+      "prompt": "Connectez d'abord un portefeuille."
+    },
+    "note": {
+      "encrypting": "chiffrement et preuve, environ dix secondes",
+      "signing": "confirmez dans votre portefeuille",
+      "mining": "attente de la validation de la transaction",
+      "done": "terminé",
+      "busy": "Cet appui a été ignoré : {label} est déjà en cours et un portefeuille signe une transaction à la fois. Attendez la fin de la ligne ci-dessus.",
+      "line": "{label} : {state}",
+      "explorer": "Voir la transaction sur Etherscan",
+      "dismiss": "Fermer"
+    },
+    "actions": {
+      "mint": "Obtenir des jetons de test",
+      "approve": "Approuver le wrapper",
+      "wrap": "Blinder vers le jeton confidentiel",
+      "deposit": "Déposer",
+      "withdraw": "Retirer",
+      "withdrawAll": "Tout retirer",
+      "close": "Clôturer le tirage {drawId}",
+      "award": "Attribuer le tirage {drawId}",
+      "advance": "Faire avancer le tirage {drawId}",
+      "finalize": "Finaliser le tirage {drawId}",
+      "reconcile": "Réconcilier le palier {tier}",
+      "askingSeed": "demande de la graine au service de gestion des clés de Zama",
+      "seedSealing": "la graine est publiée mais pas encore déchiffrable, nouvelle demande",
+      "askingCarry": "demande de la liquidité non payée du palier"
+    },
+    "reveal": {
+      "signing": "signez la demande dans votre portefeuille, cela ne coûte pas de gaz",
+      "asking": "déchiffrement dans votre navigateur",
+      "sealing": "la valeur vient d'être écrite et n'est pas encore déchiffrable, nouvelle demande",
+      "newKey": "une part du KMS a échoué, nouvel essai avec une nouvelle clé",
+      "elapsed": "{seconds} s pour l'instant, en général quelques-unes",
+      "stopWaiting": "Arrêter d'attendre",
+      "denied": "Le relayer de Zama a refusé : ce portefeuille n'est pas celui à qui ces valeurs appartiennent.",
+      "reveal": "Révéler {label}",
+      "hide": "Masquer {label}",
+      "sealAgain": "Resceller",
+      "cost": "Révéler, une signature, pas de gaz",
+      "encrypted": "{label}, chiffré",
+      "encryptedAlone": "chiffré",
+      "partial": "Le relayer a répondu sans cette valeur, le total n'est donc pas connu."
+    },
+    "unknown": {
+      "word": "inconnu",
+      "default": "Ceci n'est pas encore revenu de la chaîne."
+    },
+    "amount": {
+      "max": "Max",
+      "allOfIt": "Tout",
+      "maxFor": "{max} : {name}",
+      "shape": "Chiffres uniquement. La virgule et le point marquent tous deux les décimales, un seul par montant, et pas de séparateur de milliers.",
+      "precision": "{symbol} a {decimals} décimales : rien de plus fin que {smallest} ne peut être envoyé.",
+      "zero": "Saisissez un montant supérieur à zéro."
+    },
+    "banners": {
+      "wrongNetwork": "Votre portefeuille est sur le mauvais réseau.",
+      "wrongNetworkBody": "Hearth est déployé sur Ethereum Sepolia. Rien sur cette page ne lira ni n'écrira tant que votre portefeuille n'y sera pas.",
+      "switch": "Passer sur Sepolia",
+      "denied": "Cette adresse est sur la liste de refus du jeton.",
+      "deniedBody": "{symbol} refuse tout transfert entrant ou sortant de cette adresse : les dépôts et les retraits seront donc annulés. C'est un réglage du propriétaire du jeton, pas le nôtre.",
+      "tokenPaused": "Le jeton {symbol} est en pause.",
+      "tokenPausedBody": "Le blindage, les transferts et le déblindage sont tous arrêtés à la couche du jeton. Les contrats de Hearth n'en sont pas affectés, mais rien ne peut bouger tant que Zama ne lève pas la pause.",
+      "vaultPaused": "Le coffre est en pause.",
+      "vaultPausedBody": "Les nouveaux dépôts et la clôture des tirages sont arrêtés. Le retrait, l'évaluation, l'attribution et la finalisation ne sont jamais interruptibles : votre argent reste donc à vous de retirer.",
+      "poolPaused": "La cagnotte est en pause.",
+      "poolPausedBody": "Les tirages ne peuvent pas être clôturés. L'attribution, l'évaluation, la réconciliation et les retraits continuent.",
+      "observers": "Le propriétaire du jeton a nommé {count, plural, one {{shown} observateur} other {{shown} observateurs}}.",
+      "observersBody": "Un observateur sur {symbol} peut déchiffrer chaque montant qui passe par le jeton, dépôts et paiements compris, et rétroactivement. Le registre propre à Hearth, votre principal, vos gains, votre poids et votre crédit, ne leur est pas lisible.",
+      "upgraded": "Le jeton {symbol} a été mis à jour.",
+      "upgradedBody": "Il tourne désormais sur l'implémentation {implementation}, qui n'est pas celle dont nous avons lu le code ligne par ligne. Son comportement sur les handles de Hearth a pu changer.",
+      "unknownImplementation": "une inconnue",
+      "thinSet": "Seulement {count, plural, one {{shown} épargnant} other {{shown} épargnants}} dans le pool en ce moment.",
+      "thinSetBody": "En dessous de {minimum} épargnants, la tranche publiée est proche d'une information personnelle : avec un seul épargnant c'est son poids à un facteur deux près, et avec deux chacun peut borner l'autre. Les montants restent chiffrés dans les deux cas, mais la confidentialité est mince tant que le pool ne se remplit pas.",
+      "noKeeper": "Aucun tirage n'a été fait avancer depuis quelques heures.",
+      "noKeeperBody": "Chaque étape d'un tirage est appelable par n'importe qui. Lancer un tirage, dans la barre latérale, propose les cinq. Un keeper à l'arrêt coûte des tirages, jamais de l'argent.",
+      "keeperLate": "La dernière étape de tirage est arrivée {ago}, soit plus d'une période.",
+      "keeperLateFrom": "Envoyée par {address}. ",
+      "keeperLateBody": "Personne n'a à attendre un keeper : Lancer un tirage clôture, attribue, évalue, finalise et réconcilie depuis votre propre portefeuille.",
+      "keeperLink": "Voir sur Etherscan",
+      "tokenUnread": "L'état propre au jeton n'a pas pu être lu.",
+      "tokenUnreadBody": "Hearth vérifie à chaque visite si {symbol} a des observateurs, s'il est en pause et si votre adresse est bloquée, et ces lectures n'ont pas répondu. Rien n'a changé sur la chaîne, seulement la vue qu'en a cette page. Cela veut bien dire que les avertissements sur le jeton manquent sur cet écran parce que rien n'a été lu, et non parce qu'il n'y avait rien à signaler.",
+      "historyDown": "L'historique des tirages est indisponible.",
+      "historyDownBody": "{detail} Chaque chiffre des écrans eux-mêmes vient toujours directement de la chaîne."
+    },
+    "unsupported": {
+      "subtitle": "Hearth ne peut pas ouvrir de pool sur ce jeton : il n'y a donc rien à signer ici.",
+      "pill": "non pris en charge",
+      "notDeployed": "non déployé",
+      "whyLabel": "Pourquoi ce jeton n'a pas de pool",
+      "whyOne": "Le mint de ce jeton est réservé à son émetteur, Hearth ne peut donc pas ouvrir de pool dessus. Choisissez un autre pool.",
+      "whyTwo": "Un pool Hearth a besoin que les épargnants puissent d'abord obtenir le jeton ordinaire et le blinder eux-mêmes. {name} est émis par Zama sur Sepolia et son sous-jacent ne peut être minté que par l'adresse qui l'a déployé : personne d'autre que l'émetteur ne peut donc y blinder, et un coffre posé dessus resterait vide. C'est un réglage du jeton, pas une limite des contrats ici : le coffre accepte n'importe quel jeton confidentiel qui suit le standard.",
+      "reason": "Raison",
+      "confidentialToken": "Jeton confidentiel",
+      "underlying": "Sous-jacent",
+      "publishedBy": "Publié par",
+      "zamaList": "Les adresses Sepolia de Zama",
+      "pickLabel": "Choisissez un pool ouvert",
+      "pickNote": "Chaque pool ci-dessus est le même coffre, le même tirage et la même confidentialité, sur un jeton confidentiel différent. Votre position dans l'un ne dit rien de votre position dans un autre."
+    }
+  },
+
+  "picker": {
+    "trigger": "Épargne en {symbol}. Changer de jeton",
+    "list": "Choisir un jeton",
+    "saveIn": "Épargner en",
+    "grandPrize": "Gros lot",
+    "unread": "non lu",
+    "savingPool": "pool d'épargne",
+    "notSupported": "non pris en charge",
+    "zamaList": "La liste de Zama",
+    "reasons": {
+      "restrictedMint": "l'émission est réservée à l'émetteur"
+    }
+  },
+
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Ce que vous détenez, ce que fait le pool, et la seule chose à faire ensuite.",
+    "next": "Suivant",
+    "position": {
+      "label": "Ce que vous détenez",
+      "open": "ouvert dans ce navigateur",
+      "sealed": "scellé sur la chaîne",
+      "principal": "Principal",
+      "principalNote": "Ce que vous avez épargné. Vos chances sont pondérées par ce montant sur toute la période.",
+      "principalSpoken": "votre principal",
+      "winnings": "Gains non réclamés",
+      "winningsNote": "L'argent des lots qui vous a été crédité et pas encore retiré. Il ne rapporte aucune chance de son côté.",
+      "winningsSpoken": "vos gains non réclamés",
+      "outside": "Ce portefeuille n'est pas dans le pool en ce moment. Déposez et les deux chiffres commencent à se remplir.",
+      "footConnect": "Connectez un portefeuille pour ouvrir les vôtres. Personne d'autre ne le peut, et c'est la liste d'accès de Zama sur la chaîne qui l'impose, pas cette page qui le promet.",
+      "footNetwork": "Ouvrir ces valeurs demande une signature sur Sepolia. Basculez le portefeuille dessus et l'œil refonctionne.",
+      "footOpen": "Seul ce navigateur a vu ces chiffres. Rien n'a été écrit sur la chaîne et rien n'a été envoyé à un serveur.",
+      "footSealed": "L'œil demande au relayer de Zama de déchiffrer des valeurs que cette adresse possède. Une signature, pas de gaz, pas de transaction."
+    },
+    "pool": {
+      "label": "Le pool en ce moment",
+      "pill": "public pour tout le monde",
+      "savers": "Épargnants",
+      "saversUnknown": "Le nombre d'épargnants n'est pas encore revenu de la chaîne.",
+      "liquidity": "Liquidité des lots",
+      "liquidityUnknown": "L'un des trois soldes de palier n'est pas encore revenu, et une somme partielle n'est pas le pool.",
+      "period": "Période",
+      "periodUnknown": "La période en cours n'est pas encore revenue de la chaîne.",
+      "endsIn": "Se termine dans",
+      "endsUnknown": "La fin de cette période n'est pas encore revenue de la chaîne.",
+      "tier": "Palier",
+      "chance": "Chance",
+      "prizeEach": "Lot unitaire ({symbol})",
+      "prizeCount": "{count, plural, one {{shown} lot par tirage} other {{shown} lots par tirage}}",
+      "prizeCountUnknown": "nombre de lots inconnu",
+      "carryWaiting": "report du tirage {drawId} en attente",
+      "oddsUnknown": "Les chances de ce palier ne sont pas encore revenues de la chaîne.",
+      "nextPrizeUnknown": "Le prochain lot de ce palier n'est pas encore revenu de la chaîne.",
+      "footOne": "Chaque lot vaut la moitié de la liquidité de son palier divisée par le nombre de lots, fixée à la clôture avant que la graine aléatoire n'existe. Ce que personne ne gagne est publié un tirage plus tard et offert à nouveau.",
+      "footBracket": "Les chances sont tirées contre une tranche de <bracket>2^{bits}</bracket>, publiée avec le tirage.",
+      "footBracketUnknown": "La tranche contre laquelle ces chances sont tirées n'est pas encore revenue de la chaîne."
+    },
+    "tiers": {
+      "grand": "Gros lot",
+      "mid": "Intermédiaire",
+      "frequent": "Fréquent"
+    },
+    "tiersLower": {
+      "grand": "gros lot",
+      "mid": "intermédiaire",
+      "frequent": "fréquent"
+    }
+  },
+
+  "nextStep": {
+    "connectTitle": "Connectez un portefeuille pour commencer.",
+    "connectDetail": "Hearth tourne sur Ethereum Sepolia. Il vous faut un peu d'ETH de test pour le gaz, et le {underlyingSymbol} de test est à un clic une fois un portefeuille connecté.",
+    "connectCta": "Connecter un portefeuille",
+    "switchTitle": "Ce portefeuille pointe vers un autre réseau.",
+    "switchDetail": "Les chiffres du pool sur cette page sont lus sur Sepolia dans tous les cas. Rien ne peut être signé ni envoyé tant que le portefeuille n'y est pas aussi.",
+    "switchCta": "Passer sur Sepolia",
+    "readingTitle": "Lecture de ce portefeuille sur la chaîne.",
+    "readingDetail": "L'étape suivante apparaît une fois les lectures arrivées. En nommer une à partir d'un solde qui n'est pas arrivé vous enverrait sur le mauvais écran.",
+    "faucetTitle": "Obtenez des {underlyingSymbol} de test.",
+    "faucetDetail": "Le {underlyingSymbol} fictif a un mint ouvert plafonné à un million de jetons par appel. Il ne vaut rien : prenez-en plus qu'il ne vous en faut.",
+    "faucetCta": "Obtenir des {underlyingSymbol} de test",
+    "shieldTitle": "Blindez vos {underlyingSymbol}.",
+    "shieldDetail": "Le blindage transforme des {underlyingSymbol} ordinaires en {symbol}. Cette étape est publique par nature, et c'est la dernière chose lisible par quiconque au sujet de cet argent.",
+    "shieldCta": "Blinder des {underlyingSymbol}",
+    "depositTitle": "Placez vos {symbol} dans le pool.",
+    "depositDetail": "Le montant est chiffré dans votre navigateur avant d'être envoyé : le coffre crédite donc un nombre qu'il ne peut pas lire. Vos chances suivent ce que vous détenez.",
+    "depositCta": "Déposer",
+    "claimTitle": "Des gains vous attendent.",
+    "claimDetail": "Réclamer est un retrait ordinaire pour ce montant. Sur la chaîne, il a la même forme que n'importe quel autre retrait, et c'est ce qui l'empêche de nommer le gagnant.",
+    "claimCta": "Réclamer vos gains",
+    "readingDrawsTitle": "Lecture des derniers tirages.",
+    "readingDrawsDetail": "L'étape suivante apparaît une fois qu'ils sont arrivés. En nommer une à partir d'une liste de tirages qui n'est pas arrivée vous enverrait sur le mauvais écran.",
+    "resultTitle": "Le tirage {drawId} a écrit votre résultat.",
+    "resultDetail": "Le parcours a atteint ce portefeuille : s'il a gagné ou non est déjà décidé et stocké. Cela reste scellé jusqu'à ce que vous l'ouvriez, ce qui coûte une signature et pas de gaz.",
+    "resultCta": "Ouvrir le tirage {drawId}",
+    "settledTitle": "Rien à faire en ce moment.",
+    "settledDetail": "Votre dépôt est dans le pool et gagne des chances à chaque seconde qu'il y passe. Le prochain tirage se clôture à la fin de la période, et n'importe qui peut le clôturer.",
+    "settledCta": "Compléter votre dépôt",
+    "noWallet": "Aucun portefeuille trouvé"
+  },
+
+  "deposit": {
+    "title": "Dépôt",
+    "subtitle": "Obtenez des {underlying} de test, blindez-les en {confidential}, puis placez-les dans le coffre.",
+    "connect": "Connectez un portefeuille sur Sepolia pour déposer. Les trois étapes ci-dessous sont ce que demande la mise en pool de votre argent, et l'écran ouvre celle où votre portefeuille en est réellement.",
+    "connectNote": "Il vous faudra un peu d'ETH Sepolia pour le gaz. Le {underlying} de test est à un clic une fois connecté.",
+    "lowGas": "Ce portefeuille ne détient presque pas d'ETH Sepolia : une transaction échouera avant d'être envoyée. N'importe quel faucet Sepolia le recharge : le faucet Web3 de Google Cloud, celui d'Alchemy ou celui de Chainlink. Un dixième d'ETH est largement plus qu'assez.",
+    "inWallet": "Dans votre portefeuille",
+    "inWalletSpoken": "votre solde de {symbol}",
+    "inWalletUnknown": "Dans votre portefeuille : ",
+    "faucet": {
+      "title": "Obtenir des {underlying} de test",
+      "held": "{amount} {underlying} dans votre portefeuille.",
+      "heldSummary": "{amount} {underlying} dans votre portefeuille. ",
+      "more": "En obtenir un million de plus",
+      "unread": "Le solde de votre portefeuille n'est pas encore revenu de la chaîne.",
+      "button": "Obtenir des {underlying} de test",
+      "note": "Le {underlying} fictif a un mint ouvert plafonné à un million de jetons par appel. Il ne vaut rien : demandez-en plus qu'il ne vous en faut."
+    },
+    "shield": {
+      "title": "Blindez vos {underlying}",
+      "summary": "Blindé. Le solde est scellé : vous seul pouvez lire ce qu'il contient. ",
+      "more": "Blinder davantage",
+      "body": "Le blindage transforme des {underlying} ordinaires en {confidential}, et il est public. Le contrat wrapper émet le montant en clair, le transfert ERC-20 le porte une deuxième fois, et il n'y a pas moyen d'y échapper : convertir un jeton public en jeton confidentiel est par définition un acte public.",
+      "youShield": "Vous blindez",
+      "fieldName": "Montant de {underlying} à blinder",
+      "balance": "{amount} {underlying} dans votre portefeuille",
+      "tooMuch": "Vous détenez {amount} {underlying}. Demandez-en moins, ou mintez-en davantage d'abord.",
+      "youReceive": "Vous recevez",
+      "rateUnknown": "Le taux du wrapper n'est pas encore revenu de la chaîne.",
+      "rateOne": "Le wrapper est à un pour un : vous recevez exactement ce que vous blindez.",
+      "rateOther": "Le wrapper prend {rate} unités de {underlying} pour une unité de {confidential}.",
+      "why": "C'est pour cela que blinder et déposer sont deux boutons et non un seul. Blindez un chiffre rond, au moment de votre choix, et déposez-en une partie plus tard. Quiconque parvient à identifier votre solde peut calculer si vous avez gagné à chaque tirage à partir de là, parce que les seuils sont publics par conception.",
+      "approve": "Approuver le wrapper",
+      "button": "Blinder",
+      "approveNote": "Une seule approbation, et chaque blindage suivant tient en une transaction. Elle autorise le contrat wrapper {confidential} à prélever des {underlying} sur ce portefeuille et n'atteint rien d'autre de ce que vous possédez. {underlying} est un jeton de test Sepolia venu du bouton de faucet ci-dessus, sans valeur sur aucun réseau réel. Le bouton de blindage prend le relais une fois l'approbation validée.",
+      "waiting": "Vos soldes ne sont pas encore revenus de la chaîne, ceci est donc retenu jusque-là.",
+      "skip": "Déposer plutôt ce que vous détenez déjà"
+    },
+    "vault": {
+      "title": "Déposer dans le coffre",
+      "body": "Le montant est chiffré dans votre navigateur avec une preuve à divulgation nulle, puis envoyé en une transaction. Le coffre crédite exactement ce que le jeton dit avoir réellement déplacé : demander plus que ce que vous détenez ne déplace donc rien du tout plutôt que d'échouer bruyamment. Ouvrez l'œil ci-dessous si vous n'êtes pas sûr de ce que vous avez.",
+      "closedNotAwarded": "Un tirage est clôturé et attend son attribution en ce moment. Le dépôt reste autorisé ; cet argent compte à partir de cet instant, pondéré par la part de la période en cours qui reste à courir.",
+      "youDeposit": "Vous déposez",
+      "fieldName": "Montant de {confidential} à déposer",
+      "cap": "Le coffre plafonne un épargnant à {amount} {confidential} : ceci serait donc refusé et remboursé dans la même transaction.",
+      "tooMuch": "Vous détenez {amount} {confidential}. En demander plus n'est pas refusé sur la chaîne : le jeton déplace ce que vous avez, ici rien, et la transaction réussit quand même.",
+      "sealedNote": "Votre solde est scellé, cet écran ne peut donc pas vérifier le montant face à lui. Un dépôt supérieur à ce que vous détenez ne déplace rien et coûte quand même une transaction. Ouvrez l'œil ci-dessus et le champ est vérifié pour vous.",
+      "button": "Déposer",
+      "paused": "Le coffre est en pause, les dépôts sont donc refusés. Le retrait fonctionne toujours."
+    }
+  },
+
+  "withdraw": {
+    "title": "Retrait",
+    "subtitle": "Deux étapes : sortir du coffre, puis revenir en {underlying}. Le principal n'est jamais bloqué, même au milieu d'un tirage.",
+    "connect": "Connectez un portefeuille pour retirer. L'étape une sort le principal et les gains du coffre, l'étape deux retransforme les {confidential} en {underlying}.",
+    "connectNote": "Rien ici n'est jamais bloqué. Le principal revient en totalité dès que vous le demandez, même au milieu d'un tirage.",
+    "tabs": {
+      "label": "Étapes du retrait",
+      "vault": "Sortir du coffre",
+      "unshield": "Retour au jeton ordinaire",
+      "unfinished": "a quelque chose d'inachevé"
+    },
+    "pending": {
+      "title": "Un déblindage a été soumis et n'a jamais abouti.",
+      "body": "Les jetons confidentiels sont déjà brûlés et les {underlying} attendent sur le wrapper. Envoyer la seconde transaction les libère. ",
+      "link": "Voir le déblindage",
+      "finish": "Terminer le déblindage"
+    },
+    "vault": {
+      "reading": "Lecture de ce que ce portefeuille détient dans le coffre.",
+      "unavailable": "Les lectures pour ce portefeuille ne sont pas revenues, cet écran ne peut donc pas dire ce que le coffre détient pour vous. Rechargez quand le réseau répondra.",
+      "neverDepositedLead": "Ce portefeuille n'a jamais déposé : le coffre ne détient donc rien pour lui et un retrait serait refusé sur la chaîne. ",
+      "depositFirst": "Déposez d'abord",
+      "neverDepositedTail": ", ou passez à l'étape deux si vous détenez des {confidential} que vous voulez récupérer en {underlying}.",
+      "youWithdraw": "Vous retirez",
+      "fieldName": "Montant à retirer du coffre",
+      "inVault": "Dans le coffre",
+      "inVaultSpoken": "votre solde dans le coffre",
+      "clamped": "C'est plus que ce que vous détenez. Le coffre envoie les {amount} que vous détenez et s'arrête là.",
+      "revealNote": "Révélez pour plafonner ce champ et voir la répartition. Passer outre est sans risque : le coffre limite le montant sur la chaîne dans tous les cas.",
+      "youReceive": "Vous recevez",
+      "receiveBalance": "Dans votre portefeuille, toujours chiffré. L'étape deux le retransforme en {underlying}.",
+      "split": "{winnings} de ce montant sort des gains et {principal} du principal, en un seul transfert qui a la même allure dans les deux cas.",
+      "splitSealed": "Révélez votre solde dans le coffre pour voir comment il se répartit entre gains et principal.",
+      "button": "Retirer",
+      "everything": "Tout retirer",
+      "everythingNote": "Tout retirer ne demande ni révélation ni entrée chiffrée. Le coffre ajoute votre principal à vos gains sur la chaîne et envoie le total : ni vous ni cette page n'avez à le connaître d'abord.",
+      "howLabel": "Comment un retrait est payé",
+      "howOne": "Les gains d'abord, ensuite le principal, en un seul transfert confidentiel. Rien dans le transfert ne dit de quelles parts il était fait.",
+      "howTwo": "Le montant est limité sur la chaîne au plus petit de ce que vous demandez, de ce que vous détenez et de ce que le coffre détient, parce qu'un transfert confidentiel déplace tout le montant ou rien du tout. Une demande trop grande envoie tout ce que vous détenez au lieu d'échouer, et c'est aussi pourquoi personne ne peut trouver votre solde en demandant trop et en regardant ce qui se passe.",
+      "howWindow": "Une fenêtre de tirage est ouverte en ce moment. Le retrait est autorisé et ne change pas les chances déjà fixées pour vous. Tout lot venu de ce tirage atterrit dans vos gains, pour un retrait ultérieur.",
+      "howThree": "Le principal n'est jamais bloqué. Pas de préavis, pas de pénalité et pas d'attente de la fin d'un tirage."
+    },
+    "unshield": {
+      "youUnshield": "Vous déblindez",
+      "fieldName": "Montant de {confidential} à déblinder",
+      "inWallet": "Dans votre portefeuille",
+      "inWalletSpoken": "votre solde de {confidential}",
+      "tooMuch": "Vous détenez {amount} {confidential}. En demander plus n'est pas refusé sur la chaîne : cela dépense les deux transactions et ne déplace rien.",
+      "revealNote": "Révélez pour plafonner ce champ. Un déblindage supérieur à ce que vous détenez n'est pas refusé, il ne déplace simplement rien.",
+      "youReceive": "Vous recevez",
+      "receiveBalance": "{underlying} dans votre portefeuille, dépensables partout.",
+      "receiveNote": "Ce chiffre part sur la chaîne en clair. C'est la première des deux transactions qui le publie.",
+      "button": "Déblinder",
+      "unfinished": "Un nouveau déblindage doit attendre que celui du dessus soit terminé. Un seul est mémorisé à la fois, et en lancer un autre laisserait le premier avec ses jetons brûlés et rien pour les libérer.",
+      "unwrapping": "Déblindage : votre portefeuille demande deux fois. D'abord une signature pour que le wrapper puisse lire votre solde confidentiel, ce qui ne coûte pas de gaz, puis la transaction elle-même.",
+      "waiting": "Déblindage soumis. Attente de la publication du texte clair et de sa preuve par le protocole de Zama.",
+      "finalizing": "Finalisation : confirmez la seconde transaction pour libérer les {underlying}.",
+      "done": "Déblindé. Votre solde de {underlying} a augmenté de {amount}, lu sur la chaîne après la seconde transaction.",
+      "doneUnchecked": "Déblindé. Les deux transactions ont abouti, mais le solde de {underlying} n'a pas pu être relu : cet écran ne peut donc pas dire ce qui est arrivé. Vérifiez votre portefeuille.",
+      "nothingMoved": "Rien n'a bougé. Les deux transactions ont abouti et votre solde de {underlying} est exactement ce qu'il était, ce qui arrive quand le montant dépassait votre solde confidentiel : le wrapper ne libère rien plutôt que de refuser. Ouvrez le solde avec l'œil ci-dessus et utilisez Tout.",
+      "whyLabel": "Pourquoi cela prend deux transactions",
+      "whyOne": "Le wrapper brûle le montant chiffré et le publie d'abord, puis libère les jetons ordinaires une fois que le protocole de Zama a produit le texte clair et sa preuve. Ce sont deux appels distincts, et le second peut être envoyé plus tard si vous fermez l'onglet entre les deux.",
+      "whyTwo": "Votre portefeuille demande aussi une signature avant la première transaction, parce que le wrapper lit votre solde confidentiel pour vérifier le montant. Cette invite est une signature et non une transaction, et elle ne coûte pas de gaz.",
+      "whyThree": "Bon à savoir avant de tout vider : blindez à l'entrée et déblindez entièrement à la sortie, et la différence entre les deux totaux publics est une borne inférieure sur tout ce que vous avez jamais gagné. Déblindez en chiffres ronds, ou laissez un solde confidentiel permanent derrière vous."
+    }
+  },
+
+  "draws": {
+    "title": "Mes tirages",
+    "subtitle": "Chaque tirage récent, ses chiffres publics de lots, et votre propre poids et votre lot derrière l'œil.",
+    "count": "{count} plus récents",
+    "reading": "lecture",
+    "emptyReading": "Lecture du pool.",
+    "emptyNone": "Aucune période n'est encore terminée, il n'y a donc pas de tirage à montrer. Le premier apparaît dès que la période 1 est passée.",
+    "emptyFailed": "Les tirages n'ont pas pu être lus à l'instant. Ils sont sur la chaîne dans tous les cas ; cette page réessaie toute seule.",
+    "card": {
+      "label": "Tirage {drawId}",
+      "claimNote": "Réclamer est un retrait ordinaire pour exactement ce montant. Sur la chaîne, il a la même forme que n'importe quel autre retrait, et c'est ce qui empêche une réclamation de nommer le gagnant.",
+      "claim": "Réclamer {amount} {symbol}",
+      "advanceNote": "Faire avancer déplace le parcours partagé de jusqu'à {batch} épargnants, dans l'ordre fixé par la graine de ce tirage. Cela ne peut pas être dirigé vers vous : appuyer ne dit donc rien sur le fait que vous ayez gagné.",
+      "advance": "Faire avancer le tirage",
+      "waitingLead": "Cette étape est ouverte à tous. ",
+      "waitingLink": "Lancer un tirage",
+      "waitingTail": " la propose.",
+      "periodEnded": "Période {drawId} terminée",
+      "periodEndedUnknown": "La fin de cette période n'est pas encore revenue de la chaîne.",
+      "closeDeadline": "Échéance de clôture",
+      "closeDeadlineUnknown": "L'échéance de clôture de ce tirage n'est pas encore revenue de la chaîne.",
+      "passed": "passée",
+      "prizeWindow": "Fenêtre des lots",
+      "windowUnknown": "La fenêtre de ce tirage n'est pas encore revenue de la chaîne.",
+      "windowLeft": "{time} restant",
+      "windowClosed": "fermée",
+      "bracket": "Tranche",
+      "bracketNote": "publiée à la place du poids total du pool",
+      "walk": "Parcours",
+      "walkNotStarted": "pas commencé",
+      "walkProgress": "{cursor} sur {total}",
+      "walkNote": "jusqu'à {batch} épargnants par appel",
+      "prizeWorth": "Ce que valait un lot",
+      "noPrizeMoney": "Ce tirage n'a offert aucun argent de lots : aucune récolte n'avait encore été comptabilisée à sa clôture.",
+      "yourResult": "Votre résultat",
+      "sealedResult": "un résultat, chiffré",
+      "sealedResultNote": "Chiffré sur la chaîne, et lisible par le seul portefeuille auquel il appartient.",
+      "notReachedUnknown": "Le parcours ne vous a pas encore atteint, et la fenêtre de ce tirage n'est pas revenue de la chaîne : la page ne peut donc pas dire s'il peut encore être fait avancer.",
+      "notReachedYet": "Le parcours ne vous a pas encore atteint. Jusque-là, ce tirage ne contient aucun chiffre pour vous, gagnant ou non.",
+      "missedWindow": "La fenêtre s'est fermée avant que le parcours ne vous atteigne : ce tirage ne vous paie donc rien et l'argent est retourné aux paliers. Personne ne peut plus l'évaluer.",
+      "yourPrize": "Votre lot",
+      "yourPrizeSpoken": "votre lot au tirage {drawId}",
+      "yourWeight": "Votre poids",
+      "yourWeightSpoken": "votre poids au tirage {drawId}",
+      "noPrize": "Pas de lot à ce tirage. Votre poids a été compté et les seuils ne sont pas tombés en votre faveur.",
+      "claimed": "Déjà retiré. Le coffre ne doit rien à ce portefeuille : ce lot est donc dans votre solde confidentiel. Le tirage garde le chiffre comme trace."
+    }
+  },
+
+  "describe": {
+    "unreadBadge": "non lu",
+    "unread": "Ce tirage n'est pas encore revenu de la chaîne, rien de ce qui suit n'est donc un fait. La page continue de demander.",
+    "notClosedBadge": "non clôturé",
+    "notClosed": "La période est terminée et ce tirage attend sa clôture. N'importe qui peut le clôturer, vous compris.",
+    "missedBadge": "manqué",
+    "missed": "Personne n'a clôturé ce tirage avant son échéance, il ne paie donc rien. Sa liquidité n'a jamais bougé et la clôture suivante l'offre à nouveau.",
+    "closedBadge": "en attente de la preuve",
+    "closed": "Clôturé. La graine, la tranche, le drapeau de non-vacuité et la récolte sont publiés et attendent que le service de gestion des clés de Zama signe leurs textes clairs. N'importe qui peut les récupérer et attribuer le tirage.",
+    "emptyBadge": "vide",
+    "empty": "Personne ne détenait de solde pendant cette période, il n'y avait donc rien à peser. La liquidité offerte est retournée directement aux paliers.",
+    "skippedBadge": "sauté",
+    "skipped": "L'attribution est arrivée après la fenêtre du tirage, aucun lot n'a donc été payé. La liquidité est retournée aux paliers et la récolte a quand même été comptabilisée.",
+    "awardedBadge": "attribué",
+    "awardedAllDisconnected": "Attribué, et le parcours a atteint chacun de ses épargnants. Connectez un portefeuille pour voir où vous vous situiez.",
+    "awardedDisconnected": "Attribué. Le parcours d'évaluation tourne encore. Connectez un portefeuille pour voir où vous vous situez.",
+    "awardedAllOutside": "Attribué et chaque épargnant évalué. Ce portefeuille n'était pas dans le pool à ce moment-là.",
+    "awardedOutside": "Attribué. Le parcours d'évaluation tourne encore, et ce portefeuille n'en fait pas partie.",
+    "awardedAll": "Attribué, et le parcours a atteint chacun de ses épargnants. Chaque résultat est fixé et écrit.",
+    "awarded": "Attribué. À partir de cet instant, chaque résultat est déjà décidé : les seuils sont publics et les poids ne peuvent plus changer. L'évaluation ne fait que les écrire."
+  },
+
+  "run": {
+    "title": "Lancer un tirage",
+    "subtitle": "Un tirage prend cinq transactions. Chacune est appelable par n'importe quel portefeuille, le vôtre compris.",
+    "connect": "Connectez un portefeuille pour envoyer l'une de ces transactions. Aucune ne demande un privilège que les contrats reconnaissent, et aucune ne peut être dirigée vers un épargnant en particulier.",
+    "connectNote": "Les cinq étapes ci-dessous se lisent sur la chaîne dans tous les cas : l'écran vaut donc le coup d'œil avant de connecter quoi que ce soit.",
+    "waitingFor": "Ce que le pool attend",
+    "nothing": "Rien",
+    "ordering": " Un tirage est prêt à être clôturé également. La finalisation et la réconciliation passent d'abord, parce que l'argent libéré par un report est celui sur lequel la clôture suivante taille ses lots.",
+    "unknownDue": "Les lectures qui disent quelle étape est due ne sont pas encore revenues de la chaîne.",
+    "idleWithClock": "Soit le keeper a suivi, soit cette période tourne encore. Elle se termine dans {time}.",
+    "idle": "Soit le keeper a suivi, soit cette période tourne encore.",
+    "railLabel": "Les cinq étapes, dans l'ordre où un tirage en a besoin",
+    "unknownStep": "La disponibilité de cette étape n'est pas encore revenue de la chaîne.",
+    "chip": {
+      "due": "due maintenant",
+      "ready": "prête",
+      "unknown": "inconnu",
+      "notYet": "pas encore"
+    },
+    "blocked": {
+      "connect": "Connectez un portefeuille pour envoyer ceci.",
+      "network": "Votre portefeuille est sur un autre réseau.",
+      "busy": "Une autre transaction est déjà en vol."
+    },
+    "close": {
+      "title": "Clôture",
+      "headline": "Clôturer le tirage {drawId}",
+      "headlineIdle": "Clôturer un tirage",
+      "button": "Clôturer",
+      "does": "Fixe la taille des lots de chaque palier à partir de l'argent qui s'y trouve, déplace cet argent dans le tirage, récolte la source de rendement, et tire une graine chiffrée que personne, nous compris, ne peut lire.",
+      "paused": "La cagnotte est en pause, aucun tirage ne peut donc être clôturé.",
+      "readyDeadline": "Le tirage {drawId} peut être clôturé pendant encore {time}. Passé ce délai il est sauté et son argent reste dans les paliers.",
+      "ready": "Le tirage {drawId} attend sa clôture.",
+      "waitingClock": "Aucun tirage n'attend. Le tirage {drawId} devient clôturable dans {time}, à la fin de cette période.",
+      "waiting": "Aucun tirage n'attend d'être clôturé."
+    },
+    "award": {
+      "title": "Attribution",
+      "headline": "Attribuer le tirage {drawId}",
+      "headlineIdle": "Attribuer un tirage",
+      "button": "Attribuer",
+      "does": "Remet à la cagnotte les textes clairs des quatre valeurs publiées à la clôture, avec la signature du service de gestion des clés sur ces valeurs. La cagnotte vérifie cette signature sur la chaîne, comptabilise la récolte dans les paliers et ouvre le tirage. Les gagnants sont décidés à cet instant.",
+      "ready": "Le tirage {drawId} est clôturé et attend. Les quatre preuves sont récupérées d'abord, ce qui prend quelques secondes, puis votre portefeuille vous demande de signer.",
+      "waiting": "Aucun tirage clôturé n'attend son attribution."
+    },
+    "advance": {
+      "title": "Avancement",
+      "headline": "Faire avancer le tirage {drawId}",
+      "headlineIdle": "Faire avancer un tirage",
+      "button": "Avancer",
+      "does": "Parcourt la liste des épargnants depuis un point décidé par la graine et crédite à chacun ce que les seuils publics disent qu'il a gagné. L'appelant choisit combien d'épargnants un appel couvre, jamais lesquels : envoyer ceci ne dit donc rien de qui vous êtes dans le tirage.",
+      "readyCount": "{cursor} épargnants sur {total} traités au tirage {drawId}. Chaque appel déplace le parcours partagé de jusqu'à {batch}, ce que paie une transaction.",
+      "ready": "Le tirage {drawId} a encore des épargnants à couvrir. Chaque appel déplace le parcours partagé de jusqu'à {batch}, ce que paie une transaction.",
+      "waiting": "Aucun tirage attribué n'a d'épargnants restants dans sa fenêtre."
+    },
+    "finalize": {
+      "title": "Finalisation",
+      "headline": "Finaliser le tirage {drawId}",
+      "headlineIdle": "Finaliser un tirage",
+      "button": "Finaliser",
+      "does": "Verse le reliquat non payé de chaque palier dans le report chiffré de ce palier une fois la fenêtre passée, et publie le report de chaque palier dont c'est le tour.",
+      "ready": "Le tirage {drawId} a terminé sa fenêtre, plus rien ne peut donc en être crédité.",
+      "waitingClock": "Aucune fenêtre ne s'est terminée. Le tirage {drawId} peut être finalisé dans {time}.",
+      "waiting": "Aucun tirage n'a terminé sa fenêtre sans être finalisé."
+    },
+    "reconcile": {
+      "title": "Réconciliation",
+      "headline": "Réconcilier le palier {tier}",
+      "headlineIdle": "Réconcilier un palier",
+      "button": "Réconcilier",
+      "does": "Récupère le texte clair d'un report publié, le prouve à la cagnotte et réinscrit l'argent dans la liquidité en clair de ce palier, pour que la clôture suivante puisse l'offrir à nouveau.",
+      "ready": "Le palier {tier} a publié son report au tirage {drawId}.",
+      "readyMore": "{count, plural, one { {shown} autre palier attend derrière, et chaque appui en traite un.} other { {shown} autres paliers attendent derrière, et chaque appui en traite un.}}",
+      "waiting": "Aucun palier n'a de report en attente de réinscription."
+    },
+    "who": {
+      "label": "Qui envoie ces transactions",
+      "oneStart": "Un keeper que nous faisons tourner surveille le pool et envoie chacune de ces étapes dès qu'elle est due : dans une heure ordinaire, il n'y a donc rien à faire sur cet écran.",
+      "onePeriod": " Une période vaut ici {period}, un tour complet de cinq part donc à ce rythme.",
+      "oneEnd": " Le keeper ne détient aucun privilège que les contrats reconnaissent. Les deux choses dont il aurait pu abuser, choisir quels épargnants sont évalués et choisir l'ordre de paiement des lots, ne sont des choix pour aucun appelant.",
+      "two": "L'attribution et la réconciliation sont les deux étapes qui ont besoin de quelque chose hors chaîne. Votre navigateur demande au relayer de Zama le texte clair de ce que la cagnotte a publié, quatre valeurs pour une attribution et une pour une réconciliation, avec la signature du service de gestion des clés sur ces valeurs. C'est le même appel que fait le keeper, et le contrat vérifie lui-même la signature : un navigateur ne peut donc pas mentir sur ce qu'il a lu.",
+      "three": "Si le keeper s'arrête, rien n'est perdu. Un tirage jamais clôturé garde son argent dans les paliers et est offert à nouveau, et un report jamais réconcilié est reversé par la première clôture qui suit son arrivée. Un keeper à l'arrêt coûte des tirages au pool, pas de l'argent, et n'importe quel portefeuille ici peut les relancer.",
+      "periodHours": "{count, plural, one {une heure} other {{shown} heures}}",
+      "periodMinutes": "{count} minutes",
+      "periodSeconds": "{count} secondes"
+    },
+    "stand": {
+      "label": "Où en sont les tirages",
+      "period": "Période en cours",
+      "periodNote": "Se termine dans {time}",
+      "savers": "Épargnants",
+      "saversNote": "La distance qu'un parcours complet doit couvrir",
+      "lastClosed": "Dernier tirage clôturé",
+      "lastClosedNone": "aucun pour l'instant",
+      "vaultUnknown": "état du coffre inconnu",
+      "vaultPaused": "coffre en pause",
+      "vaultRunning": "coffre en marche",
+      "poolUnknown": "état de la cagnotte inconnu",
+      "poolPaused": "cagnotte en pause",
+      "poolRunning": "cagnotte en marche"
+    }
+  },
+
+  "verify": {
+    "title": "Vérifiez un tirage vous-même.",
+    "lede": "Aucun portefeuille nécessaire. Chaque nombre ici est lu directement dans les contrats, et les seuils viennent de la vue <code>thresholdOf</code> du coffre lui-même, qui est l'arithmétique ayant décidé du résultat. Il n'y a pas sur cette page de seconde implémentation qui pourrait contredire la première.",
+    "noPool": "{symbol} n'a pas de pool à vérifier.",
+    "noPoolBody": "{reason}, Hearth n'a donc jamais ouvert de coffre dessus et il n'y a pas de tirage ici. Choisissez un jeton dans la liste ci-dessus.",
+    "unreachable": "Sepolia n'a pas pu être joint.",
+    "unreachableBody": "Cette page lit le coffre et la cagnotte via un point d'accès RPC, et cette lecture a échoué : elle n'a donc rien à montrer. Les tirages eux-mêmes sont sur la chaîne dans tous les cas.",
+    "tryAgain": "Réessayer",
+    "reading": "Lecture des tirages sur Sepolia.",
+    "noneYet": "Aucun tirage n'a encore été clôturé, il n'y a donc rien à vérifier. Le premier apparaît une fois la période 1 passée et clôturée par quelqu'un.",
+    "oneNotClosed": "Le tirage {drawId} n'a pas encore été clôturé, il n'y a donc rien à vérifier.",
+    "rangeNotClosed": "Les tirages {first} à {last} n'ont pas été clôturés, il n'y a donc rien à vérifier ici. Tout ce qui est plus ancien est sur l'explorateur.",
+    "drawButton": "Tirage {drawId}",
+    "facts": {
+      "title": "Tirage {drawId}",
+      "periodCovered": "Période couverte",
+      "periodEnded": "terminée le {stamp}",
+      "windowEnds": "Fin de la fenêtre",
+      "seed": "Graine",
+      "seedUnpublished": "pas encore publiée",
+      "bracket": "Tranche",
+      "bracketUnset": "pas encore fixée",
+      "bracketNote": "{count} solde-secondes",
+      "prizeSizes": "Taille des lots",
+      "prizeSizesNote": "gros lot / intermédiaire / fréquent",
+      "harvest": "Récolte comptabilisée",
+      "walkSavers": "Épargnants dans le parcours",
+      "walkNotStarted": "pas commencé",
+      "walkPosition": "Position du parcours",
+      "walkProgress": "{cursor} sur {total}",
+      "finalized": "Finalisé",
+      "yes": "oui",
+      "no": "non",
+      "note": "La graine est produite sous forme de texte chiffré dans le coprocesseur de Zama, personne ne la voit donc au moment du tirage, et clôturer un tirage réussit exactement une fois, il n'y a donc pas de second lancer. La tranche est la plus petite puissance de deux au-dessus du poids agrégé du pool, publiée à la place de l'agrégat exact parce que deux totaux exacts consécutifs permettraient de retrouver le dépôt d'un épargnant ayant bougé seul."
+    },
+    "tiers": {
+      "title": "Ce que chaque palier a offert et payé",
+      "hint": "public par conception",
+      "each": "{amount} {symbol} chacun",
+      "offered": "offert",
+      "returned": "revenu non payé",
+      "notReconciled": "pas encore réconcilié",
+      "paid": "lots payés",
+      "paidUnknown": "inconnu tant que ce n'est pas réconcilié",
+      "paidInexact": "pas exactement calculable",
+      "note": "Le nombre de lots payés se déduit des nombres publics : ce que le palier a offert, moins ce qui est revenu non payé, divisé par la taille du lot. Le compte tombe juste dès qu'aucun report chiffré n'a été embarqué dans le tirage, et ce déploiement réconcilie chaque palier à chaque tirage pour que ce soit habituellement le cas. Cela ne dit jamais qui a été payé."
+    },
+    "thresholds": {
+      "title": "Seuils pour une adresse",
+      "hint": "lus depuis thresholdOf",
+      "body": "Collez n'importe quelle adresse. Le coffre renvoie le poids exact que cette adresse devait battre pour chaque lot de chaque palier de ce tirage. Comparez-le au poids déchiffré de cet épargnant et le résultat se vérifie : il a gagné un lot exactement quand son poids était strictement au-dessus du seuil.",
+      "fieldName": "Une adresse à vérifier",
+      "invalid": "Ce n'est pas une adresse Ethereum valide.",
+      "notAwarded": "Le tirage {drawId} n'est pas attribué : il n'a donc ni graine ni seuils pour l'instant.",
+      "row": "{tier}, lot {index}",
+      "reading": "lecture",
+      "rowFailed": "Le nœud n'a pas répondu à thresholdOf pour ce lot. Rien du tirage n'a changé, seulement la vue qu'en a cette page.",
+      "noCounts": "Le nombre de lots de ce tirage n'a pas pu être lu : cette page ne peut donc pas dire combien il y a de seuils. Réessayez dans un instant.",
+      "outOfRange": "hors plage, donc ingagnable",
+      "unit": "solde-secondes"
+    },
+    "transactions": {
+      "title": "Les transactions",
+      "hint": "sur Etherscan",
+      "none": "Rien pour ce tirage dans les blocs des dernières heures. L'historique plus ancien est sur l'explorateur.",
+      "block": "bloc {block}",
+      "open": "Ouvrir le pool",
+      "closed": "Clôturé",
+      "awarded": "Attribué",
+      "markedEmpty": "Marqué vide",
+      "markedSkipped": "Marqué sauté",
+      "finalized": "Finalisé",
+      "reconciled": "Palier réconcilié",
+      "withTier": "{label} ({tier})"
+    }
+  },
+
+  "lab": {
+    "pill": "Page labo",
+    "title": "La cérémonie du tirage",
+    "lede": "Non liée depuis le site. Chaque nombre ci-dessous est lu en direct dans les contrats sur Sepolia : les handles scellés, la graine signée par le service de gestion des clés, la tranche contre laquelle le tirage a tourné, et les seuils exacts qu'un portefeuille devait battre.",
+    "noPool": "{symbol} n'a pas de pool à ouvrir.",
+    "noPoolBody": "{reason}, Hearth n'a donc jamais ouvert de coffre dessus. Choisissez un jeton qui en a un.",
+    "noDraw": "Aucun tirage attribué à ouvrir pour l'instant.",
+    "noDrawBody": "La cérémonie a besoin d'un tirage clôturé et attribué. Lancez-en un depuis le panneau des tirages dans le pool, puis revenez.",
+    "drawButton": "Tirage {drawId}",
+    "openSeal": "Ouvrir le sceau",
+    "again": "Relancer",
+    "stages": {
+      "sealed": "scellé",
+      "seed": "la graine s'ouvre",
+      "bracket": "la tranche",
+      "thresholds": "les seuils tombent",
+      "mine": "votre propre résultat"
+    },
+    "seals": {
+      "title": "Ce que la clôture a publié",
+      "hint": "quatre handles, dans cet ordre exact",
+      "seed": "graine",
+      "scale": "compteur d'échelle",
+      "nonEmpty": "non-vacuité",
+      "harvest": "récolte",
+      "unpublished": "non publié",
+      "note": "La cagnotte réencode les quatre textes clairs dans cet ordre et vérifie sur la chaîne la signature du service de gestion des clés sur cet encodage : les demander dans un autre ordre fait donc échouer l'attribution. L'ordre est ici le contrat, pas une commodité."
+    },
+    "seed": {
+      "title": "La graine s'ouvre",
+      "note": "Produite sous forme de texte chiffré dans le coprocesseur de Zama, personne ne l'a donc vue au moment du tirage. Publiée une fois la période terminée, signée par le service de gestion des clés, et vérifiée sur la chaîne par la cagnotte avant que quoi que ce soit d'autre ne soit autorisé dans ce tirage. La taille des lots était déjà fixée à la clôture, avant que ce nombre n'existe."
+    },
+    "bracket": {
+      "title": "La tranche",
+      "unit": "{count} solde-secondes",
+      "note": "Le tirage tourne contre la plus petite puissance de deux au-dessus du poids agrégé du pool, jamais contre l'agrégat lui-même. Publier le total exact permettrait à n'importe qui de retrouver le dépôt d'un épargnant ayant bougé seul, à partir de deux totaux consécutifs et de l'horodatage de sa propre transaction."
+    },
+    "thresholds": {
+      "title": "Les seuils tombent",
+      "connectHint": "connectez un portefeuille pour voir les vôtres",
+      "connectBody": "Les seuils sont par adresse et publics. Connectez un portefeuille et le nombre exact qu'il devait battre pour chaque lot de ce tirage apparaît ici, calculé par le coffre et non par cette page.",
+      "row": "{tier}, lot {index}",
+      "reading": "lecture",
+      "outOfRange": "hors plage",
+      "note": "Battez le seuil et le lot est à vous. Ces nombres viennent de la vue du coffre lui-même, l'arithmétique ayant décidé du résultat : il n'y a donc pas ici de seconde implémentation qui pourrait contredire la première."
+    },
+    "mine": {
+      "title": "Et pour vous seul",
+      "connectBody": "Connectez un portefeuille et cette carte se remplit avec le poids sur lequel il a été jugé et ce que le tirage {drawId} lui a payé, déchiffré dans votre navigateur et nulle part ailleurs.",
+      "nothing": "Ce portefeuille ne détient aucun poids dans le tirage {drawId}, il n'y a donc rien de personnel à ouvrir. Seul un épargnant qui était dans le parcours a ici un poids et un crédit.",
+      "weight": "Votre poids",
+      "weightUnit": "solde-secondes sur la période",
+      "paid": "Ce que ce tirage vous a payé",
+      "paidUnit": "{symbol}, crédités à vos gains",
+      "sealAgain": "Resceller",
+      "decrypt": "Déchiffrer mon résultat",
+      "denied": "Refusé : ces valeurs appartiennent à un autre portefeuille.",
+      "note": "Tout ce qui est au-dessus de cette carte est public et n'importe qui peut le vérifier. Cette carte, non : elle demande une signature EIP-712 du portefeuille qui possède ces valeurs, et la liste de contrôle d'accès de Zama refuse tous les autres. C'est tout le produit en deux paragraphes."
+    }
+  },
+
+  "docs": {
+    "title": "Documentation",
+    "kicker": "Documentation",
+    "heading": "Le compte rendu écrit",
+    "count": "{count, plural, one {{shown} page} other {{shown} pages}}. Chacune est un fichier du dépôt, sous <path>docs/</path>, rendu ici.",
+    "contents": "Sommaire",
+    "close": "Fermer",
+    "overview": "Vue d'ensemble",
+    "nav": "Documentation",
+    "search": "Rechercher dans la documentation",
+    "noResults": "Rien ne correspond.",
+    "outline": "Sur cette page",
+    "nearby": "Pages voisines",
+    "previous": "Précédente",
+    "next": "Suivante",
+    "copy": "Copier",
+    "copied": "Copié",
+    "copyManual": "Appuyez sur ctrl C",
+    "copyLabel": "Copier ce bloc",
+    "diagramWide": "Plus large que la colonne. Faites-le défiler sur le côté.",
+    "diagramFailed": "Ce diagramme ne s'est pas dessiné. La source est ci-dessous.",
+    "rendererFailed": "Le moteur de rendu des diagrammes ne s'est pas chargé. La source est ci-dessous.",
+    "fallbackNote": "Cette page n'est pas encore traduite, elle est donc affichée en anglais.",
+    "sections": {
+      "reference": "Référence",
+      "attackLogs": "Journaux d'attaque",
+      "gettingstarted": "Pour commencer",
+      "concepts": "Concepts",
+      "security": "Sécurité",
+      "operations": "Exploitation"
+    }
+  },
+
+  "errors": {
+    "notFound": {
+      "title": "Il n'y a rien à cette adresse.",
+      "body": "La page a bougé, le lien a été mal tapé, ou le jeton qu'il contient n'est pas un de ceux contre lesquels cette version a été déployée. Le pool lui-même est sur la chaîne et n'en est pas affecté.",
+      "home": "Retour au début",
+      "pool": "Ouvrir le pool",
+      "docs": "Lire les docs"
+    },
+    "crashed": {
+      "title": "Cet écran a cassé, et l'argent non.",
+      "body": "Quelque chose dans la page elle-même a échoué. Rien n'a été signé et rien n'a été envoyé : votre solde est exactement là où il était. Recharger cet écran est sans risque.",
+      "digest": "Référence {digest}",
+      "home": "Retour au début",
+      "retry": "Réessayer cet écran"
+    },
+    "unknown": "Quelque chose s'est mal passé.",
+    "userRejected": "Vous avez refusé la demande dans votre portefeuille. Rien n'a été envoyé.",
+    "signingRejected": "Vous avez refusé la signature dans votre portefeuille. Rien n'a été envoyé.",
+    "notConnected": "Connectez d'abord un portefeuille.",
+    "decryptNotConnected": "Connectez un portefeuille pour déchiffrer vos propres valeurs.",
+    "addressesMissing": "Les adresses de Hearth ne sont pas configurées, rien ne peut donc être envoyé.",
+    "drawNotWaiting": "Le tirage {drawId} n'attend pas son attribution, il n'y a donc rien à envoyer.",
+    "insufficientAllowance": "Le wrapper n'est pas encore autorisé à prendre autant de votre jeton. Approuvez-le d'abord.",
+    "insufficientErc20": "Pas assez du jeton de test ordinaire dans ce portefeuille. Mintez-en depuis le faucet.",
+    "insufficientConfidential": "Pas assez du jeton confidentiel. Blindez-en d'abord une partie depuis le jeton ordinaire.",
+    "chainMismatch": "Votre portefeuille est sur un réseau différent de celui de l'application. Basculez-le sur Sepolia.",
+    "notEntitled": "Ce portefeuille n'est pas autorisé à lire cette valeur. Elle appartient à une autre adresse.",
+    "noCiphertext": "Il n'y a pas encore de valeur chiffrée ici, ce qui veut dire un solde de zéro.",
+    "relayerRateLimited": "Le relayer de Zama limite le débit de ce navigateur. Attendez quelques secondes et redemandez.",
+    "relayerUnreachable": "Le relayer de Zama n'a pas pu être joint. Redemandez dans un instant.",
+    "relayerUnreachableStatus": "Le relayer de Zama n'a pas pu être joint (HTTP {status}). Redemandez dans un instant.",
+    "rpcRateLimited": "Le nœud Sepolia limite le débit de ce navigateur. Attendez quelques secondes et redemandez.",
+    "noGas": "Pas assez d'ETH Sepolia pour payer le gaz. N'importe quel faucet Sepolia le recharge.",
+    "relayerBehind": "Le relayer de Zama n'a pas encore rattrapé ce bloc. Redemandez dans un instant.",
+    "EnforcedPause": "Le coffre est en pause, les dépôts et la clôture des tirages sont donc arrêtés. Le retrait fonctionne toujours.",
+    "NotASaver": "Ce portefeuille n'a jamais déposé, il n'y a donc rien à retirer.",
+    "NotTheAsset": "Seul le jeton confidentiel avec lequel ce coffre a été déployé est accepté. Blindez ce jeton et réessayez.",
+    "DrawNotAwarded": "Ce tirage n'a pas encore été attribué, il n'y a donc rien à évaluer. Clôturez-le et attribuez-le d'abord.",
+    "EvaluationWindowClosed": "La fenêtre de deux périodes de ce tirage est passée. Il ne peut plus être évalué, et il ne paie rien.",
+    "EvaluationWindowOpen": "Ce tirage peut encore être évalué, il ne peut donc pas encore être finalisé. Attendez la fin de la fenêtre.",
+    "AlreadyFinalized": "Ce tirage est déjà finalisé. Il ne reste rien à y faire.",
+    "DrawNotOpen": "Ce tirage n'a jamais été clôturé, il n'y a donc rien à finaliser.",
+    "AlreadyClosed": "Quelqu'un a clôturé ce tirage avant vous. Son attribution est l'étape suivante.",
+    "NothingToClose": "Aucun tirage n'attend d'être clôturé en ce moment.",
+    "CloseWindowClosed": "L'échéance de clôture de ce tirage est passée. Sa liquidité retourne aux paliers et le tirage suivant l'offre à nouveau.",
+    "WrongStatus": "Le tirage a avancé avant que cette transaction n'arrive. Rechargez et regardez où il en est.",
+    "CarryNotPending": "Ce palier n'a aucun report publié en attente, il n'y a donc rien à réconcilier.",
+    "InvalidKMSSignatures": "La signature du service de gestion des clés n'a pas été vérifiée sur la chaîne. Redemandez le déchiffrement."
+  },
+
+  "format": {
+    "pending": "...",
+    "dust": "<0,01",
+    "now": "maintenant",
+    "seconds": "{seconds} s",
+    "minutesSeconds": "{minutes} min {seconds} s",
+    "hoursMinutes": "{hours} h {minutes} min",
+    "agoSeconds": "il y a {count} s",
+    "agoMinutes": "il y a {count} min",
+    "agoHours": "il y a {count} h",
+    "agoDays": "il y a {count} j",
+    "notYet": "pas encore",
+    "utc": "{stamp} UTC",
+    "oddsNever": "jamais",
+    "oddsEveryDraw": "chaque tirage",
+    "oddsOneIn": "1 tirage sur {count}",
+    "balanceSeconds": "solde-secondes"
+  },
+
+  "meta": {
+    "titleDefault": "Hearth, une épargne à lots dont personne ne voit l'intérieur",
+    "titleTemplate": "{title} | Hearth",
+    "description": "Épargne à lots confidentielle et sans perte sur le protocole Zama. Les dépôts, les soldes et les gains restent chiffrés sur la chaîne, les lots sont tirés sur le rendement avec des chances proportionnelles à votre solde pondéré par le temps, et le principal revient en totalité dès que vous le demandez.",
+    "ogTitle": "Hearth",
+    "ogDescription": "Épargne à lots confidentielle et sans perte sur le protocole Zama.",
+    "how": {
+      "title": "Comment ça marche",
+      "description": "Déposez un jeton confidentiel, gardez votre solde chiffré, gagnez des lots tirés sur le rendement avec des chances fixées par votre solde pondéré par le temps, et retirez quand vous voulez."
+    },
+    "verify": {
+      "title": "Vérifier un tirage",
+      "description": "Lisez la graine, la tranche, la récolte et la taille des lots d'un tirage directement dans les contrats, et obtenez le seuil exact que n'importe quelle adresse devait battre."
+    },
+    "lab": {
+      "title": "La cérémonie du tirage",
+      "description": "Une page labo : le sceau de la graine qui s'ouvre, la tranche, les seuils et le résultat personnel d'un épargnant."
+    },
+    "docs": {
+      "title": "Documentation",
+      "description": "Comment se déroule un tirage, comment les chances sont calculées, d'où vient l'argent des lots, ce qui reste privé, et chaque faille que nous connaissons."
+    },
+    "dashboard": {
+      "title": "Tableau de bord {symbol}",
+      "titleFallback": "Tableau de bord",
+      "description": "Ce que ce portefeuille détient, ce que vaut la cagnotte, et l'étape suivante, avec chaque montant d'épargnant chiffré sur la chaîne."
+    },
+    "deposit": {
+      "title": "Déposer des {symbol}",
+      "titleFallback": "Dépôt",
+      "description": "Obtenez des {underlyingSymbol} de test, blindez-les en {symbol}, puis déposez-les dans le coffre Hearth.",
+      "descriptionFallback": "Obtenez le jeton de test, blindez-le, puis déposez-le dans le coffre Hearth."
+    },
+    "withdraw": {
+      "title": "Retirer des {symbol}",
+      "titleFallback": "Retrait",
+      "description": "Sortez le principal et les gains du coffre Hearth, puis déblindez les {symbol} en {underlyingSymbol}.",
+      "descriptionFallback": "Sortez le principal et les gains du coffre Hearth, puis déblindez vers le jeton ordinaire."
+    },
+    "draws": {
+      "title": "Mes tirages",
+      "description": "Ce que chaque tirage récent a payé, et ce qu'il vous a payé, avec votre poids et votre lot chiffrés jusqu'à ce que vous les ouvriez."
+    },
+    "run": {
+      "title": "Lancer un tirage",
+      "description": "Clôturer, attribuer, avancer, finaliser et réconcilier. Chaque étape d'un tirage Hearth est appelable par n'importe quel portefeuille."
+    }
+  }
+}

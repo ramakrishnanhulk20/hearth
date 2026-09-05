@@ -1,0 +1,981 @@
+{
+  "chrome": {
+    "home": "Hearth, Startseite",
+    "nav": {
+      "pool": "Der Pool",
+      "verify": "Prüfen",
+      "how": "So funktioniert es",
+      "docs": "Doku"
+    },
+    "menu": {
+      "open": "Menü öffnen",
+      "close": "Menü schließen",
+      "label": "Seitenmenü"
+    },
+    "footer": {
+      "tagline": "Vertrauliches Gewinnsparen ohne Verlustrisiko",
+      "zama": "Gebaut auf dem Zama Protocol",
+      "disclaimer": "Eine Demonstration im Sepolia-Testnetz. Die Token sind Testtoken ohne Wert, die Rendite ist ein vom Sponsor finanziertes Guthaben statt einer echten Strategie, und nichts hier ist eine Finanzberatung."
+    },
+    "language": {
+      "trigger": "Sprache: {name}. Ändern",
+      "list": "Sprache wählen",
+      "heading": "Sprache",
+      "note": "Von Hand übersetzt. Eine Seite, die wir noch nicht erreicht haben, erscheint auf Englisch.",
+      "current": "aktuell"
+    }
+  },
+
+  "landing": {
+    "scrollCue": "Scrollen",
+    "noWebgl": "Dieser Browser konnte die 3D-Szene nicht starten, deshalb steht die Geschichte hier als Seite. Sonst braucht sie auf dieser Website nichts.",
+    "header": {
+      "how": "So funktioniert es",
+      "open": "Pool öffnen"
+    },
+    "story": {
+      "one": {
+        "kicker": "Vertrauliches Gewinnsparen",
+        "title": "Ein Herdfeuer. Es brennt nur für den, der es hütet."
+      },
+      "two": {
+        "kicker": "Sie zahlen ein",
+        "title": "Sie füllen es, und der Betrag verschließt sich.",
+        "body": "Der Betrag wird in Ihrem Browser verschlüsselt und bleibt auf der Blockchain ein Chiffrat. Ab hier gehört die Zahl Ihnen allein, und durchgesetzt wird das von der Zugriffskontrollliste von Zama."
+      },
+      "three": {
+        "title": "Und es ist eines von vielen.",
+        "body": "Das Guthaben jedes Sparers brennt, und keines davon lässt sich von außen lesen. Auch der Pool veröffentlicht nie seine genaue Summe, nur die Zweierpotenz, unter der er liegt, denn die genaue Summe würde die Einzahlung eines einzelnen Bewegers verraten."
+      },
+      "four": {
+        "kicker": "Die Ziehung",
+        "title": "Ein Seed, den niemand sehen kann, gezogen im Koprozessor.",
+        "body": "Die Preisgrößen stehen fest, bevor der Seed existiert, niemand kann also einen Seed lesen, ausrechnen, dass er gewonnen hat, und den Gewinn größer machen. Ist die Periode vorbei, wird der Seed mit einer Signatur veröffentlicht, die der Vertrag auf der Blockchain prüft."
+      },
+      "five": {
+        "kicker": "Der Gewinn",
+        "title": "Ein Herdfeuer brennt heller.",
+        "body": "Die Chancen richten sich nach dem Guthaben über die ganze Periode, eine Einzahlung kurz vor der Ziehung verdient also nur den Bruchteil der Periode, den sie da war. Der Preis landet in einem verschlüsselten Gewinnguthaben, und das Einlösen ist eine gewöhnliche Abhebung."
+      }
+    },
+    "close": {
+      "kicker": "Ausprobieren",
+      "title": "Sparen Sie im Dunkeln.",
+      "body": "Zahlen Sie einen vertraulichen Testtoken auf Sepolia ein, führen Sie selbst eine Ziehung durch, und prüfen Sie, dass nur Sie Ihr eigenes Guthaben lesen können. Es kostet nichts außer etwas Test-ETH.",
+      "open": "Pool öffnen",
+      "grandPrize": "<figure>{amount} {symbol}</figure> Hauptpreis in der nächsten Ziehung",
+      "saversPeriod": "{count, plural, one {{shown} Sparer} other {{shown} Sparer}} · Periode {period}",
+      "offline": "Sepolia antwortet gerade nicht, deshalb fehlen die Live-Zahlen. Dem Pool macht das nichts: Er lebt auf der Blockchain, nicht hier."
+    },
+    "shelf": {
+      "heading": "Wählen Sie Ihren Token",
+      "unread": "ungelesen",
+      "note": "Der Hauptpreis jedes Pools, gerade jetzt von der Blockchain gelesen. Gleicher Vault, gleiche Ziehung, gleiche Privatsphäre, einer je vertraulichem Token."
+    },
+    "sealed": {
+      "heading": "Das Guthaben eines Sparers",
+      "empty": "Bisher hat niemand eingezahlt. Sobald das jemand tut, erscheint sein verschlüsseltes Guthaben hier und Sie können versuchen, es zu öffnen.",
+      "try": "Versuchen Sie, es zu öffnen",
+      "asking": "Frage den Schlüsselverwaltungsdienst von Zama",
+      "askingWait": "Meist ein paar Sekunden.",
+      "askingLong": "{seconds}s bisher. Es ist ein Live-Netzwerk, das dauert manchmal.",
+      "refused": "Abgelehnt.",
+      "refusedNote": "Das kam vom Schlüsselverwaltungsdienst von Zama, nicht von dieser Seite. Nur die Wallet, der dieses Guthaben gehört, kann es lesen, und kein Administrator kann das übergehen.",
+      "unreachable": "Der Entschlüsselungsdienst war nicht erreichbar.",
+      "unreachableNote": "Das ist ein Netzwerkproblem und keine Ablehnung, es beweist also in keine Richtung etwas. Es lohnt sich, es gleich noch einmal zu versuchen.",
+      "again": "Erneut versuchen",
+      "leaked": "Es wurde entschlüsselt, und das hätte nicht passieren dürfen.",
+      "leakedNote": "Der Dienst hat {value} zurückgegeben. Bitte sagen Sie uns Bescheid, denn genau dieses eine Ergebnis soll dieses Produkt unmöglich machen."
+    },
+    "footer": {
+      "tagline": "Hearth, vertrauliches Gewinnsparen ohne Verlustrisiko",
+      "how": "So funktioniert es",
+      "verify": "Eine Ziehung prüfen",
+      "docs": "Doku",
+      "zama": "Gebaut auf dem Zama Protocol"
+    }
+  },
+
+  "how": {
+    "kicker": "Eine Anleitung in zwei Minuten",
+    "title": "So funktioniert Hearth",
+    "lede": "Gemeinsam sparen, einen aus der Rendite gezahlten Preis gewinnen und die Einlage nie verlieren. Das Geld ist unsichtbar. Die Fairness nicht.",
+    "steps": {
+      "one": {
+        "title": "Abschirmen, dann einzahlen",
+        "body": "Verwandeln Sie einen einfachen Testtoken in seinen vertraulichen Zwilling und legen Sie dann einen Teil davon in den Pool dieses Tokens. Das Abschirmen ist öffentlich, das Einzahlen nicht, und genau deshalb sind es zwei Buttons: Beides in einem Klick zu erledigen veröffentlicht die Höhe Ihrer Einzahlung für jeden, der die Blockchain liest."
+      },
+      "two": {
+        "title": "Ihre Chancen sind Ihr Durchschnittsguthaben",
+        "body": "Nicht Ihr Guthaben im Moment der Ziehung, sondern Ihr Guthaben über die ganze Periode. Zahlen Sie fünf Minuten vor Ende der Periode ein, bekommen Sie ein Zwölftel der Chancen, die derselbe Betrag über die ganze Periode gehabt hätte. Das hält jemanden davon ab, kurz vor jeder Ziehung ein großes Guthaben aufblitzen zu lassen und den Preis mitzunehmen."
+      },
+      "three": {
+        "title": "Die Ziehung schließt, und ein Seed wird gezogen",
+        "body": "Zuerst stehen die Preisgrößen fest, bevor irgendeine Zufallszahl existiert. Dann wird der Seed als Chiffrat im Koprozessor von Zama erzeugt, niemand sieht ihn also beim Ziehen und es gibt kein zweites Würfeln. Ist die Periode vorbei, wird der Seed mit einer Signatur veröffentlicht, die der Vertrag auf der Blockchain prüft."
+      },
+      "four": {
+        "title": "Das Ergebnis aller steht bereits fest",
+        "body": "Von dem Moment an, in dem der Seed geprüft ist, sind die Schwellenwerte öffentliche Zahlen, die jeder nachrechnen kann, und die Gewichte können sich nicht mehr ändern. Die Auswertung schreibt nur auf, was schon wahr ist, und läuft die Sparerliste ab einem Punkt ab, den der Seed gewählt hat. Niemand bestimmt, wer ausgewertet wird oder in welcher Reihenfolge."
+      },
+      "five": {
+        "title": "Sie schauen hin, und nur Sie",
+        "body": "Drücken Sie Aufdecken und signieren Sie eine Nachricht. Diese Signatur beweist dem Relayer von Zama, dass Sie die Adresse kontrollieren, und er gibt den Klartext der Werte zurück, die der Vertrag Ihnen gewährt hat: Ihre Einlage, Ihre Gewinne, Ihr Gewicht und Ihre Gutschrift für jede Ziehung. Das kostet kein Gas und schreibt nichts."
+      },
+      "six": {
+        "title": "Nehmen Sie es jederzeit heraus",
+        "body": "Abhebungen zahlen zuerst aus den Gewinnen, dann aus der Einlage, in einem vertraulichen Transfer, der auf der Blockchain auf Ihren Bestand begrenzt wird. Das Einlösen ist derselbe Aufruf in derselben Form wie jede andere Abhebung, es gibt also keinen Transaktionstyp, der die Gewinner benennt."
+      }
+    },
+    "private": {
+      "title": "Verschlüsselt, lesbar nur für Sie",
+      "note": "Ihre eigenen Werte",
+      "one": "Ihre Einlage",
+      "two": "Ihre noch nicht abgehobenen Gewinne",
+      "three": "Ihr zeitgewichtetes Guthaben in jeder Ziehung",
+      "four": "Was jede Ziehung Ihnen gezahlt hat, also ob Sie gewonnen haben"
+    },
+    "public": {
+      "title": "Öffentlich, damit man dem Pool trauen kann",
+      "note": "jeder kann es prüfen",
+      "one": "Der Seed jeder Ziehung und seine Signatur",
+      "two": "Die Größenklasse, gegen die die Ziehung lief",
+      "three": "Preisgröße und Liquidität jeder Stufe",
+      "four": "Wie viele Preise eine Stufe gezahlt hat, eine Ziehung später",
+      "five": "Welche Adressen eingezahlt haben, und wann"
+    },
+    "leaks": {
+      "title": "Ehrlich benannt: was leckt",
+      "oneLead": "Abschirmen und Abschirmung aufheben sind öffentlich.",
+      "oneBody": "Einen öffentlichen Token in einen vertraulichen zu verwandeln ist per Definition eine öffentliche Handlung. Wer Ihr Guthaben festnageln kann, meist indem er ein öffentliches Abschirmen und kurz darauf eine Einzahlung derselben Höhe beobachtet, für den ist Ihr Ergebnis in jeder Ziehung von da an öffentliche Rechnung, denn die Schwellenwerte sind absichtlich öffentlich.",
+      "twoLead": "Unter drei Sparern ist die Größenklasse fast persönlich.",
+      "twoBody": "Bei einem Sparer ist sie dessen Gewicht auf den Faktor zwei genau. Die App sagt das auf der Seite, sobald es so weit ist.",
+      "threeLead": "Jede Stufe veröffentlicht, wie viele Preise sie gezahlt hat,",
+      "threeBody": "eine Ziehung später, nie an wen. Das ist derselbe Schritt, der ungewonnenes Geld in den öffentlichen Topf zurückgibt, und genau das lässt den Jackpot dort wachsen, wo Sie ihm zusehen können. Ein Guthaben, das sich nie bewegt, wird dadurch langsam enger eingegrenzt.",
+      "fourLead": "Der Token gehört Zama, und er ist aktualisierbar.",
+      "fourBody": "Sein Eigentümer kann Beobachter einsetzen, die jeden Betrag entschlüsseln können, der durch den Token läuft, auch rückwirkend. Hearths eigenes Kontobuch können sie nicht lesen, und die App zeigt ein Banner, sobald ein Beobachter eingesetzt wird."
+    },
+    "closing": "Sie können einer ganzen Ziehung zusehen und trotzdem nicht sagen, wer gewonnen hat. Darum geht es, und das ermöglicht allein die vollständig homomorphe Verschlüsselung.",
+    "open": "Pool öffnen",
+    "check": "Eine Ziehung selbst prüfen"
+  },
+
+  "console": {
+    "shell": {
+      "openMenu": "Konsolenmenü öffnen",
+      "closeMenu": "Konsolenmenü schließen",
+      "menuLabel": "Konsolenmenü",
+      "loading": "Das Herdfeuer wird entfacht"
+    },
+    "sidebar": {
+      "nav": "Konsole",
+      "dashboard": "Dashboard",
+      "deposit": "Einzahlen",
+      "withdraw": "Abheben",
+      "draws": "Meine Ziehungen",
+      "run": "Eine Ziehung durchführen",
+      "anyone": "Jeder",
+      "anyoneTitle": "Jeder Schritt einer Ziehung ist von jeder Wallet aufrufbar",
+      "docs": "Doku",
+      "verify": "Prüfen"
+    },
+    "wallet": {
+      "connect": "Wallet verbinden",
+      "connecting": "Verbinden",
+      "scan": "Mit dem Handy scannen",
+      "getWallet": "Wallet holen",
+      "noneLead": "In diesem Browser steckt keine Wallet. ",
+      "noneLink": "Wählen Sie eine bei ethereum.org",
+      "noneTail": ", holen Sie sich etwas Sepolia-Test-ETH und kommen Sie wieder. Alles auf diesem Bildschirm lässt sich auch ohne Wallet lesen.",
+      "switching": "Wechseln",
+      "switchTo": "Zu {network} wechseln",
+      "options": "Wallet-Optionen",
+      "explorer": "Auf Etherscan ansehen",
+      "disconnect": "Trennen"
+    },
+    "connect": {
+      "prompt": "Verbinden Sie zuerst eine Wallet."
+    },
+    "note": {
+      "encrypting": "verschlüsseln und beweisen, etwa zehn Sekunden",
+      "signing": "in Ihrer Wallet bestätigen",
+      "mining": "warten, bis die Transaktion aufgenommen ist",
+      "done": "fertig",
+      "busy": "Dieser Klick wurde ignoriert: {label} läuft bereits, und eine Wallet signiert immer nur eine Transaktion. Warten Sie, bis die Zeile oben fertig ist.",
+      "line": "{label}: {state}",
+      "explorer": "Die Transaktion auf Etherscan ansehen",
+      "dismiss": "Schließen"
+    },
+    "actions": {
+      "mint": "Testtoken holen",
+      "approve": "Wrapper freigeben",
+      "wrap": "In den vertraulichen Token abschirmen",
+      "deposit": "Einzahlen",
+      "withdraw": "Abheben",
+      "withdrawAll": "Alles abheben",
+      "close": "Ziehung {drawId} abschließen",
+      "award": "Ziehung {drawId} zuteilen",
+      "advance": "Ziehung {drawId} voranbringen",
+      "finalize": "Ziehung {drawId} finalisieren",
+      "reconcile": "Stufe {tier} abgleichen",
+      "askingSeed": "frage den Schlüsselverwaltungsdienst von Zama nach dem Seed",
+      "seedSealing": "der Seed ist veröffentlicht, aber noch nicht entschlüsselbar, frage erneut",
+      "askingCarry": "frage nach der unausgezahlten Liquidität der Stufe"
+    },
+    "reveal": {
+      "signing": "signieren Sie die Anfrage in Ihrer Wallet, sie kostet kein Gas",
+      "asking": "entschlüsseln in Ihrem Browser",
+      "sealing": "der Wert wurde gerade geschrieben und ist noch nicht entschlüsselbar, frage erneut",
+      "newKey": "ein KMS-Anteil ist fehlgeschlagen, neuer Versuch mit neuem Schlüssel",
+      "elapsed": "{seconds}s bisher, üblich sind ein paar",
+      "stopWaiting": "Nicht mehr warten",
+      "denied": "Der Relayer von Zama hat abgelehnt: Diese Wallet ist nicht die, zu der diese Werte gehören.",
+      "reveal": "{label} aufdecken",
+      "hide": "{label} verbergen",
+      "sealAgain": "Wieder versiegeln",
+      "cost": "Aufdecken, eine Signatur, kein Gas",
+      "encrypted": "{label}, verschlüsselt",
+      "encryptedAlone": "verschlüsselt",
+      "partial": "Der Relayer hat ohne diesen Wert geantwortet, die Summe ist also nicht bekannt."
+    },
+    "unknown": {
+      "word": "unbekannt",
+      "default": "Das ist noch nicht von der Blockchain zurückgekommen."
+    },
+    "amount": {
+      "max": "Max",
+      "allOfIt": "Alles davon",
+      "maxFor": "{max}: {name}",
+      "shape": "Nur Zahlen. Komma oder Punkt trennt die Nachkommastellen, höchstens eines davon, und keine Tausendertrennung.",
+      "precision": "{symbol} hat {decimals} Nachkommastellen, feiner als {smallest} lässt sich also nichts senden.",
+      "zero": "Geben Sie einen Betrag über null ein."
+    },
+    "banners": {
+      "wrongNetwork": "Ihre Wallet ist im falschen Netzwerk.",
+      "wrongNetworkBody": "Hearth ist auf Ethereum Sepolia ausgerollt. Auf dieser Seite wird nichts gelesen und nichts geschrieben, solange Ihre Wallet nicht dort ist.",
+      "switch": "Zu Sepolia wechseln",
+      "denied": "Diese Adresse steht auf der Sperrliste des Tokens.",
+      "deniedBody": "{symbol} verweigert jeden Transfer in diese Adresse hinein und aus ihr heraus, Einzahlungen und Abhebungen werden also zurückgewiesen. Das ist eine Einstellung des Token-Eigentümers, nicht unsere.",
+      "tokenPaused": "Der Token {symbol} ist pausiert.",
+      "tokenPausedBody": "Abschirmen, Übertragen und das Aufheben der Abschirmung sind auf Token-Ebene gestoppt. Hearths eigene Verträge sind davon unberührt, aber nichts kann sich bewegen, bis Zama die Pause aufhebt.",
+      "vaultPaused": "Der Vault ist pausiert.",
+      "vaultPausedBody": "Neue Einzahlungen und das Abschließen von Ziehungen sind gestoppt. Abheben, Auswerten, Zuteilen und Finalisieren lassen sich nie pausieren, Ihr Geld können Sie also weiterhin herausnehmen.",
+      "poolPaused": "Der Preispool ist pausiert.",
+      "poolPausedBody": "Ziehungen können nicht abgeschlossen werden. Zuteilen, Auswerten, Abgleichen und Abheben laufen weiter.",
+      "observers": "Der Token-Eigentümer hat {count, plural, one {{shown} Beobachter} other {{shown} Beobachter}} eingesetzt.",
+      "observersBody": "Ein Beobachter auf {symbol} kann jeden Betrag entschlüsseln, der durch den Token läuft, auch Einzahlungen und Auszahlungen, und das rückwirkend. Hearths eigenes Kontobuch, also Ihre Einlage, Ihre Gewinne, Ihr Gewicht und Ihre Gutschrift, kann er nicht lesen.",
+      "upgraded": "Der Token {symbol} wurde aktualisiert.",
+      "upgradedBody": "Seine jetzige Implementierung: {implementation}. Das ist nicht die, deren Quelltext wir Zeile für Zeile gelesen haben, und ihr Verhalten gegenüber Hearths Handles kann sich geändert haben.",
+      "unknownImplementation": "unbekannt",
+      "thinSet": "Gerade {count, plural, one {ist {shown} Sparer} other {sind {shown} Sparer}} im Pool.",
+      "thinSetBody": "Unter {minimum} Sparern kommt die veröffentlichte Größenklasse persönlichen Daten nahe: Bei einem Sparer ist sie dessen Gewicht auf den Faktor zwei genau, bei zweien kann jeder den anderen eingrenzen. Die Beträge bleiben so oder so verschlüsselt, aber die Privatsphäre ist dünn, bis mehr Leute dazukommen.",
+      "noKeeper": "In den letzten Stunden wurde keine Ziehung vorangebracht.",
+      "noKeeperBody": "Jeder Schritt einer Ziehung ist von jedem aufrufbar. Eine Ziehung durchführen, in der Seitenleiste, bietet alle fünf. Ein stehen gebliebener Keeper kostet Ziehungen, nie Geld.",
+      "keeperLate": "Der letzte Ziehungsschritt landete {ago}, länger her als eine Periode.",
+      "keeperLateFrom": "Gesendet von {address}. ",
+      "keeperLateBody": "Niemand muss auf einen Keeper warten: Eine Ziehung durchführen schließt ab, teilt zu, wertet aus, finalisiert und gleicht ab, aus Ihrer eigenen Wallet.",
+      "keeperLink": "Auf Etherscan ansehen",
+      "tokenUnread": "Der eigene Zustand des Tokens ließ sich nicht lesen.",
+      "tokenUnreadBody": "Hearth prüft {symbol} bei jedem Besuch auf Beobachter, auf eine Pause und auf eine Sperre Ihrer Adresse, und diese Lesevorgänge haben nicht geantwortet. Auf der Blockchain hat sich nichts geändert, nur die Sicht dieser Seite darauf. Es heißt aber, dass die Token-Warnungen auf diesem Bildschirm fehlen, weil nichts gelesen wurde, nicht weil es nichts zu melden gab.",
+      "historyDown": "Die Ziehungshistorie ist nicht verfügbar.",
+      "historyDownBody": "{detail} Jede Zahl auf den Bildschirmen selbst kommt weiterhin direkt von der Blockchain."
+    },
+    "unsupported": {
+      "subtitle": "Hearth kann auf diesem Token keinen Pool öffnen, hier gibt es also nichts zu signieren.",
+      "pill": "nicht unterstützt",
+      "notDeployed": "nicht ausgerollt",
+      "whyLabel": "Warum dieser Token keinen Pool hat",
+      "whyOne": "Das Minten dieses Tokens ist auf seinen Herausgeber beschränkt, Hearth kann darauf also keinen Pool öffnen. Wählen Sie einen anderen Pool.",
+      "whyTwo": "Ein Hearth-Pool braucht Sparer, die den einfachen Token zuerst selbst holen und selbst abschirmen können. {name} wird von Zama auf Sepolia herausgegeben, und sein Basiswert kann nur von der Adresse geprägt werden, die ihn ausgerollt hat, außer dem Herausgeber kann also niemand hineinabschirmen und ein Vault darüber bliebe leer. Das ist eine Einstellung des Tokens und keine Grenze der Verträge hier: Der Vault nimmt jeden vertraulichen Token, der dem Standard folgt.",
+      "reason": "Grund",
+      "confidentialToken": "Vertraulicher Token",
+      "underlying": "Basiswert",
+      "publishedBy": "Veröffentlicht von",
+      "zamaList": "Zamas Sepolia-Adressen",
+      "pickLabel": "Wählen Sie einen offenen Pool",
+      "pickNote": "Jeder Pool oben ist derselbe Vault, dieselbe Ziehung und dieselbe Privatsphäre, über einem anderen vertraulichen Token. Ihre Position in einem sagt nichts über Ihre Position in einem anderen."
+    }
+  },
+
+  "picker": {
+    "trigger": "Sparen in {symbol}. Token wechseln",
+    "list": "Token wählen",
+    "saveIn": "Sparen in",
+    "grandPrize": "Hauptpreis",
+    "unread": "ungelesen",
+    "savingPool": "Sparpool",
+    "notSupported": "nicht unterstützt",
+    "zamaList": "Zamas Liste",
+    "reasons": {
+      "restrictedMint": "Prägen nur durch den Herausgeber"
+    }
+  },
+
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Was Sie halten, was der Pool gerade tut, und die eine Sache, die als Nächstes ansteht.",
+    "next": "Als Nächstes",
+    "position": {
+      "label": "Was Sie halten",
+      "open": "in diesem Browser offen",
+      "sealed": "auf der Blockchain versiegelt",
+      "principal": "Einlage",
+      "principalNote": "Was Sie gespart haben. Ihre Chancen sind damit über die ganze Periode gewichtet.",
+      "principalSpoken": "Ihre Einlage",
+      "winnings": "Offene Gewinne",
+      "winningsNote": "Preisgeld, das Ihnen gutgeschrieben und noch nicht abgehoben wurde. Es verdient selbst keine Chancen.",
+      "winningsSpoken": "Ihre offenen Gewinne",
+      "outside": "Diese Wallet ist gerade nicht im Pool. Zahlen Sie ein, und beide Zahlen füllen sich.",
+      "footConnect": "Verbinden Sie eine Wallet, um Ihre eigenen zu öffnen. Sonst kann das niemand, und durchgesetzt wird das von Zamas Zugriffsliste auf der Blockchain, nicht von einem Versprechen dieser Seite.",
+      "footNetwork": "Diese zu öffnen braucht eine Signatur auf Sepolia. Stellen Sie die Wallet um, dann funktioniert das Auge wieder.",
+      "footOpen": "Nur dieser Browser hat diese Zahlen gesehen. Auf die Blockchain wurde nichts geschrieben und an einen Server nichts gesendet.",
+      "footSealed": "Das Auge bittet den Relayer von Zama, Werte zu entschlüsseln, die dieser Adresse gehören. Eine Signatur, kein Gas, keine Transaktion."
+    },
+    "pool": {
+      "label": "Der Pool gerade jetzt",
+      "pill": "für alle öffentlich",
+      "savers": "Sparer",
+      "saversUnknown": "Die Zahl der Sparer ist noch nicht von der Blockchain zurückgekommen.",
+      "liquidity": "Preisliquidität",
+      "liquidityUnknown": "Eines der drei Stufenguthaben ist noch nicht zurückgekommen, und eine Teilsumme ist nicht der Pool.",
+      "period": "Periode",
+      "periodUnknown": "Die laufende Periode ist noch nicht von der Blockchain zurückgekommen.",
+      "endsIn": "Endet in",
+      "endsUnknown": "Das Ende dieser Periode ist noch nicht von der Blockchain zurückgekommen.",
+      "tier": "Stufe",
+      "chance": "Chance",
+      "prizeEach": "Preis je Stück ({symbol})",
+      "prizeCount": "{count, plural, one {{shown} Preis je Ziehung} other {{shown} Preise je Ziehung}}",
+      "prizeCountUnknown": "Zahl der Preise unbekannt",
+      "carryWaiting": "Übertrag aus Ziehung {drawId} wartet",
+      "oddsUnknown": "Die Chancen dieser Stufe sind noch nicht von der Blockchain zurückgekommen.",
+      "nextPrizeUnknown": "Der nächste Preis dieser Stufe ist noch nicht von der Blockchain zurückgekommen.",
+      "footOne": "Jeder Preis ist die halbe Liquidität seiner Stufe geteilt durch die Zahl der Preise, festgelegt beim Abschluss, bevor der zufällige Seed existiert. Was niemand gewinnt, wird eine Ziehung später veröffentlicht und erneut angeboten.",
+      "footBracket": "Die Chancen werden gegen eine Größenklasse von <bracket>2^{bits}</bracket> gezogen, veröffentlicht mit der Ziehung.",
+      "footBracketUnknown": "Die Größenklasse, gegen die diese Chancen gezogen werden, ist noch nicht von der Blockchain zurückgekommen."
+    },
+    "tiers": {
+      "grand": "Hauptpreis",
+      "mid": "Mittel",
+      "frequent": "Häufig"
+    },
+    "tiersLower": {
+      "grand": "Hauptpreis",
+      "mid": "Mittel",
+      "frequent": "Häufig"
+    }
+  },
+
+  "nextStep": {
+    "connectTitle": "Verbinden Sie eine Wallet, um zu beginnen.",
+    "connectDetail": "Hearth läuft auf Ethereum Sepolia. Sie brauchen etwas Test-ETH für das Gas, und das Test-{underlyingSymbol} ist einen Klick entfernt, sobald eine Wallet verbunden ist.",
+    "connectCta": "Wallet verbinden",
+    "switchTitle": "Diese Wallet zeigt auf ein anderes Netzwerk.",
+    "switchDetail": "Die Poolzahlen auf dieser Seite werden so oder so von Sepolia gelesen. Signieren und senden lässt sich nichts, solange die Wallet nicht auch dort ist.",
+    "switchCta": "Zu Sepolia wechseln",
+    "readingTitle": "Diese Wallet wird von der Blockchain gelesen.",
+    "readingDetail": "Der nächste Schritt erscheint, sobald die Lesevorgänge landen. Ihn aus einem Guthaben zu benennen, das noch nicht da ist, würde Sie auf den falschen Bildschirm schicken.",
+    "faucetTitle": "Holen Sie sich Test-{underlyingSymbol}.",
+    "faucetDetail": "Das Mock-{underlyingSymbol} hat ein offenes Minten, gedeckelt auf eine Million Token je Aufruf. Es ist nichts wert, nehmen Sie also mehr, als Sie brauchen.",
+    "faucetCta": "Test-{underlyingSymbol} holen",
+    "shieldTitle": "Schirmen Sie Ihr {underlyingSymbol} ab.",
+    "shieldDetail": "Das Abschirmen verwandelt einfaches {underlyingSymbol} in {symbol}. Dieser Schritt ist von Natur aus öffentlich, und er ist das Letzte an diesem Geld, das irgendwer lesen kann.",
+    "shieldCta": "{underlyingSymbol} abschirmen",
+    "depositTitle": "Legen Sie Ihr {symbol} in den Pool.",
+    "depositDetail": "Der Betrag wird in Ihrem Browser verschlüsselt, bevor er gesendet wird, der Vault schreibt also eine Zahl gut, die er nicht lesen kann. Ihre Chancen folgen dem, was Sie halten.",
+    "depositCta": "Einzahlen",
+    "claimTitle": "Es warten Gewinne auf Sie.",
+    "claimDetail": "Das Einlösen ist eine gewöhnliche Abhebung über diesen Betrag. Auf der Blockchain hat sie dieselbe Form wie jede andere Abhebung, und genau das hält sie davon ab, den Gewinner zu benennen.",
+    "claimCta": "Gewinne einlösen",
+    "readingDrawsTitle": "Die letzten Ziehungen werden gelesen.",
+    "readingDrawsDetail": "Der nächste Schritt erscheint, sobald sie landen. Ihn aus einer Ziehungsliste zu benennen, die noch nicht da ist, würde Sie auf den falschen Bildschirm schicken.",
+    "resultTitle": "Ziehung {drawId} hat Ihr Ergebnis geschrieben.",
+    "resultDetail": "Der Durchlauf hat diese Wallet erreicht, ob sie gewonnen hat, ist also schon entschieden und gespeichert. Es bleibt versiegelt, bis Sie es öffnen, und das kostet eine Signatur und kein Gas.",
+    "resultCta": "Ziehung {drawId} öffnen",
+    "settledTitle": "Gerade ist nichts zu tun.",
+    "settledDetail": "Ihre Einlage liegt im Pool und verdient Chancen für jede Sekunde, die sie dort bleibt. Die nächste Ziehung schließt am Ende der Periode, und abschließen kann sie jeder.",
+    "settledCta": "Einlage aufstocken",
+    "noWallet": "Keine Wallet gefunden"
+  },
+
+  "deposit": {
+    "title": "Einzahlen",
+    "subtitle": "Test-{underlying} holen, in {confidential} abschirmen, dann in den Vault legen.",
+    "connect": "Verbinden Sie eine Wallet auf Sepolia, um einzuzahlen. Die drei Schritte unten sind das, was Geld in den Pool bringt, und der Bildschirm öffnet den, bei dem Ihre Wallet gerade steht.",
+    "connectNote": "Sie brauchen etwas Sepolia-ETH für das Gas. Das Test-{underlying} ist einen Klick entfernt, sobald Sie verbunden sind.",
+    "lowGas": "Diese Wallet hält fast kein Sepolia-ETH, eine Transaktion würde also scheitern, bevor sie gesendet ist. Jedes Sepolia-Faucet füllt sie auf: das Google Cloud Web3 Faucet, das von Alchemy oder das von Chainlink. Ein Zehntel ETH ist weit mehr als genug.",
+    "inWallet": "In Ihrer Wallet",
+    "inWalletSpoken": "Ihr {symbol}-Guthaben",
+    "inWalletUnknown": "In Ihrer Wallet: ",
+    "faucet": {
+      "title": "Test-{underlying} holen",
+      "held": "{amount} {underlying} in Ihrer Wallet.",
+      "heldSummary": "{amount} {underlying} in Ihrer Wallet. ",
+      "more": "Eine Million mehr holen",
+      "unread": "Ihr Wallet-Guthaben ist noch nicht von der Blockchain zurückgekommen.",
+      "button": "Test-{underlying} holen",
+      "note": "Das Mock-{underlying} hat ein offenes Minten, gedeckelt auf eine Million Token je Aufruf. Es ist nichts wert, verlangen Sie also mehr, als Sie brauchen."
+    },
+    "shield": {
+      "title": "Schirmen Sie Ihr {underlying} ab",
+      "summary": "Abgeschirmt. Das Guthaben ist versiegelt, nur Sie können also lesen, was darin liegt. ",
+      "more": "Mehr abschirmen",
+      "body": "Das Abschirmen verwandelt einfaches {underlying} in {confidential}, und es ist öffentlich. Der Wrapper-Vertrag wirft den Betrag im Klartext, der ERC-20-Transfer trägt ihn erneut, und daran führt kein Weg vorbei: Einen öffentlichen Token in einen vertraulichen zu verwandeln ist per Definition eine öffentliche Handlung.",
+      "youShield": "Sie schirmen ab",
+      "fieldName": "Betrag an {underlying}, der abgeschirmt wird",
+      "balance": "{amount} {underlying} in Ihrer Wallet",
+      "tooMuch": "Sie halten {amount} {underlying}. Verlangen Sie weniger, oder minten Sie zuerst mehr.",
+      "youReceive": "Sie erhalten",
+      "rateUnknown": "Die Rate des Wrappers ist noch nicht von der Blockchain zurückgekommen.",
+      "rateOne": "Der Wrapper ist eins zu eins, Sie erhalten also genau das, was Sie abschirmen.",
+      "rateOther": "Der Wrapper nimmt {rate} Einheiten {underlying} für eine Einheit {confidential}.",
+      "why": "Deshalb sind Abschirmen und Einzahlen zwei Buttons und nicht einer. Schirmen Sie eine runde Zahl ab, zu einem Zeitpunkt Ihrer Wahl, und zahlen Sie später einen Teil davon ein. Wer Ihr Guthaben festnageln kann, kann von da an in jeder Ziehung berechnen, ob Sie gewonnen haben, denn die Schwellenwerte sind absichtlich öffentlich.",
+      "approve": "Wrapper freigeben",
+      "button": "Abschirmen",
+      "approveNote": "Eine Freigabe, und jedes Abschirmen danach ist eine einzige Transaktion. Sie erlaubt dem {confidential}-Wrapper-Vertrag, {underlying} aus dieser Wallet zu ziehen, und reicht an nichts anderes heran, was Ihnen gehört. {underlying} ist ein Sepolia-Testtoken aus dem Faucet-Button oben, ohne Wert in irgendeinem echten Netzwerk. Der Abschirmen-Button übernimmt, sobald die Freigabe aufgenommen ist.",
+      "waiting": "Ihre Guthaben sind noch nicht von der Blockchain zurückgekommen, deshalb wartet das hier, bis sie da sind.",
+      "skip": "Stattdessen einzahlen, was Sie schon halten"
+    },
+    "vault": {
+      "title": "In den Vault einzahlen",
+      "body": "Der Betrag wird in Ihrem Browser mit einem Zero-Knowledge-Beweis verschlüsselt und dann in einer Transaktion gesendet. Der Vault schreibt genau das gut, was der Token tatsächlich bewegt hat, mehr zu verlangen, als Sie halten, bewegt also gar nichts, statt laut zu scheitern. Öffnen Sie unten das Auge, wenn Sie nicht sicher sind, was Sie haben.",
+      "closedNotAwarded": "Gerade ist eine Ziehung abgeschlossen und wartet auf ihre Zuteilung. Einzahlen ist trotzdem erlaubt; dieses Geld zählt ab diesem Moment, gewichtet mit dem Teil der laufenden Periode, der noch läuft.",
+      "youDeposit": "Sie zahlen ein",
+      "fieldName": "Betrag an {confidential}, der eingezahlt wird",
+      "cap": "Der Vault deckelt einen Sparer bei {amount} {confidential}, das hier würde also abgelehnt und in derselben Transaktion erstattet.",
+      "tooMuch": "Sie halten {amount} {confidential}. Mehr zu verlangen wird auf der Blockchain nicht abgelehnt: Der Token bewegt, was Sie haben, hier also nichts, und die Transaktion gelingt trotzdem.",
+      "sealedNote": "Ihr Guthaben ist versiegelt, dieser Bildschirm kann den Betrag also nicht dagegen prüfen. Eine Einzahlung über Ihren Bestand hinaus bewegt nichts und kostet trotzdem eine Transaktion. Öffnen Sie oben das Auge, dann wird das Feld für Sie geprüft.",
+      "button": "Einzahlen",
+      "paused": "Der Vault ist pausiert, Einzahlungen werden also abgelehnt. Abheben funktioniert weiterhin."
+    }
+  },
+
+  "withdraw": {
+    "title": "Abheben",
+    "subtitle": "Zwei Schritte: aus dem Vault heraus, dann zurück in {underlying}. Die Einlage ist nie gesperrt, auch nicht mitten in einer Ziehung.",
+    "connect": "Verbinden Sie eine Wallet, um abzuheben. Schritt eins nimmt Einlage und Gewinne aus dem Vault, Schritt zwei verwandelt {confidential} zurück in {underlying}.",
+    "connectNote": "Hier ist nie etwas gesperrt. Die Einlage kommt vollständig zurück, wann immer Sie fragen, auch mitten in einer Ziehung.",
+    "tabs": {
+      "label": "Schritte beim Abheben",
+      "vault": "Aus dem Vault",
+      "unshield": "Zurück zum einfachen Token",
+      "unfinished": "hat etwas Unerledigtes"
+    },
+    "pending": {
+      "title": "Eine Aufhebung der Abschirmung wurde gesendet und nie abgeschlossen.",
+      "body": "Die vertraulichen Token sind bereits verbrannt und das {underlying} wartet beim Wrapper. Die zweite Transaktion gibt es frei. ",
+      "link": "Die Aufhebung ansehen",
+      "finish": "Aufhebung abschließen"
+    },
+    "vault": {
+      "reading": "Es wird gelesen, was diese Wallet im Vault hält.",
+      "unavailable": "Die Lesevorgänge für diese Wallet sind nicht zurückgekommen, dieser Bildschirm kann also nicht sagen, was der Vault für Sie hält. Laden Sie neu, sobald das Netzwerk antwortet.",
+      "neverDepositedLead": "Diese Wallet hat nie eingezahlt, der Vault hält also nichts für sie und eine Abhebung würde auf der Blockchain abgelehnt. ",
+      "depositFirst": "Zuerst einzahlen",
+      "neverDepositedTail": ", oder nutzen Sie Schritt zwei, wenn Sie {confidential} halten, das Sie als {underlying} zurückhaben wollen.",
+      "youWithdraw": "Sie heben ab",
+      "fieldName": "Betrag, der aus dem Vault abgehoben wird",
+      "inVault": "Im Vault",
+      "inVaultSpoken": "Ihr Vault-Guthaben",
+      "clamped": "Das ist mehr, als Sie halten. Der Vault sendet die {amount}, die Sie halten, und hört da auf.",
+      "revealNote": "Decken Sie auf, um dieses Feld zu deckeln und die Aufteilung zu sehen. Es zu überspringen ist sicher: Der Vault begrenzt den Betrag so oder so auf der Blockchain.",
+      "youReceive": "Sie erhalten",
+      "receiveBalance": "In Ihrer Wallet, weiterhin verschlüsselt. Schritt zwei verwandelt es zurück in {underlying}.",
+      "split": "{winnings} davon kommen aus den Gewinnen und {principal} aus der Einlage, in einem Transfer, der so oder so gleich aussieht.",
+      "splitSealed": "Decken Sie Ihr Vault-Guthaben auf, um zu sehen, wie sich das auf Gewinne und Einlage aufteilt.",
+      "button": "Abheben",
+      "everything": "Alles abheben",
+      "everythingNote": "Alles abzuheben braucht kein Aufdecken und keine verschlüsselte Eingabe. Der Vault addiert Ihre Einlage auf der Blockchain zu Ihren Gewinnen und sendet die Summe, weder Sie noch diese Seite müssen sie also vorher kennen.",
+      "howLabel": "Wie eine Abhebung gezahlt wird",
+      "howOne": "Zuerst die Gewinne, dann die Einlage, in einem vertraulichen Transfer. Nichts an dem Transfer sagt, woraus er bestand.",
+      "howTwo": "Der Betrag wird auf der Blockchain auf den kleinsten Wert aus dem, was Sie verlangen, dem, was Sie halten, und dem, was der Vault hält, begrenzt, denn ein vertraulicher Transfer bewegt den ganzen Betrag oder gar nichts. Eine zu große Anfrage sendet alles, was Sie halten, statt zu scheitern, und deshalb kann auch niemand Ihr Guthaben finden, indem er zu viel verlangt und zusieht, was passiert.",
+      "howWindow": "Gerade ist ein Ziehungsfenster offen. Abheben ist erlaubt und ändert nichts an den Chancen, die für Sie bereits feststehen. Ein Preis aus dieser Ziehung landet in Ihren Gewinnen, für eine spätere Abhebung.",
+      "howThree": "Die Einlage ist nie gesperrt. Es gibt keine Kündigungsfrist, keine Strafe und kein Warten auf das Ende einer Ziehung."
+    },
+    "unshield": {
+      "youUnshield": "Sie heben die Abschirmung auf",
+      "fieldName": "Betrag an {confidential}, dessen Abschirmung aufgehoben wird",
+      "inWallet": "In Ihrer Wallet",
+      "inWalletSpoken": "Ihr {confidential}-Guthaben",
+      "tooMuch": "Sie halten {amount} {confidential}. Mehr zu verlangen wird auf der Blockchain nicht abgelehnt: Es kostet beide Transaktionen und bewegt nichts.",
+      "revealNote": "Decken Sie auf, um dieses Feld zu deckeln. Eine Aufhebung über Ihren Bestand hinaus wird nicht abgelehnt, sie bewegt einfach nichts.",
+      "youReceive": "Sie erhalten",
+      "receiveBalance": "{underlying} in Ihrer Wallet, überall ausgebbar.",
+      "receiveNote": "Diese Zahl geht im Klartext auf die Blockchain. Die erste der beiden Transaktionen ist es, die sie veröffentlicht.",
+      "button": "Abschirmung aufheben",
+      "unfinished": "Eine neue Aufhebung muss warten, bis die oben abgeschlossen ist. Es wird immer nur eine gemerkt, und eine zweite zu starten ließe die erste mit verbrannten Token zurück, ohne dass etwas sie freigibt.",
+      "unwrapping": "Abschirmung aufheben: Ihre Wallet fragt zweimal. Zuerst nach einer Signatur, damit der Wrapper Ihr vertrauliches Guthaben lesen kann, was kein Gas kostet, dann nach der Transaktion selbst.",
+      "waiting": "Aufhebung gesendet. Warten darauf, dass das Protokoll von Zama den Klartext und seinen Beweis veröffentlicht.",
+      "finalizing": "Abschluss: Bestätigen Sie die zweite Transaktion, um das {underlying} freizugeben.",
+      "done": "Abschirmung aufgehoben. Ihr {underlying}-Guthaben ist um {amount} gestiegen, nach der zweiten Transaktion von der Blockchain gelesen.",
+      "doneUnchecked": "Abschirmung aufgehoben. Beide Transaktionen sind gelandet, aber das {underlying}-Guthaben ließ sich nicht zurücklesen, dieser Bildschirm kann also nicht sagen, was angekommen ist. Sehen Sie in Ihrer Wallet nach.",
+      "nothingMoved": "Nichts hat sich bewegt. Beide Transaktionen sind gelandet und Ihr {underlying}-Guthaben ist genau das, was es war. Das passiert, wenn der Betrag über Ihrem vertraulichen Guthaben lag: Der Wrapper gibt nichts frei, statt abzulehnen. Öffnen Sie das Guthaben mit dem Auge oben und nutzen Sie Alles davon.",
+      "whyLabel": "Warum das zwei Transaktionen braucht",
+      "whyOne": "Der Wrapper verbrennt den verschlüsselten Betrag und veröffentlicht ihn zuerst, dann gibt er die einfachen Token frei, sobald das Protokoll von Zama den Klartext und seinen Beweis erzeugt hat. Das sind zwei getrennte Aufrufe, und den zweiten können Sie später senden, wenn Sie dazwischen den Tab schließen.",
+      "whyTwo": "Ihre Wallet fragt vor der ersten Transaktion außerdem nach einer Signatur, weil der Wrapper Ihr vertrauliches Guthaben liest, um den Betrag zu prüfen. Diese Abfrage ist eine Signatur und keine Transaktion, und sie kostet kein Gas.",
+      "whyThree": "Gut zu wissen, bevor Sie leerräumen: Schirmen Sie vollständig hinein und wieder heraus ab, ist die Differenz zwischen den beiden öffentlichen Summen eine Untergrenze für alles, was Sie je gewonnen haben. Heben Sie die Abschirmung in runden Zahlen auf, oder lassen Sie ein stehendes vertrauliches Guthaben zurück."
+    }
+  },
+
+  "draws": {
+    "title": "Meine Ziehungen",
+    "subtitle": "Jede der letzten Ziehungen, ihre öffentlichen Preiszahlen, und hinter dem Auge Ihr eigenes Gewicht und Ihr Preis.",
+    "count": "{count} neueste",
+    "reading": "wird gelesen",
+    "emptyReading": "Der Pool wird gelesen.",
+    "emptyNone": "Es ist noch keine Periode zu Ende, es gibt also keine Ziehung zu zeigen. Die erste erscheint, sobald Periode 1 vorbei ist.",
+    "emptyFailed": "Die Ziehungen ließen sich gerade nicht lesen. Sie stehen so oder so auf der Blockchain; diese Seite versucht es von selbst erneut.",
+    "card": {
+      "label": "Ziehung {drawId}",
+      "claimNote": "Das Einlösen ist eine gewöhnliche Abhebung über genau diesen Betrag. Auf der Blockchain hat sie dieselbe Form wie jede andere Abhebung, und genau das hält eine Einlösung davon ab, den Gewinner zu benennen.",
+      "claim": "{amount} {symbol} einlösen",
+      "advanceNote": "Voranbringen schiebt den gemeinsamen Durchlauf um bis zu {batch} Sparer weiter, in der Reihenfolge, die der Seed dieser Ziehung gesetzt hat. Es lässt sich nicht auf Sie richten, den Button zu drücken sagt also nichts darüber, ob Sie gewonnen haben.",
+      "advance": "Die Ziehung voranbringen",
+      "waitingLead": "Dieser Schritt steht jedem offen. ",
+      "waitingLink": "Eine Ziehung durchführen",
+      "waitingTail": " hat ihn.",
+      "periodEnded": "Periode {drawId} endete",
+      "periodEndedUnknown": "Das Ende dieser Periode ist noch nicht von der Blockchain zurückgekommen.",
+      "closeDeadline": "Abschlussfrist",
+      "closeDeadlineUnknown": "Die Abschlussfrist dieser Ziehung ist noch nicht von der Blockchain zurückgekommen.",
+      "passed": "abgelaufen",
+      "prizeWindow": "Preisfenster",
+      "windowUnknown": "Das Fenster dieser Ziehung ist noch nicht von der Blockchain zurückgekommen.",
+      "windowLeft": "noch {time}",
+      "windowClosed": "geschlossen",
+      "bracket": "Größenklasse",
+      "bracketNote": "veröffentlicht anstelle des Gesamtgewichts des Pools",
+      "walk": "Durchlauf",
+      "walkNotStarted": "nicht gestartet",
+      "walkProgress": "{cursor} von {total}",
+      "walkNote": "bis zu {batch} Sparer je Aufruf",
+      "prizeWorth": "Was ein Preis wert war",
+      "noPrizeMoney": "Diese Ziehung bot kein Preisgeld: Beim Abschluss war noch keine Ernte verbucht.",
+      "yourResult": "Ihr Ergebnis",
+      "sealedResult": "ein Ergebnis, verschlüsselt",
+      "sealedResultNote": "Auf der Blockchain verschlüsselt und nur von der Wallet lesbar, zu der es gehört.",
+      "notReachedUnknown": "Der Durchlauf hat Sie noch nicht erreicht, und das Fenster dieser Ziehung ist nicht von der Blockchain zurückgekommen, deshalb kann die Seite nicht sagen, ob sie noch vorangebracht werden kann.",
+      "notReachedYet": "Der Durchlauf hat Sie noch nicht erreicht. Bis dahin hält diese Ziehung keine Zahl für Sie bereit, gewonnen oder nicht.",
+      "missedWindow": "Das Fenster schloss, bevor der Durchlauf Sie erreicht hat, diese Ziehung zahlt Ihnen also nichts und das Geld ging an die Stufen zurück. Auswerten kann sie jetzt niemand mehr.",
+      "yourPrize": "Ihr Preis",
+      "yourPrizeSpoken": "Ihr Preis in Ziehung {drawId}",
+      "yourWeight": "Ihr Gewicht",
+      "yourWeightSpoken": "Ihr Gewicht in Ziehung {drawId}",
+      "noPrize": "Kein Preis in dieser Ziehung. Ihr Gewicht wurde gezählt, und die Schwellenwerte fielen nicht zu Ihren Gunsten.",
+      "claimed": "Bereits herausgenommen. Der Vault schuldet dieser Wallet nichts, dieser Preis liegt also in Ihrem vertraulichen Guthaben. Die Ziehung behält die Zahl als ihren Nachweis."
+    }
+  },
+
+  "describe": {
+    "unreadBadge": "ungelesen",
+    "unread": "Diese Ziehung ist noch nicht von der Blockchain zurückgekommen, nichts darunter ist also eine Tatsache. Die Seite fragt weiter.",
+    "notClosedBadge": "nicht abgeschlossen",
+    "notClosed": "Die Periode ist vorbei und diese Ziehung wartet auf ihren Abschluss. Abschließen kann sie jeder, auch Sie.",
+    "missedBadge": "verpasst",
+    "missed": "Niemand hat diese Ziehung vor ihrer Frist abgeschlossen, sie zahlt also nichts. Ihre Liquidität wurde nie bewegt, und der nächste Abschluss bietet sie erneut an.",
+    "closedBadge": "wartet auf den Beweis",
+    "closed": "Abgeschlossen. Seed, Größenklasse, Nichtleer-Kennzeichen und Ernte sind veröffentlicht und warten darauf, dass der Schlüsselverwaltungsdienst von Zama ihre Klartexte signiert. Jeder kann sie holen und die Ziehung zuteilen.",
+    "emptyBadge": "leer",
+    "empty": "In dieser Periode hielt niemand ein Guthaben, es gab also nichts zu wiegen. Die angebotene Liquidität ging direkt an die Stufen zurück.",
+    "skippedBadge": "übersprungen",
+    "skipped": "Die Zuteilung landete nach dem Fenster der Ziehung, es wurde also kein Preis gezahlt. Die Liquidität ging an die Stufen zurück und die Ernte wurde trotzdem verbucht.",
+    "awardedBadge": "zugeteilt",
+    "awardedAllDisconnected": "Zugeteilt, und der Durchlauf hat jeden Sparer darin erreicht. Verbinden Sie eine Wallet, um zu sehen, wo Sie darin standen.",
+    "awardedDisconnected": "Zugeteilt. Der Auswertungsdurchlauf läuft noch. Verbinden Sie eine Wallet, um zu sehen, wo Sie darin stehen.",
+    "awardedAllOutside": "Zugeteilt und jeder Sparer ausgewertet. Diese Wallet war damals nicht im Pool.",
+    "awardedOutside": "Zugeteilt. Der Auswertungsdurchlauf läuft noch, und diese Wallet ist nicht darin.",
+    "awardedAll": "Zugeteilt, und der Durchlauf hat jeden Sparer darin erreicht. Jedes Ergebnis steht fest und ist geschrieben.",
+    "awarded": "Zugeteilt. Ab diesem Moment ist jedes Ergebnis bereits entschieden: Die Schwellenwerte sind öffentlich und die Gewichte können sich nicht mehr ändern. Die Auswertung schreibt sie nur auf."
+  },
+
+  "run": {
+    "title": "Eine Ziehung durchführen",
+    "subtitle": "Eine Ziehung braucht fünf Transaktionen. Jede davon ist von jeder Wallet aufrufbar, auch von Ihrer.",
+    "connect": "Verbinden Sie eine Wallet, um eine davon zu senden. Keine braucht ein Recht, das die Verträge kennen, und keine lässt sich auf einen bestimmten Sparer richten.",
+    "connectNote": "Die fünf Schritte unten lesen so oder so von der Blockchain, der Bildschirm lohnt sich also auch, bevor Sie etwas verbinden.",
+    "waitingFor": "Worauf der Pool wartet",
+    "nothing": "Nichts",
+    "ordering": " Außerdem ist eine Ziehung bereit zum Abschluss. Finalisieren und Abgleichen kommen zuerst, denn das Geld, das ein Übertrag freimacht, ist das, woraus der nächste Abschluss seine Preise bemisst.",
+    "unknownDue": "Die Lesevorgänge, die sagen, welcher Schritt ansteht, sind noch nicht von der Blockchain zurückgekommen.",
+    "idleWithClock": "Entweder ist der Keeper hinterhergekommen oder diese Periode läuft noch. Sie endet in {time}.",
+    "idle": "Entweder ist der Keeper hinterhergekommen oder diese Periode läuft noch.",
+    "railLabel": "Die fünf Schritte, in der Reihenfolge, die eine Ziehung braucht",
+    "unknownStep": "Ob dieser Schritt verfügbar ist, ist noch nicht von der Blockchain zurückgekommen.",
+    "chip": {
+      "due": "jetzt fällig",
+      "ready": "bereit",
+      "unknown": "unbekannt",
+      "notYet": "noch nicht"
+    },
+    "blocked": {
+      "connect": "Verbinden Sie eine Wallet, um das zu senden.",
+      "network": "Ihre Wallet ist in einem anderen Netzwerk.",
+      "busy": "Eine andere Transaktion ist bereits unterwegs."
+    },
+    "close": {
+      "title": "Abschließen",
+      "headline": "Ziehung {drawId} abschließen",
+      "headlineIdle": "Eine Ziehung abschließen",
+      "button": "Abschließen",
+      "does": "Legt die Preisgröße jeder Stufe aus dem Geld fest, das in ihr liegt, bewegt dieses Geld in die Ziehung, erntet die Renditequelle und zieht einen verschlüsselten Seed, den niemand lesen kann, wir eingeschlossen.",
+      "paused": "Der Preispool ist pausiert, es kann also keine Ziehung abgeschlossen werden.",
+      "readyDeadline": "Ziehung {drawId} kann noch {time} lang abgeschlossen werden. Danach wird sie übersprungen und ihr Geld bleibt in den Stufen.",
+      "ready": "Ziehung {drawId} wartet auf ihren Abschluss.",
+      "waitingClock": "Keine Ziehung wartet. Ziehung {drawId} wird in {time} abschließbar, wenn diese Periode endet.",
+      "waiting": "Keine Ziehung wartet auf ihren Abschluss."
+    },
+    "award": {
+      "title": "Zuteilen",
+      "headline": "Ziehung {drawId} zuteilen",
+      "headlineIdle": "Eine Ziehung zuteilen",
+      "button": "Zuteilen",
+      "does": "Übergibt dem Pool die Klartexte der vier Werte, die der Abschluss veröffentlicht hat, samt der Signatur des Schlüsselverwaltungsdienstes darüber. Der Pool prüft diese Signatur auf der Blockchain, verbucht die Ernte in den Stufen und öffnet die Ziehung. In diesem Moment stehen die Gewinner fest.",
+      "ready": "Ziehung {drawId} ist abgeschlossen und wartet. Zuerst werden die vier Beweise geholt, was ein paar Sekunden dauert, dann bittet Ihre Wallet Sie um die Signatur.",
+      "waiting": "Keine abgeschlossene Ziehung wartet auf ihre Zuteilung."
+    },
+    "advance": {
+      "title": "Voranbringen",
+      "headline": "Ziehung {drawId} voranbringen",
+      "headlineIdle": "Eine Ziehung voranbringen",
+      "button": "Voranbringen",
+      "does": "Läuft die Sparerliste ab einem Punkt ab, den der Seed bestimmt, und schreibt jedem Sparer gut, was die veröffentlichten Schwellenwerte sagen. Der Aufrufer wählt, wie viele Sparer ein Aufruf abdeckt, nie welche, das Senden sagt also nichts darüber, wer Sie in der Ziehung sind.",
+      "readyCount": "{cursor} von {total} Sparern in Ziehung {drawId} erledigt. Jeder Aufruf schiebt den gemeinsamen Durchlauf um bis zu {batch} weiter, und das ist es, was eine Transaktion bezahlt.",
+      "ready": "Ziehung {drawId} hat noch Sparer abzudecken. Jeder Aufruf schiebt den gemeinsamen Durchlauf um bis zu {batch} weiter, und das ist es, was eine Transaktion bezahlt.",
+      "waiting": "Keine zugeteilte Ziehung hat noch Sparer in ihrem Fenster."
+    },
+    "finalize": {
+      "title": "Finalisieren",
+      "headline": "Ziehung {drawId} finalisieren",
+      "headlineIdle": "Eine Ziehung finalisieren",
+      "button": "Finalisieren",
+      "does": "Faltet den unausgezahlten Rest jeder Stufe in deren verschlüsselten Übertrag, sobald das Fenster vorbei ist, und veröffentlicht den Übertrag jeder Stufe, die an der Reihe ist.",
+      "ready": "Ziehung {drawId} hat ihr Fenster beendet, aus ihr kann also nichts mehr gutgeschrieben werden.",
+      "waitingClock": "Kein Fenster ist zu Ende. Ziehung {drawId} kann in {time} finalisiert werden.",
+      "waiting": "Keine Ziehung hat ihr Fenster beendet, ohne finalisiert zu sein."
+    },
+    "reconcile": {
+      "title": "Abgleichen",
+      "headline": "Stufe {tier} abgleichen",
+      "headlineIdle": "Eine Stufe abgleichen",
+      "button": "Abgleichen",
+      "does": "Holt den Klartext eines veröffentlichten Übertrags, weist ihn dem Pool nach und verbucht das Geld zurück in die Klartext-Liquidität dieser Stufe, damit der nächste Abschluss es erneut anbieten kann.",
+      "ready": "Stufe {tier} hat ihren Übertrag bei Ziehung {drawId} veröffentlicht.",
+      "readyMore": "{count, plural, one { {shown} weitere Stufe steht dahinter, und jeder Druck erledigt eine.} other { {shown} weitere Stufen stehen dahinter, und jeder Druck erledigt eine.}}",
+      "waiting": "Keine Stufe hat einen Übertrag, der auf die Rückbuchung wartet."
+    },
+    "who": {
+      "label": "Wer diese sendet",
+      "oneStart": "Ein Keeper, den wir betreiben, beobachtet den Pool und sendet jeden davon, sobald er fällig wird, in einer gewöhnlichen Stunde gibt es auf diesem Bildschirm also nichts zu tun.",
+      "onePeriod": " Eine Periode ist hier {period}, so oft geht also eine volle Runde von fünf Schritten hinaus.",
+      "oneEnd": " Der Keeper hält kein Recht, das die Verträge kennen. Die zwei Dinge, die er hätte missbrauchen können, nämlich auszuwählen, welche Sparer ausgewertet werden, und die Reihenfolge der Preiszahlungen zu bestimmen, sind für keinen Aufrufer eine Wahl.",
+      "two": "Zuteilen und Abgleichen sind die beiden Schritte, die etwas von außerhalb der Blockchain brauchen. Ihr Browser fragt den Relayer von Zama nach dem Klartext dessen, was der Pool veröffentlicht hat, vier Werte für eine Zuteilung und einen für einen Abgleich, samt der Signatur des Schlüsselverwaltungsdienstes darüber. Das ist derselbe Aufruf, den der Keeper macht, und der Vertrag prüft die Signatur selbst, ein Browser kann also nicht lügen, was er gelesen hat.",
+      "three": "Hält der Keeper an, geht nichts verloren. Eine Ziehung, die nie abgeschlossen wird, behält ihr Geld in den Stufen und wird erneut angeboten, und ein Übertrag, der nie abgeglichen wird, wird vom ersten Abschluss danach zurückgefaltet. Ein stehen gebliebener Keeper kostet den Pool Ziehungen, kein Geld, und jede Wallet hier kann sie wieder anstoßen.",
+      "periodHours": "{count, plural, one {eine Stunde} other {{shown} Stunden}}",
+      "periodMinutes": "{count} Minuten",
+      "periodSeconds": "{count} Sekunden"
+    },
+    "stand": {
+      "label": "Wie die Ziehungen stehen",
+      "period": "Laufende Periode",
+      "periodNote": "Endet in {time}",
+      "savers": "Sparer",
+      "saversNote": "Wie weit ein voller Durchlauf reisen muss",
+      "lastClosed": "Zuletzt abgeschlossene Ziehung",
+      "lastClosedNone": "noch keine",
+      "vaultUnknown": "Vault-Zustand unbekannt",
+      "vaultPaused": "Vault pausiert",
+      "vaultRunning": "Vault läuft",
+      "poolUnknown": "Zustand des Preispools unbekannt",
+      "poolPaused": "Preispool pausiert",
+      "poolRunning": "Preispool läuft"
+    }
+  },
+
+  "verify": {
+    "title": "Prüfen Sie eine Ziehung selbst.",
+    "lede": "Keine Wallet nötig. Jede Zahl hier wird direkt aus den Verträgen gelesen, und die Schwellenwerte kommen aus der vaulteigenen View <code>thresholdOf</code>, also derselben Rechnung, die das Ergebnis entschieden hat. Auf dieser Seite gibt es keine zweite Implementierung, die der ersten widersprechen könnte.",
+    "noPool": "{symbol} hat keinen Pool zum Prüfen.",
+    "noPoolBody": "{reason}, deshalb hat Hearth darauf nie einen Vault eröffnet und es gibt hier keine Ziehung. Wählen Sie oben einen Token aus der Liste.",
+    "unreachable": "Sepolia war nicht erreichbar.",
+    "unreachableBody": "Diese Seite liest Vault und Pool über einen RPC-Endpunkt, und dieser Lesevorgang ist fehlgeschlagen, sie hat also nichts zu zeigen. Die Ziehungen selbst stehen so oder so auf der Blockchain.",
+    "tryAgain": "Erneut versuchen",
+    "reading": "Die Ziehungen werden von Sepolia gelesen.",
+    "noneYet": "Es ist noch keine Ziehung abgeschlossen, es gibt also nichts zu prüfen. Die erste erscheint, sobald Periode 1 vorbei ist und jemand sie abschließt.",
+    "oneNotClosed": "Ziehung {drawId} ist noch nicht abgeschlossen, es gibt also nichts zu prüfen.",
+    "rangeNotClosed": "Die Ziehungen {first} bis {last} sind nicht abgeschlossen, hier gibt es also nichts zu prüfen. Alles Ältere steht im Explorer.",
+    "drawButton": "Ziehung {drawId}",
+    "facts": {
+      "title": "Ziehung {drawId}",
+      "periodCovered": "Abgedeckte Periode",
+      "periodEnded": "endete {stamp}",
+      "windowEnds": "Fenster endet",
+      "seed": "Seed",
+      "seedUnpublished": "noch nicht veröffentlicht",
+      "bracket": "Größenklasse",
+      "bracketUnset": "noch nicht gesetzt",
+      "bracketNote": "{count} Guthaben-Sekunden",
+      "prizeSizes": "Preisgrößen",
+      "prizeSizesNote": "Hauptpreis / Mittel / Häufig",
+      "harvest": "Ernte verbucht",
+      "walkSavers": "Sparer im Durchlauf",
+      "walkNotStarted": "nicht gestartet",
+      "walkPosition": "Position im Durchlauf",
+      "walkProgress": "{cursor} von {total}",
+      "finalized": "Finalisiert",
+      "yes": "ja",
+      "no": "nein",
+      "note": "Der Seed wird als Chiffrat im Koprozessor von Zama erzeugt, niemand sieht ihn also beim Ziehen, und eine Ziehung abzuschließen gelingt genau einmal, es gibt also kein zweites Würfeln. Die Größenklasse ist die kleinste Zweierpotenz über dem Gesamtgewicht des Pools, veröffentlicht anstelle der genauen Summe, denn zwei aufeinanderfolgende genaue Summen würden die Einzahlung eines einzelnen Bewegers verraten."
+    },
+    "tiers": {
+      "title": "Was jede Stufe angeboten und gezahlt hat",
+      "hint": "absichtlich öffentlich",
+      "each": "je {amount} {symbol}",
+      "offered": "angeboten",
+      "returned": "unausgezahlt zurück",
+      "notReconciled": "noch nicht abgeglichen",
+      "paid": "gezahlte Preise",
+      "paidUnknown": "unbekannt bis zum Abgleich",
+      "paidInexact": "nicht exakt ableitbar",
+      "note": "Die gezahlten Preise werden aus den öffentlichen Zahlen ermittelt: was die Stufe angeboten hat, minus dem, was unausgezahlt zurückkam, geteilt durch die Preisgröße. Es geht immer dann exakt auf, wenn kein verschlüsselter Übertrag in die Ziehung mitgeritten ist, und dieses Deployment gleicht jede Stufe bei jeder Ziehung ab, damit es meistens so ist. Es sagt nie, wer bezahlt wurde."
+    },
+    "thresholds": {
+      "title": "Schwellenwerte für eine Adresse",
+      "hint": "aus thresholdOf gelesen",
+      "body": "Fügen Sie eine beliebige Adresse ein. Der Vault gibt das genaue Gewicht zurück, das diese Adresse in jedem Preis jeder Stufe dieser Ziehung übertreffen musste. Vergleichen Sie es mit dem eigenen entschlüsselten Gewicht dieses Sparers, und das Ergebnis geht auf: Er hat genau dann einen Preis gewonnen, wenn sein Gewicht strikt über dessen Schwellenwert lag.",
+      "fieldName": "Eine Adresse zum Prüfen",
+      "invalid": "Das ist keine gültige Ethereum-Adresse.",
+      "notAwarded": "Ziehung {drawId} ist nicht zugeteilt, sie hat also noch keinen Seed und keine Schwellenwerte.",
+      "row": "{tier}, Preis {index}",
+      "reading": "wird gelesen",
+      "rowFailed": "Der Knoten hat thresholdOf für diesen Preis nicht beantwortet. An der Ziehung hat sich nichts geändert, nur an der Sicht dieser Seite darauf.",
+      "noCounts": "Die Zahl der Preise dieser Ziehung ließ sich nicht lesen, deshalb kann diese Seite nicht sagen, wie viele Schwellenwerte es gibt. Versuchen Sie es gleich erneut.",
+      "outOfRange": "außerhalb des Bereichs, also nicht gewinnbar",
+      "unit": "Guthaben-Sekunden"
+    },
+    "transactions": {
+      "title": "Die Transaktionen",
+      "hint": "auf Etherscan",
+      "none": "In den Blöcken der letzten Stunden nichts zu dieser Ziehung. Ältere Historie steht im Explorer.",
+      "block": "Block {block}",
+      "open": "Pool öffnen",
+      "closed": "Abgeschlossen",
+      "awarded": "Zugeteilt",
+      "markedEmpty": "Als leer markiert",
+      "markedSkipped": "Als übersprungen markiert",
+      "finalized": "Finalisiert",
+      "reconciled": "Stufe abgeglichen",
+      "withTier": "{label} ({tier})"
+    }
+  },
+
+  "lab": {
+    "pill": "Laborseite",
+    "title": "Die Zeremonie der Ziehung",
+    "lede": "Nicht von der Website verlinkt. Jede Zahl unten wird live aus den Verträgen auf Sepolia gelesen: die versiegelten Handles, der Seed, den der Schlüsselverwaltungsdienst signiert hat, die Größenklasse, gegen die die Ziehung lief, und die genauen Schwellenwerte, die eine Wallet übertreffen musste.",
+    "noPool": "{symbol} hat keinen Pool zum Öffnen.",
+    "noPoolBody": "{reason}, deshalb hat Hearth darauf nie einen Vault eröffnet. Wählen Sie einen Token, der einen hat.",
+    "noDraw": "Noch keine zugeteilte Ziehung zum Öffnen.",
+    "noDrawBody": "Die Zeremonie braucht eine Ziehung, die abgeschlossen und zugeteilt ist. Führen Sie eine im Ziehungsbereich des Pools durch und kommen Sie wieder.",
+    "drawButton": "Ziehung {drawId}",
+    "openSeal": "Das Siegel öffnen",
+    "again": "Noch einmal abspielen",
+    "stages": {
+      "sealed": "versiegelt",
+      "seed": "der Seed öffnet sich",
+      "bracket": "die Größenklasse",
+      "thresholds": "die Schwellenwerte fallen",
+      "mine": "Ihr eigenes Ergebnis"
+    },
+    "seals": {
+      "title": "Was der Abschluss veröffentlicht hat",
+      "hint": "vier Handles, in genau dieser Reihenfolge",
+      "seed": "Seed",
+      "scale": "Skalenzahl",
+      "nonEmpty": "nicht leer",
+      "harvest": "Ernte",
+      "unpublished": "nicht veröffentlicht",
+      "note": "Der Pool kodiert die vier Klartexte in dieser Reihenfolge neu und prüft die Signatur des Schlüsselverwaltungsdienstes über dieser Kodierung auf der Blockchain, sie in einer anderen Reihenfolge zu verlangen lässt die Zuteilung also fehlschlagen. Die Reihenfolge ist hier der Vertrag, keine Bequemlichkeit."
+    },
+    "seed": {
+      "title": "Der Seed öffnet sich",
+      "note": "Als Chiffrat im Koprozessor von Zama erzeugt, niemand hat ihn also beim Ziehen gesehen. Veröffentlicht, sobald die Periode endete, vom Schlüsselverwaltungsdienst signiert und vom Pool auf der Blockchain geprüft, bevor irgendetwas anderes in dieser Ziehung geschehen durfte. Die Preisgrößen standen schon beim Abschluss fest, bevor diese Zahl existierte."
+    },
+    "bracket": {
+      "title": "Die Größenklasse",
+      "unit": "{count} Guthaben-Sekunden",
+      "note": "Die Ziehung läuft gegen die kleinste Zweierpotenz über dem Gesamtgewicht des Pools, nie gegen das Gesamtgewicht selbst. Die genaue Summe zu veröffentlichen ließe jeden aus zwei aufeinanderfolgenden Summen und dem Zeitstempel der eigenen Transaktion die Einzahlung eines einzelnen Bewegers ausrechnen."
+    },
+    "thresholds": {
+      "title": "Die Schwellenwerte fallen",
+      "connectHint": "verbinden Sie eine Wallet, um Ihre eigenen zu sehen",
+      "connectBody": "Schwellenwerte gelten je Adresse und sind öffentlich. Verbinden Sie eine Wallet, und hier erscheint die genaue Zahl, die sie in jedem Preis dieser Ziehung übertreffen musste, berechnet vom Vault, nicht von dieser Seite.",
+      "row": "{tier}, Preis {index}",
+      "reading": "wird gelesen",
+      "outOfRange": "außerhalb des Bereichs",
+      "note": "Übertreffen Sie den Schwellenwert, und der Preis gehört Ihnen. Diese kommen aus der vaulteigenen View, derselben Rechnung, die das Ergebnis entschieden hat, es gibt hier also keine zweite Implementierung, die der ersten widersprechen könnte."
+    },
+    "mine": {
+      "title": "Und nur für Sie",
+      "connectBody": "Verbinden Sie eine Wallet, und diese Karte füllt sich mit dem Gewicht, nach dem sie beurteilt wurde, und dem, was Ziehung {drawId} ihr gezahlt hat, entschlüsselt in Ihrem Browser und nirgendwo sonst.",
+      "nothing": "Diese Wallet hält in Ziehung {drawId} kein Gewicht, es gibt also nichts Eigenes zu öffnen. Nur ein Sparer, der im Durchlauf war, hat hier ein Gewicht und eine Gutschrift.",
+      "weight": "Ihr Gewicht",
+      "weightUnit": "Guthaben-Sekunden über die Periode",
+      "paid": "Was diese Ziehung Ihnen gezahlt hat",
+      "paidUnit": "{symbol}, Ihren Gewinnen gutgeschrieben",
+      "sealAgain": "Wieder versiegeln",
+      "decrypt": "Mein Ergebnis entschlüsseln",
+      "denied": "Abgelehnt: Diese Werte gehören einer anderen Wallet.",
+      "note": "Alles über dieser Karte ist öffentlich und jeder kann es prüfen. Diese Karte nicht: Sie braucht eine EIP-712-Signatur der Wallet, der diese Werte gehören, und Zamas Zugriffskontrollliste weist alle anderen ab. Das ist das ganze Produkt in zwei Absätzen."
+    }
+  },
+
+  "docs": {
+    "title": "Dokumentation",
+    "kicker": "Dokumentation",
+    "heading": "Die schriftliche Aufzeichnung",
+    "count": "{count, plural, one {{shown} Seite} other {{shown} Seiten}}. Jede davon ist eine Datei im Repository unter <path>docs/</path>, hier gerendert.",
+    "contents": "Inhalt",
+    "close": "Schließen",
+    "overview": "Überblick",
+    "nav": "Dokumentation",
+    "search": "Die Dokumentation durchsuchen",
+    "noResults": "Dazu passt nichts.",
+    "outline": "Auf dieser Seite",
+    "nearby": "Seiten in der Nähe",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "copyManual": "Strg C drücken",
+    "copyLabel": "Diesen Block kopieren",
+    "diagramWide": "Breiter als die Spalte. Scrollen Sie seitwärts.",
+    "diagramFailed": "Dieses Diagramm wurde nicht gezeichnet. Der Quelltext steht unten.",
+    "rendererFailed": "Der Diagramm-Renderer wurde nicht geladen. Der Quelltext steht unten.",
+    "fallbackNote": "Diese Seite ist noch nicht übersetzt und wird deshalb auf Englisch gezeigt.",
+    "sections": {
+      "reference": "Referenz",
+      "attackLogs": "Angriffsprotokolle",
+      "gettingstarted": "Erste Schritte",
+      "concepts": "Konzepte",
+      "security": "Sicherheit",
+      "operations": "Betrieb"
+    }
+  },
+
+  "errors": {
+    "notFound": {
+      "title": "Unter dieser Adresse gibt es nichts.",
+      "body": "Die Seite ist umgezogen, der Link war vertippt, oder der Token darin ist keiner, gegen den dieser Build ausgerollt wurde. Der Pool selbst steht auf der Blockchain und ist so oder so unberührt.",
+      "home": "Zurück zum Anfang",
+      "pool": "Pool öffnen",
+      "docs": "Doku lesen"
+    },
+    "crashed": {
+      "title": "Dieser Bildschirm ist kaputtgegangen, Ihr Geld nicht.",
+      "body": "Etwas in der Seite selbst hat einen Fehler geworfen. Es wurde nichts signiert und nichts gesendet, Ihr Guthaben ist also genau da, wo es war. Diesen Bildschirm neu zu laden ist sicher.",
+      "digest": "Referenz {digest}",
+      "home": "Zurück zum Anfang",
+      "retry": "Diesen Bildschirm erneut versuchen"
+    },
+    "unknown": "Etwas ist schiefgegangen.",
+    "userRejected": "Sie haben die Anfrage in Ihrer Wallet abgelehnt. Es wurde nichts gesendet.",
+    "signingRejected": "Sie haben die Signatur in Ihrer Wallet abgelehnt. Es wurde nichts gesendet.",
+    "notConnected": "Verbinden Sie zuerst eine Wallet.",
+    "decryptNotConnected": "Verbinden Sie eine Wallet, um Ihre eigenen Werte zu entschlüsseln.",
+    "addressesMissing": "Die Hearth-Adressen sind nicht konfiguriert, es kann also nichts gesendet werden.",
+    "drawNotWaiting": "Ziehung {drawId} wartet nicht auf ihre Zuteilung, es gibt also nichts zu senden.",
+    "insufficientAllowance": "Der Wrapper darf noch nicht so viel von Ihrem Token nehmen. Geben Sie ihn zuerst frei.",
+    "insufficientErc20": "Nicht genug von dem einfachen Testtoken in dieser Wallet. Minten Sie welche am Faucet.",
+    "insufficientConfidential": "Nicht genug von dem vertraulichen Token. Schirmen Sie zuerst etwas vom einfachen ab.",
+    "chainMismatch": "Ihre Wallet ist in einem anderen Netzwerk als die App. Stellen Sie sie auf Sepolia um.",
+    "notEntitled": "Diese Wallet darf diesen Wert nicht lesen. Er gehört einer anderen Adresse.",
+    "noCiphertext": "Hier gibt es noch keinen verschlüsselten Wert, das bedeutet ein Guthaben von null.",
+    "relayerRateLimited": "Der Relayer von Zama drosselt diesen Browser. Warten Sie ein paar Sekunden und fragen Sie erneut.",
+    "relayerUnreachable": "Der Relayer von Zama war nicht erreichbar. Fragen Sie gleich erneut.",
+    "relayerUnreachableStatus": "Der Relayer von Zama war nicht erreichbar (HTTP {status}). Fragen Sie gleich erneut.",
+    "rpcRateLimited": "Der Sepolia-Knoten drosselt diesen Browser. Warten Sie ein paar Sekunden und fragen Sie erneut.",
+    "noGas": "Nicht genug Sepolia-ETH für das Gas. Jedes Sepolia-Faucet füllt es auf.",
+    "relayerBehind": "Der Relayer von Zama ist mit diesem Block noch nicht mitgekommen. Fragen Sie gleich erneut.",
+    "EnforcedPause": "Der Vault ist pausiert, Einzahlungen und der Abschluss von Ziehungen sind also gestoppt. Abheben funktioniert weiterhin.",
+    "NotASaver": "Diese Wallet hat nie eingezahlt, es gibt also nichts abzuheben.",
+    "NotTheAsset": "Angenommen wird nur der vertrauliche Token, mit dem dieser Vault ausgerollt wurde. Schirmen Sie diesen Token ab und versuchen Sie es erneut.",
+    "DrawNotAwarded": "Diese Ziehung ist noch nicht zugeteilt, es gibt also nichts auszuwerten. Schließen Sie sie zuerst ab und teilen Sie sie zu.",
+    "EvaluationWindowClosed": "Das Zwei-Perioden-Fenster dieser Ziehung ist vorbei. Sie kann nicht mehr ausgewertet werden und zahlt nichts.",
+    "EvaluationWindowOpen": "Diese Ziehung kann noch ausgewertet werden, sie lässt sich also noch nicht finalisieren. Warten Sie das Ende des Fensters ab.",
+    "AlreadyFinalized": "Diese Ziehung ist bereits finalisiert. An ihr bleibt nichts mehr zu tun.",
+    "DrawNotOpen": "Diese Ziehung wurde nie abgeschlossen, es gibt also nichts zu finalisieren.",
+    "AlreadyClosed": "Jemand hat diese Ziehung zuerst abgeschlossen. Ihre Zuteilung ist der nächste Schritt.",
+    "NothingToClose": "Gerade wartet keine Ziehung auf ihren Abschluss.",
+    "CloseWindowClosed": "Die Abschlussfrist dieser Ziehung ist abgelaufen. Ihre Liquidität geht an die Stufen zurück und die nächste Ziehung bietet sie erneut an.",
+    "WrongStatus": "Die Ziehung ist weitergezogen, bevor diese Transaktion gelandet ist. Laden Sie neu und sehen Sie, wo sie jetzt steht.",
+    "CarryNotPending": "Diese Stufe hat keinen veröffentlichten Übertrag am Warten, es gibt also nichts abzugleichen.",
+    "InvalidKMSSignatures": "Die Signatur des Schlüsselverwaltungsdienstes ließ sich auf der Blockchain nicht prüfen. Fragen Sie die Entschlüsselung erneut an."
+  },
+
+  "format": {
+    "pending": "...",
+    "dust": "<0,01",
+    "now": "jetzt",
+    "seconds": "{seconds}s",
+    "minutesSeconds": "{minutes}m {seconds}s",
+    "hoursMinutes": "{hours}h {minutes}m",
+    "agoSeconds": "vor {count}s",
+    "agoMinutes": "vor {count}m",
+    "agoHours": "vor {count}h",
+    "agoDays": "vor {count}d",
+    "notYet": "noch nicht",
+    "utc": "{stamp} UTC",
+    "oddsNever": "nie",
+    "oddsEveryDraw": "jede Ziehung",
+    "oddsOneIn": "1 Ziehung von {count}",
+    "balanceSeconds": "Guthaben-Sekunden"
+  },
+
+  "meta": {
+    "titleDefault": "Hearth, Gewinnsparen, in das niemand hineinsehen kann",
+    "titleTemplate": "{title} | Hearth",
+    "description": "Vertrauliches Gewinnsparen ohne Verlustrisiko auf dem Zama Protocol. Einzahlungen, Guthaben und Gewinne bleiben auf der Blockchain verschlüsselt, Preise werden aus der Rendite gezogen, mit Chancen proportional zu Ihrem zeitgewichteten Guthaben, und die Einlage kommt vollständig zurück, wann immer Sie fragen.",
+    "ogTitle": "Hearth",
+    "ogDescription": "Vertrauliches Gewinnsparen ohne Verlustrisiko auf dem Zama Protocol.",
+    "how": {
+      "title": "So funktioniert es",
+      "description": "Zahlen Sie einen vertraulichen Token ein, halten Sie Ihr Guthaben verschlüsselt, gewinnen Sie Preise aus der Rendite, mit Chancen nach Ihrem zeitgewichteten Guthaben, und heben Sie ab, wann Sie wollen."
+    },
+    "verify": {
+      "title": "Eine Ziehung prüfen",
+      "description": "Lesen Sie Seed, Größenklasse, Ernte und Preisgrößen einer Ziehung direkt aus den Verträgen, und holen Sie den genauen Schwellenwert, den eine Adresse übertreffen musste."
+    },
+    "lab": {
+      "title": "Die Zeremonie der Ziehung",
+      "description": "Eine Laborseite: der versiegelte Seed öffnet sich, die Größenklasse, die Schwellenwerte und das eigene Ergebnis eines Sparers."
+    },
+    "docs": {
+      "title": "Dokumentation",
+      "description": "Wie eine Ziehung abläuft, wie die Chancen berechnet werden, woher das Preisgeld kommt, was privat bleibt, und jede Naht, von der wir wissen."
+    },
+    "dashboard": {
+      "title": "{symbol}-Dashboard",
+      "titleFallback": "Dashboard",
+      "description": "Was diese Wallet hält, was der Preispool wert ist, und der nächste Schritt, mit jedem Sparerbetrag verschlüsselt auf der Blockchain."
+    },
+    "deposit": {
+      "title": "{symbol} einzahlen",
+      "titleFallback": "Einzahlen",
+      "description": "Test-{underlyingSymbol} holen, in {symbol} abschirmen, dann in den Hearth-Vault einzahlen.",
+      "descriptionFallback": "Den Testtoken holen, abschirmen, dann in den Hearth-Vault einzahlen."
+    },
+    "withdraw": {
+      "title": "{symbol} abheben",
+      "titleFallback": "Abheben",
+      "description": "Einlage und Gewinne aus dem Hearth-Vault nehmen, dann die Abschirmung von {symbol} zurück in {underlyingSymbol} aufheben.",
+      "descriptionFallback": "Einlage und Gewinne aus dem Hearth-Vault nehmen, dann die Abschirmung zurück in den einfachen Token aufheben."
+    },
+    "draws": {
+      "title": "Meine Ziehungen",
+      "description": "Was jede der letzten Ziehungen gezahlt hat und was sie Ihnen gezahlt hat, mit Ihrem Gewicht und Ihrem Preis verschlüsselt, bis Sie sie öffnen."
+    },
+    "run": {
+      "title": "Eine Ziehung durchführen",
+      "description": "Abschließen, zuteilen, voranbringen, finalisieren und abgleichen. Jeder Schritt einer Hearth-Ziehung ist von jeder Wallet aufrufbar."
+    }
+  }
+}

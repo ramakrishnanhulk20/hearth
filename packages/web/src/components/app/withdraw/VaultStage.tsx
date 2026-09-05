@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   ActionNote,
@@ -12,17 +12,19 @@ import {
   PrimaryButton,
   ReceiveCard,
   SealedLine,
-  phaseNote,
+  usePhaseNote,
 } from "@/components/app/console";
-import { PROBLEMS, exactAmount } from "@/components/app/amount";
+import { problemText, exactAmount } from "@/components/app/amount";
 import type { TokenSymbols } from "@/components/app/useTokenSymbols";
-import { formatAmount, parseAmount } from "@/lib/format";
+import { Link } from "@/i18n/navigation";
+import { parseAmount } from "@/lib/format";
+import { useFormat } from "@/hooks/useFormat";
 import type { useActions } from "@/hooks/useActions";
 import type { HearthConfig, SaverState } from "@/hooks/useHearth";
 import { BALANCE_SCOPE, type Reveal } from "@/hooks/useReveal";
 
 /**
- * Stage one: principal and winnings out of the vault and into confidential USDC.
+ * Stage one: principal and winnings out of the vault and back into the confidential token.
  *
  * The screen asks for a reveal before it does anything clever, because both useful things it can
  * say need the cleartext: the cap on the field, and which part of the payment comes out of
@@ -47,6 +49,10 @@ export function VaultStage({
   windowOpen: boolean;
   refresh: () => void;
 }) {
+  const t = useTranslations("withdraw.vault");
+  const amountWords = useTranslations("console.amount");
+  const format = useFormat();
+  const phaseNote = usePhaseNote();
   const [input, setInput] = useState("");
 
   // The same scope the dashboard opens, because it is the same two values. Opening either one
@@ -56,8 +62,13 @@ export function VaultStage({
   const winnings = balance.read(saver.winningsHandle);
   const available = balance.open && principal !== null && winnings !== null ? principal + winnings : null;
 
-  const amount = parseAmount(input);
-  const problem = !amount.ok && amount.reason !== "empty" ? PROBLEMS[amount.reason] : null;
+  const amount = parseAmount(input, config.decimals);
+  const problem =
+    !amount.ok && amount.reason !== "empty"
+      ? problemText(amount.reason, config.decimals, symbols.confidential, amountWords)
+      : null;
+
+  const written = (value: bigint) => format.amount(value, config.decimals);
 
   // What the vault would actually send. An over-large ask is not an error and is not refused, so
   // it is shown as the clamped figure before it is sent rather than explained afterwards.
@@ -84,11 +95,7 @@ export function VaultStage({
   if (saver.isLoading || saver.unavailable) {
     return (
       <Card>
-        <p className={CARD_PROSE}>
-          {saver.unavailable
-            ? "The reads for this wallet did not come back, so this screen cannot say what the vault holds for you. Reload once the network is answering."
-            : "Reading what this wallet holds in the vault."}
-        </p>
+        <p className={CARD_PROSE}>{saver.unavailable ? t("unavailable") : t("reading")}</p>
       </Card>
     );
   }
@@ -97,12 +104,14 @@ export function VaultStage({
     return (
       <Card>
         <p className={CARD_PROSE}>
-          This wallet has never deposited, so the vault holds nothing for it and a withdrawal would be
-          refused on chain.{" "}
-          <Link href="/app/deposit" className={INLINE_LINK}>
-            Deposit first
+          {t("neverDepositedLead")}
+          <Link href={`/app/${config.slug}/deposit`} className={INLINE_LINK}>
+            {t("depositFirst")}
           </Link>
-          , or use stage two if you are holding confidential USDC you want back as plain USDC.
+          {t("neverDepositedTail", {
+            confidential: symbols.confidential,
+            underlying: symbols.underlying,
+          })}
         </p>
       </Card>
     );
@@ -111,17 +120,19 @@ export function VaultStage({
   return (
     <div className="flex flex-col gap-4">
       <AmountCard
-        label="You withdraw"
-        name="Amount to withdraw from the vault"
+        label={t("youWithdraw")}
+        name={t("fieldName")}
         value={input}
         onChange={setInput}
         token={symbols.confidential}
         balance={
           <SealedLine
-            label="In the vault"
-            spoken="your vault balance"
+            label={t("inVault")}
+            spoken={t("inVaultSpoken")}
             scope={balance}
             amount={available}
+            unit={symbols.confidential}
+            decimals={config.decimals}
             disabled={!ready}
             onReveal={() => {
               if (!config.vault) return;
@@ -134,78 +145,61 @@ export function VaultStage({
         }
         note={
           clamped && available !== null
-            ? `That is more than you hold. The vault sends the ${formatAmount(available)} you hold and stops there.`
+            ? t("clamped", { amount: written(available) })
             : !balance.open
-              ? "Reveal to cap this field and see the split. Skipping it is safe: the vault clamps the amount on chain either way."
+              ? t("revealNote")
               : null
         }
-        onMax={available !== null ? () => setInput(exactAmount(available)) : undefined}
-        maxLabel="All of it"
+        onMax={available !== null ? () => setInput(exactAmount(available, config.decimals)) : undefined}
+        maxLabel={amountWords("allOfIt")}
         disabled={blocked}
         problem={problem}
       />
 
       <ReceiveCard
-        label="You receive"
+        label={t("youReceive")}
         token={symbols.confidential}
-        value={sending === null ? null : formatAmount(sending)}
-        balance="In your wallet, still encrypted. Stage two turns it back into plain USDC."
+        value={sending === null ? null : written(sending)}
+        balance={t("receiveBalance", { underlying: symbols.underlying })}
         note={
           split
-            ? `${formatAmount(split.fromWinnings)} of that comes out of winnings and ${formatAmount(split.fromPrincipal)} out of principal, in one transfer that looks the same either way.`
-            : "Reveal your vault balance to see how this splits between winnings and principal."
+            ? t("split", {
+                winnings: written(split.fromWinnings),
+                principal: written(split.fromPrincipal),
+              })
+            : t("splitSealed")
         }
       />
 
       <div className="flex flex-col gap-3">
         <PrimaryButton
           disabled={blocked || !amount.ok}
-          busy={money.busy && money.label === "Withdraw"}
+          busy={money.busy && money.label?.key === "withdraw"}
           onClick={() => amount.ok && money.withdraw(amount.value, settle)}
         >
-          Withdraw
+          {t("button")}
         </PrimaryButton>
 
         <PrimaryButton
           tone="quiet"
           disabled={blocked}
-          busy={money.busy && money.label === "Withdraw everything"}
+          busy={money.busy && money.label?.key === "withdrawAll"}
           onClick={() => money.withdrawAll(settle)}
         >
-          Withdraw everything
+          {t("everything")}
         </PrimaryButton>
       </div>
 
-      <p className={CARD_NOTE}>
-        Withdrawing everything needs no reveal and no encrypted input. The vault adds your principal to
-        your winnings on chain and sends the total, so neither you nor this page has to know it first.
-      </p>
+      <p className={CARD_NOTE}>{t("everythingNote")}</p>
 
-      <ActionNote {...phaseNote(money.phase, money.label, money.reset)} />
+      <ActionNote {...phaseNote(money.phase, money.label, money.reset, money.blockedBy)} />
 
-      <Card label="How a withdrawal is paid">
+      <Card label={t("howLabel")}>
         <div className={`space-y-3 ${CARD_PROSE}`}>
-          <p>
-            Winnings go first, then principal, in one confidential transfer. Nothing about the transfer
-            says which parts it was made of.
-          </p>
-          <p>
-            The amount is clamped on chain to the smallest of what you ask for, what you hold, and what
-            the vault holds, because a confidential transfer moves the whole amount or nothing at all.
-            An over-large request sends everything you hold instead of failing, which is also why nobody
-            can find your balance by asking for too much and watching what happens.
-          </p>
-          {windowOpen && (
-            <p>
-              A draw window is open right now. Withdrawing is allowed and does not change the odds
-              already fixed for you. Any prize from that draw lands in your winnings, for a later
-              withdrawal.
-            </p>
-          )}
-          <p>
-            Principal is never locked. There is no notice period, no penalty and no waiting for a draw
-            to end.
-          </p>
+          <p>{t("howOne")}</p>
+          <p>{t("howTwo")}</p>
+          {windowOpen && <p>{t("howWindow")}</p>}
+          <p>{t("howThree")}</p>
         </div>
       </Card>
     </div>

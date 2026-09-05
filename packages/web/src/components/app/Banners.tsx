@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { sepolia } from "wagmi/chains";
 import { useSwitchChain } from "wagmi";
 import { Banner, Button } from "@/components/ui";
 import { addressUrl, MIN_ANONYMITY_SET, txUrl } from "@/lib/chain/addresses";
-import { timeAgo, shortAddress } from "@/lib/format";
+import { shortAddress } from "@/lib/format";
+import { useFormat } from "@/hooks/useFormat";
 import type { PoolState, SaverState, TokenLayer } from "@/hooks/useHearth";
 import type { Activity } from "@/app/api/activity/route";
 
@@ -18,6 +20,7 @@ export function Banners({
   pool,
   saver,
   token,
+  symbol,
   activity,
   activityError,
   periodLength,
@@ -25,10 +28,14 @@ export function Banners({
   pool: PoolState;
   saver: SaverState;
   token: TokenLayer;
+  /** The confidential token this console is on, so a warning names the token it is about. */
+  symbol: string;
   activity: Activity | null;
   activityError: string | null;
   periodLength: number;
 }) {
+  const t = useTranslations("console.banners");
+  const format = useFormat();
   const { switchChain, isPending } = useSwitchChain();
 
   const keeper = activity?.lastKeeper ?? null;
@@ -42,50 +49,59 @@ export function Banners({
       {saver.wrongNetwork && (
         <Banner
           tone="bad"
-          title="Your wallet is on the wrong network."
+          title={t("wrongNetwork")}
           action={
             <Button tone="primary" size="small" busy={isPending} onClick={() => switchChain({ chainId: sepolia.id })}>
-              Switch to Sepolia
+              {t("switch")}
             </Button>
           }
         >
-          Hearth is deployed on Ethereum Sepolia. Nothing on this page will read or write until your
-          wallet is on it.
+          {t("wrongNetworkBody")}
+        </Banner>
+      )}
+
+      {/* Every token banner below is drawn from the token's own reads, and all of them go quiet
+          when those reads fail. Silence there looks exactly like a clean token, so the failure
+          gets a line of its own rather than nothing. */}
+      {token.unread && (
+        <Banner tone="info" title={t("tokenUnread")}>
+          {t("tokenUnreadBody", { symbol })}
         </Banner>
       )}
 
       {token.blocked && (
-        <Banner tone="bad" title="This address is on the token's deny list.">
-          Zama&apos;s confidential USDC refuses every transfer in or out of this address, so deposits
-          and withdrawals will revert. That is the token owner&apos;s setting, not ours.
+        <Banner tone="bad" title={t("denied")}>
+          {t("deniedBody", { symbol })}
         </Banner>
       )}
 
       {token.paused && (
-        <Banner tone="bad" title="The confidential USDC token is paused.">
-          Shielding, transferring and unshielding are all stopped at the token layer. Hearth&apos;s own
-          contracts are unaffected, but nothing can move until Zama unpauses it.
+        <Banner tone="bad" title={t("tokenPaused", { symbol })}>
+          {t("tokenPausedBody")}
         </Banner>
       )}
 
       {pool.vaultPaused && (
-        <Banner tone="warn" title="The vault is paused.">
-          New deposits and draw closing are stopped. Withdrawing, evaluation, awarding and
-          finalizing are never pausable, so your money is still yours to take out.
+        <Banner tone="warn" title={t("vaultPaused")}>
+          {t("vaultPausedBody")}
         </Banner>
       )}
 
       {pool.poolPaused && !pool.vaultPaused && (
-        <Banner tone="warn" title="The prize pool is paused.">
-          Draws cannot be closed. Awarding, evaluation, reconciliation and withdrawals continue.
+        <Banner tone="warn" title={t("poolPaused")}>
+          {t("poolPausedBody")}
         </Banner>
       )}
 
       {token.observerCount > 0 && (
-        <Banner tone="warn" title={`The token owner has appointed ${token.observerCount} observer${token.observerCount === 1 ? "" : "s"}.`}>
-          An observer on Zama&apos;s confidential USDC can decrypt every amount that moves through the
-          token, including deposits and payouts, and retroactively. Hearth&apos;s own ledger, your
-          principal, winnings, weight and credit, is not readable by them.{" "}
+        <Banner
+          tone="warn"
+          title={t("observers", {
+            count: token.observerCount,
+            shown: format.count(token.observerCount),
+          })}
+        >
+          {t("observersBody", { symbol })}{" "}
           {token.observers.map((observer) => (
             <a
               key={observer}
@@ -101,32 +117,31 @@ export function Banners({
       )}
 
       {token.upgraded && (
-        <Banner tone="warn" title="The confidential USDC token has been upgraded.">
-          It now runs implementation {token.implementation ? shortAddress(token.implementation) : "an unknown"}, which is
-          not the one whose source we read line by line. Its behaviour on Hearth&apos;s handles could
-          have changed.
+        <Banner tone="warn" title={t("upgraded", { symbol })}>
+          {t("upgradedBody", {
+            implementation: token.implementation
+              ? shortAddress(token.implementation)
+              : t("unknownImplementation"),
+          })}
         </Banner>
       )}
 
       {pool.thinAnonymitySet && (
-        <Banner tone="warn" title={`Only ${pool.savers} saver${pool.savers === 1 ? "" : "s"} in the pool right now.`}>
-          Below {MIN_ANONYMITY_SET} savers the published bracket is close to personal information: with one
-          saver it is that saver&apos;s weight to within a factor of two, and with two each can bound
-          the other. Amounts stay encrypted either way, but the privacy is thin until more people join.
+        <Banner tone="warn" title={t("thinSet", { count: pool.savers, shown: format.count(pool.savers) })}>
+          {t("thinSetBody", { minimum: MIN_ANONYMITY_SET })}
         </Banner>
       )}
 
       {noKeeperAtAll && (
-        <Banner tone="warn" title="No draw has been advanced in the last few hours.">
-          Every step of a draw is callable by anyone. Run a draw, in the sidebar, offers all five.
-          A stalled keeper costs draws, never money.
+        <Banner tone="warn" title={t("noKeeper")}>
+          {t("noKeeperBody")}
         </Banner>
       )}
 
       {keeperLate && keeper && (
         <Banner
           tone="warn"
-          title={`The last draw step landed ${timeAgo(keeper.secondsAgo)}, longer than one period.`}
+          title={t("keeperLate", { ago: format.timeAgo(keeper.secondsAgo) })}
           action={
             <a
               href={txUrl(keeper.tx)}
@@ -134,18 +149,18 @@ export function Banners({
               rel="noopener noreferrer"
               className="text-[12px] text-flameInk underline-offset-2 hover:underline"
             >
-              See it on Etherscan
+              {t("keeperLink")}
             </a>
           }
         >
-          {keeper.from ? `Sent by ${shortAddress(keeper.from)}. ` : ""}Nobody has to wait for a keeper:
-          Run a draw closes, awards, evaluates, finalizes and reconciles from your own wallet.
+          {keeper.from ? t("keeperLateFrom", { address: shortAddress(keeper.from) }) : ""}
+          {t("keeperLateBody")}
         </Banner>
       )}
 
       {activityError && (
-        <Banner tone="info" title="The draw history is unavailable.">
-          {activityError} Every figure on the screens themselves still comes straight from the chain.
+        <Banner tone="info" title={t("historyDown")}>
+          {t("historyDownBody", { detail: activityError })}
         </Banner>
       )}
     </div>

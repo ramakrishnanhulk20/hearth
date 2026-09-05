@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { Heading } from "@/lib/docs/types";
 
@@ -7,6 +8,7 @@ import type { Heading } from "@/lib/docs/types";
 const READING_LINE = 140;
 
 export function Outline({ headings }: { headings: Heading[] }) {
+  const t = useTranslations("docs");
   const [active, setActive] = useState(headings[0]?.id ?? "");
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export function Outline({ headings }: { headings: Heading[] }) {
 
   return (
     <aside className="docs-outline">
-      <p className="docs-outline-label">On this page</p>
+      <p className="docs-outline-label">{t("outline")}</p>
       <div className="docs-outline-list">
         {headings.map((heading) => (
           <a

@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import {
   ActionNote,
   CAP_LABEL,
@@ -13,11 +13,12 @@ import {
   PrimaryButton,
   SealedValue,
   Unknown,
-  phaseNote,
+  usePhaseNote,
 } from "@/components/app/console";
 import { SealedBars } from "@/components/ui";
-import { EVALUATE_BATCH, TIER_NAMES } from "@/lib/chain/addresses";
-import { countdown, formatAmount, formatUtc } from "@/lib/format";
+import { Link } from "@/i18n/navigation";
+import { EVALUATE_BATCH, TIER_KEYS } from "@/lib/chain/addresses";
+import { useFormat } from "@/hooks/useFormat";
 import type { useActions } from "@/hooks/useActions";
 import { BALANCE_SCOPE, drawScope, type Reveal, type RevealRequest } from "@/hooks/useReveal";
 import type { DrawView, HearthConfig, SaverState } from "@/hooks/useHearth";
@@ -53,69 +54,85 @@ export function DrawCard({
   active: boolean;
   onStart: (drawId: number) => void;
 }) {
+  const t = useTranslations("draws.card");
+  const tiers = useTranslations("dashboard.tiers");
+  const describeWords = useTranslations("describe");
+  const units = useTranslations("format");
+  const format = useFormat();
+  const phaseNote = usePhaseNote();
+
   // One scope per draw, so this card opens and seals on its own and says nothing about what any
   // other card on the page is showing.
   const view = reveal.scope(drawScope(draw.drawId));
-  // The draw's credit handle never changes, so the card would keep offering the same claim after
-  // it has been paid. The chain would honour a second press as a second withdrawal.
-  const [claimed, setClaimed] = useState(false);
 
   const summary = describe(draw, saver, now);
   const mine = draw.mine;
   const credit = mine ? view.read(mine.creditHandle) : null;
+  // What the vault still owes this wallet across every draw. The draw's own credit handle never
+  // changes once written, so a card gated on that alone would offer the same claim again after a
+  // reload and the chain would honour it as a second withdrawal out of principal. This figure
+  // falls when a claim lands, which makes it the only honest gate.
+  const unclaimed = view.read(saver.winningsHandle);
   const opened = view.open;
   const awarded = draw.known && draw.status === "awarded";
   const windowKnown = draw.windowEndsAt > 0;
   const inWindow = windowKnown && now < draw.windowEndsAt;
   const offeredAnything = draw.offered.some((value) => value > 0n);
 
-  // One press opens both of this wallet's figures, so the second one costs no extra signature.
+  // One press opens all three of this wallet's figures, so the second and third cost no extra
+  // signature. The vault's winnings handle rides along because the claim button is gated on it.
   const requests: RevealRequest[] =
     mine && config.vault
       ? [
           { handle: mine.weightHandle, contractAddress: config.vault },
           { handle: mine.creditHandle, contractAddress: config.vault },
+          { handle: saver.winningsHandle, contractAddress: config.vault },
         ]
       : [];
 
   // Gated on the same reads the figures are drawn from, so a refetch that comes back short cannot
   // leave a claim button standing under a card that has stopped showing a result.
   const claimable =
-    awarded && mine !== null && mine.evaluated && opened && !claimed && credit !== null && credit > 0n;
+    awarded &&
+    mine !== null &&
+    mine.evaluated &&
+    opened &&
+    credit !== null &&
+    credit > 0n &&
+    unclaimed !== null &&
+    unclaimed > 0n;
+  // Never more than the vault still owes. Asking for more would come out of principal, and the
+  // vault clamps silently rather than reverting, so the screen has to hold the line itself.
+  const claimAmount = claimable && credit !== null && unclaimed !== null
+    ? (credit < unclaimed ? credit : unclaimed)
+    : null;
   const advanceable = awarded && mine !== null && !mine.evaluated && inWindow;
 
-  const action = claimable ? (
+  const action = claimable && claimAmount !== null ? (
     <div className="flex flex-col gap-3">
-      <p className={CARD_NOTE}>
-        Claiming is an ordinary withdrawal for exactly that amount. On chain it has the same shape as
-        any other withdrawal, which is what stops a claim naming the winner.
-      </p>
+      <p className={CARD_NOTE}>{t("claimNote")}</p>
       <PrimaryButton
         disabled={money.busy || saver.wrongNetwork}
         busy={money.busy && active}
         onClick={() => {
-          if (money.busy || credit === null) return;
+          if (money.busy) return;
           onStart(draw.drawId);
-          money.withdraw(credit, () => {
-            setClaimed(true);
+          money.withdraw(claimAmount, () => {
             // Both scopes are stale the moment the claim lands: this credit is spent, and the
-            // saver's principal and winnings handles have changed under it.
+            // saver's principal and winnings handles have changed under it. Sealing this one is
+            // also what takes the button away, because the gate reads the winnings figure.
             view.hide();
             reveal.scope(BALANCE_SCOPE).hide();
             refresh();
           });
         }}
       >
-        Claim {formatAmount(credit)} USDC
+        {t("claim", { amount: format.amount(claimAmount, config.decimals), symbol: config.symbol })}
       </PrimaryButton>
     </div>
   ) : advanceable ? (
     <div className="flex flex-col gap-3">
-      <p className={CARD_NOTE}>
-        Advancing moves the shared walk on by up to {String(EVALUATE_BATCH)} savers, in the order this
-        draw&apos;s seed set. It cannot be aimed at you, so pressing it says nothing about whether you
-        won.
-      </p>
+      <p className={CARD_NOTE}>{t("advanceNote", { batch: String(EVALUATE_BATCH) })}</p>
       <PrimaryButton
         tone="quiet"
         disabled={money.busy || saver.wrongNetwork}
@@ -126,16 +143,16 @@ export function DrawCard({
           money.evaluate(draw.drawId, EVALUATE_BATCH, refresh);
         }}
       >
-        Advance the draw
+        {t("advance")}
       </PrimaryButton>
     </div>
   ) : summary.waitingOnRun ? (
     <p className={CARD_PROSE}>
-      This step is open to anybody.{" "}
-      <Link href="/app/run" className={INLINE_LINK}>
-        Run a draw
-      </Link>{" "}
-      has it.
+      {t("waitingLead")}
+      <Link href={`/app/${config.slug}/run`} className={INLINE_LINK}>
+        {t("waitingLink")}
+      </Link>
+      {t("waitingTail")}
     </p>
   ) : null;
 
@@ -147,73 +164,82 @@ export function DrawCard({
       <div className="flex flex-col gap-3">
         {action}
         <ActionNote
-          {...(active ? phaseNote(money.phase, money.label, money.reset) : { tone: "working" as const, text: null })}
+          {...(active
+            ? phaseNote(money.phase, money.label, money.reset, money.blockedBy)
+            : { tone: "working" as const, text: null })}
         />
       </div>
     ) : undefined;
 
   return (
     <Card
-      label={`Draw ${draw.drawId}`}
-      pill={<CardPill tone={summary.tone}>{summary.badge}</CardPill>}
+      label={t("label", { drawId: draw.drawId })}
+      pill={<CardPill tone={summary.tone}>{describeWords(summary.badge)}</CardPill>}
       footer={footer}
     >
-      <p className={`max-w-[70ch] ${CARD_PROSE}`}>{summary.line}</p>
+      <p className={`max-w-[70ch] ${CARD_PROSE}`}>{describeWords(summary.line)}</p>
 
       {draw.known && (
         <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-hairlineSoft pt-4 sm:grid-cols-4">
           <Fact
-            label={`Period ${draw.drawId} ended`}
+            label={t("periodEnded", { drawId: draw.drawId })}
             value={
               draw.periodEndsAt > 0 ? (
-                formatUtc(draw.periodEndsAt)
+                format.utc(draw.periodEndsAt)
               ) : (
-                <Unknown scale="inline" reason="The end of this period has not come back from the chain yet." />
+                <Unknown scale="inline" reason={t("periodEndedUnknown")} />
               )
             }
           />
 
           {draw.status === "none" ? (
             <Fact
-              label="Close deadline"
+              label={t("closeDeadline")}
               value={
                 draw.closeDeadline === 0 ? (
-                  <Unknown scale="inline" reason="This draw's close deadline has not come back from the chain yet." />
+                  <Unknown scale="inline" reason={t("closeDeadlineUnknown")} />
                 ) : now < draw.closeDeadline ? (
-                  countdown(draw.closeDeadline, now)
+                  format.countdown(draw.closeDeadline, now)
                 ) : (
-                  "passed"
+                  t("passed")
                 )
               }
-              note={draw.closeDeadline > 0 ? formatUtc(draw.closeDeadline) : undefined}
+              note={draw.closeDeadline > 0 ? format.utc(draw.closeDeadline) : undefined}
             />
           ) : (
             <Fact
-              label="Prize window"
+              label={t("prizeWindow")}
               value={
                 !windowKnown ? (
-                  <Unknown scale="inline" reason="This draw's window has not come back from the chain yet." />
+                  <Unknown scale="inline" reason={t("windowUnknown")} />
                 ) : inWindow ? (
-                  `${countdown(draw.windowEndsAt, now)} left`
+                  t("windowLeft", { time: format.countdown(draw.windowEndsAt, now) })
                 ) : (
-                  "closed"
+                  t("windowClosed")
                 )
               }
-              note={windowKnown ? formatUtc(draw.windowEndsAt) : undefined}
+              note={windowKnown ? format.utc(draw.windowEndsAt) : undefined}
             />
           )}
 
           {awarded && (
             <>
               <Fact
-                label="Bracket"
+                label={t("bracket")}
                 value={`2^${draw.scaleBits}`}
-                note="published in place of the pool's total weight"
+                note={t("bracketNote")}
               />
               <Fact
-                label="Walk"
-                value={draw.walkCount === 0 ? "not started" : `${draw.cursor} of ${draw.walkCount}`}
-                note={`up to ${String(EVALUATE_BATCH)} savers per call`}
+                label={t("walk")}
+                value={
+                  draw.walkCount === 0
+                    ? t("walkNotStarted")
+                    : t("walkProgress", {
+                        cursor: format.count(draw.cursor),
+                        total: format.count(draw.walkCount),
+                      })
+                }
+                note={t("walkNote", { batch: String(EVALUATE_BATCH) })}
               />
             </>
           )}
@@ -222,82 +248,78 @@ export function DrawCard({
 
       {awarded && (
         <div className="mt-4 border-t border-hairlineSoft pt-4">
-          <p className={CAP_LABEL}>What one prize was worth</p>
+          <p className={CAP_LABEL}>{t("prizeWorth")}</p>
           <dl className="mt-2.5 grid grid-cols-3 gap-x-6 gap-y-3">
             {draw.prize.map((prize, tier) => (
-              <Fact key={tier} label={TIER_NAMES[tier]} value={`${formatAmount(prize)} USDC`} />
+              <Fact
+                key={tier}
+                label={tiers(TIER_KEYS[tier])}
+                value={`${format.amount(prize, config.decimals)} ${config.symbol}`}
+              />
             ))}
           </dl>
           {!offeredAnything && (
-            <p className={`mt-3 ${CARD_NOTE}`}>
-              This draw offered no prize money: no harvest had been booked yet when it closed.
-            </p>
+            <p className={`mt-3 ${CARD_NOTE}`}>{t("noPrizeMoney")}</p>
           )}
         </div>
       )}
 
       {awarded && (
         <div className="mt-4 border-t border-hairlineSoft pt-4">
-          <p className={CAP_LABEL}>Your result</p>
+          <p className={CAP_LABEL}>{t("yourResult")}</p>
 
           {!mine ? (
             <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
-              <SealedBars count={4} label="a result, encrypted" />
-              <span className={CARD_PROSE}>
-                Encrypted on chain, and readable only by the wallet it belongs to.
-              </span>
+              <SealedBars count={4} label={t("sealedResult")} />
+              <span className={CARD_PROSE}>{t("sealedResultNote")}</span>
             </div>
           ) : !mine.evaluated ? (
             <p className={`mt-2 max-w-[70ch] ${CARD_PROSE}`}>
               {!windowKnown
-                ? "The walk has not reached you yet, and this draw's window has not come back from the chain, so the page cannot say whether it can still be advanced."
+                ? t("notReachedUnknown")
                 : inWindow
-                  ? "The walk has not reached you yet. Until it does, this draw holds no figure for you, won or not."
-                  : "The window closed before the walk reached you, so this draw pays you nothing and the money went back to the tiers. Nobody can evaluate it now."}
+                  ? t("notReachedYet")
+                  : t("missedWindow")}
             </p>
           ) : (
             <>
               <div className="mt-2.5 flex flex-wrap items-start gap-x-12 gap-y-5">
-                <Figure label="Your prize">
+                <Figure label={t("yourPrize")}>
                   <SealedValue
                     scope={view}
                     handle={mine.creditHandle}
                     requests={requests}
-                    label={`your prize in draw ${draw.drawId}`}
-                    unit="USDC"
+                    label={t("yourPrizeSpoken", { drawId: draw.drawId })}
+                    unit={config.symbol}
+                    decimals={config.decimals}
                     size="large"
                     disabled={requests.length === 0 || saver.wrongNetwork}
                   />
                 </Figure>
 
-                <Figure label="Your weight">
+                <Figure label={t("yourWeight")}>
                   <SealedValue
                     scope={view}
                     handle={mine.weightHandle}
                     requests={requests}
-                    label={`your weight in draw ${draw.drawId}`}
-                    unit="balance-seconds"
-                    format={(weight) => weight.toLocaleString("en-US")}
+                    label={t("yourWeightSpoken", { drawId: draw.drawId })}
+                    unit={units("balanceSeconds")}
+                    format={(weight) => format.count(weight)}
                     eye={false}
                   />
                 </Figure>
               </div>
 
-              {opened && credit === 0n && !claimed && (
-                <p className={`mt-3 max-w-[70ch] ${CARD_PROSE}`}>
-                  No prize this draw. Your weight was counted and the thresholds did not fall your way.
-                </p>
+              {opened && credit === 0n && (
+                <p className={`mt-3 max-w-[70ch] ${CARD_PROSE}`}>{t("noPrize")}</p>
               )}
 
-              {/* Green on the near-black card advances where it receded on white, so seventy
-                  characters of it outweighed the flame on the claim button beside it. The success
-                  keeps the two places the console puts a status colour, the pill and the note under
-                  the button, and the sentence explaining where the money went reads as prose. */}
-              {claimed && (
-                <p className={`mt-3 max-w-[70ch] ${CARD_PROSE}`}>
-                  Claimed. That amount went to your wallet, out of winnings first. The draw keeps the
-                  figure as its record.
-                </p>
+              {/* Read off the chain rather than remembered from the press, so it survives a
+                  reload and so a claim made in another tab shows up here too. Green on the
+                  near-black card advances where it receded on white, so the sentence explaining
+                  where the money went reads as prose and the colour stays on the pill. */}
+              {opened && credit !== null && credit > 0n && unclaimed === 0n && (
+                <p className={`mt-3 max-w-[70ch] ${CARD_PROSE}`}>{t("claimed")}</p>
               )}
             </>
           )}

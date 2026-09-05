@@ -1,0 +1,981 @@
+{
+  "chrome": {
+    "home": "Hearth，首页",
+    "nav": {
+      "pool": "资金池",
+      "verify": "核查",
+      "how": "工作原理",
+      "docs": "文档"
+    },
+    "menu": {
+      "open": "打开菜单",
+      "close": "关闭菜单",
+      "label": "站点菜单"
+    },
+    "footer": {
+      "tagline": "机密无损有奖储蓄",
+      "zama": "构建在 Zama 协议上",
+      "disclaimer": "这是在 Sepolia 测试网上的演示。代币是没有价值的测试代币，收益来自赞助方注资的余额而不是真实策略，这里的一切都不构成投资建议。"
+    },
+    "language": {
+      "trigger": "语言：{name}。点击更换",
+      "list": "选择语言",
+      "heading": "语言",
+      "note": "全部人工翻译。我们还没译到的页面显示英文。",
+      "current": "当前"
+    }
+  },
+
+  "landing": {
+    "scrollCue": "向下滚动",
+    "noWebgl": "这个浏览器无法启动 3D 场景，所以这段故事在这里以普通页面呈现。站内其余部分都不需要它。",
+    "header": {
+      "how": "工作原理",
+      "open": "打开资金池"
+    },
+    "story": {
+      "one": {
+        "kicker": "机密有奖储蓄",
+        "title": "一炉火。只为守着它的那个人亮着。"
+      },
+      "two": {
+        "kicker": "你存入",
+        "title": "你把它填满，金额随即密封。",
+        "body": "金额在你的浏览器里就加密好了，上链之后一直是密文。从这一刻起，这个数字只属于你，而执行这一点的是 Zama 的访问控制列表。"
+      },
+      "three": {
+        "title": "而它只是其中一炉。",
+        "body": "每位储户的余额都在燃烧，从外面一个也读不到。资金池也从不公布确切总额，只公布它落在哪个 2 的幂之下，因为确切总额会泄露某位唯一动过钱的储户的存款。"
+      },
+      "four": {
+        "kicker": "开奖",
+        "title": "一个没人看得见的种子，在协处理器内部摇出。",
+        "body": "奖金金额在种子存在之前就已定死，所以没人能读到种子、算出自己中了奖、再把这次中奖做大。周期结束时，种子会连同一份合约在链上核验的签名一起公布。"
+      },
+      "five": {
+        "kicker": "中奖",
+        "title": "有一炉火烧得更亮。",
+        "body": "中奖概率与你在整个周期内持有的余额成正比，所以临近开奖才存入，只买到它在场的那一小段。奖金落进一个加密的中奖余额，而领奖就是一次普通提取。"
+      }
+    },
+    "close": {
+      "kicker": "试一试",
+      "title": "在暗处储蓄。",
+      "body": "在 Sepolia 上存入一种机密测试代币，自己跑一次开奖，再验证只有你能读到自己的余额。除了一点测试 ETH，这不花任何钱。",
+      "open": "打开资金池",
+      "grandPrize": "下一期大奖 <figure>{amount} {symbol}</figure>",
+      "saversPeriod": "{count, plural, other {{shown} 位储户}} · 第 {period} 周期",
+      "offline": "Sepolia 现在没有响应，所以实时数字缺失。资金池不受影响：它活在链上，不在这里。"
+    },
+    "shelf": {
+      "heading": "选择你的代币",
+      "unread": "未读取",
+      "note": "每个池此刻的大奖，读自链上。同一个金库、同一套开奖、同样的隐私，一种机密代币一个池。"
+    },
+    "sealed": {
+      "heading": "一位储户的余额",
+      "empty": "还没有人存入。只要有人存入，他的加密余额就会出现在这里，你可以试着打开它。",
+      "try": "试着打开它",
+      "asking": "正在询问 Zama 的密钥管理服务",
+      "askingWait": "通常几秒钟。",
+      "askingLong": "已经 {seconds} 秒。这是实时网络，偶尔会慢一些。",
+      "refused": "被拒绝。",
+      "refusedNote": "这个拒绝来自 Zama 的密钥管理服务，不是来自本页。只有持有这笔余额的钱包能读到它，任何管理员都无法越过这一点。",
+      "unreachable": "无法连接解密服务。",
+      "unreachableNote": "这是网络问题而不是拒绝，所以两边都证明不了什么。过一会儿值得再试一次。",
+      "again": "再试一次",
+      "leaked": "它被解密了，而这本不该发生。",
+      "leakedNote": "服务返回了 {value}。请告诉我们，因为这正是本产品要让它不可能发生的那一个结果。"
+    },
+    "footer": {
+      "tagline": "Hearth，机密无损有奖储蓄",
+      "how": "工作原理",
+      "verify": "核查一期开奖",
+      "docs": "文档",
+      "zama": "构建在 Zama 协议上"
+    }
+  },
+
+  "how": {
+    "kicker": "两分钟指南",
+    "title": "Hearth 如何工作",
+    "lede": "一起储蓄，赢一份由收益支付的奖金，本金一分不少。钱看不见。公平看得见。",
+    "steps": {
+      "one": {
+        "title": "先封装，再存入",
+        "body": "把一种普通测试代币换成它的机密孪生代币，再把其中一部分放进该代币的资金池。封装是公开的，存入不是，这正是它们分成两个按钮的原因：一键做完两件事，就等于把你的存款额公布给每一个读链的人。"
+      },
+      "two": {
+        "title": "你的中奖概率就是你的平均余额",
+        "body": "不是开奖那一刻的余额，而是你在整个周期内的余额。在周期结束前五分钟存入，你拿到的概率只有全程持有同样金额的十二分之一。正是这一点挡住了有人在每次开奖前闪一笔大额余额，然后把奖拿走。"
+      },
+      "three": {
+        "title": "开奖关闭，种子摇出",
+        "body": "奖金金额先定死，此时还没有任何随机数存在。然后种子在 Zama 的协处理器内部以密文形式生成，所以摇出时没人看得见，也没有第二次重摇。周期结束后，种子会连同一份合约在链上核验的签名一起公布。"
+      },
+      "four": {
+        "title": "每个人的结果都已经定了",
+        "body": "从种子被核验的那一刻起，阈值就是任何人都能重算的公开数字，权重也不会再变。评估只是把已经成立的事实写下来，从种子选定的位置开始遍历储户名单。没有人能选择评估谁、按什么顺序评估。"
+      },
+      "five": {
+        "title": "你来看，而且只有你",
+        "body": "按下揭示，再签署一条消息。那条签名向 Zama 的中继器证明你控制这个地址，换回合约已授予你的那些值的明文：你的本金、你的奖金、你在每一期开奖里的权重和入账额。它不花 gas，也不往链上写任何东西。"
+      },
+      "six": {
+        "title": "随时取回",
+        "body": "提取先付奖金，再付本金，合成一次机密转账，并在链上限制为你实际持有的数额。领奖是同一个调用、同样的形状，所以没有哪种交易类型会点出中奖者的名字。"
+      }
+    },
+    "private": {
+      "title": "加密的，只有你能读",
+      "note": "你自己的数值",
+      "one": "你的本金",
+      "two": "你未领取的奖金",
+      "three": "你在每一期开奖里的时间加权余额",
+      "four": "每一期开奖付了你多少，也就是你有没有中奖"
+    },
+    "public": {
+      "title": "公开的，所以这个池值得信任",
+      "note": "任何人都能核查",
+      "one": "每一期开奖的种子，以及它的签名",
+      "two": "开奖所针对的区间",
+      "three": "每个档位的奖金金额和流动性",
+      "four": "一个档位派出了多少份奖，晚一期公布",
+      "five": "哪些地址存入过，以及什么时候"
+    },
+    "leaks": {
+      "title": "老实说：什么会泄漏",
+      "oneLead": "封装和解封装是公开的。",
+      "oneBody": "把公开代币变成机密代币，按定义就是一个公开行为。如果有人能锁定你的余额，通常是看到一次公开封装后紧跟一笔同样金额的存入，那么从此往后你在每一期开奖里的结果都是公开算术，因为阈值按设计就是公开的。",
+      "twoLead": "储户少于三位时，区间几乎就是个人信息。",
+      "twoBody": "只有一位储户时，它就是那位储户的权重，误差不超过两倍。真发生时，应用会在页面上写明。",
+      "threeLead": "每个档位会公布它派出了多少份奖，",
+      "threeBody": "晚一期公布，而且从不公布派给了谁。同一步也把没人赢走的钱退回公开的奖池，这正是让大奖能在你眼前累积起来的机制。它会慢慢收窄一笔从不移动的余额。",
+      "fourLead": "代币是 Zama 的，而且可升级。",
+      "fourBody": "它的拥有者可以指定观察者，能够解密流经该代币的每一笔金额，并且可以追溯既往。Hearth 自己的账目他们读不到，而一旦有观察者被指定，应用会显示横幅提示。"
+    },
+    "closing": "你可以从头到尾看完一整期开奖，仍然说不出是谁中了奖。这就是重点，也是只有全同态加密才能做到的那一件事。",
+    "open": "打开资金池",
+    "check": "自己核查一期开奖"
+  },
+
+  "console": {
+    "shell": {
+      "openMenu": "打开控制台菜单",
+      "closeMenu": "关闭控制台菜单",
+      "menuLabel": "控制台菜单",
+      "loading": "正在点燃炉火"
+    },
+    "sidebar": {
+      "nav": "控制台",
+      "dashboard": "仪表盘",
+      "deposit": "存入",
+      "withdraw": "提取",
+      "draws": "我的开奖",
+      "run": "跑一次开奖",
+      "anyone": "任何人",
+      "anyoneTitle": "开奖的每一步任何钱包都能调用",
+      "docs": "文档",
+      "verify": "核查"
+    },
+    "wallet": {
+      "connect": "连接钱包",
+      "connecting": "连接中",
+      "scan": "用手机扫码",
+      "getWallet": "获取钱包",
+      "noneLead": "这个浏览器里没有钱包。",
+      "noneLink": "去 ethereum.org 挑一个",
+      "noneTail": "，充一点 Sepolia 测试 ETH，然后回来。这个屏幕上的内容，不连钱包也能免费查看。",
+      "switching": "切换中",
+      "switchTo": "切换到 {network}",
+      "options": "钱包选项",
+      "explorer": "在 Etherscan 上查看",
+      "disconnect": "断开连接"
+    },
+    "connect": {
+      "prompt": "请先连接钱包。"
+    },
+    "note": {
+      "encrypting": "正在加密并生成证明，约十秒",
+      "signing": "请在钱包里确认",
+      "mining": "等待交易被打包",
+      "done": "完成",
+      "busy": "这次点击被忽略了：{label} 正在进行，而一个钱包一次只能签一笔交易。请等上面那一行结束。",
+      "line": "{label}：{state}",
+      "explorer": "在 Etherscan 上查看这笔交易",
+      "dismiss": "关闭"
+    },
+    "actions": {
+      "mint": "获取测试代币",
+      "approve": "授权包装合约",
+      "wrap": "封装成机密代币",
+      "deposit": "存入",
+      "withdraw": "提取",
+      "withdrawAll": "全部提取",
+      "close": "关闭第 {drawId} 期开奖",
+      "award": "为第 {drawId} 期发奖",
+      "advance": "推进第 {drawId} 期开奖",
+      "finalize": "终结第 {drawId} 期开奖",
+      "reconcile": "对账 {tier} 号档位",
+      "askingSeed": "正在向 Zama 的密钥管理服务索取种子",
+      "seedSealing": "种子已公布但还不能解密，正在再次索取",
+      "askingCarry": "正在索取该档位未派出的流动性"
+    },
+    "reveal": {
+      "signing": "请在钱包里签署这次请求，不花 gas",
+      "asking": "正在你的浏览器里解密",
+      "sealing": "这个值刚写入，还不能解密，正在再次索取",
+      "newKey": "一个 KMS 分片失败了，正在用新密钥重试",
+      "elapsed": "已经 {seconds} 秒，通常只要几秒",
+      "stopWaiting": "不等了",
+      "denied": "Zama 的中继器拒绝了：这些值不属于这个钱包。",
+      "reveal": "揭示{label}",
+      "hide": "隐藏{label}",
+      "sealAgain": "重新密封",
+      "cost": "揭示，一次签名，不花 gas",
+      "encrypted": "{label}，已加密",
+      "encryptedAlone": "已加密",
+      "partial": "中继器的回应里没有这个值，所以总额未知。"
+    },
+    "unknown": {
+      "word": "未知",
+      "default": "这个值还没有从链上返回。"
+    },
+    "amount": {
+      "max": "最大",
+      "allOfIt": "全部",
+      "maxFor": "{max}：{name}",
+      "shape": "只能输入数字。小数点用点号或逗号都行，最多一个，千位不加分隔符。",
+      "precision": "{symbol} 有 {decimals} 位小数，所以比 {smallest} 更细的金额发不出去。",
+      "zero": "请输入大于零的金额。"
+    },
+    "banners": {
+      "wrongNetwork": "你的钱包在错误的网络上。",
+      "wrongNetworkBody": "Hearth 部署在以太坊 Sepolia 上。在你的钱包切过来之前，本页面不会读也不会写。",
+      "switch": "切换到 Sepolia",
+      "denied": "这个地址在代币的拒绝名单上。",
+      "deniedBody": "{symbol} 拒绝这个地址的一切转入和转出，所以存入和提取都会回滚。那是代币拥有者的设置，不是我们的。",
+      "tokenPaused": "{symbol} 代币已暂停。",
+      "tokenPausedBody": "封装、转账和解封装都在代币层被停掉了。Hearth 自己的合约不受影响，但在 Zama 解除暂停之前什么都动不了。",
+      "vaultPaused": "金库已暂停。",
+      "vaultPausedBody": "新的存入和开奖关闭被停掉了。提取、评估、发奖和终结永远不可暂停，所以你的钱还是随时能取走。",
+      "poolPaused": "资金池已暂停。",
+      "poolPausedBody": "开奖无法关闭。发奖、评估、对账和提取照常进行。",
+      "observers": "代币拥有者已指定 {count, plural, other {{shown} 位观察者}}。",
+      "observersBody": "{symbol} 上的观察者可以解密流经该代币的每一笔金额，包括存入和派奖，而且可以追溯既往。Hearth 自己的账目，也就是你的本金、奖金、权重和入账额，他们读不到。",
+      "upgraded": "{symbol} 代币已升级。",
+      "upgradedBody": "它现在运行的实现是 {implementation}，不是我们逐行读过源码的那一个。它在 Hearth 的句柄上的行为可能已经变了。",
+      "unknownImplementation": "一个我们不认识的地址",
+      "thinSet": "资金池里现在只有 {count, plural, other {{shown} 位储户}}。",
+      "thinSetBody": "储户少于 {minimum} 位时，公布的区间已经接近个人信息：只有一位储户时，它就是那位储户的权重，误差不超过两倍；有两位时，彼此都能把对方框住。无论如何金额都还是加密的，但在更多人加入之前，隐私很薄。",
+      "noKeeper": "最近几小时没有任何开奖被推进过。",
+      "noKeeperBody": "开奖的每一步任何人都能调用。侧栏的“跑一次开奖”里五步俱全。keeper 卡住损失的是开奖，不是钱。",
+      "keeperLate": "上一次开奖步骤落地于{ago}，比一个周期还久。",
+      "keeperLateFrom": "由 {address} 发出。",
+      "keeperLateBody": "没有人必须等 keeper：“跑一次开奖”可以用你自己的钱包完成关闭、发奖、评估、终结和对账。",
+      "keeperLink": "在 Etherscan 上查看",
+      "tokenUnread": "代币自身的状态读不到。",
+      "tokenUnreadBody": "Hearth 每次访问都会检查 {symbol} 有没有观察者、有没有暂停、有没有拦住你的地址，而这几次读取没有回应。链上什么都没变，变的只是本页对它的视野。这也意味着这个屏幕上没有代币警告，是因为什么都没读到，不是因为没什么可报的。",
+      "historyDown": "开奖历史暂时不可用。",
+      "historyDownBody": "{detail} 屏幕上的每一个数字，依然直接来自链上。"
+    },
+    "unsupported": {
+      "subtitle": "Hearth 无法在这种代币上开池，所以这里没有什么需要签名。",
+      "pill": "不支持",
+      "notDeployed": "未部署",
+      "whyLabel": "这种代币为什么没有池",
+      "whyOne": "这种代币的铸造权限只归发行方，所以 Hearth 无法在它上面开池。请换一个池。",
+      "whyTwo": "一个 Hearth 池需要储户能先拿到普通代币并自己封装。{name} 由 Zama 在 Sepolia 上发行，它的底层代币只有部署它的地址能铸造，所以除发行方以外没人能封装进来，建在它上面的金库只会空着。那是代币的设置，不是这里合约的限制：金库接受任何遵循标准的机密代币。",
+      "reason": "原因",
+      "confidentialToken": "机密代币",
+      "underlying": "底层代币",
+      "publishedBy": "发布方",
+      "zamaList": "Zama 的 Sepolia 地址表",
+      "pickLabel": "换一个开着的池",
+      "pickNote": "上面每个池都是同一个金库、同一套开奖、同样的隐私，只是换了一种机密代币。你在一个池里的仓位，说明不了你在另一个池里的情况。"
+    }
+  },
+
+  "picker": {
+    "trigger": "正在用 {symbol} 储蓄。点击更换代币",
+    "list": "选择代币",
+    "saveIn": "储蓄币种",
+    "grandPrize": "大奖",
+    "unread": "未读取",
+    "savingPool": "储蓄池",
+    "notSupported": "不支持",
+    "zamaList": "Zama 的清单",
+    "reasons": {
+      "restrictedMint": "铸造权限只在发行方手里"
+    }
+  },
+
+  "dashboard": {
+    "title": "仪表盘",
+    "subtitle": "你持有什么，资金池在做什么，以及接下来该做的那一件事。",
+    "next": "下一步",
+    "position": {
+      "label": "你持有什么",
+      "open": "已在此浏览器打开",
+      "sealed": "在链上密封",
+      "principal": "本金",
+      "principalNote": "你存了多少。你的中奖概率按它在整个周期内加权。",
+      "principalSpoken": "你的本金",
+      "winnings": "未领取的奖金",
+      "winningsNote": "已记入你名下、尚未提取的奖金。它本身不产生中奖概率。",
+      "winningsSpoken": "你未领取的奖金",
+      "outside": "这个钱包现在不在池子里。存入之后，两个数字就会开始有内容。",
+      "footConnect": "连接钱包才能打开你自己的数值。别人打不开，而执行这一点的是链上 Zama 的访问列表，不是本页的承诺。",
+      "footNetwork": "打开这些数值需要在 Sepolia 上签一次名。把钱包切过去，眼睛图标就又能用了。",
+      "footOpen": "只有这个浏览器看到了那些数字。什么都没写上链，也什么都没发给服务器。",
+      "footSealed": "眼睛图标是请 Zama 的中继器解密这个地址拥有的值。一次签名，不花 gas，不发交易。"
+    },
+    "pool": {
+      "label": "资金池现况",
+      "pill": "对所有人公开",
+      "savers": "储户",
+      "saversUnknown": "储户数量还没有从链上返回。",
+      "liquidity": "奖金流动性",
+      "liquidityUnknown": "三个档位余额里有一个还没返回，而部分之和不等于整个池。",
+      "period": "周期",
+      "periodUnknown": "当前周期还没有从链上返回。",
+      "endsIn": "剩余",
+      "endsUnknown": "本周期的结束时间还没有从链上返回。",
+      "tier": "档位",
+      "chance": "概率",
+      "prizeEach": "单份奖金（{symbol}）",
+      "prizeCount": "{count, plural, other {每期 {shown} 份奖}}",
+      "prizeCountUnknown": "奖项数量未知",
+      "carryWaiting": "第 {drawId} 期的结转额待对账",
+      "oddsUnknown": "这个档位的概率还没有从链上返回。",
+      "nextPrizeUnknown": "这个档位的下一份奖金还没有从链上返回。",
+      "footOne": "每份奖是它所在档位流动性的一半除以奖项数量，在关闭时、随机种子存在之前就定死。没人赢走的部分晚一期公布，并再次拿出来发。",
+      "footBracket": "概率是针对 <bracket>2^{bits}</bracket> 这个区间摇的，随开奖一起公布。",
+      "footBracketUnknown": "这些概率所针对的区间还没有从链上返回。"
+    },
+    "tiers": {
+      "grand": "大奖档",
+      "mid": "中档",
+      "frequent": "高频档"
+    },
+    "tiersLower": {
+      "grand": "大奖档",
+      "mid": "中档",
+      "frequent": "高频档"
+    }
+  },
+
+  "nextStep": {
+    "connectTitle": "先连接一个钱包。",
+    "connectDetail": "Hearth 跑在以太坊 Sepolia 上。你需要一点测试 ETH 付 gas，而连上钱包之后，测试 {underlyingSymbol} 一键就能拿到。",
+    "connectCta": "连接钱包",
+    "switchTitle": "这个钱包指向了另一条网络。",
+    "switchDetail": "本页的池子数字无论如何都读自 Sepolia。但在钱包也切过去之前，什么都签不了、也发不出。",
+    "switchCta": "切换到 Sepolia",
+    "readingTitle": "正在从链上读取这个钱包。",
+    "readingDetail": "读取落地之后就会给出下一步。用一个还没到的余额来点名下一步，只会把你指到错的页面。",
+    "faucetTitle": "领一些测试 {underlyingSymbol}。",
+    "faucetDetail": "mock {underlyingSymbol} 有一个公开铸造入口，每次调用上限一百万枚。它一文不值，所以多领一点。",
+    "faucetCta": "获取测试 {underlyingSymbol}",
+    "shieldTitle": "封装你的 {underlyingSymbol}。",
+    "shieldDetail": "封装把普通 {underlyingSymbol} 变成 {symbol}。这一步天然是公开的，也是关于这笔钱最后一件别人还读得到的事。",
+    "shieldCta": "封装 {underlyingSymbol}",
+    "depositTitle": "把你的 {symbol} 放进资金池。",
+    "depositDetail": "金额在发出之前就在你的浏览器里加密好了，所以金库记入的是一个它读不到的数字。你的中奖概率跟着你持有的数额走。",
+    "depositCta": "存入",
+    "claimTitle": "你有奖金待领。",
+    "claimDetail": "领奖就是一笔金额恰好为此的普通提取。在链上它和任何一次提取形状相同，这正是它不会点出中奖者的原因。",
+    "claimCta": "领取你的奖金",
+    "readingDrawsTitle": "正在读取最近几期开奖。",
+    "readingDrawsDetail": "它们落地之后就会给出下一步。用一份还没到的开奖列表来点名下一步，只会把你指到错的页面。",
+    "resultTitle": "第 {drawId} 期开奖已经写下了你的结果。",
+    "resultDetail": "遍历走到了这个钱包，所以中没中已经定了，也存了下来。在你打开它之前它一直密封着，而打开只要一次签名，不花 gas。",
+    "resultCta": "打开第 {drawId} 期开奖",
+    "settledTitle": "现在没有什么需要做。",
+    "settledDetail": "你的存款留在池子里，待着的每一秒都在赚中奖概率。下一期开奖在周期结束时关闭，任何人都能关。",
+    "settledCta": "追加存入",
+    "noWallet": "没有找到钱包"
+  },
+
+  "deposit": {
+    "title": "存入",
+    "subtitle": "领取测试 {underlying}，封装成 {confidential}，再放进金库。",
+    "connect": "在 Sepolia 上连接钱包才能存入。下面三步就是把钱送进池子的全部流程，而这个屏幕会直接打开你的钱包实际走到的那一步。",
+    "connectNote": "你需要一点 Sepolia ETH 付 gas。连上之后，测试 {underlying} 一键就能拿到。",
+    "lowGas": "这个钱包几乎没有 Sepolia ETH，交易还没发出就会失败。任何 Sepolia 水龙头都能补上：Google Cloud Web3 水龙头、Alchemy 的或 Chainlink 的都行。零点一个 ETH 已经远远够用。",
+    "inWallet": "你的钱包里",
+    "inWalletSpoken": "你的 {symbol} 余额",
+    "inWalletUnknown": "你的钱包里：",
+    "faucet": {
+      "title": "获取测试 {underlying}",
+      "held": "你的钱包里有 {amount} {underlying}。",
+      "heldSummary": "你的钱包里有 {amount} {underlying}。",
+      "more": "再来一百万",
+      "unread": "你的钱包余额还没有从链上返回。",
+      "button": "获取测试 {underlying}",
+      "note": "mock {underlying} 有一个公开铸造入口，每次调用上限一百万枚。它一文不值，所以要得比你需要的多一点。"
+    },
+    "shield": {
+      "title": "封装你的 {underlying}",
+      "summary": "已封装。余额是密封的，只有你能读到里面是多少。",
+      "more": "继续封装",
+      "body": "封装把普通 {underlying} 变成 {confidential}，而且它是公开的。包装合约会发出明文金额，底层的 ERC-20 转账又带了一次，这没有办法绕开：把公开代币变成机密代币，按定义就是一个公开行为。",
+      "youShield": "你封装",
+      "fieldName": "要封装的 {underlying} 金额",
+      "balance": "你的钱包里有 {amount} {underlying}",
+      "tooMuch": "你持有 {amount} {underlying}。少要一点，或者先铸造更多。",
+      "youReceive": "你收到",
+      "rateUnknown": "包装合约的比例还没有从链上返回。",
+      "rateOne": "包装合约是一比一的，所以你封装多少就收到多少。",
+      "rateOther": "包装合约用 {rate} 单位 {underlying} 换一单位 {confidential}。",
+      "why": "这就是封装和存入分成两个按钮而不是一个的原因。挑你自己选的时间，封装一个整数，之后再存入其中一部分。任何能锁定你余额的人，都能算出你从此以后每一期开奖有没有中奖，因为阈值按设计就是公开的。",
+      "approve": "授权包装合约",
+      "button": "封装",
+      "approveNote": "只需授权一次，之后每次封装都只是一笔交易。它允许 {confidential} 包装合约从这个钱包里划走 {underlying}，碰不到你其他任何东西。{underlying} 是上面那个水龙头按钮给的 Sepolia 测试代币，在任何真实网络上都没有价值。授权被打包之后，封装按钮就接手了。",
+      "waiting": "你的余额还没有从链上返回，所以这一步先挂着。",
+      "skip": "直接存入你已经持有的"
+    },
+    "vault": {
+      "title": "存入金库",
+      "body": "金额会在你的浏览器里连同一份零知识证明一起加密，然后在一笔交易里发出。金库记入的，是代币说实际转过来的那个数额，所以要求超过你持有的金额只会什么都不动，而不是大声报错。不确定自己有多少，就点开下面的眼睛图标。",
+      "closedNotAwarded": "现在有一期开奖已经关闭、正在等发奖。存入依然允许；这笔钱从此刻起计入，按当前周期还剩下的那一段加权。",
+      "youDeposit": "你存入",
+      "fieldName": "要存入的 {confidential} 金额",
+      "cap": "金库对单个储户的上限是 {amount} {confidential}，所以这一笔会在同一笔交易里被拒绝并退回。",
+      "tooMuch": "你持有 {amount} {confidential}。要多了并不会在链上被拒绝：代币只转走你有的，这里就是零，而交易照样成功。",
+      "sealedNote": "你的余额是密封的，所以这个屏幕无法拿它来核对金额。超过你持有数额的存入什么都不会动，还是要花一笔交易。点开上面的眼睛图标，这个输入框就会替你核对。",
+      "button": "存入",
+      "paused": "金库已暂停，所以存入会被拒绝。提取仍然可用。"
+    }
+  },
+
+  "withdraw": {
+    "title": "提取",
+    "subtitle": "两个阶段：先从金库取出，再换回 {underlying}。本金从不锁定，开奖进行到一半也一样。",
+    "connect": "连接钱包才能提取。第一阶段把本金和奖金从金库取出，第二阶段把 {confidential} 换回 {underlying}。",
+    "connectNote": "这里没有任何东西会被锁定。你随时要，本金都全额回来，开奖进行到一半也一样。",
+    "tabs": {
+      "label": "提取的两个阶段",
+      "vault": "从金库取出",
+      "unshield": "换回普通代币",
+      "unfinished": "有未完成的事"
+    },
+    "pending": {
+      "title": "有一次解封装提交了却没做完。",
+      "body": "机密代币已经销毁，{underlying} 还压在包装合约里。发出第二笔交易就能把它释放出来。",
+      "link": "查看这次解封装",
+      "finish": "完成解封装"
+    },
+    "vault": {
+      "reading": "正在读取这个钱包在金库里的数额。",
+      "unavailable": "这个钱包的读取没有返回，所以这个屏幕说不出金库里为你存着多少。等网络恢复响应之后重新加载。",
+      "neverDepositedLead": "这个钱包从没存入过，所以金库里没有它的钱，提取会在链上被拒绝。",
+      "depositFirst": "先去存入",
+      "neverDepositedTail": "，或者如果你手上有想换回 {underlying} 的 {confidential}，就用第二阶段。",
+      "youWithdraw": "你提取",
+      "fieldName": "要从金库提取的金额",
+      "inVault": "金库里",
+      "inVaultSpoken": "你在金库里的余额",
+      "clamped": "这超过了你持有的数额。金库会把你持有的 {amount} 发给你，到此为止。",
+      "revealNote": "揭示之后这个输入框才有上限，也才能看到拆分。跳过也是安全的：无论如何金库都会在链上把金额限住。",
+      "youReceive": "你收到",
+      "receiveBalance": "进你的钱包，仍然是加密的。第二阶段把它换回 {underlying}。",
+      "split": "其中 {winnings} 出自奖金，{principal} 出自本金，合成一次转账，两种情况看起来一模一样。",
+      "splitSealed": "揭示你在金库里的余额，才能看到它在奖金和本金之间怎么拆。",
+      "button": "提取",
+      "everything": "全部提取",
+      "everythingNote": "全部提取不需要揭示，也不需要加密输入。金库在链上把你的本金加上奖金，再把总额发出，所以你和这个屏幕都不必先知道那个数。",
+      "howLabel": "一次提取是怎么付的",
+      "howOne": "先付奖金，再付本金，合成一次机密转账。这笔转账不会透露它由哪几部分组成。",
+      "howTwo": "金额在链上会被限制为你要的、你持有的和金库持有的三者中最小的那个，因为一次机密转账要么整笔转走，要么一分不动。要得过多不会失败，而是把你持有的全部发出，这也正是没人能靠要一个大数、再看会发生什么来找出你余额的原因。",
+      "howWindow": "现在有一个开奖窗口开着。提取是允许的，也不会改变已经为你定死的中奖概率。那一期的任何奖金会落进你的中奖余额，留到以后提取。",
+      "howThree": "本金从不锁定。没有通知期，没有罚金，也不用等一期开奖结束。"
+    },
+    "unshield": {
+      "youUnshield": "你解封装",
+      "fieldName": "要解封装的 {confidential} 金额",
+      "inWallet": "你的钱包里",
+      "inWalletSpoken": "你的 {confidential} 余额",
+      "tooMuch": "你持有 {amount} {confidential}。要多了并不会在链上被拒绝：两笔交易都会花掉，而什么都不会动。",
+      "revealNote": "揭示之后这个输入框才有上限。解封装超过你持有的数额不会被拒绝，只是什么都不动。",
+      "youReceive": "你收到",
+      "receiveBalance": "{underlying} 进你的钱包，随处可花。",
+      "receiveNote": "这个数字会明文上链。公布它的是两笔交易里的第一笔。",
+      "button": "解封装",
+      "unfinished": "新的解封装要等上面那一次做完。一次只记得住一个，另起一个会让第一个的代币已经销毁，却没人来释放它们。",
+      "unwrapping": "解封装：你的钱包会问你两次。先是一条签名，让包装合约能读到你的机密余额，这不花 gas，然后才是交易本身。",
+      "waiting": "解封装已提交。正在等 Zama 协议公布明文和它的证明。",
+      "finalizing": "正在收尾：确认第二笔交易，把 {underlying} 释放出来。",
+      "done": "已解封装。你的 {underlying} 余额涨了 {amount}，这是第二笔交易之后从链上读到的。",
+      "doneUnchecked": "已解封装。两笔交易都落地了，但 {underlying} 余额读不回来，所以这个屏幕说不出到账了多少。请查看你的钱包。",
+      "nothingMoved": "什么都没动。两笔交易都落地了，而你的 {underlying} 余额和原来分毫不差。金额超过你的机密余额时就会这样：包装合约什么都不释放，而不是拒绝。用上面的眼睛图标打开余额，再点全部。",
+      "whyLabel": "为什么这需要两笔交易",
+      "whyOne": "包装合约先销毁加密金额并把它公布出来，等 Zama 协议产出明文和它的证明之后，再释放普通代币。这是两次独立的调用，而且如果你在中间关掉了标签页，第二次可以稍后再发。",
+      "whyTwo": "第一笔交易之前你的钱包还会要一条签名，因为包装合约要读你的机密余额来核对金额。那个弹窗是签名不是交易，也不花 gas。",
+      "whyThree": "清空之前值得知道：全额封装进来、又全额解封装出去，两个公开总额之差就是你有史以来全部中奖所得的一个下界。解封装用整数，或者留一笔常备的机密余额在里面。"
+    }
+  },
+
+  "draws": {
+    "title": "我的开奖",
+    "subtitle": "最近的每一期开奖、它公开的奖金数字，以及眼睛图标后面你自己的权重和奖金。",
+    "count": "最近 {count} 期",
+    "reading": "读取中",
+    "emptyReading": "正在读取资金池。",
+    "emptyNone": "还没有周期结束，所以没有开奖可看。第 1 周期一结束，第一期就会出现。",
+    "emptyFailed": "刚才读不到这些开奖。无论如何它们都在链上；本页会自己重试。",
+    "card": {
+      "label": "第 {drawId} 期开奖",
+      "claimNote": "领奖就是一笔金额恰好为此的普通提取。在链上它和任何一次提取形状相同，这正是领奖不会点出中奖者的原因。",
+      "claim": "领取 {amount} {symbol}",
+      "advanceNote": "推进会把共享的遍历往前走最多 {batch} 位储户，顺序由这一期的种子定。它没法对准你，所以按下它说明不了你有没有中奖。",
+      "advance": "推进这期开奖",
+      "waitingLead": "这一步对所有人开放。",
+      "waitingLink": "跑一次开奖",
+      "waitingTail": "里就有。",
+      "periodEnded": "第 {drawId} 周期结束",
+      "periodEndedUnknown": "本周期的结束时间还没有从链上返回。",
+      "closeDeadline": "关闭截止时间",
+      "closeDeadlineUnknown": "这一期的关闭截止时间还没有从链上返回。",
+      "passed": "已过",
+      "prizeWindow": "奖金窗口",
+      "windowUnknown": "这一期的窗口还没有从链上返回。",
+      "windowLeft": "还剩 {time}",
+      "windowClosed": "已关闭",
+      "bracket": "区间",
+      "bracketNote": "用来代替资金池的总权重公布",
+      "walk": "遍历",
+      "walkNotStarted": "未开始",
+      "walkProgress": "{total} 位中的 {cursor} 位",
+      "walkNote": "每次调用最多 {batch} 位储户",
+      "prizeWorth": "一份奖值多少",
+      "noPrizeMoney": "这一期没有奖金：关闭时还没有任何收割额入账。",
+      "yourResult": "你的结果",
+      "sealedResult": "一个加密的结果",
+      "sealedResultNote": "在链上加密，只有它所属的那个钱包能读。",
+      "notReachedUnknown": "遍历还没走到你这里，而这一期的窗口也没有从链上返回，所以本页说不出它还能不能被推进。",
+      "notReachedYet": "遍历还没走到你这里。在那之前，这一期对你还没有任何数字，中没中都没有。",
+      "missedWindow": "遍历还没走到你这里，窗口就关了，所以这一期不付给你任何东西，钱回到了各档位。现在没人能再评估它。",
+      "yourPrize": "你的奖金",
+      "yourPrizeSpoken": "你在第 {drawId} 期的奖金",
+      "yourWeight": "你的权重",
+      "yourWeightSpoken": "你在第 {drawId} 期的权重",
+      "noPrize": "这一期没有中奖。你的权重被计入了，阈值没有落在你这边。",
+      "claimed": "已经取走了。金库不欠这个钱包任何东西，所以这笔奖金在你的机密余额里。这一期把数字留作记录。"
+    }
+  },
+
+  "describe": {
+    "unreadBadge": "未读取",
+    "unread": "这一期还没有从链上返回，所以它下面的内容都还不算事实。本页会一直问。",
+    "notClosedBadge": "未关闭",
+    "notClosed": "周期已经结束，这一期正等着被关闭。任何人都能关，包括你。",
+    "missedBadge": "已错过",
+    "missed": "没有人在截止时间之前关闭这一期，所以它不付任何东西。它的流动性从来没被移走过，下一次关闭会再拿出来发。",
+    "closedBadge": "等待证明",
+    "closed": "已关闭。种子、区间、非空标志和收割额都已公布，正在等 Zama 的密钥管理服务为它们的明文签名。任何人都能取回它们并为这一期发奖。",
+    "emptyBadge": "空",
+    "empty": "这个周期里没有人持有余额，所以没有什么可称量的。拿出来的流动性直接回到了各档位。",
+    "skippedBadge": "已跳过",
+    "skipped": "发奖落在了这一期的窗口之后，所以没有奖金派出。流动性回到了各档位，而收割额照样入了账。",
+    "awardedBadge": "已发奖",
+    "awardedAllDisconnected": "已发奖，遍历也走完了里面的每一位储户。连接钱包就能看到你当时排在哪里。",
+    "awardedDisconnected": "已发奖。评估遍历还在跑。连接钱包就能看到你排在哪里。",
+    "awardedAllOutside": "已发奖，每位储户都评估过了。当时这个钱包不在池子里。",
+    "awardedOutside": "已发奖。评估遍历还在跑，而这个钱包不在里面。",
+    "awardedAll": "已发奖，遍历也走完了里面的每一位储户。每一个结果都已定死并写了下来。",
+    "awarded": "已发奖。从这一刻起每个结果都已经定了：阈值是公开的，权重也不会再变。评估只是把它们写下来。"
+  },
+
+  "run": {
+    "title": "跑一次开奖",
+    "subtitle": "一期开奖要五笔交易。每一笔任何钱包都能发，包括你的。",
+    "connect": "连接钱包才能发出其中任何一笔。它们都不需要合约认可的任何特权，也都没法对准某一位储户。",
+    "connectNote": "下面五步无论如何都会从链上读数，所以在连接任何东西之前，这个屏幕就值得看一看。",
+    "waitingFor": "资金池在等什么",
+    "nothing": "没有",
+    "ordering": "同时也有一期开奖可以关闭了。终结和对账排在前面，因为结转额释放出来的钱，正是下一次关闭用来定奖金金额的钱。",
+    "unknownDue": "说明哪一步该做的那些读取还没有从链上返回。",
+    "idleWithClock": "要么 keeper 跟上了，要么这个周期还在跑。它还有 {time} 结束。",
+    "idle": "要么 keeper 跟上了，要么这个周期还在跑。",
+    "railLabel": "五个步骤，按一期开奖需要的顺序",
+    "unknownStep": "这一步能不能做，还没有从链上返回。",
+    "chip": {
+      "due": "现在该做",
+      "ready": "就绪",
+      "unknown": "未知",
+      "notYet": "还不到时候"
+    },
+    "blocked": {
+      "connect": "连接钱包才能发出这一笔。",
+      "network": "你的钱包在另一条网络上。",
+      "busy": "已经有另一笔交易在路上。"
+    },
+    "close": {
+      "title": "关闭",
+      "headline": "关闭第 {drawId} 期开奖",
+      "headlineIdle": "关闭一期开奖",
+      "button": "关闭",
+      "does": "按每个档位里现有的钱定死它这一期的奖金金额，把这笔钱移进本期开奖，收割收益来源，并摇出一个加密种子，没有任何人能读到它，我们也不能。",
+      "paused": "资金池已暂停，所以任何开奖都关不了。",
+      "readyDeadline": "第 {drawId} 期开奖还能关闭 {time}。过了就会被跳过，它的钱留在各档位里。",
+      "ready": "第 {drawId} 期开奖正等着被关闭。",
+      "waitingClock": "没有开奖在等。第 {drawId} 期要再过 {time}，也就是这个周期结束时，才可以关闭。",
+      "waiting": "没有开奖在等着被关闭。"
+    },
+    "award": {
+      "title": "发奖",
+      "headline": "为第 {drawId} 期发奖",
+      "headlineIdle": "为一期开奖发奖",
+      "button": "发奖",
+      "does": "把关闭时公布的那四个值的明文，连同密钥管理服务对它们的签名一起交给资金池。资金池在链上核验那个签名，把收割额记入各档位，并打开这一期。中奖者就在这一刻被决定。",
+      "ready": "第 {drawId} 期已关闭，正在等待。四份证明会先取回来，要几秒钟，然后你的钱包才会让你签名。",
+      "waiting": "没有已关闭的开奖在等发奖。"
+    },
+    "advance": {
+      "title": "推进",
+      "headline": "推进第 {drawId} 期开奖",
+      "headlineIdle": "推进一期开奖",
+      "button": "推进",
+      "does": "从种子决定的位置开始遍历储户名单，按公开阈值把每位储户该得的记入他名下。调用者能选一次覆盖多少位储户，永远选不了是哪几位，所以发出这一笔，说明不了你在这期开奖里是谁。",
+      "readyCount": "第 {drawId} 期已完成 {total} 位储户中的 {cursor} 位。每次调用把共享的遍历往前推最多 {batch} 位，那是一笔交易付得起的量。",
+      "ready": "第 {drawId} 期还有储户没走到。每次调用把共享的遍历往前推最多 {batch} 位，那是一笔交易付得起的量。",
+      "waiting": "没有已发奖的开奖在窗口内还剩储户。"
+    },
+    "finalize": {
+      "title": "终结",
+      "headline": "终结第 {drawId} 期开奖",
+      "headlineIdle": "终结一期开奖",
+      "button": "终结",
+      "does": "窗口结束之后，把每个档位没派出去的余额折进该档位的加密结转额，并公布轮到的那些档位的结转额。",
+      "ready": "第 {drawId} 期的窗口已经跑完，所以再也不能从它记入任何东西。",
+      "waitingClock": "还没有窗口结束。第 {drawId} 期再过 {time} 可以终结。",
+      "waiting": "没有窗口跑完却没被终结的开奖。"
+    },
+    "reconcile": {
+      "title": "对账",
+      "headline": "对账{tier}",
+      "headlineIdle": "对账一个档位",
+      "button": "对账",
+      "does": "取回一个已公布结转额的明文，向资金池证明它，并把这笔钱记回该档位的明文流动性，好让下一次关闭再拿出来发。",
+      "ready": "{tier}在第 {drawId} 期公布了它的结转额。",
+      "readyMore": "{count, plural, other { 后面还排着 {shown} 个档位，每按一次做一个。}}",
+      "waiting": "没有档位有结转额等着被记回。"
+    },
+    "who": {
+      "label": "这些由谁发出",
+      "oneStart": "我们跑着一个 keeper 盯着资金池，每一步一到期就发出去，所以平常一小时里，这个屏幕上没什么可做的。",
+      "onePeriod": " 这里一个周期是 {period}，所以整整五步大约按这个频率发出一轮。",
+      "oneEnd": " keeper 不持有合约认可的任何特权。它本可能滥用的那两件事，挑选评估谁和挑选派奖顺序，对任何调用者都不是选项。",
+      "two": "发奖和对账是仅有的两步需要链下的东西。你的浏览器向 Zama 的中继器索取资金池公布的那些值的明文，发奖要四个、对账要一个，并附上密钥管理服务对它们的签名。keeper 做的是同一个调用，而签名由合约自己核验，所以浏览器没法谎报它读到了什么。",
+      "three": "如果 keeper 停了，什么都不会丢。一期从没被关闭的开奖，钱留在各档位里，下次再拿出来发；一笔从没对账的结转额，会被它落地之后的第一次关闭折回去。keeper 卡住让资金池损失的是开奖，不是钱，而这里任何一个钱包都能把它们重新推起来。",
+      "periodHours": "{count, plural, other {{shown} 小时}}",
+      "periodMinutes": "{count} 分钟",
+      "periodSeconds": "{count} 秒"
+    },
+    "stand": {
+      "label": "开奖进展",
+      "period": "当前周期",
+      "periodNote": "{time} 后结束",
+      "savers": "储户",
+      "saversNote": "一次完整遍历要走多远",
+      "lastClosed": "最近关闭的一期",
+      "lastClosedNone": "还没有",
+      "vaultUnknown": "金库状态未知",
+      "vaultPaused": "金库已暂停",
+      "vaultRunning": "金库运行中",
+      "poolUnknown": "资金池状态未知",
+      "poolPaused": "资金池已暂停",
+      "poolRunning": "资金池运行中"
+    }
+  },
+
+  "verify": {
+    "title": "自己核查一期开奖。",
+    "lede": "不需要钱包。这里的每一个数字都直接读自合约，而阈值来自金库自己的 <code>thresholdOf</code> 视图，也就是当初决定结果的那套算术。本页没有第二套实现来跟第一套打架。",
+    "noPool": "{symbol} 没有可核查的池。",
+    "noPoolBody": "{reason}，所以 Hearth 从没在它上面开过金库，这里也没有开奖。从上面的清单里挑一种代币。",
+    "unreachable": "无法连接 Sepolia。",
+    "unreachableBody": "本页通过一个 RPC 端点读取金库和资金池，而那次读取失败了，所以它没有东西可显示。无论如何，开奖本身都在链上。",
+    "tryAgain": "再试一次",
+    "reading": "正在从 Sepolia 读取开奖。",
+    "noneYet": "还没有开奖被关闭，所以没有什么可核查。第 1 周期结束、有人关闭它之后，第一期就会出现。",
+    "oneNotClosed": "第 {drawId} 期还没有关闭，所以没有什么可核查。",
+    "rangeNotClosed": "第 {first} 到 {last} 期都还没有关闭，所以这里没有什么可核查。更早的在区块浏览器上。",
+    "drawButton": "第 {drawId} 期",
+    "facts": {
+      "title": "第 {drawId} 期开奖",
+      "periodCovered": "覆盖的周期",
+      "periodEnded": "结束于 {stamp}",
+      "windowEnds": "窗口结束",
+      "seed": "种子",
+      "seedUnpublished": "尚未公布",
+      "bracket": "区间",
+      "bracketUnset": "尚未设定",
+      "bracketNote": "{count} 余额秒",
+      "prizeSizes": "奖金金额",
+      "prizeSizesNote": "大奖 / 中档 / 高频",
+      "harvest": "已入账的收割额",
+      "walkSavers": "遍历中的储户",
+      "walkNotStarted": "未开始",
+      "walkPosition": "遍历位置",
+      "walkProgress": "{total} 位中的 {cursor} 位",
+      "finalized": "已终结",
+      "yes": "是",
+      "no": "否",
+      "note": "种子是在 Zama 的协处理器内部以密文形式生成的，所以摇出时没人看得见；而关闭一期开奖恰好只能成功一次，所以没有第二次重摇。区间是刚好大于资金池总权重的那个 2 的幂，公布它而不是公布确切总额，因为两个连续的确切总额能解出某位唯一动过钱的储户的存款。"
+    },
+    "tiers": {
+      "title": "每个档位拿出了多少、派出了多少",
+      "hint": "按设计公开",
+      "each": "每份 {amount} {symbol}",
+      "offered": "拿出",
+      "returned": "未派出而退回",
+      "notReconciled": "尚未对账",
+      "paid": "派出的奖项",
+      "paidUnknown": "对账之前未知",
+      "paidInexact": "无法精确推出",
+      "note": "派出的奖项数是从公开数字算出来的：该档位拿出的，减去未派出退回的，再除以奖金金额。只要没有加密结转额跟着进这一期，它就是精确的，而这次部署每个档位每期都对账，所以通常都是精确的。它从不说明派给了谁。"
+    },
+    "thresholds": {
+      "title": "某个地址的阈值",
+      "hint": "读自 thresholdOf",
+      "body": "粘贴任意地址。金库会返回这个地址在这一期每个档位的每一份奖里必须超过的确切权重。把它和那位储户自己解密出来的权重一对，结果就对上了：他的权重严格高于阈值时，他就赢了那份奖。",
+      "fieldName": "要核查的地址",
+      "invalid": "这不是一个有效的以太坊地址。",
+      "notAwarded": "第 {drawId} 期还没有发奖，所以还没有种子，也没有阈值。",
+      "row": "{tier}第 {index} 份奖",
+      "reading": "读取中",
+      "rowFailed": "节点没有为这份奖回应 thresholdOf。这一期本身没有任何变化，变的只是本页对它的视野。",
+      "noCounts": "这一期的奖项数量读不到，所以本页说不出一共有多少个阈值。过一会儿再试。",
+      "outOfRange": "超出范围，因而不可能中",
+      "unit": "余额秒"
+    },
+    "transactions": {
+      "title": "那些交易",
+      "hint": "在 Etherscan 上",
+      "none": "最近几小时的区块里没有这一期的记录。更早的历史在区块浏览器上。",
+      "block": "区块 {block}",
+      "open": "打开资金池",
+      "closed": "已关闭",
+      "awarded": "已发奖",
+      "markedEmpty": "标记为空",
+      "markedSkipped": "标记为跳过",
+      "finalized": "已终结",
+      "reconciled": "档位已对账",
+      "withTier": "{label}（{tier}）"
+    }
+  },
+
+  "lab": {
+    "pill": "实验页",
+    "title": "开奖仪式",
+    "lede": "不从站内链接过来。下面每一个数字都是从 Sepolia 上的合约实时读取的：密封的句柄、密钥管理服务签过名的种子、这一期所针对的区间，以及一个钱包必须超过的确切阈值。",
+    "noPool": "{symbol} 没有可打开的池。",
+    "noPoolBody": "{reason}，所以 Hearth 从没在它上面开过金库。换一种有池的代币。",
+    "noDraw": "还没有已发奖的开奖可以打开。",
+    "noDrawBody": "这个仪式需要一期已经关闭并发过奖的开奖。先从池子里的开奖面板跑一次，再回来。",
+    "drawButton": "第 {drawId} 期",
+    "openSeal": "打开封印",
+    "again": "再跑一次",
+    "stages": {
+      "sealed": "密封",
+      "seed": "种子打开",
+      "bracket": "区间",
+      "thresholds": "阈值落下",
+      "mine": "你自己的结果"
+    },
+    "seals": {
+      "title": "关闭时公布了什么",
+      "hint": "四个句柄，就按这个顺序",
+      "seed": "种子",
+      "scale": "规模计数",
+      "nonEmpty": "非空标志",
+      "harvest": "收割额",
+      "unpublished": "未公布",
+      "note": "资金池按那个顺序把四段明文重新编码，并在链上核验密钥管理服务对这段编码的签名，所以按任何其他顺序索取它们，发奖都会回滚。顺序在这里是合约的一部分，不是图方便。"
+    },
+    "seed": {
+      "title": "种子打开",
+      "note": "它在 Zama 的协处理器内部以密文形式生成，所以摇出时没人看见。周期结束后公布，由密钥管理服务签名，并在这一期允许发生任何其他事情之前，由资金池在链上核验。奖金金额在关闭时就已定死，早于这个数字存在。"
+    },
+    "bracket": {
+      "title": "区间",
+      "unit": "{count} 余额秒",
+      "note": "开奖针对的是刚好大于资金池总权重的那个 2 的幂，从来不是总权重本身。公布确切总额，会让任何人凭两个连续总额加上自己那笔交易的时间戳，解出某位唯一动过钱的储户的存款。"
+    },
+    "thresholds": {
+      "title": "阈值落下",
+      "connectHint": "连接钱包看你自己的",
+      "connectBody": "阈值是按地址算的，而且是公开的。连接钱包，它在这一期每份奖里必须超过的确切数字就会出现在这里，由金库算出，不是由本页算出。",
+      "row": "{tier}第 {index} 份奖",
+      "reading": "读取中",
+      "outOfRange": "超出范围",
+      "note": "超过阈值，这份奖就是你的。这些来自金库自己的视图，也就是当初决定结果的那套算术，所以这里没有第二套实现来跟第一套打架。"
+    },
+    "mine": {
+      "title": "而且只给你",
+      "connectBody": "连接钱包，这张卡片就会填上它被判定时的权重，以及第 {drawId} 期付了它多少，在你的浏览器里解密，别处都不解。",
+      "nothing": "这个钱包在第 {drawId} 期没有任何权重，所以没有属于它自己的东西可打开。只有进了那次遍历的储户，才在这里有权重和入账额。",
+      "weight": "你的权重",
+      "weightUnit": "整个周期的余额秒",
+      "paid": "这一期付了你多少",
+      "paidUnit": "{symbol}，已记入你的中奖余额",
+      "sealAgain": "重新密封",
+      "decrypt": "解密我的结果",
+      "denied": "被拒绝：这些值属于另一个钱包。",
+      "note": "这张卡片上面的一切都是公开的，任何人都能核查。这张卡片不是：它需要拥有这些值的钱包做一次 EIP-712 签名，而 Zama 的访问控制列表会拒绝其他所有人。两段话就是整个产品。"
+    }
+  },
+
+  "docs": {
+    "title": "文档",
+    "kicker": "文档",
+    "heading": "书面记录",
+    "count": "{count, plural, other {共 {shown} 页}}。每一页都是仓库里 <path>docs/</path> 下的一个文件，在这里渲染出来。",
+    "contents": "目录",
+    "close": "关闭",
+    "overview": "总览",
+    "nav": "文档",
+    "search": "搜索文档",
+    "noResults": "没有匹配的内容。",
+    "outline": "本页目录",
+    "nearby": "相邻页面",
+    "previous": "上一页",
+    "next": "下一页",
+    "copy": "复制",
+    "copied": "已复制",
+    "copyManual": "请按 ctrl C",
+    "copyLabel": "复制这一段",
+    "diagramWide": "比栏宽还宽。可以左右滚动。",
+    "diagramFailed": "这张图没画出来。源码在下面。",
+    "rendererFailed": "图表渲染器没加载出来。源码在下面。",
+    "fallbackNote": "这一页还没有翻译，所以显示英文。",
+    "sections": {
+      "reference": "参考",
+      "attackLogs": "攻击记录",
+      "gettingstarted": "入门",
+      "concepts": "概念",
+      "security": "安全",
+      "operations": "运维"
+    }
+  },
+
+  "errors": {
+    "notFound": {
+      "title": "这个地址下没有内容。",
+      "body": "页面移动了，链接打错了，或者里面的代币不是这个版本部署过的。无论哪种情况，资金池都在链上，不受影响。",
+      "home": "回到开头",
+      "pool": "打开资金池",
+      "docs": "阅读文档"
+    },
+    "crashed": {
+      "title": "这个屏幕坏了，钱没坏。",
+      "body": "页面自己抛出了错误。什么都没签，什么都没发，所以你的余额分毫未动。重新加载这个屏幕是安全的。",
+      "digest": "参考编号 {digest}",
+      "home": "回到开头",
+      "retry": "重试这个屏幕"
+    },
+    "unknown": "出了点问题。",
+    "userRejected": "你在钱包里拒绝了这次请求。什么都没有发出。",
+    "signingRejected": "你在钱包里拒绝了这次签名。什么都没有发出。",
+    "notConnected": "请先连接钱包。",
+    "decryptNotConnected": "连接钱包才能解密你自己的数值。",
+    "addressesMissing": "Hearth 的合约地址没有配置，所以什么都发不出去。",
+    "drawNotWaiting": "第 {drawId} 期不在等发奖，所以没有什么可发。",
+    "insufficientAllowance": "包装合约还不能从你的代币里划走这么多。请先授权。",
+    "insufficientErc20": "这个钱包里的普通测试代币不够。先从水龙头铸造一些。",
+    "insufficientConfidential": "机密代币不够。先把普通代币封装一些。",
+    "chainMismatch": "你的钱包和应用不在同一条网络上。请切换到 Sepolia。",
+    "notEntitled": "这个钱包无权读取那个值。它属于另一个地址。",
+    "noCiphertext": "这里还没有加密值，也就是余额为零。",
+    "relayerRateLimited": "Zama 的中继器正在限制这个浏览器的请求频率。等几秒再问一次。",
+    "relayerUnreachable": "连不上 Zama 的中继器。过一会儿再问一次。",
+    "relayerUnreachableStatus": "连不上 Zama 的中继器（HTTP {status}）。过一会儿再问一次。",
+    "rpcRateLimited": "Sepolia 节点正在限制这个浏览器的请求频率。等几秒再问一次。",
+    "noGas": "Sepolia ETH 不够付 gas。任何 Sepolia 水龙头都能补上。",
+    "relayerBehind": "Zama 的中继器还没跟上那个区块。过一会儿再问一次。",
+    "EnforcedPause": "金库已暂停，所以存入和开奖关闭都停了。提取仍然可用。",
+    "NotASaver": "这个钱包从没存入过，所以没有什么可提取。",
+    "NotTheAsset": "只接受这个金库部署时指定的那种机密代币。请封装那种代币再试。",
+    "DrawNotAwarded": "那一期还没有发奖，所以没有什么可评估。先关闭它并发奖。",
+    "EvaluationWindowClosed": "那一期的两周期窗口已经结束。它不能再被评估，也不付任何东西。",
+    "EvaluationWindowOpen": "那一期还能被评估，所以还不能终结。等窗口结束。",
+    "AlreadyFinalized": "那一期已经终结了。它上面没有事情可做了。",
+    "DrawNotOpen": "那一期从没被关闭，所以没有什么可终结。",
+    "AlreadyClosed": "有人先一步关闭了那一期。下一步是为它发奖。",
+    "NothingToClose": "现在没有开奖在等着被关闭。",
+    "CloseWindowClosed": "那一期的关闭截止时间已经过了。它的流动性回到各档位，下一期会再拿出来发。",
+    "WrongStatus": "这笔交易还没落地，开奖已经走到下一步了。重新加载看看它现在在哪一步。",
+    "CarryNotPending": "那个档位没有已公布的结转额在等，所以没有什么可对账。",
+    "InvalidKMSSignatures": "密钥管理服务的签名在链上没有通过核验。请重新索取一次解密。"
+  },
+
+  "format": {
+    "pending": "...",
+    "dust": "<0.01",
+    "now": "现在",
+    "seconds": "{seconds} 秒",
+    "minutesSeconds": "{minutes} 分 {seconds} 秒",
+    "hoursMinutes": "{hours} 小时 {minutes} 分",
+    "agoSeconds": "{count} 秒前",
+    "agoMinutes": "{count} 分钟前",
+    "agoHours": "{count} 小时前",
+    "agoDays": "{count} 天前",
+    "notYet": "尚未",
+    "utc": "{stamp} UTC",
+    "oddsNever": "从不",
+    "oddsEveryDraw": "每期都有",
+    "oddsOneIn": "每 {count} 期 1 次",
+    "balanceSeconds": "余额秒"
+  },
+
+  "meta": {
+    "titleDefault": "Hearth，没人看得见内部的有奖储蓄",
+    "titleTemplate": "{title} | Hearth",
+    "description": "构建在 Zama 协议上的机密无损有奖储蓄。存入、余额和奖金在链上始终加密，奖金由收益开出，中奖概率与你的时间加权余额成正比，本金随时全额取回。",
+    "ogTitle": "Hearth",
+    "ogDescription": "构建在 Zama 协议上的机密无损有奖储蓄。",
+    "how": {
+      "title": "工作原理",
+      "description": "存入一种机密代币，余额保持加密，赢取由收益开出的奖金，中奖概率由你的时间加权余额决定，随时可以提取。"
+    },
+    "verify": {
+      "title": "核查一期开奖",
+      "description": "直接从合约读取一期开奖的种子、区间、收割额和奖金金额，并拿到任意地址必须超过的确切阈值。"
+    },
+    "lab": {
+      "title": "开奖仪式",
+      "description": "一个实验页：密封的种子打开、区间、阈值，以及一位储户自己的结果。"
+    },
+    "docs": {
+      "title": "文档",
+      "description": "一期开奖怎么进行、中奖概率怎么算、奖金从哪来、什么保持私密，以及我们知道的每一处接缝。"
+    },
+    "dashboard": {
+      "title": "{symbol} 仪表盘",
+      "titleFallback": "仪表盘",
+      "description": "这个钱包持有什么、奖池值多少、下一步做什么，而每位储户的金额都在链上加密。"
+    },
+    "deposit": {
+      "title": "存入 {symbol}",
+      "titleFallback": "存入",
+      "description": "领取测试 {underlyingSymbol}，封装成 {symbol}，再存入 Hearth 金库。",
+      "descriptionFallback": "领取测试代币，封装它，再存入 Hearth 金库。"
+    },
+    "withdraw": {
+      "title": "提取 {symbol}",
+      "titleFallback": "提取",
+      "description": "把本金和奖金从 Hearth 金库取出，再把 {symbol} 解封装回 {underlyingSymbol}。",
+      "descriptionFallback": "把本金和奖金从 Hearth 金库取出，再解封装回普通代币。"
+    },
+    "draws": {
+      "title": "我的开奖",
+      "description": "最近每一期开奖付了多少、付了你多少，而你的权重和奖金在你打开之前一直加密。"
+    },
+    "run": {
+      "title": "跑一次开奖",
+      "description": "关闭、发奖、推进、终结、对账。Hearth 开奖的每一步任何钱包都能调用。"
+    }
+  }
+}

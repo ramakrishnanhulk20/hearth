@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import {
   ActionNote,
@@ -12,18 +13,17 @@ import {
   SealedLine,
   type ActionNoteProps,
 } from "@/components/app/console";
-import { PROBLEMS, exactAmount } from "@/components/app/amount";
+import { problemText, exactAmount } from "@/components/app/amount";
 import type { TokenSymbols } from "@/components/app/useTokenSymbols";
-import { formatAmount, parseAmount } from "@/lib/format";
+import { parseAmount } from "@/lib/format";
+import { useFormat } from "@/hooks/useFormat";
+import { useErrorText } from "@/hooks/useErrorText";
 import type { HearthConfig, SaverState } from "@/hooks/useHearth";
-import type { Reveal } from "@/hooks/useReveal";
+import { WALLET_SCOPE, type Reveal } from "@/hooks/useReveal";
 import type { useUnshield } from "@/hooks/useUnshield";
 
-/** The wallet's own confidential USDC, which is a different balance from the one in the vault. */
-const WALLET_SCOPE = "wallet-confidential";
-
 /**
- * Stage two: confidential USDC back to the plain ERC-20.
+ * Stage two: the confidential token back to the plain ERC-20.
  *
  * Two transactions and one signature, and the amount ends up on chain in the clear. The screen
  * says so before the first prompt rather than after it, because a saver who did not expect a
@@ -44,18 +44,29 @@ export function UnshieldStage({
   symbols: TokenSymbols;
   refresh: () => void;
 }) {
+  const t = useTranslations("withdraw.unshield");
+  const amountWords = useTranslations("console.amount");
+  const format = useFormat();
+  const errorText = useErrorText();
   const [input, setInput] = useState("");
 
   const wallet = reveal.scope(WALLET_SCOPE);
   const held = wallet.read(saver.confidentialHandle);
 
-  const amount = parseAmount(input);
+  const amount = parseAmount(input, config.decimals);
   const overHeld = amount.ok && held !== null && amount.value > held;
 
   const problem = (() => {
-    if (!amount.ok) return amount.reason === "empty" ? null : PROBLEMS[amount.reason];
+    if (!amount.ok) {
+      return amount.reason === "empty"
+        ? null
+        : problemText(amount.reason, config.decimals, symbols.confidential, amountWords);
+    }
     if (overHeld && held !== null) {
-      return `You hold ${formatAmount(held)} confidential USDC. Asking for more is not refused on chain: it spends both transactions and moves nothing.`;
+      return t("tooMuch", {
+        amount: format.amount(held, config.decimals),
+        confidential: symbols.confidential,
+      });
     }
     return null;
   })();
@@ -73,46 +84,55 @@ export function UnshieldStage({
       case "idle":
         return { tone: "working", text: null };
       case "unwrapping":
-        return {
-          tone: "working",
-          text: "Unshield: your wallet asks twice. First for a signature so the wrapper can read your confidential balance, which costs no gas, then for the transaction itself.",
-        };
+        return { tone: "working", text: t("unwrapping") };
       case "waiting":
-        return {
-          tone: "working",
-          text: "Unshield submitted. Waiting for Zama's protocol to publish the cleartext and its proof.",
-        };
+        return { tone: "working", text: t("waiting") };
       case "finalizing":
-        return {
-          tone: "working",
-          text: "Finalizing: confirm the second transaction to release the plain USDC.",
-        };
+        return { tone: "working", text: t("finalizing", { underlying: symbols.underlying }) };
       case "done":
+        // The transaction succeeded either way. Whether any money moved is a different question,
+        // and the wrapper answers it by releasing nothing when the ask was above the balance.
+        if (stage.moved === 0n) {
+          return {
+            tone: "bad",
+            text: t("nothingMoved", { underlying: symbols.underlying }),
+            hash: stage.hash,
+            onDismiss: unshield.dismiss,
+          };
+        }
         return {
           tone: "good",
-          text: "Unshielded. The plain USDC is back in your wallet.",
+          text:
+            stage.moved === null
+              ? t("doneUnchecked", { underlying: symbols.underlying })
+              : t("done", {
+                  underlying: symbols.underlying,
+                  amount: format.amount(stage.moved, config.underlyingDecimals),
+                }),
           hash: stage.hash,
           onDismiss: unshield.dismiss,
         };
       case "failed":
-        return { tone: "bad", text: stage.error.message, onDismiss: unshield.dismiss };
+        return { tone: "bad", text: errorText(stage.error), onDismiss: unshield.dismiss };
     }
   })();
 
   return (
     <div className="flex flex-col gap-4">
       <AmountCard
-        label="You unshield"
-        name="Amount of confidential USDC to unshield"
+        label={t("youUnshield")}
+        name={t("fieldName", { confidential: symbols.confidential })}
         value={input}
         onChange={setInput}
         token={symbols.confidential}
         balance={
           <SealedLine
-            label="In your wallet"
-            spoken="your confidential USDC balance"
+            label={t("inWallet")}
+            spoken={t("inWalletSpoken", { confidential: symbols.confidential })}
             scope={wallet}
             amount={held}
+            unit={symbols.confidential}
+            decimals={config.decimals}
             disabled={!ready}
             onReveal={() => {
               if (!config.asset) return;
@@ -120,23 +140,19 @@ export function UnshieldStage({
             }}
           />
         }
-        note={
-          wallet.open
-            ? null
-            : "Reveal to cap this field. An unshield of more than you hold is not refused, it just moves nothing."
-        }
-        onMax={held !== null ? () => setInput(exactAmount(held)) : undefined}
-        maxLabel="All of it"
+        note={wallet.open ? null : t("revealNote")}
+        onMax={held !== null ? () => setInput(exactAmount(held, config.decimals)) : undefined}
+        maxLabel={amountWords("allOfIt")}
         disabled={blocked}
         problem={problem}
       />
 
       <ReceiveCard
-        label="You receive"
-        token={symbols.usdc}
-        value={amount.ok && !overHeld ? formatAmount(amount.value) : null}
-        balance="Plain USDC in your wallet, spendable anywhere."
-        note="This figure goes on chain in the clear. The first of the two transactions is what publishes it."
+        label={t("youReceive")}
+        token={symbols.underlying}
+        value={amount.ok && !overHeld ? format.amount(amount.value, config.decimals) : null}
+        balance={t("receiveBalance", { underlying: symbols.underlying })}
+        note={t("receiveNote")}
       />
 
       <PrimaryButton
@@ -150,35 +166,18 @@ export function UnshieldStage({
           })
         }
       >
-        Unshield
+        {t("button")}
       </PrimaryButton>
 
-      {unfinished && (
-        <p className={CARD_NOTE}>
-          A new unshield has to wait until the one above is finished. Only one is remembered at a time,
-          and starting another would leave the first with its tokens burned and nothing to release them.
-        </p>
-      )}
+      {unfinished && <p className={CARD_NOTE}>{t("unfinished")}</p>}
 
       <ActionNote {...note} />
 
-      <Card label="Why this takes two transactions">
+      <Card label={t("whyLabel")}>
         <div className={`space-y-3 ${CARD_PROSE}`}>
-          <p>
-            The wrapper burns the encrypted amount and publishes it first, then releases the plain
-            tokens once Zama&apos;s protocol has produced the cleartext and its proof. Those are two
-            separate calls, and the second one can be sent later if you close the tab between them.
-          </p>
-          <p>
-            Your wallet also asks for a signature before the first transaction, because the wrapper
-            reads your confidential balance to check the amount. That prompt is a signature and not a
-            transaction, and it costs no gas.
-          </p>
-          <p>
-            Worth knowing before you empty it: shield in and unshield out in full, and the difference
-            between the two public totals is a lower bound on everything you have ever won. Unshield in
-            round numbers, or leave a standing confidential balance behind.
-          </p>
+          <p>{t("whyOne")}</p>
+          <p>{t("whyTwo")}</p>
+          <p>{t("whyThree")}</p>
         </div>
       </Card>
     </div>

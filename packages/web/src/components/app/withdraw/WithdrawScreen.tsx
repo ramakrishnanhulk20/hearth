@@ -1,7 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { CARD_PROSE, ConnectPrompt, INLINE_LINK, PrimaryButton } from "@/components/app/console";
+import { CARD_PROSE, ConnectPrompt, INLINE_LINK, PageHeader, PrimaryButton } from "@/components/app/console";
 import { useTokenSymbols } from "@/components/app/useTokenSymbols";
 import { txUrl } from "@/lib/chain/addresses";
 import { useActions } from "@/hooks/useActions";
@@ -20,6 +21,7 @@ import { VaultStage } from "./VaultStage";
  * never on screen together is what keeps the second one from being clicked by momentum.
  */
 export function WithdrawScreen() {
+  const t = useTranslations("withdraw");
   const config = useHearthConfig();
   const pool = usePoolState();
   const saver = useSaverState(config);
@@ -43,27 +45,37 @@ export function WithdrawScreen() {
     (draw) => draw.known && (draw.status === "none" || draw.status === "closed" || draw.status === "awarded"),
   );
 
+  const header = (
+    <PageHeader
+      title={t("title")}
+      subtitle={t("subtitle", { underlying: symbols.underlying })}
+    />
+  );
+
   if (!saver.connected) {
     return (
-      <ConnectPrompt note="Nothing here is ever locked. Principal comes back in full whenever you ask, including in the middle of a draw.">
-        Connect a wallet to withdraw. Stage one takes principal and winnings out of the vault, stage
-        two turns confidential USDC back into the plain kind.
-      </ConnectPrompt>
+      <>
+        {header}
+        <ConnectPrompt note={t("connectNote")}>
+          {t("connect", {
+            confidential: symbols.confidential,
+            underlying: symbols.underlying,
+          })}
+        </ConnectPrompt>
+      </>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
+      {header}
       {unshield.pending && (
         <div className="panel-glare rounded-card border border-warn/45 bg-warn/[0.08] px-5 py-5 sm:px-6">
-          <p className="text-[13.5px] font-semibold text-parchment">
-            An unshield was submitted and never finished.
-          </p>
+          <p className="text-[13.5px] font-semibold text-parchment">{t("pending.title")}</p>
           <p className={`mt-1.5 ${CARD_PROSE}`}>
-            The confidential tokens are already burned and the plain USDC is waiting on the wrapper.
-            Sending the second transaction releases it.{" "}
+            {t("pending.body", { underlying: symbols.underlying })}
             <a href={txUrl(unshield.pending)} target="_blank" rel="noopener noreferrer" className={INLINE_LINK}>
-              See the unshield
+              {t("pending.link")}
             </a>
           </p>
           <div className="mt-4">
@@ -77,7 +89,7 @@ export function WithdrawScreen() {
                 void unshield.resume(refresh);
               }}
             >
-              Finish the unshield
+              {t("pending.finish")}
             </PrimaryButton>
           </div>
         </div>

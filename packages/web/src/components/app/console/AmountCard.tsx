@@ -49,15 +49,15 @@ function FieldCard({
 /**
  * An amount somebody types.
  *
- * The input is the app's existing AmountField in its plain skin, so the six decimal checks, the
- * error line and the accessible name are the same ones the old panels used.
+ * The input is the app's existing AmountField in its plain skin, so the decimal checks, the error
+ * line and the accessible name are the same ones the old panels used.
  */
 export function AmountCard({
   label,
   name,
   value,
   onChange,
-  token = "USDC",
+  token,
   onTokenClick,
   balance,
   note,
@@ -72,7 +72,8 @@ export function AmountCard({
   name: string;
   value: string;
   onChange: (next: string) => void;
-  token?: string;
+  /** The ticker on the pill. Always the pool's own, never a default typed into this file. */
+  token: string;
   /** Set only when the token can actually be changed. The chevron follows this, not decoration. */
   onTokenClick?: () => void;
   /** The muted line under the figure. Say "unknown" here rather than zero when nothing has read. */

@@ -1,21 +1,27 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/app/console";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { WithdrawScreen } from "@/components/app/withdraw/WithdrawScreen";
+import { findPool } from "@/lib/chain/pools";
+import { alternates } from "@/lib/hreflang";
 
-export const metadata: Metadata = {
-  title: "Withdraw",
-  description:
-    "Take principal and winnings out of the Hearth vault, then unshield confidential USDC back into plain USDC.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; pool: string }>;
+}): Promise<Metadata> {
+  const { locale, pool } = await params;
+  const entry = findPool(pool);
+  const t = await getTranslations({ locale, namespace: "meta.withdraw" });
+  return {
+    title: entry ? t("title", { symbol: entry.symbol }) : t("titleFallback"),
+    description: entry
+      ? t("description", { symbol: entry.symbol, underlyingSymbol: entry.underlyingSymbol })
+      : t("descriptionFallback"),
+    alternates: alternates(`/app/${pool}/withdraw`, locale),
+  };
+}
 
-export default function WithdrawPage() {
-  return (
-    <>
-      <PageHeader
-        title="Withdraw"
-        subtitle="Two stages: out of the vault, then back into plain USDC. Principal is never locked, including in the middle of a draw."
-      />
-      <WithdrawScreen />
-    </>
-  );
+export default async function WithdrawPage({ params }: { params: Promise<{ locale: string }> }) {
+  setRequestLocale((await params).locale);
+  return <WithdrawScreen />;
 }

@@ -18,7 +18,10 @@
 
     --text: rgba(255, 255, 255, 0.82);
     --muted: rgba(255, 255, 255, 0.54);
-    --faint: rgba(255, 255, 255, 0.34);
+    /* The faintest weight still carries reading text off the console: the landing nav, the Verify
+       row labels, the docs captions. At 0.34 it measured 2.89:1 on this ground, under the bar for
+       any of them, so it sits at the same 0.46 the console uses and clears 4.5:1. */
+    --faint: rgba(255, 255, 255, 0.46);
 
     --flame: 249 209 0;
     --flame-fill: 249 209 0;
@@ -66,12 +69,11 @@
        still well under the 0.88 a revealed figure carries. */
     --seal: rgba(255, 255, 255, 0.34);
 
-    /* All three text weights lift. Grey that reads on white goes dim on black, and these carry
-       13.5px prose, 12.5px caveats and 11px labels rather than a hero line. At these values even
-       the faintest clears 4.5:1 against the card. */
+    /* Both upper text weights lift again. Grey that reads on white goes dim on black, and these
+       carry 13.5px prose, 12.5px caveats and 11px labels rather than a hero line. The faintest is
+       already at the value it needs and is inherited from :root. */
     --text: rgba(255, 255, 255, 0.88);
     --muted: rgba(255, 255, 255, 0.62);
-    --faint: rgba(255, 255, 255, 0.46);
 
     /* The landing's red lands at 4:1 on the console card, under the bar for the 12.5px error
        lines this surface prints. Lifted until it clears it. */
@@ -100,6 +102,16 @@
 
   html {
     scroll-behavior: auto;
+  }
+
+  /*
+   * Chinese, Japanese and Tamil display type needs more room than the 0.9 to 1.02 leadings the
+   * English headings are set in: the tall marks in those scripts clip against the line above.
+   * The locale layout sets --display-leading and this attribute only where that is true, so
+   * English, and every other Latin locale, is not touched by a single declaration here.
+   */
+  html[data-loose-display] :is(h1, h2, h3, .font-display) {
+    line-height: var(--display-leading);
   }
 
   body {
@@ -173,8 +185,19 @@
    */
   .ember-lit {
     position: relative;
+    /* The wash runs along the reading direction, so on an Arabic page it falls away from the bar
+       on the right rather than towards it. */
     background-image: linear-gradient(
-      90deg,
+      to right,
+      rgb(var(--flame) / 0.15),
+      rgb(var(--flame) / 0.04) 58%,
+      transparent
+    );
+  }
+
+  [dir="rtl"] .ember-lit {
+    background-image: linear-gradient(
+      to left,
       rgb(var(--flame) / 0.15),
       rgb(var(--flame) / 0.04) 58%,
       transparent
@@ -184,11 +207,12 @@
   .ember-lit::before {
     content: "";
     position: absolute;
-    left: 0;
+    inset-inline-start: 0;
     top: 6px;
     bottom: 6px;
     width: 2px;
-    border-radius: 0 2px 2px 0;
+    border-start-end-radius: 2px;
+    border-end-end-radius: 2px;
     background: rgb(var(--flame));
     box-shadow: 0 0 10px 1px rgb(var(--flame) / 0.5);
   }
@@ -228,6 +252,49 @@
 .flame-core {
   transform-origin: center;
   animation: flame-flicker 1.15s ease-in-out infinite;
+}
+
+/* The spark on the landing's scroll cue, travelling along its rule and starting over. */
+@keyframes scroll-spark {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(280%);
+    opacity: 0;
+  }
+}
+
+.scroll-spark {
+  animation: scroll-spark 2.4s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+[dir="rtl"] .scroll-spark {
+  animation-name: scroll-spark-rtl;
+}
+
+@keyframes scroll-spark-rtl {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-280%);
+    opacity: 0;
+  }
 }
 
 @keyframes fade-rise {

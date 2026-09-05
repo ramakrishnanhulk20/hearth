@@ -28,7 +28,7 @@
 
 .docs-rail {
   display: none;
-  border-right: 1px solid var(--hairline-soft);
+  border-inline-end: 1px solid var(--hairline-soft);
 }
 
 @media (min-width: 1024px) {
@@ -121,7 +121,7 @@
 .docs-nav-link[data-active="true"]::before {
   content: "";
   position: absolute;
-  left: -1.25rem;
+  inset-inline-start: -1.25rem;
   top: 50%;
   height: 15px;
   width: 2px;
@@ -163,7 +163,7 @@
 
 .docs-search-key {
   position: absolute;
-  right: 0.5rem;
+  inset-inline-end: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -185,7 +185,7 @@
   display: block;
   border-radius: 7px;
   padding: 0.45rem 0.75rem;
-  text-align: left;
+  text-align: start;
   transition: background-color 0.15s ease;
 }
 
@@ -271,11 +271,12 @@
 
 .docs-drawer-panel {
   position: absolute;
-  inset: 0 auto 0 0;
+  inset-block: 0;
+  inset-inline-start: 0;
   width: min(20rem, 86vw);
   overflow-y: auto;
   overscroll-behavior: contain;
-  border-right: 1px solid var(--hairline);
+  border-inline-end: 1px solid var(--hairline);
   background: #060606;
   padding: 1rem 1.1rem 3rem 1.1rem;
   animation: docs-slide 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -350,16 +351,17 @@
 
 .docs-outline-list {
   margin-top: 0.75rem;
-  border-left: 1px solid var(--hairline-soft);
+  border-inline-start: 1px solid var(--hairline-soft);
   display: flex;
   flex-direction: column;
 }
 
 .docs-outline-link {
   display: block;
-  border-left: 1px solid transparent;
-  margin-left: -1px;
-  padding: 0.3rem 0 0.3rem 0.85rem;
+  border-inline-start: 1px solid transparent;
+  margin-inline-start: -1px;
+  padding-block: 0.3rem;
+  padding-inline: 0.85rem 0;
   font-size: 12.5px;
   line-height: 1.45;
   color: var(--faint);
@@ -369,7 +371,7 @@
 }
 
 .docs-outline-link[data-depth="3"] {
-  padding-left: 1.65rem;
+  padding-inline-start: 1.65rem;
   font-size: 12px;
 }
 
@@ -379,7 +381,7 @@
 
 .docs-outline-link[data-active="true"] {
   color: rgb(var(--flame));
-  border-left-color: rgb(var(--flame));
+  border-inline-start-color: rgb(var(--flame));
 }
 
 /* ---------- prose ---------- */
@@ -449,7 +451,7 @@ h6.doc-heading {
 
 .doc-anchor {
   position: absolute;
-  left: -1.25rem;
+  inset-inline-start: -1.25rem;
   top: 0;
   bottom: 0;
   display: none;
@@ -473,7 +475,7 @@ h2.doc-heading .doc-anchor {
 .doc-prose ul,
 .doc-prose ol {
   margin: 1.15rem 0;
-  padding-left: 1.35rem;
+  padding-inline-start: 1.35rem;
 }
 
 .doc-prose ul {
@@ -487,7 +489,7 @@ h2.doc-heading .doc-anchor {
 .doc-prose ul > li::before {
   content: "";
   position: absolute;
-  left: -1.05rem;
+  inset-inline-start: -1.05rem;
   top: 0.72em;
   height: 5px;
   width: 5px;
@@ -528,7 +530,7 @@ h2.doc-heading .doc-anchor {
 
 .doc-link-out::after {
   content: "\2197";
-  margin-left: 0.2em;
+  margin-inline-start: 0.2em;
   font-size: 0.82em;
   color: var(--faint);
 }
@@ -581,7 +583,7 @@ h2.doc-heading .doc-anchor {
 }
 
 .doc-scroll th {
-  text-align: left;
+  text-align: start;
   font-weight: 500;
   font-size: 10.5px;
   letter-spacing: 0.14em;
@@ -652,7 +654,7 @@ h2.doc-heading .doc-anchor {
 .doc-copy {
   position: absolute;
   top: 0.5rem;
-  right: 0.5rem;
+  inset-inline-end: 0.5rem;
   z-index: 2;
   border: 1px solid var(--hairline);
   border-radius: 6px;
@@ -734,7 +736,7 @@ h2.doc-heading .doc-anchor {
 
 .doc-diagram-source {
   display: none;
-  text-align: left;
+  text-align: start;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 12px;
   line-height: 1.6;
@@ -810,5 +812,28 @@ h2.doc-heading .doc-anchor {
 }
 
 .docs-neighbour[data-side="next"] {
-  text-align: right;
+  text-align: end;
+}
+
+/*
+ * The line at the top of a page a translator has not reached yet.
+ *
+ * It sits above the prose rather than beside it, because a reader who cannot read English needs to
+ * know before the first paragraph, not after the last one. The ember rather than the flame: it is
+ * a fact about the page, not a control on it.
+ */
+.docs-fallback {
+  margin-top: 1.5rem;
+  border-inline-start: 2px solid rgb(var(--ember) / 0.6);
+  background: linear-gradient(to right, rgb(var(--ember) / 0.09), transparent 70%);
+  padding: 0.7rem 0.95rem;
+  border-start-end-radius: 8px;
+  border-end-end-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+[dir="rtl"] .docs-fallback {
+  background: linear-gradient(to left, rgb(var(--ember) / 0.09), transparent 70%);
 }

@@ -4,7 +4,15 @@ import { matchZamaError } from "@zama-fhe/sdk";
 export type Remedy = "approve" | "faucet" | "wrap" | "switch" | "connect" | "retry" | "none";
 
 export type RoutedError = {
-  message: string;
+  /**
+   * A key in the `errors` namespace. Null only where the failure has no sentence of ours, which is
+   * the unrecognised case: then `raw` carries whatever the stack said, in whatever language it
+   * said it.
+   */
+  key: string | null;
+  values?: Record<string, string | number>;
+  /** The original first line, kept for the unrecognised case and for callers that match on it. */
+  raw: string;
   remedy: Remedy;
   /** True when nothing is wrong with the request and asking again is the whole fix. */
   retryable: boolean;
@@ -33,6 +41,13 @@ function text(error: unknown): string {
     })
     .join(" ")
     .toLowerCase();
+}
+
+function firstLine(error: unknown): string {
+  const raw =
+    (error as { shortMessage?: string })?.shortMessage ??
+    (error instanceof Error ? error.message.split("\n")[0] : String(error));
+  return raw.length > 180 ? `${raw.slice(0, 177)}...` : raw;
 }
 
 /**
@@ -73,87 +88,51 @@ export function isUserRejection(error: unknown): boolean {
   );
 }
 
-/** Contract reverts a saver can actually hit, each answered with what to do next. */
-const REVERTS: Record<string, RoutedError> = {
-  EnforcedPause: {
-    message: "The vault is paused, so deposits and draw closing are stopped. Withdrawing still works.",
-    remedy: "none",
-    retryable: false,
-  },
-  NotASaver: {
-    message: "This wallet has never deposited, so there is nothing to withdraw.",
-    remedy: "none",
-    retryable: false,
-  },
-  NotTheAsset: {
-    message: "Only the confidential USDC the vault was deployed with is accepted. Wrap that token and try again.",
-    remedy: "wrap",
-    retryable: false,
-  },
-  DrawNotAwarded: {
-    message: "That draw has not been awarded yet, so there is nothing to evaluate. Close and award it first.",
-    remedy: "none",
-    retryable: false,
-  },
-  EvaluationWindowClosed: {
-    message: "That draw's two-period window is over. It can no longer be evaluated, and it pays nothing.",
-    remedy: "none",
-    retryable: false,
-  },
-  EvaluationWindowOpen: {
-    message: "That draw can still be evaluated, so it cannot be finalized yet. Wait for the window to end.",
-    remedy: "none",
-    retryable: false,
-  },
-  AlreadyFinalized: {
-    message: "That draw is already finalized. There is nothing left to do on it.",
-    remedy: "none",
-    retryable: false,
-  },
-  DrawNotOpen: {
-    message: "That draw was never closed, so there is nothing to finalize.",
-    remedy: "none",
-    retryable: false,
-  },
-  AlreadyClosed: {
-    message: "Somebody closed that draw first. Its award is the next step.",
-    remedy: "none",
-    retryable: false,
-  },
-  NothingToClose: {
-    message: "No draw is waiting to be closed right now.",
-    remedy: "none",
-    retryable: false,
-  },
-  CloseWindowClosed: {
-    message: "The closing deadline for that draw has passed. Its liquidity goes back to the tiers and the next draw offers it again.",
-    remedy: "none",
-    retryable: false,
-  },
-  WrongStatus: {
-    message: "The draw moved on before this transaction landed. Reload and look at where it is now.",
-    remedy: "retry",
-    retryable: true,
-  },
-  CarryNotPending: {
-    message: "That tier has no published carry waiting, so there is nothing to reconcile.",
-    remedy: "none",
-    retryable: false,
-  },
-  InvalidKMSSignatures: {
-    message: "The key management service signature did not verify on chain. Ask for the decryption again.",
-    remedy: "retry",
-    retryable: true,
-  },
+/**
+ * Contract reverts a saver can actually hit, each answered with what to do next.
+ *
+ * The custom error's own name is the message key, so a new revert in the contracts needs one line
+ * here and one line in every message file rather than a second naming scheme in between.
+ */
+const REVERTS: Record<string, { remedy: Remedy; retryable: boolean }> = {
+  EnforcedPause: { remedy: "none", retryable: false },
+  NotASaver: { remedy: "none", retryable: false },
+  NotTheAsset: { remedy: "wrap", retryable: false },
+  DrawNotAwarded: { remedy: "none", retryable: false },
+  EvaluationWindowClosed: { remedy: "none", retryable: false },
+  EvaluationWindowOpen: { remedy: "none", retryable: false },
+  AlreadyFinalized: { remedy: "none", retryable: false },
+  DrawNotOpen: { remedy: "none", retryable: false },
+  AlreadyClosed: { remedy: "none", retryable: false },
+  NothingToClose: { remedy: "none", retryable: false },
+  CloseWindowClosed: { remedy: "none", retryable: false },
+  WrongStatus: { remedy: "retry", retryable: true },
+  CarryNotPending: { remedy: "none", retryable: false },
+  InvalidKMSSignatures: { remedy: "retry", retryable: true },
 };
 
-function revertName(error: unknown): string | null {
+/**
+ * Refusals the app raises itself before anything is signed, tagged on the thrown error with the
+ * same `errorName` field viem uses for a contract revert, so one lookup covers both.
+ */
+const APP_REFUSALS: Record<string, Remedy> = {
+  addressesMissing: "none",
+  drawNotWaiting: "none",
+};
+
+function taggedName(error: unknown): { name: string; node: Record<string, unknown> } | null {
   for (const node of chain(error)) {
     const data = node["data"] as { errorName?: unknown } | undefined;
-    if (data && typeof data.errorName === "string") return data.errorName;
+    if (data && typeof data.errorName === "string") return { name: data.errorName, node };
     const name = node["errorName"];
-    if (typeof name === "string") return name;
+    if (typeof name === "string") return { name, node };
   }
+  return null;
+}
+
+function revertName(error: unknown): string | null {
+  const tagged = taggedName(error);
+  if (tagged) return tagged.name;
   const lowered = text(error);
   for (const key of Object.keys(REVERTS)) {
     if (lowered.includes(key.toLowerCase())) return key;
@@ -162,43 +141,49 @@ function revertName(error: unknown): string | null {
 }
 
 /**
- * Turns anything thrown by the SDK, viem or a contract into one sentence and one thing to do.
+ * Turns anything thrown by the SDK, viem or a contract into one message key and one thing to do.
  * The SDK's own codes are matched first, because they carry the remedy the SDK already worked out.
+ *
+ * Nothing here returns a sentence. The screen that shows the failure is the one that knows what
+ * language it is in, so this names the sentence and lets that screen say it.
  */
 export function routeError(error: unknown): RoutedError {
+  const raw = firstLine(error);
+
   if (isUserRejection(error)) {
-    return { message: "You turned the request down in your wallet. Nothing was sent.", remedy: "none", retryable: false };
+    return { key: "userRejected", raw, remedy: "none", retryable: false };
   }
 
   const matched = matchZamaError<RoutedError>(error, {
     INSUFFICIENT_ALLOWANCE: () => ({
-      message: "The wrapper is not allowed to take that many USDC yet. Approve it first.",
+      key: "insufficientAllowance",
+      raw,
       remedy: "approve",
       retryable: false,
     }),
     INSUFFICIENT_ERC20_BALANCE: () => ({
-      message: "Not enough test USDC in this wallet. Mint some from the faucet.",
+      key: "insufficientErc20",
+      raw,
       remedy: "faucet",
       retryable: false,
     }),
     INSUFFICIENT_CONFIDENTIAL_BALANCE: () => ({
-      message: "Not enough confidential USDC. Wrap some plain USDC first.",
+      key: "insufficientConfidential",
+      raw,
       remedy: "wrap",
       retryable: false,
     }),
-    CHAIN_MISMATCH: () => ({
-      message: "Your wallet is on a different network from the app. Switch it to Sepolia.",
-      remedy: "switch",
-      retryable: false,
-    }),
+    CHAIN_MISMATCH: () => ({ key: "chainMismatch", raw, remedy: "switch", retryable: false }),
     NOT_ENTITLED: () => ({
-      message: "This wallet is not allowed to read that value. It belongs to a different address.",
+      key: "notEntitled",
+      raw,
       remedy: "none",
       retryable: false,
       code: "NOT_ENTITLED",
     }),
     NO_CIPHERTEXT: () => ({
-      message: "There is no encrypted value here yet, which means a balance of zero.",
+      key: "noCiphertext",
+      raw,
       remedy: "none",
       retryable: false,
       code: "NO_CIPHERTEXT",
@@ -206,63 +191,41 @@ export function routeError(error: unknown): RoutedError {
     RELAYER_REQUEST_FAILED: (relayerError) => {
       const status = (relayerError as unknown as { status?: number }).status;
       if (status === 429) {
-        return {
-          message: "Zama's relayer is rate limiting this browser. Wait a few seconds and ask again.",
-          remedy: "retry",
-          retryable: true,
-        };
+        return { key: "relayerRateLimited", raw, remedy: "retry", retryable: true };
       }
-      return {
-        message: `Zama's relayer could not be reached${status ? ` (HTTP ${status})` : ""}. Ask again in a moment.`,
-        remedy: "retry",
-        retryable: true,
-      };
+      return status
+        ? { key: "relayerUnreachableStatus", values: { status }, raw, remedy: "retry", retryable: true }
+        : { key: "relayerUnreachable", raw, remedy: "retry", retryable: true };
     },
-    RPC_RATE_LIMITED: () => ({
-      message: "The Sepolia node is rate limiting this browser. Wait a few seconds and ask again.",
-      remedy: "retry",
-      retryable: true,
-    }),
-    SIGNING_REJECTED: () => ({
-      message: "You turned the signature down in your wallet. Nothing was sent.",
-      remedy: "none",
-      retryable: false,
-    }),
-    WALLET_NOT_CONNECTED: () => ({
-      message: "Connect a wallet first.",
-      remedy: "connect",
-      retryable: false,
-    }),
-    SIGNER_NOT_CONFIGURED: () => ({
-      message: "Connect a wallet first.",
-      remedy: "connect",
-      retryable: false,
-    }),
+    RPC_RATE_LIMITED: () => ({ key: "rpcRateLimited", raw, remedy: "retry", retryable: true }),
+    SIGNING_REJECTED: () => ({ key: "signingRejected", raw, remedy: "none", retryable: false }),
+    WALLET_NOT_CONNECTED: () => ({ key: "notConnected", raw, remedy: "connect", retryable: false }),
+    SIGNER_NOT_CONFIGURED: () => ({ key: "notConnected", raw, remedy: "connect", retryable: false }),
   });
   if (matched) return matched;
 
-  const name = revertName(error);
-  if (name && REVERTS[name]) return REVERTS[name];
-
-  const lowered = text(error);
-  if (lowered.includes("insufficient funds")) {
+  const tagged = taggedName(error);
+  if (tagged && APP_REFUSALS[tagged.name]) {
+    const drawId = tagged.node["drawId"];
     return {
-      message: "Not enough Sepolia ETH to pay for gas. Any Sepolia faucet tops it up.",
-      remedy: "none",
+      key: tagged.name,
+      values: typeof drawId === "number" ? { drawId } : undefined,
+      raw,
+      remedy: APP_REFUSALS[tagged.name],
       retryable: false,
     };
   }
+
+  const name = revertName(error);
+  if (name && REVERTS[name]) return { key: name, raw, ...REVERTS[name] };
+
+  const lowered = text(error);
+  if (lowered.includes("insufficient funds")) {
+    return { key: "noGas", raw, remedy: "none", retryable: false };
+  }
   if (isNotReadyYet(error)) {
-    return {
-      message: "Zama's relayer has not caught up with that block yet. Ask again in a moment.",
-      remedy: "retry",
-      retryable: true,
-    };
+    return { key: "relayerBehind", raw, remedy: "retry", retryable: true };
   }
 
-  const raw =
-    (error as { shortMessage?: string })?.shortMessage ??
-    (error instanceof Error ? error.message.split("\n")[0] : String(error));
-  const trimmed = raw.length > 180 ? `${raw.slice(0, 177)}...` : raw;
-  return { message: trimmed || "Something went wrong.", remedy: "retry", retryable: false };
+  return { key: null, raw: raw || "", remedy: "retry", retryable: false };
 }

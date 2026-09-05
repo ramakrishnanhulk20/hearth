@@ -1,15 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef, type KeyboardEvent } from "react";
 
 export type Stage = "vault" | "unshield";
 
 const ORDER: Stage[] = ["vault", "unshield"];
-
-const TITLE: Record<Stage, string> = {
-  vault: "Out of the vault",
-  unshield: "Back to plain USDC",
-};
 
 export const tabId = (stage: Stage) => `withdraw-tab-${stage}`;
 export const panelId = (stage: Stage) => `withdraw-panel-${stage}`;
@@ -31,14 +27,20 @@ export function StageTabs({
   /** A stage with something unfinished waiting in it. Used for an unshield that was never finalized. */
   alert?: Stage | null;
 }) {
+  const t = useTranslations("withdraw.tabs");
   const tabs = useRef<Partial<Record<Stage, HTMLButtonElement | null>>>({});
 
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     const index = ORDER.indexOf(stage);
+    // The arrow that moves forward is the one that points along the reading direction, so on an
+    // Arabic page the left arrow goes to the next tab rather than back to the previous one.
+    const rtl = typeof document !== "undefined" && document.dir === "rtl";
+    const forward = rtl ? "ArrowLeft" : "ArrowRight";
+    const back = rtl ? "ArrowRight" : "ArrowLeft";
     const next =
-      event.key === "ArrowRight"
+      event.key === forward
         ? ORDER[(index + 1) % ORDER.length]
-        : event.key === "ArrowLeft"
+        : event.key === back
           ? ORDER[(index + ORDER.length - 1) % ORDER.length]
           : event.key === "Home"
             ? ORDER[0]
@@ -54,7 +56,7 @@ export function StageTabs({
   return (
     <div
       role="tablist"
-      aria-label="Withdraw stages"
+      aria-label={t("label")}
       className="flex gap-1 rounded-xl border border-hairline bg-raised p-1"
     >
       {ORDER.map((key, index) => {
@@ -89,10 +91,10 @@ export function StageTabs({
             >
               {index + 1}
             </span>
-            <span className="min-w-0 truncate">{TITLE[key]}</span>
+            <span className="min-w-0 truncate">{t(key)}</span>
             {alert === key && (
               <>
-                <span className="sr-only">has something unfinished</span>
+                <span className="sr-only">{t("unfinished")}</span>
                 <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
               </>
             )}
