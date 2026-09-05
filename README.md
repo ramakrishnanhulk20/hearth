@@ -774,11 +774,11 @@ symbol, the decimals and its `KEEPER_ACCOUNT_INDEX`: `usdc` 1, `usdt` 10, `weth`
 12, `zama` 13, `tgbp` 14, `xaut` 15. `KEEPER_NAME` is the tag every log line carries, so
 seven interleaved logs stay readable.
 
-The pm2 file is the way to run all seven on one machine. The seven that are live run on
-Railway instead, one service per pool: the repository carries `railway.json` at its root for
-the `usdc` keeper and `railway/hearth-keeper-<slug>.json` for the other six, each start
-command already naming that pool's `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` and address file,
-so a service needs only `RECOVERY_PHRASE` and `SEPOLIA_RPC_URL`. The keeper carries its own
+The pm2 file is the way to run all seven on one machine. A hosted keeper is one Railway
+service per pool with the same build and start commands, `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`,
+and the three variables that name the pool: `HEARTH_ADDRESSES_FILE`, `KEEPER_ACCOUNT_INDEX`
+and `KEEPER_NAME`. The repository carries `railway.json` at its root for the `usdc` keeper
+and `railway/hearth-keeper-<slug>.json` as the written record for the other six. The keeper carries its own
 ABIs under `packages/keeper/abi`, so a host that never compiles the contracts can still run
 it. Settings, the hosting steps and the Chainlink Automation registration are in
 [packages/keeper/README.md](packages/keeper/README.md).
@@ -1142,7 +1142,7 @@ hearth/
 │   ├── web/              the Next.js app and the documentation site it serves
 │   └── keeper/           the script that drives draws, one process per pool, with its
 │                         own suite and the pm2 file for all seven
-├── railway/              one hosting config per pool, for the keepers that run live
+├── railway/              the hosting values per pool, one file each
 ├── docs/                 the written record: getting started, concepts, security, operations
 ├── ARCHITECTURE.md       the implementation specification, with the three diagrams
 └── README.md

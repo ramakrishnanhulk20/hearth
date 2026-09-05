@@ -204,19 +204,20 @@ account needs its own Sepolia ETH. Index 0 is the deployer and the keeper refuse
 
 ## Where the live seven run
 
-pm2 on a laptop is one way to run all seven and it still works. It is not what is live. All
-seven Sepolia keepers run on Railway, one service per pool, so a closed laptop stops no
-draws.
+pm2 on a laptop is one way to run all seven and it still works. The cUSDC keeper runs on
+Railway; the other six run under pm2 until their own Railway services exist, one per pool,
+so that a closed laptop stops no draws.
 
 A keeper is a long-running process rather than a scheduled function: one pass can spend two
 minutes waiting on the key management service, which is longer than most serverless
 platforms allow. Any host that keeps a Node process alive will do, and the repository
 carries the configuration for this one:
 
-- `railway.json` at the repository root drives the `usdc` pool.
-- `railway/hearth-keeper-<slug>.json` drives each of the other six. Each start command sets
-  that pool's `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` and `HEARTH_ADDRESSES_FILE` inline, so a
-  service built from one of them needs only `RECOVERY_PHRASE` and `SEPOLIA_RPC_URL`.
+- `railway.json` at the repository root is what the `usdc` service was built from.
+- `railway/hearth-keeper-<slug>.json` records the values for each of the other six. Railway no
+  longer reads a config file for a new service, so those values go into the service's own
+  settings: the build and start commands above, then `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`,
+  `HEARTH_ADDRESSES_FILE`, `KEEPER_ACCOUNT_INDEX` and `KEEPER_NAME` as variables.
 
 The build is `npm run build -w @hearth/keeper` and the start is
 `node packages/keeper/dist/src/index.js` on any host. The contract ABIs the keeper needs are

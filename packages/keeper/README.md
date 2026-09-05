@@ -356,17 +356,21 @@ Six variables are required, and they describe one pool:
 default that suits an hourly period: `KEEPER_POLL_SECONDS` is 30, `KEEPER_BATCH` is 4, and
 `KEEPER_MAX_FEE_GWEI` is unset, which means no ceiling.
 
-The root `railway.json` starts the cUSDC keeper with the variables above. For the other pools the
-`railway/` folder at the repository root carries one config file per pool, and each one already
-names the pool: its start command sets `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` and
-`HEARTH_ADDRESSES_FILE` inline, so a service built from it needs only `RECOVERY_PHRASE` and
-`SEPOLIA_RPC_URL`. All seven keepers run this way on Railway since 6 September 2026. To host them:
+The root `railway.json` is what the first, cUSDC service was built from. Railway no longer lets
+a new service read a config file from the repository (the feature is deprecated for services
+that never used it), so every other pool is set up in the service's own settings. The
+`railway/` folder keeps one file per pool as the written record of the exact values. To host a
+pool:
 
-1. In the project, add a service from this same repository, once per pool.
-2. In that service's settings, set the config file path to `railway/hearth-keeper-<slug>.json`
-   (Settings, Config-as-code). Leave the root directory as the repository root, because the
-   address file lives under `packages/contracts/deployments`.
-3. Give the service `RECOVERY_PHRASE` and `SEPOLIA_RPC_URL`; shared variables work.
+1. In the project, add a service from this same repository, once per pool. Leave the root
+   directory as the repository root, because the address file lives under
+   `packages/contracts/deployments`.
+2. Settings, Build: the custom build command is `npm run build -w @hearth/keeper`.
+   Settings, Deploy: the custom start command is `node packages/keeper/dist/src/index.js`.
+3. Variables: `RECOVERY_PHRASE` and `SEPOLIA_RPC_URL` (shared variables work), plus the three
+   that name the pool: `HEARTH_ADDRESSES_FILE` set to
+   `packages/contracts/deployments/sepolia/hearth.<slug>.json`, `KEEPER_ACCOUNT_INDEX` from
+   the table above, and `KEEPER_NAME` set to the slug.
 4. Deploy, and confirm the first log line reads `[<slug>] hearth keeper: ...` with the right
    account index. Only then stop the laptop copy: `pm2 stop hearth-keeper-<slug>`.
 
