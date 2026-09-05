@@ -17,33 +17,53 @@ const UTILISATION_BPS = 5000n;
 type Entry = { status: "success"; result: unknown } | { status: "failure"; error: unknown };
 
 /**
+ * The prize column of one row: what the grand tier pays, or when this pool's first draw can close.
+ * Only one of the two is ever set, and a pool waiting for its first draw has no prize to state.
+ */
+type Prize = { grand: bigint | null; firstDrawAt: number | null };
+
+const NOTHING_READ: Prize = { grand: null, firstDrawAt: null };
+
+/**
  * What one grand prize is worth in every open pool, in a single multicall.
  *
- * Two reads per pool, all of them in one wagmi batch, so opening the picker costs one round trip
+ * Three reads per pool, all of them in one wagmi batch, so opening the picker costs one round trip
  * whether there is one token on the shelf or eight. The figures are real: a token whose read did
- * not land shows nothing rather than a zero.
+ * not land shows nothing rather than a zero, and a pool that has never closed a draw is empty on
+ * purpose, so it hands back the time of its first draw instead of a jackpot of zero.
  */
-function useGrandPrizes(): Record<string, bigint | null> {
+function useGrandPrizes(): Record<string, Prize> {
   const { data } = useReadContracts({
     query: { enabled: OPEN_POOLS.length > 0, refetchInterval: 30_000 },
     contracts: OPEN_POOLS.flatMap((entry) => [
       { address: entry.pool, abi: HEARTH_POOL_ABI, functionName: "liquidity", args: [0n] } as const,
       { address: entry.pool, abi: HEARTH_POOL_ABI, functionName: "tierOf", args: [0] } as const,
+      { address: entry.pool, abi: HEARTH_POOL_ABI, functionName: "lastClosedDraw" } as const,
     ]),
   });
 
   return useMemo(() => {
-    const found: Record<string, bigint | null> = {};
+    const found: Record<string, Prize> = {};
     OPEN_POOLS.forEach((entry, index) => {
-      const liquidity = (data as readonly Entry[] | undefined)?.[index * 2];
-      const tier = (data as readonly Entry[] | undefined)?.[index * 2 + 1];
+      const rows = data as readonly Entry[] | undefined;
+      const liquidity = rows?.[index * 3];
+      const tier = rows?.[index * 3 + 1];
+      const closed = rows?.[index * 3 + 2];
+      // Draw 1 covers the first period, so it can only close once that period is over.
+      const firstDrawAt =
+        closed?.status === "success" && Number(closed.result) === 0
+          ? entry.firstPeriodAt + entry.periodLength
+          : null;
       if (liquidity?.status !== "success" || tier?.status !== "success") {
-        found[entry.slug] = null;
+        found[entry.slug] = { grand: null, firstDrawAt };
         return;
       }
       const count = Number((tier.result as { prizeCount: number }).prizeCount);
-      found[entry.slug] =
-        count === 0 ? 0n : ((liquidity.result as bigint) * UTILISATION_BPS) / 10_000n / BigInt(count);
+      found[entry.slug] = {
+        grand:
+          count === 0 ? 0n : ((liquidity.result as bigint) * UTILISATION_BPS) / 10_000n / BigInt(count),
+        firstDrawAt,
+      };
     });
     return found;
   }, [data]);
@@ -193,7 +213,7 @@ export function PoolPicker({ compact = false }: { compact?: boolean }) {
               id={rowId(pool.slug)}
               pool={pool}
               selected={pool.slug === current.slug}
-              grand={prizes[pool.slug] ?? null}
+              prize={prizes[pool.slug] ?? NOTHING_READ}
               onPick={() => go(pool)}
             />
           ))}
@@ -207,13 +227,13 @@ function Row({
   id,
   pool,
   selected,
-  grand,
+  prize,
   onPick,
 }: {
   id: string;
   pool: Pool;
   selected: boolean;
-  grand: bigint | null;
+  prize: Prize;
   onPick: () => void;
 }) {
   const t = useTranslations("picker");
@@ -274,13 +294,19 @@ function Row({
           >
             {t("zamaList")}
           </a>
+        ) : prize.firstDrawAt !== null ? (
+          // Nothing has funded this pool yet, so the column answers the question behind the
+          // question: not what the prize is, but when there will be one.
+          <span className="block max-w-[8.5rem] text-[11.5px] leading-tight tabular-nums text-faint">
+            {t("firstDraw", { time: format.clock(prize.firstDrawAt) })}
+          </span>
         ) : (
           <span
             className={`text-[13px] tabular-nums ${selected ? "text-flameInk" : "text-parchment"}`}
           >
             {/* The shelf on the landing page says "unread" for the same reason: three dots is
                 a promise that a figure is coming, and a read that failed is not coming. */}
-            {grand === null ? t("unread") : format.amount(grand, pool.decimals)}
+            {prize.grand === null ? t("unread") : format.amount(prize.grand, pool.decimals)}
           </span>
         )}
       </span>

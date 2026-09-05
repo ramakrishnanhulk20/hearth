@@ -70,6 +70,7 @@
     "shelf": {
       "heading": "选择你的代币",
       "unread": "未读取",
+      "firstDraw": "首次开奖 {time}",
       "note": "每个池此刻的大奖，读自链上。同一个金库、同一套开奖、同样的隐私，一种机密代币一个池。"
     },
     "sealed": {
@@ -302,6 +303,7 @@
     "saveIn": "储蓄币种",
     "grandPrize": "大奖",
     "unread": "未读取",
+    "firstDraw": "首次开奖 {time}",
     "savingPool": "储蓄池",
     "notSupported": "不支持",
     "zamaList": "Zama 的清单",

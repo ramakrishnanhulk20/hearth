@@ -70,6 +70,7 @@
     "shelf": {
       "heading": "Escolha seu token",
       "unread": "não lido",
+      "firstDraw": "Primeiro sorteio {time}",
       "note": "Prêmio grande de cada pool agora, lido da blockchain. Mesmo cofre, mesmo sorteio, mesma privacidade, um por token confidencial."
     },
     "sealed": {
@@ -302,6 +303,7 @@
     "saveIn": "Poupe em",
     "grandPrize": "Prêmio grande",
     "unread": "não lido",
+    "firstDraw": "Primeiro sorteio {time}",
     "savingPool": "pool de poupança",
     "notSupported": "sem suporte",
     "zamaList": "Lista da Zama",

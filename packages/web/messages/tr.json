@@ -70,6 +70,7 @@
     "shelf": {
       "heading": "Tokeninizi seçin",
       "unread": "okunamadı",
+      "firstDraw": "İlk çekiliş {time}",
       "note": "Her havuzun şu anki büyük ödülü, zincirden okundu. Aynı kasa, aynı çekiliş, aynı gizlilik, gizli token başına bir tane."
     },
     "sealed": {
@@ -302,6 +303,7 @@
     "saveIn": "Şununla biriktirin",
     "grandPrize": "Büyük ödül",
     "unread": "okunamadı",
+    "firstDraw": "İlk çekiliş {time}",
     "savingPool": "tasarruf havuzu",
     "notSupported": "desteklenmiyor",
     "zamaList": "Zama'nın listesi",

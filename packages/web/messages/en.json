@@ -70,6 +70,7 @@
     "shelf": {
       "heading": "Pick your token",
       "unread": "unread",
+      "firstDraw": "First draw {time}",
       "note": "Grand prize on each pool right now, read from the chain. Same vault, same draw, same privacy, one per confidential token."
     },
     "sealed": {
@@ -302,6 +303,7 @@
     "saveIn": "Save in",
     "grandPrize": "Grand prize",
     "unread": "unread",
+    "firstDraw": "First draw {time}",
     "savingPool": "saving pool",
     "notSupported": "not supported",
     "zamaList": "Zama's list",

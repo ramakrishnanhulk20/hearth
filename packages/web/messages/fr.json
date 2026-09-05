@@ -70,6 +70,7 @@
     "shelf": {
       "heading": "Choisissez votre jeton",
       "unread": "non lu",
+      "firstDraw": "Premier tirage {time}",
       "note": "Le gros lot de chaque pool en ce moment, lu sur la chaîne. Même coffre, même tirage, même confidentialité, un par jeton confidentiel."
     },
     "sealed": {
@@ -302,6 +303,7 @@
     "saveIn": "Épargner en",
     "grandPrize": "Gros lot",
     "unread": "non lu",
+    "firstDraw": "Premier tirage {time}",
     "savingPool": "pool d'épargne",
     "notSupported": "non pris en charge",
     "zamaList": "La liste de Zama",

@@ -69,6 +69,7 @@
     "shelf": {
       "heading": "Chọn token của bạn",
       "unread": "chưa đọc được",
+      "firstDraw": "Kỳ quay đầu tiên {time}",
       "note": "Giải lớn của từng pool ngay lúc này, đọc từ chuỗi. Cùng một vault, cùng một kỳ quay, cùng một mức riêng tư, mỗi token bảo mật một pool."
     },
     "sealed": {
@@ -162,6 +163,7 @@
     "saveIn": "Tiết kiệm bằng",
     "grandPrize": "Giải lớn",
     "unread": "chưa đọc được",
+    "firstDraw": "Kỳ quay đầu tiên {time}",
     "savingPool": "pool tiết kiệm",
     "notSupported": "không hỗ trợ",
     "zamaList": "Danh sách của Zama",

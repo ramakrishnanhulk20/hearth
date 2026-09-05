@@ -69,6 +69,7 @@
     "shelf": {
       "heading": "Pilih token Anda",
       "unread": "belum terbaca",
+      "firstDraw": "Undian pertama {time}",
       "note": "Hadiah utama tiap pool saat ini, dibaca dari rantai. Vault yang sama, undian yang sama, privasi yang sama, satu untuk tiap token rahasia."
     },
     "sealed": {
@@ -298,6 +299,7 @@
     "saveIn": "Menabung dalam",
     "grandPrize": "Hadiah utama",
     "unread": "belum terbaca",
+    "firstDraw": "Undian pertama {time}",
     "savingPool": "pool tabungan",
     "notSupported": "tidak didukung",
     "zamaList": "Daftar Zama",

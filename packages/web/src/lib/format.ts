@@ -16,6 +16,29 @@ function grouping(locale: string): Intl.NumberFormat {
 
 const groupers = new Map<string, Intl.NumberFormat>();
 
+const clocks = new Map<string, Intl.DateTimeFormat>();
+
+/**
+ * A wall clock in UTC on a twenty-four hour dial, punctuated the way the reader's language does it.
+ *
+ * The dial is not the locale's own: half of these languages default to a twelve hour clock, and
+ * "09:00 PM UTC" next to a chain timestamp written "2026-09-05 21:00 UTC" is read wrong at a
+ * glance. Everything else about the string follows the reader.
+ */
+function clockOf(locale: string): Intl.DateTimeFormat {
+  let formatter = clocks.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(`${locale}-u-nu-latn`, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+      timeZone: "UTC",
+    });
+    clocks.set(locale, formatter);
+  }
+  return formatter;
+}
+
 function group(locale: string, value: bigint | number): string {
   let formatter = groupers.get(locale);
   if (!formatter) {
@@ -89,6 +112,8 @@ export type Format = {
   countdown(targetSeconds: number, nowSeconds: number): string;
   timeAgo(seconds: number): string;
   utc(seconds: number | bigint): string;
+  /** The time of day a moment falls on, in UTC, for something the reader is waiting for. */
+  clock(seconds: number): string;
   /** Plain-English odds, so a tier's chance reads as a chance rather than a fraction. */
   odds(numerator: bigint, denominator: bigint): string;
 };
@@ -145,6 +170,11 @@ export function createFormat(locale: string, words: FormatWords): Format {
       // The stamp itself stays ISO in every language. It is a chain timestamp a reader compares
       // against an explorer, and the explorer writes it this way.
       return words("utc", { stamp: new Date(value * 1000).toISOString().slice(0, 16).replace("T", " ") });
+    },
+
+    clock(seconds) {
+      if (!Number.isFinite(seconds) || seconds <= 0) return words("notYet");
+      return words("utc", { stamp: clockOf(locale).format(new Date(seconds * 1000)) });
     },
 
     odds(numerator, denominator) {

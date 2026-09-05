@@ -70,6 +70,7 @@
     "shelf": {
       "heading": "Wählen Sie Ihren Token",
       "unread": "ungelesen",
+      "firstDraw": "Erste Ziehung {time}",
       "note": "Der Hauptpreis jedes Pools, gerade jetzt von der Blockchain gelesen. Gleicher Vault, gleiche Ziehung, gleiche Privatsphäre, einer je vertraulichem Token."
     },
     "sealed": {
@@ -302,6 +303,7 @@
     "saveIn": "Sparen in",
     "grandPrize": "Hauptpreis",
     "unread": "ungelesen",
+    "firstDraw": "Erste Ziehung {time}",
     "savingPool": "Sparpool",
     "notSupported": "nicht unterstützt",
     "zamaList": "Zamas Liste",

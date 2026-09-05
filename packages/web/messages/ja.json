@@ -70,6 +70,7 @@
     "shelf": {
       "heading": "トークンを選ぶ",
       "unread": "未取得",
+      "firstDraw": "初回抽選 {time}",
       "note": "各プールのいまのグランド賞を、チェーンから読んでいます。ボールトも抽選もプライバシーも同じで、機密トークンごとに 1 つずつあります。"
     },
     "sealed": {
@@ -302,6 +303,7 @@
     "saveIn": "貯めるトークン",
     "grandPrize": "グランド賞",
     "unread": "未取得",
+    "firstDraw": "初回抽選 {time}",
     "savingPool": "貯蓄プール",
     "notSupported": "非対応",
     "zamaList": "Zama の一覧",

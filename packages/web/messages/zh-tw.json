@@ -69,6 +69,7 @@
     "shelf": {
       "heading": "挑一種代幣",
       "unread": "未讀取",
+      "firstDraw": "首次抽獎 {time}",
       "note": "各池此刻的頭獎，直接讀自鏈上。同一套金庫、同一種抽獎、同樣的隱私，每一種機密代幣一個。"
     },
     "sealed": {
@@ -162,6 +163,7 @@
     "saveIn": "儲蓄幣種",
     "grandPrize": "頭獎",
     "unread": "未讀取",
+    "firstDraw": "首次抽獎 {time}",
     "savingPool": "儲蓄池",
     "notSupported": "不支援",
     "zamaList": "Zama 的清單",

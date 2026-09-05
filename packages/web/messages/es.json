@@ -70,6 +70,7 @@
     "shelf": {
       "heading": "Elige tu token",
       "unread": "sin leer",
+      "firstDraw": "Primer sorteo {time}",
       "note": "El premio mayor de cada pool ahora mismo, leído de la cadena. La misma bóveda, el mismo sorteo, la misma privacidad, uno por token confidencial."
     },
     "sealed": {
@@ -302,6 +303,7 @@
     "saveIn": "Ahorrar en",
     "grandPrize": "Premio mayor",
     "unread": "sin leer",
+    "firstDraw": "Primer sorteo {time}",
     "savingPool": "pool de ahorro",
     "notSupported": "no admitido",
     "zamaList": "La lista de Zama",

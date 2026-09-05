@@ -150,6 +150,12 @@ export type PoolPrize = {
   decimals: number;
   /** What the grand tier would pay per prize if a draw closed now, null when the read failed. */
   grand: bigint | null;
+  /**
+   * When no draw has closed on this pool yet, the moment the first one can. A pool is funded by the
+   * yield a closed draw harvests, so before that moment every tier is genuinely empty and a row of
+   * zeros would read as a broken page rather than as a pool waiting for its first draw.
+   */
+  firstDrawAt: number | null;
 };
 
 /**
@@ -162,12 +168,13 @@ export async function readAllGrandPrizes(): Promise<PoolPrize[]> {
   const pools = OPEN_POOLS;
   if (pools.length === 0) return [];
 
-  const shape = (entry: OpenPool, grand: bigint | null): PoolPrize => ({
+  const shape = (entry: OpenPool, grand: bigint | null, firstDrawAt: number | null): PoolPrize => ({
     slug: entry.slug,
     symbol: entry.symbol,
     name: entry.name,
     decimals: entry.decimals,
     grand,
+    firstDrawAt,
   });
 
   try {
@@ -176,20 +183,30 @@ export async function readAllGrandPrizes(): Promise<PoolPrize[]> {
       contracts: pools.flatMap((entry) => [
         { address: entry.pool, abi: HEARTH_POOL_ABI, functionName: "liquidity", args: [0n] } as const,
         { address: entry.pool, abi: HEARTH_POOL_ABI, functionName: "tierOf", args: [0] } as const,
+        { address: entry.pool, abi: HEARTH_POOL_ABI, functionName: "lastClosedDraw" } as const,
       ]),
     });
 
     return pools.map((entry, index) => {
-      const liquidity = results[index * 2];
-      const tier = results[index * 2 + 1];
-      if (liquidity?.status !== "success" || tier?.status !== "success") return shape(entry, null);
+      const liquidity = results[index * 3];
+      const tier = results[index * 3 + 1];
+      const closed = results[index * 3 + 2];
+      // Draw 1 covers the first period, so it can only close once that period is over.
+      const firstDrawAt =
+        closed?.status === "success" && Number(closed.result) === 0
+          ? entry.firstPeriodAt + entry.periodLength
+          : null;
+      if (liquidity?.status !== "success" || tier?.status !== "success") {
+        return shape(entry, null, firstDrawAt);
+      }
       const count = Number((tier.result as { prizeCount: number }).prizeCount);
-      if (count === 0) return shape(entry, 0n);
-      return shape(entry, ((liquidity.result as bigint) * UTILISATION_BPS) / 10_000n / BigInt(count));
+      if (count === 0) return shape(entry, 0n, firstDrawAt);
+      const grand = ((liquidity.result as bigint) * UTILISATION_BPS) / 10_000n / BigInt(count);
+      return shape(entry, grand, firstDrawAt);
     });
   } catch {
     // The shelf still lists every token when the node will not answer. A missing figure says so
     // on the row rather than taking the row away.
-    return pools.map((entry) => shape(entry, null));
+    return pools.map((entry) => shape(entry, null, null));
   }
 }

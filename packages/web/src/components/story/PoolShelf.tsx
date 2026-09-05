@@ -11,7 +11,9 @@ import { useFormat } from "@/hooks/useFormat";
  * The figures are read on the server in one multicall and shipped inside the page, so the row is
  * already filled in when the story closes rather than filling in afterwards. A pool whose read
  * did not answer says so on its own cell instead of printing a zero, because a zero jackpot and
- * an unanswered node look identical once one is written down.
+ * an unanswered node look identical once one is written down. A pool whose first draw has not
+ * closed yet says when it can close, for the same reason: nothing has funded it, so there is a
+ * time to give rather than a prize.
  */
 export function PoolShelf({ pools }: { pools: PoolPrize[] }) {
   const t = useTranslations("landing.shelf");
@@ -35,12 +37,20 @@ export function PoolShelf({ pools }: { pools: PoolPrize[] }) {
             <span className="block text-[12px] uppercase tracking-label text-white/55 transition-colors duration-200 group-hover:text-white/70">
               {entry.symbol}
             </span>
-            <span
-              className="mt-1.5 block font-display text-[19px] leading-none tabular-nums tracking-tight text-white/85 transition-colors duration-200 group-hover:text-flame"
-              style={{ fontWeight: 640 }}
-            >
-              {entry.grand === null ? t("unread") : format.amount(entry.grand, entry.decimals)}
-            </span>
+            {entry.firstDrawAt === null ? (
+              <span
+                className="mt-1.5 block font-display text-[19px] leading-none tabular-nums tracking-tight text-white/85 transition-colors duration-200 group-hover:text-flame"
+                style={{ fontWeight: 640 }}
+              >
+                {entry.grand === null ? t("unread") : format.amount(entry.grand, entry.decimals)}
+              </span>
+            ) : (
+              // The prize slot keeps the same nineteen pixels so a waiting pool sits level with a
+              // funded one on the shelf. It is written smaller because it is a promise, not a figure.
+              <span className="mt-1.5 block whitespace-nowrap text-[12.5px] leading-[19px] tabular-nums text-white/55 transition-colors duration-200 group-hover:text-white/75">
+                {t("firstDraw", { time: format.clock(entry.firstDrawAt) })}
+              </span>
+            )}
             {/* The lit underline is the same move the console makes on the row you are standing
                 on, so the two halves of the product share one gesture. */}
             <span
