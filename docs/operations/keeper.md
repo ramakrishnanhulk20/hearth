@@ -3,6 +3,10 @@
 Draws do not happen by themselves. Something has to send the transactions. This page is
 what that something does, what happens when it stops, and how much it costs.
 
+One process drives one pool. Hearth runs seven pools on Sepolia, so seven keeper processes
+run, each signing from its own account of the same seed phrase and each pointed at one
+pool's address file. The section "One keeper per pool" below is the table.
+
 The important framing first: the keeper has no privileges. Every function it calls is
 callable by anyone, and the two levers a keeper might have abused, choosing who gets
 evaluated and choosing the payout order, are not levers any more. It is a convenience that
@@ -38,8 +42,8 @@ saves savers the trouble, not a role the pool depends on for safety.
    liquidity, the vault subtracts it from the carry (which may have grown since it was
    published), and `TierReconciled` is emitted.
 
-On Sepolia every tier is due every draw, so step 6 runs up to three times after each
-finalize. The cadence is a per-tier constructor argument and the keeper reads it from the
+On Sepolia every tier of every pool is due every draw, so step 6 runs up to three times
+after each finalize. The cadence is a per-tier constructor argument and the keeper reads it from the
 chain rather than assuming it, so a deployment that publishes a tier's carry less often
 needs no keeper change. Why this one publishes all three every draw is in
 [prizes and tiers](../concepts/prizes-and-tiers.md).
@@ -92,7 +96,8 @@ a redundancy path underneath it.
 ## How a saver advances a draw themselves
 
 Every step above is permissionless, and the app exposes every one of them on its "Run a
-draw" screen, at `/app/run`, which is the sidebar row marked "Anyone". A card at the top
+draw" screen, at `/app/<slug>/run` for the pool they are in, which is the sidebar row
+marked "Anyone". A card at the top
 names the step the pool is waiting for, and each of the five below it carries its own
 button, off with a stated reason when it is not that step's turn:
 
@@ -124,8 +129,9 @@ on-chain automation network cannot fetch any of that, so pretending it could wou
 theatre.
 
 The upkeep is optional. It needs LINK in a registered upkeep account, and it is redundancy
-rather than the primary path. No upkeep is registered yet, so the keeper alone runs the demo
-pool.
+rather than the primary path, and it would be one upkeep per pool, each on that pool's own
+schedule. None is registered on any of the seven yet, so the keepers alone run the demo
+pools.
 
 We declare the two-function interface locally instead of adding the whole Chainlink
 contracts package and its dependencies for two selectors.
@@ -147,6 +153,12 @@ At 5 savers that is `8,456,388` gas per draw, or about
 `0.0085 ETH` at 1 gwei, the Sepolia base fee at deployment. On a one-hour period that is 24 draws a
 day and `0.2030 ETH` per day; on a daily period it is `0.0085 ETH`.
 
+Multiply that by seven pools and it is the whole reason six of them draw every six hours
+rather than every hour. Hourly across all seven is 168 draws a day, about `1.43 ETH`, which
+public faucets cannot keep up with. One hourly pool and six six-hour pools is 48 draws a
+day, about `0.41 ETH`. Each keeper account is funded separately, so a pool that runs out of
+gas stops only its own draws.
+
 One more saver in a batch costs `708,836` gas on Sepolia, and a batch carrying a single
 saver costs `1,291,192`, since the fixed part of the call is paid either way. In compute
 units a saver is `3,674,128` on the mock coprocessor's price table, which is where that
@@ -165,16 +177,40 @@ prizes, because addresses with no observation before the period are skipped with
 encrypted work. If the keeper is down, anyone can press "Advance", and because the walk
 starts at a different point every draw, nobody sits permanently at the back.
 
+## One keeper per pool
+
+`packages/keeper/ecosystem.config.cjs` starts all seven under pm2, one process each. A
+process is told which pool it drives by `HEARTH_ADDRESSES_FILE`, the address file that
+pool's deploy wrote, which also gives it the token symbol, the decimals and the account
+index to sign from. `KEEPER_NAME` is the tag every log line carries.
+
+| pm2 process | `HEARTH_ADDRESSES_FILE` | `KEEPER_ACCOUNT_INDEX` |
+| --- | --- | --- |
+| `hearth-keeper-usdc` | `hearth.json` | 1 |
+| `hearth-keeper-usdt` | `hearth.usdt.json` | 10 |
+| `hearth-keeper-weth` | `hearth.weth.json` | 11 |
+| `hearth-keeper-bron` | `hearth.bron.json` | 12 |
+| `hearth-keeper-zama` | `hearth.zama.json` | 13 |
+| `hearth-keeper-tgbp` | `hearth.tgbp.json` | 14 |
+| `hearth-keeper-xaut` | `hearth.xaut.json` | 15 |
+
+The `usdc` process points at `hearth.json` rather than `hearth.usdc.json` because that is
+the file the first deployment wrote, before pools had slugs, and the running keeper has
+been pointed at it for days. Both files carry the same addresses.
+
+The indexes are spread out so a later pool can be added without renumbering, and each
+account needs its own Sepolia ETH. Index 0 is the deployer and the keeper refuses it.
+
 ## Running it
 
-The keeper is the `@hearth/keeper` package. It signs with account index 1 of the same
-`RECOVERY_PHRASE` the deploy uses and reads `SEPOLIA_RPC_URL` from `packages/contracts/.env`;
-its own settings live in `packages/keeper/.env`:
+The keeper is the `@hearth/keeper` package. It signs with one account of the same
+`RECOVERY_PHRASE` the deploy uses and reads `SEPOLIA_RPC_URL` from
+`packages/contracts/.env`; its own settings live in `packages/keeper/.env`:
 
 ```
-HEARTH_VAULT=0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52
-HEARTH_POOL=0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2
-HEARTH_SOURCE=0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91   # optional, printed at boot
+HEARTH_ADDRESSES_FILE=../contracts/deployments/sepolia/hearth.weth.json
+KEEPER_ACCOUNT_INDEX=11            # defaults to the index in the address file
+KEEPER_NAME=weth                   # defaults to the slug in the address file
 KEEPER_BATCH=4                     # savers of encrypted work per evaluate call
 KEEPER_POLL_SECONDS=30
 KEEPER_MAX_FEE_GWEI=20             # refuse to send above this
@@ -185,14 +221,37 @@ npm run compile -w @hearth/contracts    # the keeper reads the compiled ABI
 npm run build -w @hearth/keeper
 npm run plan -w @hearth/keeper          # one pass, simulates every call, sends nothing
 npm run once -w @hearth/keeper          # one live pass
-pm2 start packages/keeper/ecosystem.config.cjs
+pm2 start packages/keeper/ecosystem.config.cjs   # all seven
+pm2 logs hearth-keeper-weth                      # one pool
 ```
+
+`plan` and `once` drive whichever pool `HEARTH_ADDRESSES_FILE` points at, so checking
+another pool is one variable on the front of the command. If `HEARTH_VAULT` and
+`HEARTH_POOL` are still sitting in `packages/keeper/.env` from a single-pool setup, take
+them out: they are read before the address file, so all seven processes would drive one
+pool.
+
+A pass logs one line per fact, and every line is tagged with the pool the process drives,
+so seven interleaved logs stay readable. Amounts carry that pool's own symbol and its own
+decimals, both read from the address file:
+
+```
+09:14:37 [usdc] closed draw 41 (gas 1,422,474)
+09:14:39 [usdc] draw 41: asking the relayer for the seed, the scale, the empty flag and the harvest
+09:14:53 [usdc] awarded draw 41: 3 tiers, prizes 12.40 / 2.10 / 0.40 cUSDC, harvest 3.60 cUSDC (gas 435,578)
+09:15:07 [usdc] evaluated draw 41: 4 of 9 savers done (gas 3,417,699)
+09:15:38 [usdc] nothing to do: period 43, draw 41 has 8 of 9 savers evaluated
+```
+
+The WETH process prints the same lines under `[weth]`, in `cWETH`. What every kind of line
+means, line by line, is in the keeper package's own README,
+`packages/keeper/README.md`.
 
 The keeper is stateless between ticks: it reads the draw state, the evaluation cursor and
 the reconcile cadence from the chain and works out what to do. Restarting it loses
-nothing. Run one instance per account: on chain every step succeeds exactly once per draw
-and per tier and two evaluate calls simply advance the same cursor, but two keepers on one
-account race each other for the transaction nonce.
+nothing. Run exactly one instance per pool, and never two on one account: on chain every
+step succeeds exactly once per draw and per tier and two evaluate calls simply advance the
+same cursor, but two keepers on one account race each other for the transaction nonce.
 
 ## What this page does not cover
 

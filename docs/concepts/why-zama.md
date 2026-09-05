@@ -62,8 +62,9 @@ arrives encrypted from end to end.
 
 ### ERC-7984, the confidential token standard
 
-Hearth's asset is Zama's confidential USDC, an ERC-7984 wrapper around ordinary USDC.
-Balances in it are encrypted values rather than public numbers.
+Each pool's asset is one of Zama's confidential tokens, an ERC-7984 wrapper around an
+ordinary ERC-20: cUSDC, cUSDT, cWETH, cBRON, cZAMA, ctGBP or cXAUt. Balances in them are
+encrypted values rather than public numbers.
 
 Deposits arrive through `confidentialTransferAndCall`, which transfers an encrypted
 amount and calls the receiver's hook in the same transaction. The vault's hook is handed
@@ -71,9 +72,11 @@ the amount the token really moved, which is how the vault credits reality rather
 request. Payouts go the other way through `confidentialTransfer`.
 
 Using the standard token, rather than writing our own, matters. Several projects in this
-field hand-rolled an "ERC-7984-style" token. Ours is the one Zama deployed, so a saver's
-confidential USDC is usable outside Hearth and the token's own behaviour is not something
-we get to define in our favour.
+field hand-rolled an "ERC-7984-style" token. Every one of ours is a token Zama deployed, so
+a saver's confidential balance is usable outside Hearth and the token's own behaviour is
+not something we get to define in our favour. It also means Hearth can open a pool on a new
+confidential token the day Zama publishes it, which is how six of the seven were added, and
+that it can open none at all on a token whose mint the issuer keeps to itself.
 
 ### Encrypted randomness
 
@@ -142,8 +145,8 @@ Naming this is the point of the page.
 - **The Zama Protocol** to compute correctly on ciphertexts and to decrypt only what is
   marked decryptable. Every decryption the contracts act on carries a proof verified on
   chain. This is the same trust boundary Zama's own Confidential Vault documents.
-- **The confidential USDC wrapper**, which is Zama's contract rather than ours, and which
-  is upgradeable by its owner. See the token layer section of
+- **The confidential token wrappers**, which are Zama's contracts rather than ours, and
+  which are upgradeable by their owner. See the token layer section of
   [what stays private](../security/what-stays-private.md).
 - **Hearth's own contracts**, which are immutable once deployed, with no proxy and no
   upgrade path. The owner's remaining powers are narrow and listed in the

@@ -26,8 +26,9 @@ contribution, not the snapshot.
 
 ## What a late deposit is worth
 
-A period on Sepolia is 3,600 seconds. Weight is balance multiplied by the seconds it was
-held, so weight is measured in USDC-seconds.
+A period is 3,600 seconds in the USDC pool and 21,600 in the other six. Weight is balance
+multiplied by the seconds it was held, so it is measured in balance-seconds of that pool's
+own token. The example below is the hourly USDC pool.
 
 | Saver | What they did | Weight for the period |
 | --- | --- | --- |
@@ -121,7 +122,8 @@ because nothing reverts and nobody sees it happen.
 
 **Per saver.** The vault refuses any deposit whose amount, or whose resulting principal,
 would be above `maxPrincipal = (2^64 - 1) / L`. At a one-hour period that is about 5
-billion USDC. At a daily period it is about 213 million USDC. Since your running total
+billion tokens, at a six-hour period about 854 million, and at a daily period about 213
+million. Since your running total
 cannot exceed your balance multiplied by the period length, and your balance cannot exceed
 that cap, your running total cannot exceed 64 bits. The refusal is returned as an encrypted
 false and the token refunds you in the same transaction, so hitting the cap does not

@@ -37,12 +37,18 @@ what lets prize sizes be fixed before the seed exists.
 
 ## Sepolia: the sponsored source
 
-`SponsoredYieldSource` is what runs on the live deployment at `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91`.
+`SponsoredYieldSource` is what runs on every live pool, one instance each, so the seven
+sources are seven separate balances of seven different tokens. The USDC pool's is at
+`0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91`; the other six are in
+[pools and tokens](pools-and-tokens.md).
 
-A sponsor calls the source's own `sponsor` function with public USDC. The source wraps it
-into confidential USDC and books exactly what the wrapper minted, not what the sponsor
-asked for. From there the balance drips at `ratePerSecond`, currently `5,555 base units a second, which is 19.998 USDC a period`,
-and `harvest` sends whatever has accrued to the pool.
+A sponsor calls the source's own `sponsor` function with the pool's public token. The source
+wraps it into the confidential one and books exactly what the wrapper minted, not what the
+sponsor asked for. From there the balance drips at `ratePerSecond`, which on the USDC pool
+is `5,555 base units a second, which is 19.998 USDC a period`,
+and `harvest` sends whatever has accrued to the pool. Each pool's rate is set in whole
+tokens an hour so two pools on different clocks can be compared at a glance, and every
+sponsorship is sized to cover more than eighty draws.
 
 A sponsorship is a donation. There is no path for a sponsor to take it back, and only the
 source's owner can change the drip rate, which emits `RateChanged`.
@@ -59,7 +65,7 @@ draws that do have savers. Nothing is stranded in an empty pool.
 
 Because a mock source is only honest if the docs say how it works and how a real one plugs
 in, both are below. We looked for a real one first and there is not one on Sepolia that pays
-yield on Zama's mock USDC:
+yield on Zama's mock tokens:
 
 | Venue | Why not |
 | --- | --- |
@@ -69,7 +75,8 @@ yield on Zama's mock USDC:
 
 So the honest options were a fake number that goes up, or a sponsor-funded balance that
 really exists on chain and really drips. We took the second. Every unit of prize money on
-the live pool was really wrapped, really transferred and really verified.
+every one of the seven live pools was really wrapped, really transferred and really
+verified.
 
 ## The pool never books a reported number
 
@@ -98,6 +105,11 @@ Zama ships a protocol whose entire job is earning yield on confidential balances
 is the natural mainnet source. `ConfidentialVaultYieldSource` is the adapter in that
 design. What follows is its specification, not a contract in this repository.
 
+It is one adapter per pool, like everything else here, and each one needs a batcher and a
+yield vault for its own token. Zama's mainnet deployment covers USDC today, so a mainnet
+Hearth would open the USDC pool on the Confidential Vault and any other token on whatever
+source exists for it, or on none.
+
 The design is a batcher sitting between confidential tokens and an ordinary ERC-4626
 yield vault. An ERC-4626 vault only accepts public transfers, so a lone depositor would
 publish their exact amount. The batcher instead pools many encrypted deposits, decrypts
@@ -115,7 +127,7 @@ flowchart LR
     Vault --> cUSDC
 ```
 
-The adapter joins the deposit batcher with the pool's confidential USDC and holds
+The adapter joins the deposit batcher with the pool's confidential token and holds
 confidential shares. Redemption runs on its own schedule, ahead of the harvest: the keeper
 periodically asks the redeem batcher for the growth and walks that request through its four
 stages, so that by the time the pool next calls `harvest`, the redeemed confidential USDC

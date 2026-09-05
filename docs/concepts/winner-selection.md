@@ -93,7 +93,8 @@ Nothing in Hearth ever branches on a secret.
 ## Worked example: three savers, one tier
 
 A tiny pool, so the numbers stay readable. One tier: the frequent tier, `count = 4`,
-`odds = 1` (that is, `oddsNum = 1`, `oddsDen = 1`). Weights are in USDC-seconds.
+`odds = 1` (that is, `oddsNum = 1`, `oddsDen = 1`). Weights are in balance-seconds of
+whatever token that pool holds; the example reads them as USDC.
 
 | Saver | Weight | Share of `W` | `z = weight * 4 / M` |
 | --- | --- | --- | --- |

@@ -48,15 +48,24 @@ then move money between tiers to make the win bigger.
 
 ## The three Sepolia tiers
 
+Every pool carries its own tier set, because the odds are a fraction of that pool's own
+period. The hourly USDC pool:
+
 | Tier | Prizes per draw (`count`) | Odds | Shares | Reconciles every | What it feels like |
 | --- | --- | --- | --- | --- | --- |
 | Grand | 1 | 1 in 24 | 40 | 1 draw | Rare and large |
 | Mid | 1 | 1 in 6 | 20 | 1 draw | A few times a day |
 | Frequent | 4 | 1 in 1 | 40 | 1 draw | Four prizes every draw |
 
-Total shares are 100, so the grand tier takes 40 percent of every harvest, the mid tier 20
-percent and the frequent tier 40 percent. A period on Sepolia is one hour, so 1 in 24
-works out at about once a day and 1 in 6 at about every six hours. Every tier reconciles
+The six pools that draw every six hours keep the same counts, shares and cadence and change
+only the odds: grand 1 in 4, mid 1 in 2, frequent 1 in 1. A six-hour draw is six times
+rarer, so 1 in 4 lands the grand prize about once a day, the same rhythm the hourly set
+gives. The mid tier is the one difference: about twice a day on the six-hour pools against
+about four times a day on the hourly one. Why six hours: [pools and
+tokens](pools-and-tokens.md).
+
+Total shares are 100 in both sets, so the grand tier takes 40 percent of every harvest, the
+mid tier 20 percent and the frequent tier 40 percent. Every tier of every pool reconciles
 every draw, which is a choice with a cost on both sides; it has its own section below.
 
 ### What those settings produce
@@ -73,6 +82,13 @@ settles at a steady state:
 
 The three expected payouts add to exactly `H`. All of the yield goes out as prizes and
 none of it accumulates forever.
+
+That table is the hourly pool. A six-hour pool collects six times as much in one period and
+holds its draws six times less often, and its shorter odds spread that income over the same
+number of prizes: the grand tier settles at 3.2 H of liquidity and a prize of 1.6 H, the
+mid tier at 0.8 H and 0.4 H, and the frequent tier is unchanged at 0.1 H a prize. Measured in real money rather than in
+`H`, the grand prize of a six-hour pool is the same size as the grand prize of an hourly
+one earning at the same rate, because a rarer draw carries six times the harvest.
 
 Those are the nominal figures. The draw runs against the bracket `M` rather than the exact
 total `W`, and `M` sits between `W` and `2W`, so a tier actually pays between half and all
@@ -92,16 +108,19 @@ winnable, but it would sit in the encrypted carry between reconciles, and the pu
 liquidity, which is what sizes the prize, would be only the harvest booked since that
 tier's last reconcile. The next section is that trade in full.
 
-To put a number on it, suppose the Sepolia source drips 10 USDC per period. Then the grand
-prize sits near 96 USDC and lands about once a day, the mid prize near 12 USDC about every
-six hours, and four prizes of about 1 USDC land in every draw, with each of those figures
-free to run up to twice as large depending on the bracket. The live drip rate is
-`5,555 base units a second, which is 19.998 USDC a period` and the live prize sizes are in the "The pool right now" card on the dashboard at `/app`, read from the
+To put a number on it, suppose the Sepolia USDC source drips 10 USDC per period. Then the
+grand prize sits near 96 USDC and lands about once a day, the mid prize near 12 USDC about
+every six hours, and four prizes of about 1 USDC land in every draw, with each of those
+figures free to run up to twice as large depending on the bracket. The live drip rate on
+that pool is
+`5,555 base units a second, which is 19.998 USDC a period`, every pool's rate is listed in
+[pools and tokens](pools-and-tokens.md), and the live prize sizes are in the "The pool right
+now" card on that pool's dashboard at `/app/<slug>`, read from the
 chain.
 
-These are constructor arguments, chosen with PoolTogether V5's odds formula in the deploy
-config. A mainnet deployment with a daily period would use different ones; see
-[deploying](../operations/deploying.md).
+These are constructor arguments, chosen with PoolTogether V5's odds formula and written per
+pool in `packages/contracts/hearth.config.ts`. A mainnet deployment with a daily period
+would use different ones again; see [deploying](../operations/deploying.md).
 
 ## The reconcile cadence, and what raising it costs
 
@@ -138,7 +157,9 @@ Never who won, in either case.
 That makes the count above a disclosed residual rather than a mitigated one. The reasoning
 is unchanged and still true: a per-draw count on a 1 in 24 tier is a measurement over the
 small set of savers eligible in that draw, and it accumulates against a balance that never
-moves. It is written up in [what stays private](../security/what-stays-private.md) and
+moves. It is a weaker measurement in the six-hour pools, whose grand tier is 1 in 4, so
+each count covers about a quarter of the pool rather than a twenty-fourth, and there are
+four of them a day rather than twenty-four. It is written up in [what stays private](../security/what-stays-private.md) and
 carried in the [limitations list](../limitations.md). Two things still limit it. The
 counts are coarse, since nothing finer than a whole number of prizes is ever published.
 And the thresholds cannot be aimed at a suspected balance, because the seed is drawn

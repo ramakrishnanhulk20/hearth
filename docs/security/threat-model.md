@@ -7,6 +7,13 @@ Hearth's core contracts are immutable once deployed. There is no proxy and no up
 path, so nothing on this page can be changed after the fact except by deploying a new
 pool.
 
+**Each pool is isolated.** The seven pools on Sepolia are seven separate deployments of the
+same code, one per confidential token, and they share no storage, no balance and no
+registry. A pool holds only its own token, funds only its own vault and is driven by its
+own keeper account, so a bug in one token's wrapper, an owner pausing one vault or a keeper
+that stops cannot reach another pool's savers or another pool's prize money. What follows
+describes one pool, and applies to each of the seven on its own.
+
 ## 1. A curious observer
 
 Someone with an archive node, a block explorer and time. No capital, no privileged
@@ -207,8 +214,8 @@ which is the whole point of a no-loss design.
 
 ## 7. The token operator
 
-Zama, as owner of the confidential USDC wrapper. Hearth's asset is their contract, not
-ours.
+Zama, as owner of the confidential token wrappers. Every pool's asset is their contract,
+not ours, and each pool sits behind a different one of them.
 
 **Wants:** enumerated, not alleged.
 

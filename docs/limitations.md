@@ -24,8 +24,8 @@ so a smaller batch needs no redeploy.
 
 ## 2. The two-period window, and prizes that expire
 
-A draw must be closed, awarded and evaluated during the two periods that follow it. On
-Sepolia that is two hours. Closing has a tighter deadline still: the middle of the second
+A draw must be closed, awarded and evaluated during the two periods that follow it. That is
+two hours in the USDC pool and half a day in the six-hour ones. Closing has a tighter deadline still: the middle of the second
 of those periods, so that the decryption round trip and the award always have at least
 half a period left. After the window shuts, the draw is over.
 
@@ -47,7 +47,8 @@ permanently at the back of the queue.
 
 Deposits are refused when the amount, or the resulting principal, is above
 `maxPrincipal = (2^64 - 1) / periodLength`. At a one-hour period that is about 5 billion
-USDC. At a daily period it is about 213 million USDC.
+tokens, at the six-hour period the other pools run it is about 854 million, and at a daily
+period it would be about 213 million.
 
 **What it means:** the cap is real, and at a daily period on mainnet it is a number a
 large institution could reach.
@@ -121,13 +122,16 @@ unset.
 **What it does not reach:** Hearth's own ledger. Principal, winnings, per-draw weights and
 per-draw credits live in the vault, and the token holds no access rights on them.
 
-**One product consequence, and the live pool hits it every draw:** a batch's funding
+**One product consequence, and every live pool hits it every draw:** a batch's funding
 transfer carries the total credited to everybody in that batch, so a batch of one carries
 one saver's exact prize, under the observer assumption. The walk's last batch holds a
-single saver whenever the saver count is not a multiple of the batch size. On the live pool
-that is five savers at a batch size of 4 (`KEEPER_BATCH`, `packages/keeper/src/config.ts`),
-so every draw ends with a batch of one, and the `Evaluated` event in that same transaction
-names the saver it belongs to.
+single saver whenever the saver count is not a multiple of the batch size. Each of the
+seven pools is seeded with five savers at a batch size of 4 (`KEEPER_BATCH`,
+`packages/keeper/src/config.ts`), so every draw ends with a batch of one, and the
+`Evaluated` event in that same transaction names the saver it belongs to.
+
+The seven pools are seven separate wrappers with seven separate owners' powers, so this
+applies pool by pool rather than once across all of them.
 
 No minimum batch can fix this, because `evaluate(uint32,uint256)`
 (`packages/contracts/contracts/HearthVault.sol`) is permissionless and takes the batch size
@@ -155,18 +159,21 @@ throughout.
 **What reduces it:** every step is permissionless and the app exposes them, so any saver
 can push a draw along. The pool also implements Chainlink's automation interface for the
 close step, which is the only step needing no off-chain data and the only one with a
-deadline, but no upkeep is registered on the demo pool, so today the keeper and the app are
-the whole of it.
+deadline, but no upkeep is registered on any of the seven pools, so today the keepers and
+the app are the whole of it. Each pool has its own keeper process on its own account, so a
+keeper that stops, or an account that runs out of Sepolia ETH, costs that pool its draws
+and leaves the other six running.
 
 ## 9. Yield on Sepolia is sponsored, not earned
 
-The live pool's prize money comes from a sponsor-funded balance that drips at a set rate.
+Every pool's prize money comes from its own sponsor-funded balance, which drips at a set
+rate.
 
 **What it means:** it is not real yield. Nobody is earning it from lending or from a
 vault. When the sponsored balance runs out, prizes stop. A sponsorship cannot be taken
 back once made, and only the source's owner can change the rate.
 
-**Why:** there is no venue on Sepolia that pays yield on Zama's mock USDC. Aave refuses
+**Why:** there is no venue on Sepolia that pays yield on Zama's mock tokens. Aave refuses
 those deposits, Compound wants Circle's own USDC, and Zama's Sepolia vault is idle-only
 with no yield adapter, which is Zama's own description of it.
 
@@ -279,6 +286,16 @@ deployment that values the slower measurement more than the visible pot sets it 
 
 ## Not a limitation, but worth stating plainly
 
+- **Six of the seven pools draw every six hours, and that is a gas decision.** A draw at
+  five savers costs `8,456,388` gas, so seven hourly pools would spend about `1.43 ETH` a
+  day on Sepolia, which public faucets cannot keep up with. Only the USDC pool, deployed
+  first, still draws hourly. Each pool's tier odds are set against its own period, so the
+  prize rhythm is the same on both clocks.
+- **The sixteen languages are machine translation.** The interface copy and the translated
+  documentation pages were written by a model, not by native speakers, and have not been
+  professionally reviewed. English is the source of truth for every number, contract name
+  and claim on this site, and a page that has not been translated falls back to English
+  rather than to a guess.
 - **A large saver wins often.** Odds are proportional to time-weighted balance, so someone
   holding a lot for a long time wins a lot. That is the design, not a flaw.
 - **Prize sizes and prize counts are public.** They always were in PoolTogether. What is

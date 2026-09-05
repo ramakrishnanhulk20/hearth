@@ -15,9 +15,11 @@ periodStart(p) = firstPeriodAt + (p - 1) * L
 periodEnd(p)   = periodStart(p + 1)
 ```
 
-On Sepolia `L` is one hour, so a visitor sees a full cycle inside one sitting. On mainnet
-a real deployment would use a day, which is what PoolTogether V5 uses. The period is a
-constructor argument, so the same code serves both.
+Every pool has its own `L`. On Sepolia the USDC pool runs one hour and the other six run
+six hours, so a visitor sees a full cycle inside one sitting. On mainnet a real deployment
+would use a day, which is what PoolTogether V5 uses. The period is a constructor argument,
+so the same code serves all three, and each pool's tier odds are set against its own
+period. See [pools and tokens](pools-and-tokens.md).
 
 Draw `p` covers period `p`. It is decided entirely by balances held during period `p`.
 Nothing that happens after period `p` ends can change its outcome.
@@ -25,7 +27,7 @@ Nothing that happens after period `p` ends can change its outcome.
 ## The window, and the deadline for closing
 
 Every step of draw `p` happens during periods `p+1` and `p+2`. That is the window, and it
-ends at `periodEnd(p + 2)`. On Sepolia that gives two hours.
+ends at `periodEnd(p + 2)`. That is two hours in the USDC pool and half a day in the others.
 
 Closing has a tighter deadline than the rest of the window:
 

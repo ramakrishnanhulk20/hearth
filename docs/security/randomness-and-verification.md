@@ -117,7 +117,9 @@ arithmetic if you would rather check the contract against your own code.
 
 A worked example with small numbers is in
 [winner selection](../concepts/winner-selection.md). A filled example from a real Sepolia
-draw is here:
+draw is here, taken from the `usdc` pool, whose prize pool is
+`0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2`. Every pool publishes the same fields for its
+own draws:
 
 | Field | Value |
 | --- | --- |
@@ -134,8 +136,9 @@ three `TierReconciled` events for that draw, since what a tier offered and did n
 exactly the carry it published. The grand and mid tiers paid nothing in this draw and handed
 their whole offer back, which is what a 1 in 24 and a 1 in 6 tier do most of the time.
 
-The app's verify panel does this arithmetic in the browser for any address you type in. It
-has no privileged access; it is the same public inputs and the same formula.
+The app's verify panel does this arithmetic in the browser for any address you type in, at
+`/verify?pool=<slug>` for the pool you want. It has no privileged access; it is the same
+public inputs and the same formula.
 
 ## Why the remainder is unbiased
 

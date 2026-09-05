@@ -4,6 +4,33 @@ One repeatable script, never manual clicking. This page is the order, the parame
 what each of them means, so that a reviewer can read the deployed constructor arguments
 and know they match.
 
+Hearth deploys one pool per confidential token: a vault, a prize pool and a yield source
+per token, sharing nothing with any other pool. One run opens one pool, because one
+deployer nonce runs one deploy, and the token is chosen with `HEARTH_TOKEN`. Every task
+afterwards takes `--token`:
+
+```
+cd packages/contracts
+HEARTH_TOKEN=weth npx hardhat deploy --network sepolia
+npx hardhat hearth:verify  --network sepolia --token weth
+npx hardhat hearth:seed    --network sepolia --token weth
+npx hardhat hearth:status  --network sepolia --token weth
+```
+
+Leave both off and you get `usdc`, the network's default token. An unknown slug fails with
+the list of pools that network does have. Every pool's parameters live in one file,
+`packages/contracts/hearth.config.ts`: the asset pair, the period, the tier set, the
+initial bracket, the drip rate, the sponsorship, the five demo stakes and the account index
+its keeper signs from. Read that file next to the tables below; it is the same numbers.
+
+The deploy reuses any contract that already has a saved deployment rather than replacing
+it, so a second run is a no-op. A live pool holding savers' money and days of draw history
+can never be moved to a fresh address by rerunning the script. To replace one deliberately,
+delete its file under `deployments/<network>/` first.
+
+It writes `deployments/sepolia/hearth.<slug>.json`, which is what a keeper is pointed at
+with `HEARTH_ADDRESSES_FILE` and what the app's pool list is generated from.
+
 ## What depends on what
 
 ```mermaid
@@ -39,8 +66,28 @@ three.
 | 4 | Deploy the yield source, pointing at the pool as recipient | It has to know where to send harvests. |
 | 5 | Wire: `pool.setYieldSource(source)` | Emits `YieldSourceSet`. Until this lands, a close harvests nothing and emits `HarvestFailed`. |
 
-After step 5, seed the pool: sponsor the yield source so prizes exist, and run the demo
-seeding script so a first visitor lands on a populated pool rather than an empty one.
+After step 5, seed the pool: `hearth:seed --token <slug>` sponsors the yield source so
+prizes exist and puts five demo savers of different sizes in from accounts 2 to 6, so a
+first visitor lands on a populated pool rather than an empty one. Every step of it checks
+the chain for what is already done, so a seed interrupted by a relayer hiccup is safe to
+run again.
+
+The keeper for that pool also needs its own Sepolia ETH, and so do the five demo savers:
+
+```
+npx hardhat hearth:spread-gas --network sepolia --token weth
+npx hardhat hearth:spread-gas --network sepolia --keepers 10,11,12,13,14,15 --savers false
+```
+
+The first funds one pool's keeper and the savers; the second funds several keeper accounts
+in one pass, which is what opening six pools at once needs.
+
+Then point the app at what was deployed:
+
+```
+cd ../web
+node scripts/sync-pools.mjs
+```
 
 ## The parameters
 
@@ -55,13 +102,13 @@ SponsoredYieldSource(IERC7984ERC20Wrapper asset, address recipient, uint64 rateP
 
 | Parameter | Meaning | Getting it wrong |
 | --- | --- | --- |
-| `asset` | The ERC-7984 confidential token savers deposit. Zama's cUSDC. | A token with a wrapper rate other than 1 changes what a unit means. |
+| `asset` | The ERC-7984 confidential token savers deposit, one of Zama's seven. | Every wrapper reads six decimals, and the deploy refuses to continue if the chain disagrees with the config. The rate to the public token underneath is not 1 on every pool: on the 18-decimal WETH mock it is a million million, so anything reading the public token must apply it. |
 | `periodLength` (`L`) | Seconds in a period. Immutable. | Also sets the per-saver cap, `(2^64 - 1) / L`. Too small an `L` and the cap is huge but draws are noisy; too large and the cap tightens. |
 | `firstPeriodAt` | Timestamp when period 1 starts. Immutable, and must be at or before deployment. | A future value makes `period(now)` undefined until it passes. |
 | `owner` | Two-step owner. Renouncing is disabled. | The powers are listed in the [threat model](../security/threat-model.md). |
 
 `maxPrincipal` is derived from `periodLength`, not set. At one hour it is about 5 billion
-USDC. At a day it is about 213 million USDC.
+tokens, at six hours about 854 million, and at a day about 213 million.
 
 The vault owns the clock. The pool takes the vault address and reads periods from it, so
 there is no way for the two contracts to disagree about what period it is.
@@ -114,24 +161,34 @@ Sponsoring is a separate call after deployment, not a constructor argument. It b
 exactly what the wrapper minted rather than what the sponsor asked for, and it cannot be
 undone.
 
-## Two parameter sets
+## Three parameter sets
 
-| Setting | Sepolia, live | Mainnet, candidate |
-| --- | --- | --- |
-| Period length | 1 hour | 1 day |
-| Window | 2 hours (two periods) | 2 days |
-| Close deadline | 1 hour 30 minutes after the period ends | 1 day 12 hours after |
-| Per-saver cap | About 5 billion USDC | About 213 million USDC |
-| Grand tier | count 1, odds 1/24, shares 40, reconcile every draw | count 1, odds 1/30, shares 50, reconcile every draw |
-| Mid tier | count 1, odds 1/6, shares 20, reconcile every draw | count 1, odds 1/7, shares 25, reconcile every draw |
-| Frequent tier | count 4, odds 1, shares 40, reconcile every draw | count 4, odds 1, shares 25, reconcile every draw |
-| Utilisation | 50 percent | 50 percent |
-| Yield source | `SponsoredYieldSource` | `ConfidentialVaultYieldSource` over Zama's batcher |
-| Grand prize fires | About once a day | Set by the odds chosen |
+Sepolia runs two of them, because the pools run on two clocks.
 
-The Sepolia numbers exist so a visitor sees a full cycle in one sitting: a draw every hour,
-four small prizes every time, a grand prize about daily. They are not what a real
+| Setting | Sepolia `usdc` | Sepolia, the other six | Mainnet, candidate |
+| --- | --- | --- | --- |
+| Period length | 1 hour | 6 hours | 1 day |
+| Window | 2 hours (two periods) | 12 hours | 2 days |
+| Close deadline | 1 hour 30 minutes after the period ends | 9 hours after | 1 day 12 hours after |
+| Per-saver cap | About 5 billion tokens | About 854 million | About 213 million |
+| Grand tier | count 1, odds 1/24, shares 40, reconcile every draw | count 1, odds 1/4, shares 40, reconcile every draw | count 1, odds 1/30, shares 50, reconcile every draw |
+| Mid tier | count 1, odds 1/6, shares 20, reconcile every draw | count 1, odds 1/2, shares 20, reconcile every draw | count 1, odds 1/7, shares 25, reconcile every draw |
+| Frequent tier | count 4, odds 1, shares 40, reconcile every draw | count 4, odds 1, shares 40, reconcile every draw | count 4, odds 1, shares 25, reconcile every draw |
+| Utilisation | 50 percent | 50 percent | 50 percent |
+| Yield source | `SponsoredYieldSource` | `SponsoredYieldSource` | `ConfidentialVaultYieldSource` over Zama's batcher |
+| Grand prize fires | About once a day | About once a day | Set by the odds chosen |
+
+The Sepolia numbers exist so a visitor sees a full cycle in one sitting: four small prizes
+every draw and a grand prize about daily on either clock. They are not what a real
 deployment would use.
+
+Why two clocks. A draw at five savers costs `8,456,388` gas, so seven pools drawing hourly
+would spend about `1.43 ETH` a day on Sepolia, which public faucets cannot keep up with. Six
+hours cuts that to four draws a day per pool, about `0.41 ETH` a day for all seven. The
+odds are set against each pool's own period rather than carried over, which is why the
+middle column reads 1/4 and 1/2 where the first reads 1/24 and 1/6, and why the grand prize
+still lands about once a day in both. The USDC pool kept its hourly clock because it was
+deployed first and its draw history is filed under it.
 
 The mainnet column is a candidate, not a deployment. The rule for filling it is the same
 one that produced the Sepolia column: pick how many draws you want between grand prizes and
@@ -144,32 +201,44 @@ with grand odds of 1 in 365 gives an annual grand prize, which is the shape V5 u
 
 ## Deployed addresses
 
-| Contract | Network | Address | Verified |
-| --- | --- | --- | --- |
-| HearthVault | Sepolia | `0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52` | [Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) |
-| HearthPrizePool | Sepolia | `0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2` | [Etherscan](https://sepolia.etherscan.io/address/0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2#code) |
-| SponsoredYieldSource | Sepolia | `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91` | [Etherscan](https://sepolia.etherscan.io/address/0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91#code) |
-| Confidential USDC (Zama) | Sepolia | `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639` | Zama's deployment |
-| Mock USDC (Zama) | Sepolia | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` | Zama's deployment |
+Seven pools on Sepolia, every contract verified on Etherscan. The token pair each one holds
+is Zama's and is listed in [pools and tokens](../concepts/pools-and-tokens.md), together
+with the seeded stakes and drip rate per pool.
 
-Deployment block: `11622398`. First period start: `1788386400 (2 September 2026, 22:00:00 UTC)`.
+| Pool | HearthVault | HearthPrizePool | SponsoredYieldSource | Deployed in block |
+| --- | --- | --- | --- | --- |
+| `usdc` | `0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52` | `0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2` | `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91` | `11622398` |
+| `usdt` | `0xe54F44dE64F8A7abc0647eaae547dD59ce0EFfac` | `0x6a83Beb2Dc3f258107Cad5e17BC57657fAd4fbd1` | `0x5bb1Cd5380Cb9f2B15569030fF0dB7a445cF54cA` | `11641314` |
+| `weth` | `0x3D1A182782B68fE270A66294C9adaC7F005c4f14` | `0x1a11e7C689F244fA8Dd5f4abA8F2F3131090cc1C` | `0x40DF298f15c6136294eC651aD7b0c1C6F221DE8F` | `11641366` |
+| `bron` | `0x18086DC8271f8A73c5Ea985fd519527Dbb991279` | `0x2Ed982979CD184494B947a1E38E597494a38ACe4` | `0x0cD1155D752bD81b3a437a6f0B3965CAA2A1C8e9` | `11641408` |
+| `zama` | `0xEEC26386F273c6678cA538AcA18e1d9384eA9F09` | `0x873B285404199D46325a294Aa0EC7a79C30A7fF7` | `0xdD352D70311E834ab75307f53d5C276060081d23` | `11641447` |
+| `tgbp` | `0xCe95dAa01f5354aA8887A5952E403D26d452c323` | `0xC531D54ee2c695e0eBfe8b8258e9Fd80fd507095` | `0xDEa2BD6351072F735B6ea83c357bF157d83c01af` | `11641484` |
+| `xaut` | `0x77f701101d66FbD522A3bFdC2c00DB09a4F57daE` | `0x9a2888aca42c707A3BC0D561FdF6ff8Abfda5201` | `0x03fDdAA7C4323C53CE511CC49D4c33B26B492af7` | `11641523` |
+
+First period start: `1788386400 (2 September 2026, 22:00:00 UTC)` for `usdc`,
+`1788620400 (5 September 2026, 15:00:00 UTC)` for `usdt`, and
+`1788624000 (5 September 2026, 16:00:00 UTC)` for the remaining five. `firstPeriodAt` is
+immutable and must be at or before the deployment block, so the deploy reads the chain's
+own clock and rounds down to the top of the hour, never the machine's clock.
 
 ## Verification
 
 Verification is part of the deploy, not an afterthought. A reviewer who cannot read the
 deployed source has to take our word for the whole of this documentation.
 
-1. Verify all three contracts on Etherscan with the constructor arguments recorded by the
-   deploy script.
+1. Verify all three of that pool's contracts on Etherscan with the constructor arguments
+   recorded by the deploy script: `hearth:verify --token <slug>` does it, contract by
+   contract, and says which were already verified.
 2. Check that the verified constructor arguments match the parameter tables above. In
-   particular that the pool was given the deployed vault and the same `asset`, and that
-   the tier set matches the Sepolia column.
-3. Check that `vault.prizePool()` is the deployed pool and `pool.yieldSource()` is the
-   deployed source.
-4. Check the token: `asset` should be Zama's cUSDC at
-   `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639`, whose `rate()` is 1 and whose
-   `underlying()` is Zama's mock USDC. A wrapper rate other than 1 changes what a base
-   unit means throughout.
+   particular that the pool was given its own vault and the same `asset`, and that the tier
+   set matches the column for that pool's clock.
+3. Check that `vault.prizePool()` is that pool's prize pool and `pool.yieldSource()` is
+   that pool's source, and that neither points at another pool's contracts.
+4. Check the token: `asset` should be the confidential wrapper for that pool from Zama's
+   published Sepolia list, and `underlying()` should be the public mock beneath it. The
+   wrapper's `rate()` is 1 only where the public token also reads six decimals; on the WETH
+   pool it is a million million, and a rate other than 1 changes what a base unit means for
+   anything touching the public token.
 5. Read `pool.scaleBits()` after a few draws and check it has settled near the bit length
    the pool's real size implies. A tracker stuck far from that would mean the initial guess
    was wildly off and the correction has not caught up.
@@ -209,28 +278,35 @@ nothing obvious to point at.
 | `SEPOLIA_RPC_URL` | No | Your own Sepolia endpoint. The landing page and the `/api/activity` route read the chain on the server, so this one never reaches a browser. Log queries need it, because the free public node caps `eth_getLogs` ranges far below a day of blocks |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Yes | Optional. The wallet reads use it and fall back to `https://ethereum-sepolia-rpc.publicnode.com` when it is unset. Visible in the bundle, so it must be one you are happy to publish |
 | `NEXT_PUBLIC_CHAIN_ID` | Yes | `11155111` for Ethereum Sepolia. The app defaults to it if unset |
-| `NEXT_PUBLIC_HEARTH_VAULT` | Yes | From `packages/contracts/deployments/sepolia/hearth.json` |
-| `NEXT_PUBLIC_HEARTH_POOL` | Yes | Same file |
-| `NEXT_PUBLIC_HEARTH_SOURCE` | Yes | Same file |
 
-The confidential asset and its underlying ERC-20 are deliberately not configured here. The
-app reads them from the vault and the wrapper on chain, so it cannot talk to a token the
-vault would refuse.
+No contract address is an environment variable any more. The app reads every pool from
+`packages/web/src/lib/chain/pools.json`, which `node scripts/sync-pools.mjs` generates from
+the address files the deploy script wrote, so an address the app shows can always be traced
+to a deployment record rather than to something somebody typed. Run that script after every
+deploy and commit the result. The three public variables that used to hold one pool's
+vault, prize pool and yield source addresses are gone; delete them from any environment
+that still sets them, because nothing reads them.
+
+The confidential asset and its underlying ERC-20 are also read from the vault and the
+wrapper on chain, so the app cannot talk to a token the vault would refuse.
 
 ### After the first deploy
 
 1. Open the production URL on a phone. Every page has to work at 375 pixels wide.
 2. Connect a wallet on Sepolia and walk the two-minute path from the README against the
    deployed site rather than localhost.
-3. Open `/verify` and paste a saver's address. The thresholds come from a contract call, so
-   if they render, the deployed app is talking to the deployed vault.
+3. Open `/verify?pool=<slug>` and paste a saver's address. The thresholds come from a
+   contract call, so if they render, the deployed app is talking to that pool's deployed
+   vault.
+4. Open the pool picker and check every slug loads its own dashboard, and that the
+   restricted token shows its refusal page rather than a broken screen.
 
 ---
 
 ## What this page does not cover
 
-It does not cover running the pool after deployment, which is
-[the keeper](keeper.md). It does not cover mainnet operational readiness: the Confidential
+It does not cover running the pools after deployment, which is
+[the keeper](keeper.md), and one keeper process per pool is part of that page. It does not cover mainnet operational readiness: the Confidential
 Vault adapter is specified against Zama's published batcher interface and is not implemented
 in this repository, and taking it live is described in
 [yield source](../concepts/yield-source.md).

@@ -2,10 +2,11 @@
 
 # Hearth
 
-**Confidential no-loss prize savings on the Zama Protocol.** You deposit confidential
-USDC, your balance stays encrypted on chain, the yield the pool earns is handed out as
-prizes every period, and your principal is withdrawable at any time. Nobody, including
-us, can read what you saved or what you won. Anybody can check that the draw was honest.
+**Confidential no-loss prize savings on the Zama Protocol, live on seven confidential
+tokens.** You deposit a confidential token, your balance stays encrypted on chain, the
+yield the pool earns is handed out as prizes every period, and your principal is
+withdrawable at any time. Nobody, including us, can read what you saved or what you won.
+Anybody can check that the draw was honest.
 
 [Live app](https://hearth-ram.vercel.app) · [Documentation](https://hearth-ram.vercel.app/docs) · [Contracts on Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) · [Demo video](https://youtu.be/HEZczDU8iB4) · [X thread](https://x.com/ram_krish2000/status/2095949745135268159)
 
@@ -13,18 +14,59 @@ us, can read what you saved or what you won. Anybody can check that the draw was
 
 ## Live deployments
 
-Ethereum Sepolia, chain id 11155111. Period length one hour.
+Ethereum Sepolia, chain id 11155111. Seven pools, one per confidential token Zama
+publishes on Sepolia. Each pool is its own vault, its own prize pool, its own yield source
+and its own keeper process, and they share nothing on chain. Every contract below is
+verified on Etherscan.
 
-| Network | Contract | Address | Verified |
-| --- | --- | --- | --- |
-| Sepolia | HearthVault | `0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52` | [Etherscan](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) |
-| Sepolia | HearthPrizePool | `0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2` | [Etherscan](https://sepolia.etherscan.io/address/0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2#code) |
-| Sepolia | SponsoredYieldSource | `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91` | [Etherscan](https://sepolia.etherscan.io/address/0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91#code) |
-| Sepolia | Confidential USDC (Zama's, not ours) | `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639` | [Etherscan](https://sepolia.etherscan.io/address/0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639#code) |
-| Sepolia | Mock USDC with an open `mint` (Zama's) | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` | [Etherscan](https://sepolia.etherscan.io/address/0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF#code) |
+| Pool | Draw every | HearthVault | HearthPrizePool | SponsoredYieldSource |
+| --- | --- | --- | --- | --- |
+| `usdc` | 1 hour | [`0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52`](https://sepolia.etherscan.io/address/0x0F93e5db6027b4FB1C76566d24aA2D2E417fAF52#code) | [`0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2`](https://sepolia.etherscan.io/address/0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2#code) | [`0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91`](https://sepolia.etherscan.io/address/0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91#code) |
+| `usdt` | 6 hours | [`0xe54F44dE64F8A7abc0647eaae547dD59ce0EFfac`](https://sepolia.etherscan.io/address/0xe54F44dE64F8A7abc0647eaae547dD59ce0EFfac#code) | [`0x6a83Beb2Dc3f258107Cad5e17BC57657fAd4fbd1`](https://sepolia.etherscan.io/address/0x6a83Beb2Dc3f258107Cad5e17BC57657fAd4fbd1#code) | [`0x5bb1Cd5380Cb9f2B15569030fF0dB7a445cF54cA`](https://sepolia.etherscan.io/address/0x5bb1Cd5380Cb9f2B15569030fF0dB7a445cF54cA#code) |
+| `weth` | 6 hours | [`0x3D1A182782B68fE270A66294C9adaC7F005c4f14`](https://sepolia.etherscan.io/address/0x3D1A182782B68fE270A66294C9adaC7F005c4f14#code) | [`0x1a11e7C689F244fA8Dd5f4abA8F2F3131090cc1C`](https://sepolia.etherscan.io/address/0x1a11e7C689F244fA8Dd5f4abA8F2F3131090cc1C#code) | [`0x40DF298f15c6136294eC651aD7b0c1C6F221DE8F`](https://sepolia.etherscan.io/address/0x40DF298f15c6136294eC651aD7b0c1C6F221DE8F#code) |
+| `bron` | 6 hours | [`0x18086DC8271f8A73c5Ea985fd519527Dbb991279`](https://sepolia.etherscan.io/address/0x18086DC8271f8A73c5Ea985fd519527Dbb991279#code) | [`0x2Ed982979CD184494B947a1E38E597494a38ACe4`](https://sepolia.etherscan.io/address/0x2Ed982979CD184494B947a1E38E597494a38ACe4#code) | [`0x0cD1155D752bD81b3a437a6f0B3965CAA2A1C8e9`](https://sepolia.etherscan.io/address/0x0cD1155D752bD81b3a437a6f0B3965CAA2A1C8e9#code) |
+| `zama` | 6 hours | [`0xEEC26386F273c6678cA538AcA18e1d9384eA9F09`](https://sepolia.etherscan.io/address/0xEEC26386F273c6678cA538AcA18e1d9384eA9F09#code) | [`0x873B285404199D46325a294Aa0EC7a79C30A7fF7`](https://sepolia.etherscan.io/address/0x873B285404199D46325a294Aa0EC7a79C30A7fF7#code) | [`0xdD352D70311E834ab75307f53d5C276060081d23`](https://sepolia.etherscan.io/address/0xdD352D70311E834ab75307f53d5C276060081d23#code) |
+| `tgbp` | 6 hours | [`0xCe95dAa01f5354aA8887A5952E403D26d452c323`](https://sepolia.etherscan.io/address/0xCe95dAa01f5354aA8887A5952E403D26d452c323#code) | [`0xC531D54ee2c695e0eBfe8b8258e9Fd80fd507095`](https://sepolia.etherscan.io/address/0xC531D54ee2c695e0eBfe8b8258e9Fd80fd507095#code) | [`0xDEa2BD6351072F735B6ea83c357bF157d83c01af`](https://sepolia.etherscan.io/address/0xDEa2BD6351072F735B6ea83c357bF157d83c01af#code) |
+| `xaut` | 6 hours | [`0x77f701101d66FbD522A3bFdC2c00DB09a4F57daE`](https://sepolia.etherscan.io/address/0x77f701101d66FbD522A3bFdC2c00DB09a4F57daE#code) | [`0x9a2888aca42c707A3BC0D561FdF6ff8Abfda5201`](https://sepolia.etherscan.io/address/0x9a2888aca42c707A3BC0D561FdF6ff8Abfda5201#code) | [`0x03fDdAA7C4323C53CE511CC49D4c33B26B492af7`](https://sepolia.etherscan.io/address/0x03fDdAA7C4323C53CE511CC49D4c33B26B492af7#code) |
 
-Deployment block `11622398`. First period starts at `1788386400 (2 September 2026, 22:00:00 UTC)`.
-Chainlink Automation upkeep: not registered yet, the keeper alone runs the demo pool.
+The token each pool holds is Zama's, not ours: a confidential ERC-7984 wrapper over a
+public mock ERC-20 whose `mint` anyone may call, capped at a million tokens a call. Every
+wrapper reads six decimals whatever the token underneath reads, and the wrapper's `rate()`
+is the conversion (confidential WETH sits over an 18-decimal token, so its rate is a
+million million).
+
+| Pool | Confidential asset (ERC-7984) | Public token with the open `mint` |
+| --- | --- | --- |
+| `usdc` | [`0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639`](https://sepolia.etherscan.io/address/0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639#code) | [`0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF`](https://sepolia.etherscan.io/address/0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF#code) |
+| `usdt` | [`0x4E7B06D78965594eB5EF5414c357ca21E1554491`](https://sepolia.etherscan.io/address/0x4E7B06D78965594eB5EF5414c357ca21E1554491#code) | [`0xa7dA08FafDC9097Cc0E7D4f113A61e31d7e8e9b0`](https://sepolia.etherscan.io/address/0xa7dA08FafDC9097Cc0E7D4f113A61e31d7e8e9b0#code) |
+| `weth` | [`0x46208622DA27d91db4f0393733C8BA082ed83158`](https://sepolia.etherscan.io/address/0x46208622DA27d91db4f0393733C8BA082ed83158#code) | [`0xff54739b16576FA5402F211D0b938469Ab9A5f3F`](https://sepolia.etherscan.io/address/0xff54739b16576FA5402F211D0b938469Ab9A5f3F#code) |
+| `bron` | [`0xaa5612FA27c927a0c7961f5AEFEE5ba3A0F9C891`](https://sepolia.etherscan.io/address/0xaa5612FA27c927a0c7961f5AEFEE5ba3A0F9C891#code) | [`0xFf021fB13cA64e5354c62c954b949a88cfDEb25E`](https://sepolia.etherscan.io/address/0xFf021fB13cA64e5354c62c954b949a88cfDEb25E#code) |
+| `zama` | [`0xf2D628d2598aF4eAF94CB76a437Ff86CA78FfbFB`](https://sepolia.etherscan.io/address/0xf2D628d2598aF4eAF94CB76a437Ff86CA78FfbFB#code) | [`0x75355a85c6FB9df5f0C80FF54e8747EEe9a0BF57`](https://sepolia.etherscan.io/address/0x75355a85c6FB9df5f0C80FF54e8747EEe9a0BF57#code) |
+| `tgbp` | [`0xfCE5c7069c5525eF6c8C2b2E35A745bA20a2F7CC`](https://sepolia.etherscan.io/address/0xfCE5c7069c5525eF6c8C2b2E35A745bA20a2F7CC#code) | [`0x93c931278A2aad1916783F952f94276eA5111442`](https://sepolia.etherscan.io/address/0x93c931278A2aad1916783F952f94276eA5111442#code) |
+| `xaut` | [`0xe4FcF848739845BC81Dee1d5352cf3844F0a60C7`](https://sepolia.etherscan.io/address/0xe4FcF848739845BC81Dee1d5352cf3844F0a60C7#code) | [`0x24377AE4AA0C45ecEe71225007f17c5D423dd940`](https://sepolia.etherscan.io/address/0x24377AE4AA0C45ecEe71225007f17c5D423dd940#code) |
+
+The USDC pool came first: block `11622398`, first period `1788386400 (2 September 2026,
+22:00:00 UTC)`, hourly draws ever since and now past draw 66. The other six were deployed
+on 5 September 2026, in blocks `11641314` through `11641523`, with period 1 starting at
+`1788620400` for `usdt` and `1788624000` for the rest.
+
+Six hours rather than an hour, for the six later pools, is a gas decision and nothing else:
+a draw at five savers is `8,456,388` gas, so seven hourly pools would spend about
+`1.43 ETH` a day on Sepolia and could not be kept funded from public faucets. With six of
+them drawing four times a day instead, all seven together cost about `0.41 ETH` a day. The
+six-hour odds are set against the longer period rather than carried over, so the grand
+prize still pays about once a day in every pool.
+
+**The eighth token, refused on purpose.** Zama also publishes a non-mock Confidential tGBP
+at `0x167DC962808B32CFFFc7e14B5018c0bE06A3A208` over
+`0xf6Ef9ADB61A48E29E36bc873070A46A3D2667ff3`, whose underlying mint is restricted to the
+issuer. Nobody can obtain the public token, so nobody can wrap it and no pool can exist on
+it. Hearth lists it in the pool picker anyway, greyed out, with the reason written next to
+it, and choosing it opens a page that names the token, links both contracts, says whose
+restriction it is and offers no wallet action. Leaving it off the list would have looked
+like an oversight instead of a decision.
+
+Chainlink Automation upkeep: not registered yet, the keepers alone run the demo pools.
 
 ---
 
@@ -91,21 +133,22 @@ the one a transparent chain cannot offer. Full argument in
 
 ### Save privately
 
-- Deposit confidential USDC in one transaction. The amount travels as a ciphertext handle,
-  which is a pointer to an encrypted value rather than the value itself.
+- Pick one of seven tokens and deposit it in one transaction. The amount travels as a
+  ciphertext handle, which is a pointer to an encrypted value rather than the value itself.
 - Principal, unclaimed winnings, your time-weighted weight for each draw and your credit
   for each draw are all encrypted, and only your address is granted access to them.
 - Reading your own numbers is an EIP-712 signature, a typed off-chain signature that
   proves you control the address. It is not a transaction. No gas, no trace.
-- Wrapping public USDC into confidential USDC and depositing are deliberately two separate
-  steps, because doing both in one click publishes your deposit amount. The app explains
-  why at the point where it costs you something.
+- Wrapping the public token into the confidential one and depositing are deliberately two
+  separate steps, because doing both in one click publishes your deposit amount. The app
+  explains why at the point where it costs you something.
 
 ### Win fairly
 
-- Odds come from your average balance across the whole period, measured in USDC-seconds,
-  not from your balance when the draw happens. Depositing five minutes before a one-hour
-  period closes buys one twelfth of the odds of having held the same amount all period.
+- Odds come from your average balance across the whole period, measured in
+  balance-seconds, not from your balance when the draw happens. Depositing five minutes
+  before a one-hour period closes buys one twelfth of the odds of having held the same
+  amount all period.
 - The random seed comes from `FHE.randEuint64`, generated inside Zama's coprocessor under
   the network key. Nobody sees it when it is drawn and closing a draw succeeds exactly
   once, so nobody can re-roll it.
@@ -144,9 +187,10 @@ the one a transparent chain cannot offer. Full argument in
 - `evaluate` takes a count, never a list of addresses. The walk starts at a point that
   draw's seed decides, so nobody can pick themselves, and pressing the button says nothing
   about whether you won.
-- A keeper script runs the whole cycle. The pool implements Chainlink's automation
+- A keeper process runs the whole cycle, one per pool, each on its own account. The pool
+  implements Chainlink's automation
   interface for the close step, the only step needing no off-chain data and the only one
-  with a deadline, though no upkeep is registered on the demo pool yet.
+  with a deadline, though no upkeep is registered on any of the seven pools yet.
 - A stalled keeper costs the pool a draw, never money. Liquidity that was never offered
   stays in its tier, and a late award still books the yield.
 
@@ -163,16 +207,19 @@ which contracts depend on which. All three are kept current in
 ```mermaid
 flowchart LR
     Saver["Saver wallet"]
-    USDC["USDC (public ERC-20)"]
-    cUSDC["Confidential USDC<br/>Zama ERC-7984 wrapper"]
-    Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
-    Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
-    Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
-    Keeper["Keeper script<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
+    Public["Public ERC-20<br/>USDC, USDT, WETH,<br/>BRON, ZAMA, tGBP, XAUt"]
+    cToken["Confidential token<br/>Zama ERC-7984 wrapper"]
     Relayer["Zama relayer + KMS"]
 
-    Saver -- "wrap" --> cUSDC
-    USDC -- "approve" --> cUSDC
+    subgraph Set["One set per token, seven on Sepolia"]
+        Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
+        Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
+        Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
+        Keeper["Keeper process, one per pool<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
+    end
+
+    Saver -- "wrap" --> cToken
+    Public -- "approve" --> cToken
     Saver -- "confidentialTransferAndCall" --> Vault
     Saver -- "withdraw" --> Vault
     Vault -- "scale of the aggregate" --> Pool
@@ -182,6 +229,11 @@ flowchart LR
     Keeper -- "public decryption proofs" --> Relayer
     Saver -- "EIP-712 user decryption" --> Relayer
 ```
+
+The box holds one token's pool. Seven of them run on Sepolia, sharing nothing on chain:
+seven vaults, seven prize pools, seven yield sources and seven keeper processes. Addresses
+per pool are in the table above and in
+[pools and tokens](docs/concepts/pools-and-tokens.md).
 
 ### One draw, end to end
 
@@ -194,6 +246,7 @@ sequenceDiagram
     participant K as Keeper
     participant Z as Zama relayer/KMS
 
+    Note over V,K: one token's pool, and each of the seven runs this on its own clock
     S->>V: confidentialTransferAndCall (encrypted deposit)
     V->>V: principal += amount, observations updated
     Note over V,P: period p ends
@@ -225,13 +278,13 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Vault["HearthVault"] --> IERC7984["IERC7984 (Zama cUSDC)"]
+    Vault["HearthVault (x7)"] --> IERC7984["IERC7984<br/>Zama's confidential token"]
     Vault --> FHE["@fhevm/solidity FHE"]
-    Vault --> Pool["HearthPrizePool"]
+    Vault --> Pool["HearthPrizePool (x7)"]
     Pool --> IERC7984
     Pool --> FHE
     Pool --> IYield["IYieldSource"]
-    IYield --> Sponsored["SponsoredYieldSource"]
+    IYield --> Sponsored["SponsoredYieldSource (x7)"]
     IYield -.-> CV["ConfidentialVaultYieldSource (mainnet design, not built)"]
     CV -.-> Batcher["Zama DepositVaultBatcherConfidential (mainnet design, not built)"]
     Pool --> Auto["IAutomationCompatible"]
@@ -239,17 +292,19 @@ flowchart TD
     Pool --> OZ
 ```
 
-Solid edges are contracts in this repository. The two dotted nodes are the mainnet yield
-path: the adapter is specified against Zama's published batcher interface and no adapter
-contract is written here.
+Solid edges are contracts in this repository. `(x7)` marks the three that are deployed once
+per token, each pointing at its own token and at nothing belonging to another pool. The two
+dotted nodes are the mainnet yield path: the adapter is specified against Zama's published
+batcher interface and no adapter contract is written here.
 
 ---
 
 ## How the pool and draws work
 
-Time is cut into equal periods. On Sepolia a period is one hour, so a visitor sees a full
-cycle in one sitting. On mainnet a real deployment would use a day, which is what
-PoolTogether V5 uses. The period is a constructor argument, so the same code serves both.
+Time is cut into equal periods. On Sepolia the USDC pool runs an hour and the other six run
+six hours, so a visitor sees a full cycle in one sitting. On mainnet a real deployment
+would use a day, which is what PoolTogether V5 uses. The period is a constructor argument,
+so the same code serves all three.
 
 Draw `p` covers period `p` and is decided entirely by balances held during period `p`.
 Every step of it happens during the two periods that follow, which is the window. Closing
@@ -295,11 +350,12 @@ the count for that many draws, at the cost of the money nobody won sitting encry
 the public prize dropping to one draw's share until the next reconcile. This deployment
 chose the visible jackpot, and says so in [limitations](docs/limitations.md).
 
-### Seven draws on Sepolia, read from the pool
+### The first seven draws of the USDC pool, read from the pool
 
-Every figure here came from `drawParams(drawId)` on the deployed pool
-`0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2`, read on 3 September 2026. The three prize
-columns are that draw's `prize[tier]` in USDC and the bracket is its `scaleBits`.
+Every figure here came from `drawParams(drawId)` on the deployed `usdc` prize pool
+`0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2`, read on 3 September 2026. That pool draws
+hourly and is now past draw 66; these are its first seven. The three prize columns are that
+draw's `prize[tier]` in USDC and the bracket is its `scaleBits`.
 
 | Draw | Status | Grand | Mid | Frequent | Bracket |
 | --- | --- | --- | --- | --- | --- |
@@ -446,22 +502,28 @@ trivial encrypted zero, `HarvestFailed` is emitted, and the close succeeds.
 
 ### On Sepolia: a sponsored source
 
-`SponsoredYieldSource` holds confidential USDC that a sponsor wrapped into it, and releases
-it at `ratePerSecond`, currently `5,555 base units a second, which is 19.998 USDC a period`. A sponsorship is a donation: there is
-no path to take it back, and only the owner can change the rate. Sponsor amounts, the rate
-and every harvest are public, exactly as the yield a PoolTogether vault contributes is
-public. What is confidential in Hearth is who saved how much and who won, never how much
-money the pool made.
+Each pool has its own `SponsoredYieldSource`. It holds the confidential token a sponsor
+wrapped into it and releases it at `ratePerSecond`: on the USDC pool that is
+`5,555 base units a second, which is 19.998 USDC a period`, and every pool's rate is set in
+whole tokens an hour so two pools on different clocks can be compared. A sponsorship is a
+donation: there is no path to take it back, and only the owner can change the rate. Sponsor
+amounts, the rate and every harvest are public, exactly as the yield a PoolTogether vault
+contributes is public. What is confidential in Hearth is who saved how much and who won,
+never how much money the pool made.
+
+The seven rates and sponsorships are listed in
+[pools and tokens](docs/concepts/pools-and-tokens.md). Each is sized to last more than
+eighty draws, so no pool needs topping up during a demo.
 
 The source of the money is a mock, and this section is where we say so rather than leaving
-anyone to work it out. We looked for a real one first. There is no venue on Sepolia that pays yield on Zama's mock USDC: Aave refuses
+anyone to work it out. We looked for a real one first. There is no venue on Sepolia that pays yield on Zama's mock tokens: Aave refuses
 those deposits because the supply cap is exceeded, Compound wants Circle's own USDC, and
 Zama's own Sepolia vault is idle-only with no yield adapter, which is Zama's own
 description of it.
 
-So the source of the money is a mock. The plumbing is not. Every unit of prize money on the
-live pool was really wrapped, really transferred to the pool as an encrypted transfer, and
-really verified by a KMS-signed decryption before it was credited.
+So the source of the money is a mock. The plumbing is not. Every unit of prize money on
+every one of the seven live pools was really wrapped, really transferred to that pool as an
+encrypted transfer, and really verified by a KMS-signed decryption before it was credited.
 
 ### The pool never books a number the source reports
 
@@ -507,13 +569,14 @@ The app is a console: a rail down the left with one task per screen. The path is
 that rail.
 
 1. Open https://hearth-ram.vercel.app, follow **The pool** in the header to `/app`, and connect a wallet on
-   Sepolia. **Dashboard** opens with a block marked **Next** naming the one thing your wallet
-   is up to, and a button that goes straight to it.
+   Sepolia. You land in the USDC pool at `/app/usdc`; the token name at the top of the rail
+   opens the picker for the other six. **Dashboard** opens with a block marked **Next**
+   naming the one thing your wallet is up to, and a button that goes straight to it.
 2. **Deposit** in the sidebar. It opens on whichever of its three steps your wallet is
-   actually up to. Step 1 is **Get test USDC**, and its button says the same. That calls
-   `mint` on Zama's mock USDC, which has no owner check and a cap of one million tokens per
-   call. A wallet that already holds some finds step 1 already done, with **Get a million
-   more** on it.
+   actually up to. Step 1 is **Get test USDC**, and its button says the same, with that
+   pool's own token in the label. That calls `mint` on Zama's mock token, which has no owner
+   check and a cap of one million tokens per call. A wallet that already holds some finds
+   step 1 already done, with **Get a million more** on it.
 3. Step 2 is **Shield your USDC**: type an amount and press **Shield**. That button reads
    **Approve the wrapper** until the wrapper's allowance covers the amount you typed. Step 3
    is **Deposit into the vault**: type an amount and press **Deposit**. The two are separate
@@ -529,22 +592,31 @@ that rail.
    **Your prize**, under **Your result** on that draw's card. Your weight and credit for that
    draw appear, and the balance you opened in step 4 stays open; the one signature serves
    both.
-7. Open `/verify`. The public seed and bracket are there, **Thresholds for an address**
-   recomputes your thresholds in front of you, and the comparison matches what the contract
-   credited.
+7. Open `/verify?pool=usdc`. The public seed and bracket are there, **Thresholds for an
+   address** recomputes your thresholds in front of you, and the comparison matches what the
+   contract credited. Every pool has its own verify page under the same `pool` parameter.
 8. On that same draw card, press the claim button, which carries the amount, such as **Claim
    1.00 USDC**, to withdraw your winnings. Or open **Withdraw**, stay on the **Out of the
    vault** tab, and press **Withdraw everything** to take principal and winnings back in one
    transfer.
 
+The app reads in sixteen languages, chosen from a button in the top bar, with the language
+code as the first part of the URL for every language but English, so a reader in Japanese
+walks the same path at `/ja/app/usdc`.
+
 ### The prove-it command
 
 ```bash
-npm run prove:sepolia -w @hearth/contracts
+npm run prove:sepolia -w @hearth/contracts                    # the usdc pool
+npm run prove:sepolia -w @hearth/contracts -- --token weth    # any other pool
 ```
 
-It runs from one saver's account against the live deployment and prints nine numbered steps.
-Every step is a real transaction or a real decryption: deposit 500 USDC; decrypt your own
+It runs from one saver's account against the live deployment of the pool you name, and
+prints nine numbered steps. Without `--token` it runs the `usdc` pool, which is the pool the
+transcript below was recorded against.
+
+Every step is a real transaction or a real decryption: deposit that pool's stake, 500 on
+the USDC pool and 0.25 on the WETH one; decrypt your own
 principal and check it moved by exactly that; ask for the same handle from a fresh wallet and
 show the refusal; drive any pending draw and pick the newest awarded draw the saver holds a
 weight in; decrypt your own weight and credit for it; recompute the outcome from the public
@@ -554,8 +626,8 @@ and check the wallet grew by exactly that while the principal is back at its bas
 never waits for a period, it leaves the pool as it found it, and it can be run any number of
 times.
 
-The run below is from 3 September 2026 and took 260 seconds, almost all of it waiting on the
-relayer. The lines that say a KMS share did not reconstruct are Zama's key management
+The run below is the `usdc` pool on 3 September 2026 and took 260 seconds, almost all of it
+waiting on the relayer. The lines that say a KMS share did not reconstruct are Zama's key management
 service serving one bad share for a given transport key; the command recovers by
 regenerating the key and asking again, and every decryption below succeeded.
 
@@ -628,25 +700,59 @@ npm run compile                         # hardhat compile, then typechain
 npm test                                # the full suite on Zama's mock coprocessor
 npm run lint                            # solhint, zero warnings allowed
 npm run fhe:ship                        # pin the version the Sepolia build needs, before deploying
-npm run deploy:sepolia -w @hearth/contracts
 ```
 
 `npm run fhe:test` and `npm run fhe:ship` switch the `@fhevm/solidity` version in place.
 The local Hardhat plugin pins one version and the live network needs another, so run the
 matching one before compiling for that target.
 
+### Deploying one pool
+
+A deploy run opens one token's pool, because one deployer nonce runs one deploy. The token
+is chosen by `HEARTH_TOKEN`, and every task after it takes `--token`:
+
+```bash
+cd packages/contracts
+HEARTH_TOKEN=weth npx hardhat deploy --network sepolia          # vault, pool, source, wired
+npx hardhat hearth:verify  --network sepolia --token weth       # Etherscan, with the recorded arguments
+npx hardhat hearth:seed    --network sepolia --token weth       # sponsor, then five demo savers
+npx hardhat hearth:status  --network sepolia --token weth       # the live state, in one screen
+```
+
+Leave `HEARTH_TOKEN` and `--token` off and you get `usdc`, the default. An unknown slug
+fails with the list of pools that network does have. Every parameter of every pool lives in
+`packages/contracts/hearth.config.ts`: period, tiers, initial bracket, drip rate,
+sponsorship, the five demo stakes and the keeper's account index. The deploy writes
+`deployments/sepolia/hearth.<slug>.json`, and never replaces a contract that already has a
+saved deployment, so a second run is a no-op rather than a fresh address that strands live
+savers.
+
+Then point the app at what was deployed:
+
+```bash
+cd ../web
+node scripts/sync-pools.mjs                   # rewrites src/lib/chain/pools.json from the deployment files
+```
+
 ### Keeper
+
+One process per pool, each signing from its own account index, because two processes on one
+account fight over the same nonce.
 
 ```bash
 npm run build -w @hearth/keeper
 npm run plan -w @hearth/keeper          # one pass, sends nothing, prints what it would send
 npm run once -w @hearth/keeper          # one pass, live
-npm run start -w @hearth/keeper         # forever, in the foreground
 npm test -w @hearth/keeper              # the keeper's own suite, no network
+pm2 start packages/keeper/ecosystem.config.cjs   # all seven, one process per pool
+pm2 logs hearth-keeper-weth                      # one pool's log
 ```
 
-Settings, the pm2 setup for a demo, and the Chainlink Automation registration are in
-[packages/keeper/README.md](packages/keeper/README.md).
+Which pool a process drives is `HEARTH_ADDRESSES_FILE`, which also gives it the token
+symbol, the decimals and its `KEEPER_ACCOUNT_INDEX`: `usdc` 1, `usdt` 10, `weth` 11, `bron`
+12, `zama` 13, `tgbp` 14, `xaut` 15. `KEEPER_NAME` is the tag every log line carries, so
+seven interleaved logs stay readable. Settings, the pm2 file and the Chainlink Automation
+registration are in [packages/keeper/README.md](packages/keeper/README.md).
 
 ### App
 
@@ -657,14 +763,21 @@ npm run typecheck -w @hearth/web
 npm run lint -w @hearth/web
 ```
 
+The app takes its addresses from `packages/web/src/lib/chain/pools.json`, which
+`scripts/sync-pools.mjs` generates from the deployment files. The three public environment
+variables that used to hold one pool's vault, prize pool and yield source no longer exist;
+delete them from any environment that still sets them.
+
 ### Operator scripts
 
-Every command named in this README and in the docs exists in `packages/contracts/package.json`.
-The deploy is `deploy:sepolia`, the demo pool is filled by `seed:sepolia`, one draw is driven by
+Every command named in this README and in the docs exists in `packages/contracts/package.json`,
+and each takes `-- --token <slug>` to pick a pool. The deploy is `deploy:sepolia` with
+`HEARTH_TOKEN` set, a pool is filled by `seed:sepolia`, one draw is driven by
 `draw:sepolia`, the live state is printed by `status:sepolia`, the prove-it command is
 `prove:sepolia`, and the executed attack scripts behind the threat model are `audit:sepolia`,
 which writes its transcript under `docs/security/attacks`. Each has a `:local` twin that runs
-against `hardhat node`.
+against `hardhat node`. `hearth:spread-gas --keepers 10,11,12,13,14,15` funds several
+keepers in one pass, which is what opening six pools at once needs.
 
 ### Secrets
 
@@ -688,7 +801,7 @@ balance was held, runs the winner test, and pays out.
 
 | Function | Who may call | What it does |
 | --- | --- | --- |
-| `onConfidentialTransferReceived(address, from, amount, bytes)` | The confidential USDC token only, inside `confidentialTransferAndCall` | Credits the amount the token actually moved. Refuses with an encrypted false when the amount or the resulting principal is above `maxPrincipal`, and the token refunds it in the same transaction. Registers the address as a saver. Blocked while paused |
+| `onConfidentialTransferReceived(address, from, amount, bytes)` | That pool's confidential token only, inside `confidentialTransferAndCall` | Credits the amount the token actually moved. Refuses with an encrypted false when the amount or the resulting principal is above `maxPrincipal`, and the token refunds it in the same transaction. Registers the address as a saver. Blocked while paused |
 | `openDraw(drawId, offered[3])` | The prize pool only, once per draw | Moves each tier's plaintext offer plus its encrypted carry into the draw's encrypted remaining liquidity |
 | `scaleFor(period, scaleBits)` | The prize pool only, after the period ends | Compares the period's aggregate weight against the five powers of two around `scaleBits` and separately against zero, marks both results publicly decryptable, and returns them |
 | `evaluate(drawId, count)` | Anyone, any number of times, inside the two-period window | Advances the draw's walk by up to `count` savers and at most `MAX_BATCH` needing encrypted work, credits each one, and pulls the encrypted batch total from the pool |
@@ -749,7 +862,7 @@ prize[3], offered[3])`, `DrawAwarded(drawId, seed, scaleBits, harvested)`,
 
 | Function | Who may call | What it does |
 | --- | --- | --- |
-| `sponsor(amount)` | Anyone | Pulls public USDC rounded down to a multiple of the wrapper rate, wraps it, and books exactly the units the wrapper minted. Cannot be undone |
+| `sponsor(amount)` | Anyone | Pulls the public token rounded down to a multiple of the wrapper rate, wraps it, and books exactly the units the wrapper minted. Cannot be undone |
 | `harvest()` | The recipient pool only | Moves everything accrued as one confidential transfer and returns the encrypted amount the token says moved. Returns an encrypted zero rather than reverting when nothing has accrued |
 | `harvestable()` | Anyone, view | What `harvest` would move right now. For display. The pool never uses it for accounting |
 | `setRate(ratePerSecond)` | Owner | Settles accrual to now at the old rate, then changes it |
@@ -769,11 +882,16 @@ SponsoredYieldSource(IERC7984ERC20Wrapper asset, address recipient, uint64 rateP
 ```
 
 Deploy the vault, then the pool, then `vault.setPrizePool(pool)`, then the source with the
-pool as recipient, then `pool.setYieldSource(source)`, then sponsor it. The Sepolia tier
-set is grand count 1 at odds 1/24 with 40 shares, mid count 1 at odds 1/6 with 20 shares,
-and frequent count 4 at odds 1 with 40 shares, and all three reconcile every draw.
-Utilisation is fixed at 50 percent, following PoolTogether V5. Full
-parameter meanings and a candidate mainnet set: [deploying](docs/operations/deploying.md).
+pool as recipient, then `pool.setYieldSource(source)`, then sponsor it. One run does one
+token, and `HEARTH_TOKEN` picks which.
+
+There are two tier sets, because there are two clocks. The hourly `usdc` pool runs grand
+count 1 at odds 1/24 with 40 shares, mid count 1 at odds 1/6 with 20 shares, and frequent
+count 4 at odds 1 with 40 shares. The six-hour pools run the same counts and shares at odds
+1/4 and 1/2, so the grand prize still pays about once a day and the mid prize about twice a
+day. All three tiers of every pool reconcile every draw. Utilisation is fixed at 50 percent,
+following PoolTogether V5. Full parameter meanings and a candidate mainnet set:
+[deploying](docs/operations/deploying.md).
 
 ---
 
@@ -947,8 +1065,10 @@ A whole draw at 5 savers is `8,456,388` gas, about `0.0085 ETH`. That total is t
 above summed at the counts in the middle column: one close, one award, a full evaluate
 batch of 4, a second evaluate batch carrying the fifth saver, one finalize and three
 reconciles. At a one-hour period that is 24 draws a day and `0.2030 ETH`; at the daily
-period a mainnet deployment would use it is `0.0085 ETH`. Whoever sends the transactions
-pays. Nothing on chain
+period a mainnet deployment would use it is `0.0085 ETH`. That figure is why six of the
+seven Sepolia pools draw every six hours: hourly, all seven would cost about `1.43 ETH` a
+day, and at four draws a day for six of them the whole set costs about `0.41 ETH`. Whoever
+sends the transactions pays. Nothing on chain
 caps evaluation, so the keeper caps the gas price it will pay rather than the work it will
 do: above `KEEPER_MAX_FEE_GWEI` it sends nothing at all that tick, and below it the keeper
 runs the walk to the end. Any saver can push the walk further from the app.
@@ -974,12 +1094,15 @@ hearth/
 │   ├── contracts/        Solidity, Hardhat, tests, deploy scripts and tasks
 │   │   ├── contracts/    HearthVault, HearthPrizePool, SponsoredYieldSource,
 │   │   │                 interfaces, the Periods library, mocks
-│   │   ├── deploy/       repeatable deployment
+│   │   ├── deploy/       repeatable deployment, one pool per run
+│   │   ├── deployments/  the address file each pool's deploy wrote
 │   │   ├── test/         the mock-coprocessor suite
-│   │   └── tasks/        deploy, seed, status, draw, the prove-it command and the
-│   │                     executed attack scripts
+│   │   ├── tasks/        deploy, seed, status, draw, the prove-it command and the
+│   │   │                 executed attack scripts
+│   │   └── hearth.config.ts   every pool's parameters, on one page
 │   ├── web/              the Next.js app and the documentation site it serves
-│   └── keeper/           the script that drives draws, with its own suite and pm2 config
+│   └── keeper/           the script that drives draws, one process per pool, with its
+│                         own suite and the pm2 file for all seven
 ├── docs/                 the written record: getting started, concepts, security, operations
 ├── ARCHITECTURE.md       the implementation specification, with the three diagrams
 └── README.md
@@ -1000,7 +1123,8 @@ hearth/
 | Encryption and decryption client | `@zama-fhe/sdk` in the operator tasks, the keeper and the app | 3.5.1 |
 | App | Next.js App Router, React, Tailwind, wagmi, viem | 16.3.4, 19.2.8, 3.4.17, 3.7.7, 2.56.3 |
 | App motion | Framer Motion, React Three Fiber, drei, postprocessing, Lenis | 13.2.0, 9.7.0, 10.7.8, 3.1.1, 1.3.26 |
-| Keeper | Node 20 with its own test runner, ethers 6.16.0, run under pm2 for a demo | No framework |
+| App languages | `next-intl`, the locale code as the first URL segment for all but English | 4.14.2 |
+| Keeper | Node 20 with its own test runner, ethers 6.16.0, one process per pool under pm2 | No framework |
 | Automation | Chainlink time-based upkeep, interface declared locally | Two selectors, no package |
 
 ---
@@ -1059,7 +1183,7 @@ The full numbered list is [docs/limitations.md](docs/limitations.md). In short:
    Participation is not capped; only the batch is.
 2. A saver the evaluation walk does not reach inside the two-period window forfeits that
    draw, as an unclaimed PoolTogether V5 prize expires.
-3. One saver cannot hold more than `(2^64 - 1) / periodLength`, about 5 billion USDC at an
+3. One saver cannot hold more than `(2^64 - 1) / periodLength`, about 5 billion tokens at an
    hourly period and about 213 million at a daily one.
 4. No reserve tier. The 50 percent utilisation rate is the only cushion for an
    over-subscribed tier.

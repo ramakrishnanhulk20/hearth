@@ -1,0 +1,62 @@
+Hearth XAUt self-audit on sepolia, 2026-09-05T16:59:44.790Z
+vault 0x77f701101d66FbD522A3bFdC2c00DB09a4F57daE, pool 0x9a2888aca42c707A3BC0D561FdF6ff8Abfda5201, asset 0xe4FcF848739845BC81Dee1d5352cf3844F0a60C7
+period 1, 5 savers, bracket 2^34, tier liquidity 0 XAUt
+Every row below is one line of the table "What is checked, and how" in docs/security/threat-model.md, in order.
+
+Row 1. A stranger cannot read a saver's principal, winnings, weight and credit
+  NOT RUN: no awarded draw holds a weight for the saver at account index 2 yet
+
+Row 2. The pool's exact total time-weighted balance is not obtainable
+  the pool's aggregate lives in storage slot 6 of the vault as 0x37c82e5c57bee96c763d6633ee35d0d376d0a4fc37ff0000000000aa36a70600, a euint128 with no getter
+  slot 7 holds the matching total balance handle and slot 8 its timestamp, 2026-09-05T16:40:24.000Z, which is what identifies the three words
+  a fresh wallet 0x2B1Dab8331C808934D75Fc7565DE3A89431b22f7 asks for it: NotEntitledError: the access control list does not allow 0x2B1Dab8331C808934D75Fc7565DE3A89431b22f7 to decrypt 0x37c82e5c57bee96c763d6633ee35d0d376d0a4fc37ff0000000000aa36a70600 on 0x77f701101d66FbD522A3bFdC2c00DB09a4F57daE
+  the deployer and owner 0xd57D8F8A615F35133D8121e58F4ed778A4F612E9 asks for it: NotEntitledError: the access control list does not allow 0xd57D8F8A615F35133D8121e58F4ed778A4F612E9 to decrypt 0x37c82e5c57bee96c763d6633ee35d0d376d0a4fc37ff0000000000aa36a70600 on 0x77f701101d66FbD522A3bFdC2c00DB09a4F57daE
+  the balance handle in slot 7 is 0x68f77036c4de4566ed6e80a3d32029fc72946e9bf5ff0000000000aa36a70500
+  only 0 awarded draw is on chain, so the bracket difference has nothing to compare against yet
+  PASS: the aggregate handle refused both a random wallet and the owner; the bracket difference needs two awarded draws and this pool has 0
+
+Row 3. A flash deposit earns almost nothing
+  NOT RUN: the deposit has to land a fixed number of seconds before a period ends, which needs the local clock
+
+Row 4. Fake savers cannot stall a draw
+  NOT RUN: registering 25 addresses and running the whole walk against them is a local-only expense
+
+Row 5. Nobody can choose who is evaluated
+  NOT RUN: no awarded draw with an unfinished walk exists on this network right now
+
+Row 6. A late close is refused and the draw costs nothing
+  NOT RUN: letting a close deadline pass without closing needs the local clock
+
+Row 7. A missed award loses nothing
+  NOT RUN: letting a whole evaluation window pass before awarding needs the local clock
+
+Row 8. A reverting yield source does not stop the clock
+  NOT RUN: pointing the pool at a broken source needs the owner key and a deploy, so it is kept to the local chain
+
+Row 9. An over-subscribed tier clamps rather than overpaying
+  NOT RUN: forcing more winners than a tier can fund needs the local clock to walk the published bracket down first
+
+Row 10. An award proof cannot be replayed against another draw
+  NOT RUN: no draw has been awarded on this network yet, so there is no proof to steal
+
+Row 11. Nobody withdraws more than they own
+  covered by the property test "keeps every balance, remainder and carry accounted for under a random sequence of actions" in test/Invariants.ts
+  NOT RUN: a property test over a random sequence of actions belongs in the suite, not in a live run
+
+Row 12. Money is conserved
+  covered by the same property test in test/Invariants.ts, and the payout share is covered by "pays each saver a share of the prizes that tracks their share of the pool" in test/Fairness.ts
+  NOT RUN: a property test over a random sequence of actions belongs in the suite, not in a live run
+
+12 rows in 11.4s: 1 PASS, 0 FAIL, 11 NOT RUN
+  NOT RUN row 1   A stranger cannot read a saver's principal, winnings, weight and credit
+  PASS    row 2   The pool's exact total time-weighted balance is not obtainable
+  NOT RUN row 3   A flash deposit earns almost nothing
+  NOT RUN row 4   Fake savers cannot stall a draw
+  NOT RUN row 5   Nobody can choose who is evaluated
+  NOT RUN row 6   A late close is refused and the draw costs nothing
+  NOT RUN row 7   A missed award loses nothing
+  NOT RUN row 8   A reverting yield source does not stop the clock
+  NOT RUN row 9   An over-subscribed tier clamps rather than overpaying
+  NOT RUN row 10  An award proof cannot be replayed against another draw
+  NOT RUN row 11  Nobody withdraws more than they own
+  NOT RUN row 12  Money is conserved

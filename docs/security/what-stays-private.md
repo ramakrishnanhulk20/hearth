@@ -4,6 +4,10 @@ Three things matter about confidentiality: what stays encrypted, is the draw pro
 and weighted by deposit, and is every leak named. This page answers the first and the third. Our position is that naming every seam
 ourselves is worth more than a claim nobody can check.
 
+Everything here is written for one pool, and Hearth runs seven of them, one per
+confidential token. They share nothing, so each pool's anonymity set is its own savers and
+nobody else's, and a pool with three savers is not helped by another pool having thirty.
+
 ## The table
 
 | Value | State | Who can read it |
@@ -28,7 +32,7 @@ ourselves is worth more than a claim nobody can check.
 | When you deposited, withdrew, or were evaluated, and in which batch | Public | Everyone |
 | The unfunded counter | Public at finalization | Everyone |
 | Sponsor amounts and the drip rate | Public | Everyone |
-| The amount you wrap into, or unwrap out of, confidential USDC | Public | Everyone |
+| The amount you wrap into, or unwrap out of, the confidential token | Public | Everyone |
 | Every threshold any address had to beat, in any tier | Publicly computable | Everyone |
 
 Two ways to read that table. The left column of secrets is exactly the per-person
@@ -44,8 +48,8 @@ An observer with a full archive node and unlimited patience can build:
 - Every draw's seed, bracket, harvest and prize sizes, and each tier's prize count, one
   draw after the draw it belongs to.
 - Every threshold every address had to beat. They can literally compute your ladder.
-- The pool's total holdings in confidential USDC as an encrypted handle, which they cannot
-  read.
+- The pool's total holdings of its confidential token as an encrypted handle, which they
+  cannot read.
 
 They cannot get:
 
@@ -103,8 +107,9 @@ draw checkable. So **anyone who can pin your balance computes your won or lost r
 every tier of every draw, with no decryption at all**, and for every later draw too, since
 winnings sit in a separate balance that never enters the odds.
 
-The usual way a balance gets pinned is the wrap seam in rule 3: wrapping public USDC into
-confidential USDC is a public movement, so a saver who wraps and then deposits the same
+The usual way a balance gets pinned is the wrap seam in rule 3: wrapping a public token
+into its confidential form is a public movement, so a saver who wraps and then deposits the
+same
 amount seconds later has published their deposit. From that point their draw outcomes are
 public arithmetic.
 
@@ -120,7 +125,8 @@ threshold is an uncheckable draw.
 
 ## Rule 3: the wrap seam, both directions
 
-Turning public USDC into confidential USDC is a public ERC-20 movement. The amount appears
+Turning a public token into its confidential form is a public ERC-20 movement. The amount
+appears
 in the wrapper's `Wrap` event, in the underlying token's `Transfer`, and again in the
 coprocessor's record of encrypting that plaintext. There is no confidential way to convert
 a public token.
@@ -134,7 +140,8 @@ same effect for their batcher and calls it shield-join correlation.
 Unwrapping publishes an amount too, and the first of the two unwrap calls is the one that
 does it, so an unwrap that is never finalized still leaks. That gives a second named
 disclosure: **cumulative winnings become a public lower bound for any address that wraps
-in and unwraps out in full.** For an address whose only confidential USDC counterparty is
+in and unwraps out in full.** For an address whose only counterparty in that confidential
+token is
 Hearth, the public unwrapped total minus the public wrapped total is exactly lifetime
 winnings withdrawn, less whatever principal and confidential balance that address still
 holds. Both of those are hidden and non-negative, so the difference is always a lower
@@ -185,8 +192,9 @@ the visible pot can have it.
 
 ## Rule 5: the token layer is Zama's, not ours
 
-Hearth's asset is Zama's confidential USDC. That is deliberate, and it means the token's
-own powers apply to money moving through Hearth. Naming them:
+Every pool's asset is one of Zama's confidential tokens. That is deliberate, and it means
+the token's own powers apply to money moving through Hearth, pool by pool: seven wrappers,
+the same powers on each. Naming them:
 
 The Sepolia contract is a `ConfidentialWrapper` behind an upgradeable proxy, owned by
 Zama, with two-step ownership and renouncing disabled. Reading its verified source on 2

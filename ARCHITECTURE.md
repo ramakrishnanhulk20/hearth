@@ -1,30 +1,39 @@
 # Hearth architecture
 
-Hearth is confidential no-loss prize savings on the Zama Protocol. Savers deposit
-confidential USDC, their balances stay encrypted on chain, yield funds prizes, and a
+Hearth is confidential no-loss prize savings on the Zama Protocol. Savers deposit a
+confidential token, their balances stay encrypted on chain, yield funds prizes, and a
 periodic draw awards those prizes to savers with odds proportional to their
 time-weighted balance. Principal is withdrawable at any time.
 
+The unit of deployment is one pool per confidential token: its own `HearthVault`, its own
+`HearthPrizePool`, its own `SponsoredYieldSource` and its own keeper process, sharing no
+storage, no balance and no registry with any other pool. Seven of them run on Sepolia. This
+document specifies one pool; the seven differ only in their constructor arguments, which
+are listed per token in `packages/contracts/hearth.config.ts`.
+
 This document is the implementation specification. It follows PoolTogether V5's design
 (time-weighted average balance, tiered prizes, per-saver winner test) and adapts each
-part to encrypted arithmetic, with the deviations named in section 14. Revised 3
-September 2026 after two adversarial design reviews.
+part to encrypted arithmetic, with the deviations named in section 14. Revised 5
+September 2026: two adversarial design reviews, then the move to seven pools.
 
 ## 1. System overview
 
 ```mermaid
 flowchart LR
     Saver["Saver wallet"]
-    USDC["USDC (public ERC-20)"]
-    cUSDC["Confidential USDC<br/>Zama ERC-7984 wrapper"]
-    Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
-    Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
-    Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
-    Keeper["Keeper script<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
+    Public["Public ERC-20<br/>USDC, USDT, WETH,<br/>BRON, ZAMA, tGBP, XAUt"]
+    cToken["Confidential token<br/>Zama ERC-7984 wrapper"]
     Relayer["Zama relayer + KMS"]
 
-    Saver -- "wrap" --> cUSDC
-    USDC -- "approve" --> cUSDC
+    subgraph Set["One set per token, seven on Sepolia"]
+        Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
+        Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
+        Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
+        Keeper["Keeper process, one per pool<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
+    end
+
+    Saver -- "wrap" --> cToken
+    Public -- "approve" --> cToken
     Saver -- "confidentialTransferAndCall" --> Vault
     Saver -- "withdraw" --> Vault
     Vault -- "scale of the aggregate" --> Pool
@@ -35,9 +44,16 @@ flowchart LR
     Saver -- "EIP-712 user decryption" --> Relayer
 ```
 
-Test token on Sepolia: Zama's mock USDC has a public `mint(address, uint256)` capped at one
-million tokens per call; the app exposes it as one click, then shields into confidential
-USDC through Zama's wrapper.
+The box is one token's pool, deployed seven times on Sepolia with different constructor
+arguments. A saver holds a position in each pool separately, and a pause, a stalled keeper
+or a bug in one token's wrapper cannot reach another pool's money.
+
+Test tokens on Sepolia: each of the seven confidential wrappers is Zama's, over a public
+mock ERC-20 with a `mint(address, uint256)` anyone may call, capped at one million tokens
+per call. The app exposes that mint as one click on the pool's deposit screen, then shields
+into the confidential token through Zama's wrapper. Every wrapper reads six decimals and
+converts to its underlying's decimals through `rate()`, which for the 18-decimal WETH mock
+is a million million. Addresses per pool: `docs/concepts/pools-and-tokens.md`.
 
 ## 2. Periods, draws and windows
 
@@ -115,8 +131,8 @@ struct Observation { euint64 cum; euint64 balance; uint32 ts; }
 Resetting at each period start bounds the accumulator by `balance * L`.
 
 Bounds: the vault refuses any deposit whose amount, or whose resulting principal, exceeds
-`maxPrincipal = (2^64 - 1) / L` (about 5 billion USDC at an hourly period, about 213
-million USDC at a daily period), so a saver's `cum` never exceeds 64 bits and the
+`maxPrincipal = (2^64 - 1) / L` (about 5 billion tokens at an hourly period, about 854
+million at six hours, about 213 million at a daily period), so a saver's `cum` never exceeds 64 bits and the
 addition that checks the cap cannot wrap. The total observation uses a 128-bit `cum`, so
 the aggregate never overflows for any supply the wrapper can mint.
 
@@ -273,11 +289,21 @@ accrual window, so a large holder who joins for a single period takes a full pro
 shot at the accumulated pot. This is a stated deviation; the cheap fix, an accumulator of
 balance-seconds since the last grand payout, is noted for a later version.
 
-Tier parameters (count, odds, shares, reconcile cadence) are constructor arguments.
-Sepolia, at a one-hour period: grand count 1, odds 1/24, shares 40; mid count 1, odds 1/6,
-shares 20; frequent count 4, odds 1, shares 40; all three reconcile every draw. With a
-harvest of H per period the grand prize settles near 10 H and pays about daily; the
-frequent tier pays up to four prizes near 0.1 H each draw.
+Tier parameters (count, odds, shares, reconcile cadence) are constructor arguments, so each
+pool carries its own. Sepolia runs two sets, one per clock:
+
+| Tier | `usdc`, one-hour period | The six six-hour pools |
+| --- | --- | --- |
+| Grand | count 1, odds 1/24, shares 40 | count 1, odds 1/4, shares 40 |
+| Mid | count 1, odds 1/6, shares 20 | count 1, odds 1/2, shares 20 |
+| Frequent | count 4, odds 1, shares 40 | count 4, odds 1, shares 40 |
+
+All three tiers of every pool reconcile every draw. The odds are set against each pool's own
+period rather than carried across, so the grand prize pays about once a day on either clock;
+the mid tier fires about four times a day at an hour and about twice a day at six. With a
+harvest of H per period the grand prize settles near 10 H on the hourly set and near 1.6 H
+on the six-hour set, and the frequent tier pays up to four prizes near 0.1 H every draw in
+both.
 
 ## 7. Yield source
 
@@ -380,6 +406,7 @@ sequenceDiagram
     participant K as Keeper
     participant Z as Zama relayer/KMS
 
+    Note over V,K: one token's pool, and each of the seven runs this on its own clock
     S->>V: confidentialTransferAndCall (encrypted deposit)
     V->>V: principal += amount, observations updated
     Note over V,P: period p ends
@@ -411,13 +438,13 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Vault["HearthVault"] --> IERC7984["IERC7984 (Zama cUSDC)"]
+    Vault["HearthVault (x7)"] --> IERC7984["IERC7984<br/>Zama's confidential token"]
     Vault --> FHE["@fhevm/solidity FHE"]
-    Vault --> Pool["HearthPrizePool"]
+    Vault --> Pool["HearthPrizePool (x7)"]
     Pool --> IERC7984
     Pool --> FHE
     Pool --> IYield["IYieldSource"]
-    IYield --> Sponsored["SponsoredYieldSource"]
+    IYield --> Sponsored["SponsoredYieldSource (x7)"]
     IYield -.-> CV["ConfidentialVaultYieldSource (mainnet design, not built)"]
     CV -.-> Batcher["Zama DepositVaultBatcherConfidential (mainnet design, not built)"]
     Pool --> Auto["IAutomationCompatible"]
@@ -425,9 +452,11 @@ flowchart TD
     Pool --> OZ
 ```
 
-Solid edges are contracts in this repository. The two dotted nodes are the mainnet yield
-path: the adapter is specified against Zama's published batcher interface and no adapter
-contract is written here.
+Solid edges are contracts in this repository. `(x7)` marks the three deployed once per
+token; each instance points at its own asset and at the two other instances of its own set,
+never at another pool's. The two dotted nodes are the mainnet yield path: the adapter is
+specified against Zama's published batcher interface and no adapter contract is written
+here.
 
 ## 13. Events, views and constructors
 
@@ -494,3 +523,45 @@ Accepted and documented: evaluation order decides ties in an over-subscribed tie
 saver not evaluated inside the window forfeits that draw, as an unclaimed V5 prize
 expires; privacy below three savers; a pinned balance has a public outcome; the token
 operator's observer power; slow narrowing of static balances.
+
+## 15. The frontend interface
+
+The app is handed addresses, never asked to guess them, and it holds seven pools at once.
+
+**Addresses.** `packages/web/src/lib/chain/pools.json` is the single source, generated by
+`node scripts/sync-pools.mjs` from the files the deploy script wrote under
+`packages/contracts/deployments/sepolia/`. Each open entry carries `slug`, `name`,
+`symbol`, `underlyingSymbol`, `decimals`, `vault`, `pool`, `source`, `asset`, `underlying`,
+`firstPeriodAt`, `periodLength` and `status: "open"`. The generator refuses a deployment
+file missing any address and refuses two pools claiming one slug. One entry is not a
+deployment: Zama's official Confidential tGBP, carried with `status: "restricted"` and a
+`reason`, because Hearth cannot open a pool on a token whose mint is the issuer's alone.
+The three public environment variables that once held one pool's vault, prize pool and
+yield source addresses are gone.
+
+The confidential asset and its underlying are also read from the vault and the wrapper on
+chain, so the app can never talk to a token the vault would refuse.
+
+**Routes.** The pool is the first path segment after `/app`, and the language code is the
+first segment of all for every language but English.
+
+| Route | Reads | Writes |
+| --- | --- | --- |
+| `/app` | the remembered slug from a cookie, checked against the deployed list | redirects to `/app/<slug>` |
+| `/app/<slug>` | `currentPeriod`, `periodEnd`, `saverCount`, `drawOf`, `drawParams`, `liquidity`, `confidentialBalanceOf`, `confidentialWinningsOf`, `harvestable` | none |
+| `/app/<slug>/deposit` | the public token's `balanceOf` and `allowance`, the wrapper's `rate` and `decimals`, `maxPrincipal` | `mint`, `approve`, `wrap`, `confidentialTransferAndCall` |
+| `/app/<slug>/withdraw` | `confidentialBalanceOf`, `confidentialWinningsOf`, the wrapper's unwrap state | `withdraw`, `withdrawAll`, `unwrap`, `finalizeUnwrap` |
+| `/app/<slug>/draws` | `drawOf`, `drawParams`, `weightHandle`, `creditHandle`, `evaluatedCount`, `walkOf` | `evaluate`, and `withdraw` behind the claim button |
+| `/app/<slug>/run` | `closableDraw`, `canClose`, `closeDeadline`, `windowEndsAt`, `publishedCarry` | `closeDraw`, `awardDraw`, `evaluate`, `finalizeDraw`, `reconcile` |
+| `/verify?pool=<slug>` | `drawParams`, `thresholdOf` | none |
+
+Reading a saver's own encrypted values is an EIP-712 user decryption through Zama's
+relayer, not a contract call, and the award and reconcile buttons fetch the same KMS-signed
+public decryptions the keeper does, in the browser, in the handle order
+`[seed, scaleCount, nonEmpty, harvested]`.
+
+**Languages.** Sixteen, listed in `packages/web/src/i18n/routing.ts`, chosen from a button
+in the top bar. English keeps the unprefixed URLs; every other locale prefixes them, so the
+Japanese dashboard for the WETH pool is `/ja/app/weth`. The documentation is translated
+page for page under `docs/i18n/<locale>/`, and an untranslated page falls back to the
+English file with a line at the top saying so.

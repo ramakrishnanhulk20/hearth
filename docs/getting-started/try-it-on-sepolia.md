@@ -1,14 +1,44 @@
 # Try it on Sepolia
 
 Sepolia is Ethereum's public test network. The money on it is not real, so you can run the
-whole cycle for free. A period on Sepolia is one hour, so budget up to about an hour and a
-half if you want to watch the draw for a period you deposited in. The two-minute path at
-the bottom of this page does not wait for one.
+whole cycle for free. The USDC pool draws every hour and the other six draw every six
+hours, so pick USDC if you want to watch a draw for a period you deposited in. The
+two-minute path at the bottom of this page does not wait for one.
 
 The live app is at https://hearth-ram.vercel.app. Everything below can also be done straight from a block
 explorer if you prefer to watch the raw calls.
 
+## 0. Pick a token
+
+Hearth runs seven pools, one per confidential token Zama publishes on Sepolia. Each is a
+separate set of contracts with its own savers, its own prize money and its own clock, so
+choosing a token is choosing a pool. The token name at the top of the rail opens the
+picker, and the pool you are in is the first part of the URL: `/app/usdc`, `/app/weth` and
+so on.
+
+| Token | Slug | Draw every | Public token with the open `mint` |
+| --- | --- | --- | --- |
+| Confidential USDC (Mock) | `usdc` | 1 hour | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` |
+| Confidential USDT (Mock) | `usdt` | 6 hours | `0xa7dA08FafDC9097Cc0E7D4f113A61e31d7e8e9b0` |
+| Confidential WETH (Mock) | `weth` | 6 hours | `0xff54739b16576FA5402F211D0b938469Ab9A5f3F` |
+| Confidential BRON (Mock) | `bron` | 6 hours | `0xFf021fB13cA64e5354c62c954b949a88cfDEb25E` |
+| Confidential ZAMA (Mock) | `zama` | 6 hours | `0x75355a85c6FB9df5f0C80FF54e8747EEe9a0BF57` |
+| Confidential tGBP (Mock) | `tgbp` | 6 hours | `0x93c931278A2aad1916783F952f94276eA5111442` |
+| Confidential XAUt (Mock) | `xaut` | 6 hours | `0x24377AE4AA0C45ecEe71225007f17c5D423dd940` |
+
+The picker also lists Zama's official **Confidential tGBP**, greyed out, because its
+underlying mint belongs to the issuer and nobody else can obtain the token. Choosing it
+shows a page that names the token, links both contracts and offers no wallet action, rather
+than a deposit button that would revert.
+
+The app reads in sixteen languages, chosen from the button in the top bar. English keeps
+the plain URLs and every other language puts its code in front, so the same screen in
+Japanese is `/ja/app/usdc`.
+
 ## Contracts you will touch
+
+The walkthrough below uses the USDC pool. Every other pool is the same set of contracts at
+different addresses, listed in [pools and tokens](../concepts/pools-and-tokens.md).
 
 | What | Address | Who deployed it |
 | --- | --- | --- |
@@ -19,8 +49,11 @@ explorer if you prefer to watch the raw calls.
 | SponsoredYieldSource | `0xCC49DF69eAB6884fD8DD9260902B8A0Abc9D6b91` | Hearth |
 
 The two Zama addresses are the ones published in Zama's own Confidential Vault address
-reference for Sepolia, so the test token is Zama's, not ours. Both tokens use 6 decimals,
-which means every on-chain amount is in millionths: 1,000 USDC is written `1000000000`.
+reference for Sepolia, so the test token is Zama's, not ours. Every confidential wrapper on
+that list uses 6 decimals, which means every on-chain amount in the wrapper is in
+millionths: 1,000 USDC is written `1000000000`. The public token underneath can use a
+different scale, and the wrapper's `rate()` is the conversion. Mock USDC also uses 6, so
+the two agree; mock WETH uses 18, so its rate is a million million.
 
 ## 1. Get Sepolia ETH
 
@@ -29,12 +62,14 @@ common use are the Google Cloud Web3 faucet, Alchemy's Sepolia faucet and the Ch
 faucet, and each pays out enough for this walkthrough in one request. A tenth of an ETH
 is far more than enough.
 
-## 2. Mint the test USDC
+## 2. Mint the test token
 
-Zama's mock USDC has a public `mint(address, uint256)` with no owner check, capped at one
-million tokens per call. The app exposes it as one button on the Deposit screen, on the
+Every one of the seven public mocks has a public `mint(address, uint256)` with no owner
+check, capped at one million tokens per call, and the addresses are in the table above. The
+app exposes it as one button on the Deposit screen of whichever pool you are in, on the
 first of its three steps, labelled "Get test USDC" while your wallet holds none and "Get a
-million more" once it does. By hand it is:
+million more" once it does, with that pool's own token in the label. By hand, for USDC, it
+is:
 
 ```
 USDCMock.mint(yourAddress, 1000000000)     // 1,000 USDC
@@ -78,7 +113,8 @@ receive hook credits exactly the amount the token says actually moved, not the a
 asked for, so a transfer that is short for any reason cannot create phantom principal.
 
 The vault refuses a deposit whose amount, or whose resulting principal, would push you
-above the per-saver cap, which on a one-hour period is about 5 billion USDC. Both halves
+above the per-saver cap, which on a one-hour period is about 5 billion tokens and on a
+six-hour period about 854 million. Both halves
 of that check matter: encrypted addition wraps silently at 64 bits, so bounding the
 incoming amount as well as the total is what stops a huge deposit from wrapping the sum
 round to a small number and slipping through. The refusal is itself encrypted: the hook
@@ -116,8 +152,10 @@ not one.
 
 ## 5. Wait for a draw
 
-Periods on Sepolia are one hour long. The draw for a period can only be closed after that
-period has ended, and everything about it has to finish within the following two periods.
+A period is one hour in the USDC pool and six hours in the other six, for the gas reason in
+[pools and tokens](../concepts/pools-and-tokens.md). The draw for a period can only be
+closed after that period has ended, and everything about it has to finish within the
+following two periods.
 Closing itself has a tighter deadline, the middle of the second of those periods, so that
 the decryption round trip and the award always have room. So a deposit you make now earns
 odds for the current period, and the result of that period lands within the next couple of
@@ -129,8 +167,9 @@ you want to push it along yourself, every step of a draw is callable by anyone, 
 draw" in the sidebar has all five; see [the keeper page](../operations/keeper.md).
 
 Your odds for a period are based on your average balance across that whole period, not
-your balance at the end of it. Depositing five minutes before the period closes buys you
-one twelfth of the odds of having held the same amount all period. That is deliberate; see
+your balance at the end of it. Depositing five minutes before a one-hour period closes buys
+you one twelfth of the odds of having held the same amount all period. That is deliberate;
+see
 [time-weighted balance](../concepts/time-weighted-balance.md).
 
 ## 6. Reveal what you hold and what you won
@@ -229,7 +268,9 @@ The app is a console with a rail down the left, one task per screen, so the path
 down that rail.
 
 1. Open https://hearth-ram.vercel.app, follow "The pool" in the header to `/app`, and connect a wallet on
-   Sepolia. The dashboard opens with a block marked "Next" naming the one thing to do.
+   Sepolia. You land in the USDC pool at `/app/usdc`; the token name at the top of the rail
+   switches pools. The dashboard opens with a block marked "Next" naming the one thing to
+   do.
 2. "Deposit" in the sidebar, which opens on whichever of its three steps your wallet is up
    to. Click "Get test USDC", then "Shield", then "Deposit".
 3. Back on the dashboard, press the eye beside "Principal" in "What you hold" and sign:
@@ -239,8 +280,9 @@ down that rail.
 5. Press "Advance" on the same screen. Then open "My draws" and press the eye under "Your
    result" on that draw's card: your weight and credit for that draw appear, and the
    balance from step 3 stays open on one signature.
-6. Open `/verify`: the public seed and bracket are there, "Thresholds for an address"
-   recomputes your thresholds in front of you, and the comparison matches.
+6. Open `/verify?pool=usdc`: the public seed and bracket are there, "Thresholds for an
+   address" recomputes your thresholds in front of you, and the comparison matches. Swap
+   the `pool` parameter for any other slug to check that pool instead.
 7. "Withdraw" in the sidebar, "Out of the vault" tab, "Withdraw everything". Principal and
    any winnings come back in one transfer.
 

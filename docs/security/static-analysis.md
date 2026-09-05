@@ -1,7 +1,8 @@
 # Static analysis
 
 Every contract is run through slither 0.11.6 and solhint before a deployment, and every finding
-is either fixed or explained here. This page is the explanation. The raw run is repeatable:
+is either fixed or explained here. The seven pools are seven deployments of these same three
+contracts, so one run covers all of them. This page is the explanation. The raw run is repeatable:
 
 ```bash
 npm run lint -w @hearth/contracts
@@ -22,7 +23,7 @@ own contracts. None is a bug. They fall into five families, and each family has 
 | --- | --- | --- | --- |
 | `unused-return` | 38 | Medium | 36 of them are `FHE.allow`, `FHE.allowThis`, `FHE.allowTransient` and `FHE.makePubliclyDecryptable`, which return the handle they were given so calls can be chained. Ignoring that return is the documented usage in every Zama example. The other two are below. |
 | `reentrancy-no-eth`, `reentrancy-benign`, `reentrancy-events` | 20 | Medium and Low | slither treats every `FHE.*` operation as an external call, because each one is a call into the coprocessor contract. Those calls carry ciphertext handles, not control, and no user contract runs inside them. The genuinely external calls are the token and the vault, both fixed at construction, and every function that moves value is `nonReentrant` and writes its state before the transfer. |
-| `timestamp` and `incorrect-equality` | 18 | Low and Medium | Periods are defined by `block.timestamp` on purpose, and the strict equalities compare period numbers and zero flags, never balances. A validator can shift a timestamp by seconds against periods of an hour, which moves a saver's weight by that many seconds out of 3,600. |
+| `timestamp` and `incorrect-equality` | 18 | Low and Medium | Periods are defined by `block.timestamp` on purpose, and the strict equalities compare period numbers and zero flags, never balances. A validator can shift a timestamp by seconds against periods of an hour or six, which moves a saver's weight by that many seconds out of 3,600 or 21,600. |
 | `uninitialized-local` | 8 | Medium | Accumulators and counters that start at Solidity's zero default by intent: `offered`, `assigned`, `totalShares`, `processed`, `heavy`, `marked`, `cleared`. `harvestHandle` is assigned on every path of the try/catch that follows its declaration. |
 | `calls-loop` | 1 | Low | `finalizeDraw` asks the pool for each of three tiers' reconcile cadence. The loop is bounded at three and the pool is the vault's own, set once by the owner. |
 

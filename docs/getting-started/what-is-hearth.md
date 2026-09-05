@@ -1,8 +1,11 @@
 # What Hearth is
 
-Hearth is a savings pool where you cannot lose your money and you might win a prize.
+Hearth is a savings pool where you cannot lose your money and you might win a prize. Seven
+of them run on Sepolia, one per confidential token, and you pick a token the way you would
+pick a savings account.
 
-You put confidential USDC in. The pool puts that money to work and earns yield. Every
+You put a confidential token in: USDC, USDT, WETH, BRON, ZAMA, tGBP or XAUt. The pool puts
+that money to work and earns yield. Every
 period the yield the pool earned is handed out as prizes, and your chance of winning is
 proportional to how much you held and how long you held it. You can take your principal
 back at any time, in full. That is the "no-loss lottery" idea PoolTogether invented, and
@@ -21,16 +24,19 @@ draw is still checkable by a stranger.
 ```mermaid
 flowchart LR
     Saver["Saver wallet"]
-    USDC["USDC (public ERC-20)"]
-    cUSDC["Confidential USDC<br/>Zama ERC-7984 wrapper"]
-    Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
-    Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
-    Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
-    Keeper["Keeper script<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
+    Public["Public ERC-20<br/>USDC, USDT, WETH,<br/>BRON, ZAMA, tGBP, XAUt"]
+    cToken["Confidential token<br/>Zama ERC-7984 wrapper"]
     Relayer["Zama relayer + KMS"]
 
-    Saver -- "wrap" --> cUSDC
-    USDC -- "approve" --> cUSDC
+    subgraph Set["One set per token, seven on Sepolia"]
+        Vault["HearthVault<br/>encrypted balances, TWAB,<br/>winner test, winnings"]
+        Pool["HearthPrizePool<br/>draw schedule, randomness,<br/>tier liquidity, proofs"]
+        Yield["Yield source<br/>Sponsored (Sepolia)<br/>Confidential Vault (mainnet)"]
+        Keeper["Keeper process, one per pool<br/>+ Chainlink upkeep interface,<br/>no upkeep registered"]
+    end
+
+    Saver -- "wrap" --> cToken
+    Public -- "approve" --> cToken
     Saver -- "confidentialTransferAndCall" --> Vault
     Saver -- "withdraw" --> Vault
     Vault -- "scale of the aggregate" --> Pool
@@ -44,8 +50,14 @@ flowchart LR
 Two contracts do the work. `HearthVault` holds every saver's encrypted principal, their
 encrypted winnings, the record of how long they held what, and it runs the winner test.
 `HearthPrizePool` runs the clock, draws the random seed, collects the yield and keeps the
-prize money in tiers. A keeper script pushes the draw along, and every step it takes can
+prize money in tiers. A keeper process pushes the draw along, and every step it takes can
 be taken by anyone else instead.
+
+The box in the middle is one token's pool. There are seven of them and they share nothing:
+your USDC position and your WETH position are separate savers in separate vaults, and one
+pool going quiet leaves the rest running. Which pool you are looking at is the first part
+of the address bar, `/app/usdc` or `/app/weth`. The full list, with addresses, is
+[pools and tokens](../concepts/pools-and-tokens.md).
 
 ## The four moves
 
@@ -53,7 +65,8 @@ A saver makes four moves. Here is what each one does and what it gives away.
 
 ### 1. Deposit
 
-You send confidential USDC to the vault with one transaction. The amount travels as a
+You send that pool's confidential token to its vault with one transaction. The amount
+travels as a
 ciphertext handle, which is a pointer to an encrypted value rather than the value itself.
 The vault adds it to your encrypted principal and updates the record of your balance over
 time, all without decrypting anything.
@@ -61,7 +74,7 @@ time, all without decrypting anything.
 - Hidden: the amount, your running balance, and therefore your share of the pool.
 - Public: your address, the block you did it in, and the fact that a deposit happened.
 
-There is one seam. Turning ordinary public USDC into confidential USDC is a public
+There is one seam. Turning the ordinary public token into the confidential one is a public
 ERC-20 transfer, so the wrapped amount is visible. If you wrap 5,000 USDC and deposit two
 blocks later, an observer has a very good guess. Hearth keeps wrapping and depositing as
 two separate steps precisely so you can put distance between them. See
@@ -156,7 +169,7 @@ Short version, in full in [what stays private](../security/what-stays-private.md
 - Who the savers are, and when each of them deposited, withdrew or was evaluated.
 - The bracket the pool's total fell in each period, the seed, and the yield collected.
 - Each tier's prize size, and how many prizes it paid, published one draw later.
-- The amount you wrapped into or out of confidential USDC.
+- The amount you wrapped into or out of the confidential token.
 - With one saver, the published bracket is that saver's weight to within a factor of two.
   With two, each can bound the other. Privacy here needs three or more savers and the app
   says so.
