@@ -31,8 +31,8 @@ tasarımın, onu kullanan ve denetleyen insanlar için anlatılmış halidir.
 | [Gizli kalanlar](security/what-stays-private.md) | Yedi kural: aralık ve yerine geçtiği sızıntı, sabitlenmiş bir bakiyenin bedeli, sarmalama dikişinin iki yönü, ödül sayılarının neyi ölçtüğü, token katmanı, değerlendirmenin neden ipucu vermediği ve davranıştan kalan artık iz. |
 | [Tehdit modeli](security/threat-model.md) | Dokuz saldırgan, her birinin ne istediği, onları neyin durdurduğu ve neyin durdurmadığı. Ayrıca önceki tasarımımızın fiilen kırılan noktaları. |
 | [Rastgelelik ve doğrulama](security/randomness-and-verification.md) | Tohumun nereden geldiği, neden kimsenin onu yeniden atamayacağı ya da kazandırdığı tutarı değiştiremeyeceği ve herkesin bir eşiği sonradan nasıl yeniden hesaplayabileceği. |
-| [Statik analiz](security/static-analysis.md) | slither ve solhint çalıştırmaları ve beş bulgu ailesinin her birinin arkasındaki tek sebep. |
-| [Keeper](operations/keeper.md) | Keeper'ın işi adım adım, sıralama kuralı, havuz başına tek süreç, çalışmadığında ne olduğu ve gas bütçesi. |
+| [Statik analiz](security/static-analysis.md) | slither ve solhint çalıştırmaları, beş bulgu ailesinin her birinin arkasındaki tek sebep, ve hâlâ bildirdiği iki axios bulgusuyla bağımlılık denetimi. |
+| [Keeper](operations/keeper.md) | Keeper'ın işi adım adım, sıralama kuralı, havuz başına tek süreç, canlıdaki yedisinin nerede barındırıldığı, çalışmadığında ne olduğu ve gas bütçesi. |
 | [Dağıtım](operations/deploying.md) | Token başına tek havuz dağıtmak, constructor imzaları ve parametreleri, doğrulama ve iki Sepolia parametre setinin ana ağdakiyle karşılaştırması. |
 | [Kısıtlar](limitations.md) | Belgelenmiş bütün kısıtlar, on dört maddelik tek bir numaralı listede. |
 | [SSS](faq.md) | On iki kısa cevap: yedi tokenden hangisinde birikim yapabileceğinizle başlıyor, talep düğmesinin nereye gittiği de içinde. |

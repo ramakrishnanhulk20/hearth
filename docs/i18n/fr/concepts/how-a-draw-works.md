@@ -284,4 +284,3 @@ Elle ne couvre pas la façon dont le poids d'un épargnant se construit sur une 
 est le [solde pondéré par le temps](time-weighted-balance.md), ni l'arithmétique du test du
 gagnant, qui est la [désignation des gagnants](winner-selection.md), ni la taille de chaque
 lot, qui est dans [lots et paliers](prizes-and-tiers.md).
-</content>

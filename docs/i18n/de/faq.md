@@ -14,7 +14,13 @@ Einzelheiten unter [Pools und Token](concepts/pools-and-tokens.md).
 
 Unter "Meine Ziehungen" in der App, auf der Karte dieser Ziehung, unter "Ihr Ergebnis",
 sobald Sie es mit dem Auge geöffnet haben. Er erscheint nur, wenn diese Ziehung Ihnen etwas
-gutgeschrieben hat. Unter der Haube ist er bewusst keine eigene Transaktion: Preise werden
+gutgeschrieben hat und der Vault dieser Wallet noch Geld schuldet: dasselbe Auge öffnet die
+Gutschrift dieser Ziehung und den laufenden Stand der nicht eingelösten Gewinne des Vaults
+zusammen, und der Button bietet den kleineren der beiden an. Diese zweite Zahl ist es, die ihn
+ehrlich macht. Die Gutschrift einer Ziehung ändert sich nie mehr, sobald sie geschrieben ist,
+ein Button, der allein an der Gutschrift hängt, würde nach einem Neuladen also denselben Preis
+noch einmal anbieten, und die Blockchain würde ihn aus Ihrer eigenen Einlage zahlen.
+Unter der Haube ist er bewusst keine eigene Transaktion: Preise werden
 Ihrem verschlüsselten Gewinnguthaben bei der Auswertung gutgeschrieben, und der
 Einlöse-Button, der den Betrag trägt, sendet eine gewöhnliche Abhebung dafür, die auf der
 Blockchain wie jede andere Abhebung aussieht. In den meisten Preisprotokollen haben nur

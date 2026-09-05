@@ -8,6 +8,12 @@ depositaste. El camino de dos minutos del final de esta página no espera a ning
 La aplicación en vivo está en https://hearth-ram.vercel.app. Todo lo de abajo se puede hacer también
 directamente desde un explorador de bloques si prefieres ver las llamadas en crudo.
 
+Hay dos maneras de entrar con una cartera. Si el navegador tiene una extensión, "Conectar
+cartera" la usa. Si no tiene ninguna, "Escanear con el móvil" muestra un código de
+WalletConnect que lee una cartera de móvil, que es el único camino en una máquina donde no
+puedes instalar nada. A un navegador sin ninguna cartera se le dice cuál instalar y dónde, en
+lugar de darle un botón que falla a mitad de camino.
+
 ## 0. Elige un token
 
 Hearth tiene siete pools, uno por cada token confidencial que Zama publica en Sepolia. Cada
@@ -27,13 +33,25 @@ de la URL: `/app/usdc`, `/app/weth` y así.
 | Confidential XAUt (Mock) | `xaut` | 6 horas | `0x24377AE4AA0C45ecEe71225007f17c5D423dd940` |
 
 El selector también lista el **Confidential tGBP** oficial de Zama, en gris, porque el mint
-de su token subyacente pertenece al emisor y nadie más puede conseguir el token. Elegirlo
-muestra una página que nombra el token, enlaza los dos contratos y no ofrece ninguna acción
-de cartera, en lugar de un botón de depósito que revertiría.
+de su token subyacente pertenece al emisor y nadie más puede conseguir el token. El motivo
+está bajo su nombre, en el idioma en el que estás leyendo, y elegirlo muestra una página que
+nombra el token, enlaza los dos contratos y no ofrece ninguna acción de cartera, en lugar de
+un botón de depósito que revertiría. Un pool que todavía no ha cerrado su primer sorteo usa
+esa misma línea bajo su nombre para decir cuándo es ese sorteo, porque hay una hora que dar
+en lugar de un premio.
 
-La aplicación se lee en dieciséis idiomas, que se eligen desde el botón de la barra
-superior. El inglés conserva las URL simples y cada uno de los demás idiomas antepone su
-código, así que la misma pantalla en japonés es `/ja/app/usdc`.
+La aplicación se lee en dieciséis idiomas, que se eligen desde el botón de la barra superior
+o desde el de la barra lateral de la consola. El inglés conserva las URL simples y cada uno
+de los demás idiomas antepone su código, así que la misma pantalla en japonés es
+`/ja/app/usdc`. El árabe refleja la disposición. Todos los idiomas, el árabe incluido,
+conservan los dígitos occidentales y un reloj de veinticuatro horas en UTC, así que una cifra
+de la pantalla coincide con la cifra de un explorador de bloques, y cualquier campo de
+cantidad acepta una coma o un punto como separador decimal, y rechaza solo una cantidad que
+lleve los dos. Estas páginas de documentación están traducidas igual, página por página, y
+una página que nadie ha traducido todavía muestra la inglesa con una línea arriba que lo
+dice. Cada traducción la escribió un modelo y no una persona nativa: el inglés es la fuente
+de verdad para cada número y cada nombre de contrato, como dice
+[limitaciones](../limitations.md).
 
 ## Contratos que vas a tocar
 
@@ -92,7 +110,11 @@ cUSDC.wrap(yourAddress, 1000000000)
 
 En la aplicación esas dos llamadas son el paso 2 del Depósito, "Blinda tus USDC". El botón
 dice "Blindar", y "Aprobar el envoltorio" mientras la autorización del envoltorio no llegue a
-la cantidad que escribiste.
+la cantidad que escribiste. La aprobación se pide una sola vez, por una autorización grande,
+así que cada blindaje después del primero es una única transacción en lugar de dos. Alcanza
+exactamente a un contrato, el envoltorio confidencial de ese token, y le deja sacar el token
+mock público de tu cartera y nada más. La pantalla dice esas dos cosas al lado del botón en
+lugar de dejar que las descubras.
 
 Ahora tienes 1.000 USDC confidenciales. A partir de aquí, tu saldo es un handle de texto
 cifrado y solo tú puedes leerlo.
@@ -114,6 +136,16 @@ La aplicación construye la entrada cifrada y su prueba por ti con el SDK de Zam
 de recepción de la bóveda abona exactamente la cantidad que el token dice que se movió de
 verdad, no la que pediste, así que una transferencia que se quede corta por el motivo que sea
 no puede crear principal fantasma.
+
+Eso tiene una consecuencia que conviene conocer antes de escribir una cifra. Pedir depositar
+más de tu saldo confidencial no se rechaza en ningún sitio de la cadena: el token mueve lo
+que la cartera tiene, que puede ser nada, y la transacción tiene éxito sin haber conseguido
+nada. Así que esa línea la sostiene la propia pantalla. Una vez que has abierto tu saldo
+confidencial con el ojo, el campo de depósito dice "Eso es más de lo que tienes" y el botón
+se queda apagado. La pantalla de desblindaje va más lejos, porque ahí no hay nada que abrir:
+lee tu saldo de token público antes de la operación y otra vez después, y si los dos son
+idénticos dice "No se movió nada", señala la cantidad demasiado grande como la causa
+habitual y apunta a "Todo".
 
 La bóveda rechaza un depósito cuya cantidad, o cuyo principal resultante, te empujaría por
 encima del límite por ahorrador, que en un periodo de una hora es de unos 5.000 millones de
@@ -222,6 +254,15 @@ envía un retiro corriente por exactamente esa cantidad, y el paso 8 se lleva el
 En la cadena, un cobro y un retiro son la misma llamada con la misma forma, y eso es lo que
 evita que un ganador destaque.
 
+El único ojo de esa tarjeta abre tres cifras a la vez: tu peso para el sorteo, el abono de ese
+sorteo y `confidentialWinningsOf`, que es todo lo que la bóveda todavía le debe a esta cartera
+sumando todos los sorteos. El botón está atado tanto al abono como a esa cifra corriente, y
+ofrece la menor de las dos. El abono de un sorteo no cambia nunca una vez escrito, así que una
+tarjeta atada solo al abono ofrecería el mismo premio otra vez tras recargar y la cadena lo
+honraría, de tu propio principal. La cifra corriente baja en cuanto llega un cobro, y eso es
+lo que retira el botón y deja la tarjeta diciendo que el premio ya se sacó, con la cifra
+guardada como registro de ese sorteo.
+
 Tampoco hay nada que pulsar para que te abonen. La evaluación recorre la lista de ahorradores
 desde un punto que decide la semilla de ese sorteo. El botón "Avanzar el sorteo" en la
 tarjeta de ese sorteo, y "Avanzar" en la pantalla "Ejecutar un sorteo", mueven los dos ese
@@ -258,7 +299,12 @@ nuestro.
 
 La primera llamada quema la cantidad cifrada y la marca para descifrado público. La segunda
 libera los tokens en claro una vez que el protocolo de Zama ha producido el texto en claro y
-su prueba. La cantidad que desenvuelves es pública, igual que la que envolviste, y es la
+su prueba. La aplicación lee tu saldo de token público antes de la primera llamada y otra vez
+después de la segunda, e informa de la diferencia, así que "desblindados 250,00 USDC" es un
+hecho medido y no la cifra que escribiste. Cuando esa diferencia es cero dice "No se movió
+nada" en lugar de declarar el éxito: las dos transacciones sí llegaron, y el envoltorio no
+libera nada en lugar de rechazar cuando la cantidad estaba por encima de tu saldo
+confidencial. La cantidad que desenvuelves es pública, igual que la que envolviste, y es la
 primera llamada la que la publica, así que un desenvolver que nunca finalizas ya ha filtrado.
 
 Eso da una segunda cosa que conviene saber. Si envuelves a la entrada y desenvuelves a la
@@ -274,11 +320,14 @@ La aplicación es una consola con una barra a la izquierda, una tarea por pantal
 camino es un paseo por esa barra.
 
 1. Abre https://hearth-ram.vercel.app, sigue "El pool" en la cabecera hasta `/app` y conecta una
-   cartera en Sepolia. Aterrizas en el pool de USDC, en `/app/usdc`; el nombre del token en lo
-   alto de la barra cambia de pool. El panel se abre con un bloque marcado "Siguiente" que
-   nombra la única cosa que hay que hacer.
+   cartera en Sepolia, con la extensión del navegador o escaneando el código con una cartera
+   de móvil. Aterrizas en el pool de USDC, en `/app/usdc`; el nombre del token en lo alto de
+   la barra cambia de pool. El panel se abre con un bloque marcado "Siguiente" que nombra la
+   única cosa que hay que hacer.
 2. "Depositar" en la barra lateral, que se abre en el paso de sus tres en el que esté tu
-   cartera. Pulsa "Consigue USDC de prueba", después "Blindar" y después "Depositar".
+   cartera. Pulsa "Consigue USDC de prueba", después "Blindar" y después "Depositar". El
+   primer blindaje pide una aprobación del envoltorio y ningún blindaje posterior la vuelve
+   a pedir.
 3. De vuelta en el panel, pulsa el ojo junto a "Principal" en "Lo que tienes" y firma: tu
    principal y tus ganancias aparecen los dos, solo en el navegador.
 4. "Ejecutar un sorteo" en la barra lateral, la fila marcada "Cualquiera". Pulsa "Cerrar" y

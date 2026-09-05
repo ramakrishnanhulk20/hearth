@@ -103,14 +103,33 @@ Zama cũng phát hành một **Confidential tGBP** không phải bản mock trê
 đơn vị phát hành, nên ngoài đơn vị phát hành thì không ai lấy được token công khai, không ai
 bọc thành token bảo mật được, và cũng không thể mở pool nào trên nó cả.
 
-Hearth vẫn liệt kê nó trong bộ chọn pool, để mờ, kèm lý do viết ngay bên cạnh:
-`mint restricted to the issuer`. Chọn nó sẽ mở ra một trang gọi tên token, dẫn tới cả hai hợp
+Hearth vẫn liệt kê nó trong bộ chọn pool, để mờ, kèm lý do viết ngay dưới tên nó. Tệp triển khai
+ghi lý do đó đúng một lần, bằng tiếng Anh, là `mint restricted to the issuer`, còn ứng dụng in nó
+ra bằng thứ tiếng người đọc đang dùng. Chọn nó sẽ mở ra một trang gọi tên token, dẫn tới cả hai hợp
 đồng trên Etherscan, nói rõ giới hạn đó là của ai, và không đưa ra thao tác ví nào, vì một nút
 gửi tiền chỉ để bị revert còn tệ hơn là không có nút.
 
 Bỏ hẳn token đó khỏi danh sách thì dễ hơn, mà lại trông như Hearth đơn giản là chưa làm tới.
 Người gửi nào đi tìm tGBP sẽ thấy hai mục: pool bản mock thì chạy được, và token chính thức
 thì không, kèm lý do.
+
+## Dãy pool cho thấy điều gì
+
+Trang chủ kết lại bằng một dãy có đủ mọi pool, mỗi ô mang giải lớn của pool đó ngay lúc này, đọc
+trên máy chủ trong một lệnh multicall và gửi kèm sẵn trong trang, nên dãy ấy đã điền xong khi câu
+chuyện ngừng cuộn. Bộ chọn bên trong bảng điều khiển hiển thị đúng những con số ấy theo đúng những
+quy tắc ấy.
+
+Hai trong số các quy tắc đó tồn tại vì một con số có thể gây hiểu lầm:
+
+- Pool nào không đọc được thì ghi `chưa đọc được`, không bao giờ ghi `0.00`. Một nút mạng không trả
+  lời và một hũ giải rỗng trông y hệt nhau một khi đã viết số 0 xuống.
+- Pool nào chưa đóng kỳ quay đầu tiên thì ghi **Kỳ quay đầu tiên HH:MM UTC** thay cho một con số, cả
+  trên dãy pool lẫn dưới tên nó trong bộ chọn. Tiền giải chỉ tới được các hạng khi kỳ quay đầu tiên
+  được trao, nên trước lần đóng đó câu trả lời thành thật là một thời điểm, chứ không phải `0.00`.
+  Ô hiển thị cái nào trong hai cái là do `lastClosedDraw` vẫn đọc ra 0 quyết định, còn bản thân thời
+  điểm là `firstPeriodAt` cộng `periodLength`, tức lúc kết thúc kỳ đầu tiên và cũng là khoảnh khắc
+  sớm nhất mà kỳ quay 1 có thể đóng. Đồng hồ là 24 giờ UTC trong mọi ngôn ngữ.
 
 ## Ứng dụng lấy địa chỉ từ đâu
 

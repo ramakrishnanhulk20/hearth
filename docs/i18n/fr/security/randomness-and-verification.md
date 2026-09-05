@@ -235,4 +235,3 @@ Si cela ne correspond pas, c'est soit qu'un palier est tombé à sec avant que l
 vous atteigne, ce qui est le plafonnement documenté, soit que quelque chose ne va pas et
 vous avez les nombres pour le prouver. L'application fait les quatre étapes pour vous et
 montre l'arithmétique.
-</content>

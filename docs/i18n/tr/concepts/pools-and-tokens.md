@@ -109,15 +109,35 @@ Zama Sepolia'da taklit olmayan bir **Confidential tGBP** de yayımlıyor,
 ihraççıyla sınırlıdır, dolayısıyla ihraççı dışında kimse açık tokeni edinemez, kimse gizli
 olana sarmalayamaz, ve üzerine hiçbir havuz açılamaz.
 
-Hearth onu yine de havuz seçicisinde listeler, soluk halde, sebebi yanına yazılmış olarak:
-`mint restricted to the issuer`. Onu seçmek, tokenin adını veren, her iki sözleşmeye
-Etherscan üzerinden bağlantı veren, kısıtın kime ait olduğunu söyleyen ve hiçbir cüzdan
-işlemi sunmayan bir sayfa açar, çünkü geri dönen bir yatırma düğmesi, hiç düğme olmamasından
-kötüdür.
+Hearth onu yine de havuz seçicisinde listeler, soluk halde, sebebi adının altına yazılmış
+olarak. Dağıtım dosyası bu sebebi bir kez, İngilizce olarak, `mint restricted to the issuer`
+biçiminde belirtir, uygulama da onu okuyanın bulunduğu dilde yazar. Onu seçmek, tokenin adını
+veren, her iki sözleşmeye Etherscan üzerinden bağlantı veren, kısıtın kime ait olduğunu
+söyleyen ve hiçbir cüzdan işlemi sunmayan bir sayfa açar, çünkü geri dönen bir yatırma
+düğmesi, hiç düğme olmamasından kötüdür.
 
 Tokeni listeden çıkarmak daha kolay olurdu ve Hearth'ün ona sırası gelmemiş gibi görünürdü.
 tGBP arayan bir tasarruf sahibi iki kayıt bulur: çalışan taklit havuz, ve çalışmayan resmi
 token, sebebiyle birlikte.
+
+## Havuz sırası neyi gösteriyor
+
+Açılış sayfası her havuzun yer aldığı bir sırayla biter, her hücre o havuzun şu anki büyük
+ödülünü taşır, sunucuda tek bir multicall ile okunur ve sayfanın içinde gönderilir, böylece
+hikâye kaymayı bıraktığında sıra çoktan doludur. Konsolun içindeki seçici de aynı rakamları
+aynı kurallara göre gösterir.
+
+Bu kuralların ikisi, bir sayının yanıltabilmesi yüzünden var:
+
+- Okuması geri gelmeyen bir havuz `0.00` değil, `okunamadı` der. Cevap vermeyen bir düğüm ile
+  boş bir ödül havuzu, bir kez sıfır yazıldıktan sonra birbirinin aynı görünür.
+- İlk çekilişini henüz kapatmamış bir havuz, rakam yerine **İlk çekiliş HH:MM UTC** der, hem
+  sırada hem de seçicide adının altında. Ödül parası kademelere ancak ilk çekiliş
+  ödüllendirildiğinde ulaşır, dolayısıyla o kapanıştan önce dürüst cevap bir rakam değil bir
+  saattir. Bir hücrenin ikisinden hangisini göstereceğine `lastClosedDraw` değerinin hâlâ sıfır
+  okuması karar verir, ve saatin kendisi `firstPeriodAt` artı `periodLength`, yani ilk dönemin
+  sonu ve 1 numaralı çekilişin kapanabileceği en erken andır. Saat her dilde yirmi dört saatlik
+  UTC'dir.
 
 ## Uygulama adresleri nereden alıyor
 

@@ -8,6 +8,12 @@ em que você depositou. O caminho de dois minutos no fim desta página não espe
 O aplicativo ao vivo está em https://hearth-ram.vercel.app. Tudo abaixo também pode ser
 feito direto de um explorador de blocos, se você preferir ver as chamadas cruas.
 
+Duas maneiras de entrar com uma carteira. Se o navegador tem uma extensão, "Conectar carteira"
+usa ela. Se não tem nenhuma, "Escanear com o celular" mostra um código WalletConnect que uma
+carteira de celular lê, que é o único caminho numa máquina onde você não pode instalar nada. Um
+navegador sem carteira nenhuma é informado de qual instalar e onde, em vez de receber um botão
+que falha no meio do caminho.
+
 ## 0. Escolha um token
 
 O Hearth roda sete pools, um para cada token confidencial que a Zama publica na Sepolia.
@@ -27,13 +33,24 @@ parte da URL: `/app/usdc`, `/app/weth` e assim por diante.
 | Confidential XAUt (Mock) | `xaut` | 6 horas | `0x24377AE4AA0C45ecEe71225007f17c5D423dd940` |
 
 O seletor também lista o **Confidential tGBP** oficial da Zama, em cinza, porque o mint do
-token subjacente pertence ao emissor e mais ninguém consegue obter o token. Escolhê-lo
-mostra uma página que nomeia o token, aponta para os dois contratos e não oferece nenhuma
-ação de carteira, em vez de um botão de depósito que iria reverter.
+token subjacente pertence ao emissor e mais ninguém consegue obter o token. O motivo fica sob
+o nome dele, na língua em que você está lendo, e escolhê-lo mostra uma página que nomeia o
+token, aponta para os dois contratos e não oferece nenhuma ação de carteira, em vez de um
+botão de depósito que iria reverter. Um pool que ainda não fechou o primeiro sorteio usa essa
+mesma linha sob o nome dele para dizer quando esse sorteio é, porque ali existe uma hora a
+dar, e não um prêmio.
 
-O aplicativo é lido em dezesseis idiomas, escolhidos no botão da barra superior. O inglês
-mantém as URLs simples e todos os outros idiomas colocam o código na frente, então a mesma
-tela em japonês é `/ja/app/usdc`.
+O aplicativo é lido em dezesseis idiomas, escolhidos no botão da barra superior ou no botão da
+barra do console. O inglês mantém as URLs simples e todos os outros idiomas colocam o código
+na frente, então a mesma tela em japonês é `/ja/app/usdc`. O árabe espelha o layout. Todos os
+idiomas mantêm os algarismos ocidentais e um relógio de vinte e quatro horas em UTC, o árabe
+inclusive, para que um número na tela bata com o número em um explorador de blocos, e todo
+campo de valor aceita vírgula ou ponto como marca decimal, recusando apenas um valor que traga
+as duas. Estas páginas de documentação são traduzidas do mesmo jeito, página por página, e uma
+página que ninguém traduziu ainda mostra a inglesa com uma linha no topo dizendo isso. Toda
+tradução foi escrita por um modelo, e não por um falante nativo: o inglês é a fonte da verdade
+para todo número e todo nome de contrato, como diz a
+[lista de limitações](../limitations.md).
 
 ## Contratos que você vai tocar
 
@@ -92,7 +109,11 @@ cUSDC.wrap(yourAddress, 1000000000)
 
 No aplicativo essas duas chamadas são o passo 2 do Depósito, "Blinde seu USDC". O botão diz
 "Blindar", e "Aprovar o wrapper" enquanto a permissão do wrapper estiver abaixo do valor que
-você digitou.
+você digitou. A permissão é pedida uma vez só, para um limite grande, então toda blindagem
+depois da primeira é uma transação em vez de duas. Ela alcança exatamente um contrato, o
+wrapper confidencial daquele token, e o deixa puxar o token mock público da sua carteira, e
+nada além disso. A tela diz essas duas coisas ao lado do botão, em vez de deixar que você as
+descubra sozinho.
 
 Agora você tem 1.000 USDC confidenciais. Daqui em diante, seu saldo é um handle de texto
 cifrado e só você consegue lê-lo.
@@ -114,6 +135,15 @@ O aplicativo monta a entrada cifrada e a prova dela para você com o SDK da Zama
 recebimento do cofre credita exatamente o valor que o token diz que realmente se moveu, não
 o valor que você pediu, então uma transferência que veio a menor por qualquer motivo não
 consegue criar principal fantasma.
+
+Isso tem uma consequência que vale saber antes de você digitar um valor. Pedir para depositar
+mais do que o seu saldo confidencial não é recusado em lugar nenhum da blockchain: o token
+move o que a carteira tem, que pode ser nada, e a transação dá certo sem ter conseguido nada.
+Então é a tela que segura essa linha. Depois que você abriu o seu saldo confidencial com o
+olho, o campo de depósito diz "Isso é mais do que você tem" e o botão fica desligado. A tela
+de desblindagem vai além, porque lá não há nada para abrir: ela lê o seu saldo do token
+público antes da execução e de novo depois dela, e se os dois forem idênticos ela diz "Nada se
+moveu", aponta o valor grande demais como a causa de sempre, e indica "Tudo".
 
 O cofre recusa um depósito cujo valor, ou cujo principal resultante, empurraria você acima
 do teto por poupador, que em um período de uma hora é cerca de 5 bilhões de tokens e em um
@@ -222,6 +252,15 @@ dele em "Meus sorteios" mostra um botão de resgate carregando o valor, algo com
 para casa. Na blockchain um resgate e um saque são a mesma chamada com o mesmo formato, e é
 isso que impede um vencedor de se destacar.
 
+O único olho daquele cartão abre três números de uma vez: o seu peso naquele sorteio, o
+crédito daquele sorteio, e `confidentialWinningsOf`, que é tudo o que o cofre ainda deve a
+essa carteira somando todos os sorteios. O botão está preso ao crédito e também a esse número
+corrente, e oferece o menor dos dois. O crédito de um sorteio nunca muda depois de escrito,
+então um cartão preso só ao crédito ofereceria o mesmo prêmio de novo depois de um
+recarregamento, e a blockchain honraria isso, saindo do seu próprio principal. O número
+corrente cai no instante em que um resgate chega, e é isso que tira o botão e deixa o cartão
+dizendo que o prêmio já foi retirado, com o número guardado como o registro daquele sorteio.
+
 Também não há nada para apertar para ser creditado. A avaliação percorre a lista de
 poupadores a partir de um ponto que a semente daquele sorteio decide. O botão "Avançar o
 sorteio" no cartão daquele sorteio, e "Avançar" na tela "Rodar um sorteio", movem essa mesma
@@ -256,6 +295,11 @@ wrapper da Zama, não no nosso.
 
 A primeira chamada queima o valor cifrado e o marca para decifragem pública. A segunda libera
 os tokens em texto claro assim que o protocolo da Zama produziu o texto claro e a prova dele.
+O aplicativo lê o seu saldo do token público antes da primeira chamada e de novo depois da
+segunda, e relata a diferença, então "Desblindado, 250.00 USDC" é um fato medido, e não o
+número que você digitou. Quando essa diferença é zero, ele diz "Nada se moveu" em vez de
+declarar sucesso: as duas transações chegaram mesmo, e o wrapper não libera nada em vez de
+recusar quando o valor estava acima do seu saldo confidencial.
 O valor que você desempacota é público, exatamente como o valor que você empacotou, e é a
 primeira chamada que o publica, então um desempacotamento que você nunca finaliza já vazou.
 
@@ -272,11 +316,12 @@ O aplicativo é um console com uma barra à esquerda, uma tarefa por tela, entã
 uma caminhada por essa barra.
 
 1. Abra https://hearth-ram.vercel.app, siga "O pool" no cabeçalho até `/app` e conecte uma
-   carteira na Sepolia. Você chega no pool de USDC em `/app/usdc`. O nome do token no topo da
-   barra troca de pool. O painel abre com um bloco marcado "Próximo" nomeando a única coisa a
-   fazer.
+   carteira na Sepolia, com a extensão do navegador ou escaneando o código com uma carteira de
+   celular. Você chega no pool de USDC em `/app/usdc`. O nome do token no topo da barra troca
+   de pool. O painel abre com um bloco marcado "Próximo" nomeando a única coisa a fazer.
 2. "Depósito" na barra lateral, que abre no passo em que a sua carteira está, dos três.
-   Clique em "Consiga USDC de teste", depois "Blindar", depois "Depositar".
+   Clique em "Consiga USDC de teste", depois "Blindar", depois "Depositar". A primeira
+   blindagem pede uma aprovação do wrapper, e nenhuma blindagem depois dela pede de novo.
 3. De volta ao painel, aperte o olho ao lado de "Principal" em "O que você tem" e assine: seu
    principal e seus ganhos aparecem, só no navegador.
 4. "Rodar um sorteio" na barra lateral, a linha marcada "Qualquer um". Aperte "Fechar",

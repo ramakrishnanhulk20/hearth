@@ -281,6 +281,7 @@ belirgin bir sebep olmadan başarısız olur.
 | `SEPOLIA_RPC_URL` | Hayır | Kendi Sepolia ucunuz. Açılış sayfası ve `/api/activity` yolu zinciri sunucuda okur, dolayısıyla bu değişken hiçbir tarayıcıya ulaşmaz. Kayıt sorguları buna ihtiyaç duyar, çünkü ücretsiz açık düğüm `eth_getLogs` aralıklarını bir günlük bloğun epey altında sınırlıyor |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Evet | İsteğe bağlı. Cüzdan okumaları bunu kullanır ve ayarlı değilse `https://ethereum-sepolia-rpc.publicnode.com` adresine düşer. Paket içinde görünür, dolayısıyla yayımlamaktan memnun olacağınız bir uç olmalı |
 | `NEXT_PUBLIC_CHAIN_ID` | Evet | Ethereum Sepolia için `11155111`. Ayarlı değilse uygulama bunu varsayar |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Evet | İsteğe bağlı, ve Reown'un https://dashboard.reown.com adresindeki panosundan ücretsiz. Ayarlayın, her bağlanma ekranı tarayıcı eklentisinin yanında "Telefonla tarayın" seçeneğini de sunar, telefon cüzdanları ve eklentisi olmayan makineler buradan girer. Boş bırakılırsa bağlayıcı hiç kurulmaz, böylece kimseye tam tarama anında başarısız olacak bir düğme sunulmaz |
 
 Artık hiçbir sözleşme adresi bir ortam değişkeni değil. Uygulama her havuzu
 `packages/web/src/lib/chain/pools.json` dosyasından okur, ki onu `node scripts/sync-pools.mjs`

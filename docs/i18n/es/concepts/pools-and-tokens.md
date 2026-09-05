@@ -110,14 +110,35 @@ Zama publica también un **Confidential tGBP** que no es mock en Sepolia, en
 emisor, así que nadie salvo el emisor puede conseguir el token público, nadie puede envolver
 hacia el confidencial y no se puede abrir ningún pool sobre él.
 
-Hearth lo lista igualmente en el selector de pools, en gris, con el motivo escrito al lado:
-`mint restringido al emisor`. Elegirlo abre una página que nombra el token, enlaza los dos
-contratos en Etherscan, dice de quién es la restricción y no ofrece ninguna acción de
-cartera, porque un botón de depósito que revierte es peor que ningún botón.
+Hearth lo lista igualmente en el selector de pools, en gris, con el motivo escrito bajo su
+nombre. El archivo de despliegue enuncia ese motivo una sola vez, en inglés, como
+`mint restricted to the issuer`, y la aplicación lo imprime en el idioma en el que estás
+leyendo. Elegirlo abre una página que nombra el token, enlaza los dos contratos en Etherscan,
+dice de quién es la restricción y no ofrece ninguna acción de cartera, porque un botón de
+depósito que revierte es peor que ningún botón.
 
 Dejar el token fuera de la lista habría sido más fácil y habría parecido que Hearth
 sencillamente no había llegado a él. Un ahorrador que va buscando tGBP encuentra dos
 entradas: el pool mock que funciona y el token oficial que no, con el motivo.
+
+## Qué muestra la fila de pools
+
+La página de inicio termina con una fila de todos los pools, y cada celda lleva el premio gordo
+de ese pool ahora mismo, leído en el servidor con un solo multicall y enviado dentro de la
+propia página, así que la fila ya está rellena cuando la historia deja de desplazarse. El
+selector de dentro de la consola muestra las mismas cifras con las mismas reglas.
+
+Dos de esas reglas existen porque un número puede engañar:
+
+- Un pool cuya lectura no ha vuelto dice `sin leer`, nunca `0.00`. Un nodo que no ha contestado
+  y un bote vacío se ven igual en cuanto se escribe un cero.
+- Un pool que todavía no ha cerrado su primer sorteo dice **Primer sorteo HH:MM UTC** en lugar
+  de una cifra, tanto en la fila como bajo su nombre en el selector. El dinero de los premios
+  solo llega a los niveles cuando se adjudica el primer sorteo, así que antes de ese cierre la
+  respuesta honesta es una hora y no `0.00`. Cuál de las dos muestra una celda lo decide que
+  `lastClosedDraw` siga leyendo cero, y la hora en sí es `firstPeriodAt` más `periodLength`, el
+  final del primer periodo y el momento más temprano en que el sorteo 1 puede cerrar. El reloj
+  es de veinticuatro horas y en UTC en todos los idiomas.
 
 ## De dónde saca la aplicación las direcciones
 

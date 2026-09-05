@@ -27,8 +27,8 @@ Sepolia 上共有七個資金池，Zama 在該網路發行的每一種機密代�
 | [什麼保持私密](security/what-stays-private.md) | 七條規則：級距與它取代掉的那個外洩、餘額被鎖定的代價、包裝接縫的兩個方向、獎項數量究竟量到了什麼、代幣層、為何評估動作不會洩底，以及行為上的殘留線索。 |
 | [威脅模型](security/threat-model.md) | 九種攻擊者、各自想要什麼、什麼擋得住他們、什麼擋不住。另附我們上一版設計被實際打穿的紀錄。 |
 | [隨機性與驗證](security/randomness-and-verification.md) | 種子從哪裡來、為何沒人能重擲或改動它能贏到的金額，以及任何人事後如何重算門檻。 |
-| [靜態分析](security/static-analysis.md) | slither 與 solhint 的執行結果，以及五類發現各自背後的那一個原因。 |
-| [Keeper](operations/keeper.md) | keeper 的工作逐步拆解、排序規則、一池一支程序、它掛掉會怎樣，以及 gas 預算。 |
+| [靜態分析](security/static-analysis.md) | slither 與 solhint 的執行結果、五類發現各自背後的那一個原因，以及相依套件稽核和它至今仍會報出的那兩條 axios 發現。 |
+| [Keeper](operations/keeper.md) | keeper 的工作逐步拆解、排序規則、一池一支程序、線上那七支跑在哪、它掛掉會怎樣，以及 gas 預算。 |
 | [部署](operations/deploying.md) | 每種代幣部署一個池、建構子簽章與參數、驗證，以及兩組 Sepolia 參數對照一組主網參數。 |
 | [限制](limitations.md) | 十四項限制，全部列在一份編號清單裡。 |
 | [常見問題](faq.md) | 十二則簡答，從七種代幣裡你能存哪一種開始，也包括領獎按鈕跑到哪去了。 |

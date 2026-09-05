@@ -307,4 +307,3 @@ soi-même, ce qui est dans [aléa et vérification](randomness-and-verification.
 prétend rien sur la confidentialité au niveau du réseau : l'adresse IP depuis laquelle vous
 vous connectez, le fournisseur RPC que vous utilisez et la requête que vous envoyez au
 relayer sont hors de la chaîne et hors de cette analyse.
-</content>

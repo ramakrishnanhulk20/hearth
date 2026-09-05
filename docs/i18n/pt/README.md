@@ -30,8 +30,8 @@ Esta árvore é o mesmo projeto explicado para quem usa e para quem audita.
 | [O que permanece privado](security/what-stays-private.md) | Sete regras: a faixa e o vazamento que ela substituiu, o que custa um saldo identificado, a costura do empacotamento nos dois sentidos, o que as contagens de prêmios medem, a camada do token, por que a avaliação não entrega ninguém e o resíduo comportamental. |
 | [Modelo de ameaças](security/threat-model.md) | Nove atacantes, o que cada um quer, o que os detém e o que não detém. Mais as falhas executadas do nosso projeto anterior. |
 | [Aleatoriedade e verificação](security/randomness-and-verification.md) | De onde vem a semente, por que ninguém pode sorteá-la de novo nem mudar o tamanho do que ela ganha, e como qualquer pessoa recalcula um limiar depois do fato. |
-| [Análise estática](security/static-analysis.md) | As execuções do slither e do solhint, e a razão única por trás de cada uma das cinco famílias de achados. |
-| [O keeper](operations/keeper.md) | O trabalho do keeper passo a passo, a regra de ordem, um processo por pool, o que acontece quando ele cai e o orçamento de gás. |
+| [Análise estática](security/static-analysis.md) | As execuções do slither e do solhint, a razão única por trás de cada uma das cinco famílias de achados, e a auditoria de dependências com os dois achados do axios que ela ainda aponta. |
+| [O keeper](operations/keeper.md) | O trabalho do keeper passo a passo, a regra de ordem, um processo por pool, onde rodam os sete que estão no ar, o que acontece quando ele cai e o orçamento de gás. |
 | [Implantação](operations/deploying.md) | Implantar um pool por token, assinaturas e parâmetros do construtor, verificação, e os dois conjuntos de parâmetros da Sepolia contra um de mainnet. |
 | [Limitações](limitations.md) | Todas as limitações documentadas em uma lista numerada de catorze. |
 | [Perguntas frequentes](faq.md) | Doze respostas curtas, começando por em qual dos sete tokens você pode poupar, e incluindo para onde foi o botão de resgate. |

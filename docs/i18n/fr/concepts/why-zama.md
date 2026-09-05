@@ -166,4 +166,3 @@ Le nommer est tout l'objet de cette page.
   désactivée.
 
 Rien sur cette liste n'est une personne à qui nous vous demandons de croire.
-</content>

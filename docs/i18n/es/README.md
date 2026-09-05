@@ -31,8 +31,8 @@ Estas páginas son el registro escrito completo de cómo funciona y de lo que no
 | [Qué permanece privado](security/what-stays-private.md) | Siete reglas: la franja y la fuga que sustituyó, lo que cuesta un saldo identificado, la costura del envoltorio en ambos sentidos, qué miden los recuentos de premios, la capa del token, por qué la evaluación no delata y el residuo de comportamiento. |
 | [Modelo de amenazas](security/threat-model.md) | Nueve atacantes, qué busca cada uno, qué los detiene y qué no. Más los fallos ejecutados de nuestro diseño anterior. |
 | [Aleatoriedad y verificación](security/randomness-and-verification.md) | De dónde sale la semilla, por qué nadie puede volver a tirarla ni cambiar el tamaño de lo que gana, y cómo cualquiera recalcula un umbral a posteriori. |
-| [Análisis estático](security/static-analysis.md) | Las ejecuciones de slither y solhint, y la razón única detrás de cada una de las cinco familias de hallazgos. |
-| [El keeper](operations/keeper.md) | El trabajo del keeper paso a paso, la regla de orden, un proceso por pool, qué pasa cuando se cae y el presupuesto de gas. |
+| [Análisis estático](security/static-analysis.md) | Las ejecuciones de slither y solhint, la razón única detrás de cada una de las cinco familias de hallazgos, y la auditoría de dependencias con los dos hallazgos de axios que todavía reporta. |
+| [El keeper](operations/keeper.md) | El trabajo del keeper paso a paso, la regla de orden, un proceso por pool, dónde están alojados los siete que están en marcha, qué pasa cuando se cae y el presupuesto de gas. |
 | [Despliegue](operations/deploying.md) | Desplegar un pool por token, firmas y parámetros del constructor, verificación, y los dos juegos de parámetros de Sepolia frente a uno de mainnet. |
 | [Limitaciones](limitations.md) | Todas las limitaciones documentadas en una sola lista numerada de catorce. |
 | [Preguntas frecuentes](faq.md) | Doce respuestas cortas, empezando por en cuál de los siete tokens puedes ahorrar, e incluyendo adónde fue a parar el botón de cobro. |

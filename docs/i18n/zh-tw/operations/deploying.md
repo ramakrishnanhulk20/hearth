@@ -244,6 +244,7 @@ Sepolia 上七個池，每一份合約都在 Etherscan 上驗證過。每個池�
 | `SEPOLIA_RPC_URL` | 否 | 你自己的 Sepolia 端點。首頁和 `/api/activity` 路由是在伺服器端讀鏈的，所以這一個永遠不會到達瀏覽器。日誌查詢需要它，因為免費的公開節點把 `eth_getLogs` 的範圍限制得遠低於一天的區塊量 |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | 是 | 選填。錢包端的讀取會用它，沒設時退回 `https://ethereum-sepolia-rpc.publicnode.com`。它會出現在打包檔裡，所以必須是你願意公開的那一個 |
 | `NEXT_PUBLIC_CHAIN_ID` | 是 | 以太坊 Sepolia 是 `11155111`。沒設時 App 會用這個預設值 |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | 是 | 選填，在 Reown 的後台 https://dashboard.reown.com 免費申請。設了它，每一個連接畫面都會在瀏覽器擴充功能旁邊給出「用手機掃描」，手機錢包和一台裝不了擴充功能的機器就是這樣進來的。留白的話這個連接器根本不會被建出來，就不會有人拿到一個掃描那一刻才失敗的按鈕 |
 
 已經沒有任何合約位址是環境變數了。App 從 `packages/web/src/lib/chain/pools.json` 讀取每一個池，而那
 是 `node scripts/sync-pools.mjs` 依部署腳本寫出的位址檔生成的，所以 App 顯示的任何位址，永遠追得回

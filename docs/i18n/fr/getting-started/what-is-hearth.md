@@ -198,4 +198,3 @@ Version courte, et en entier dans [ce qui reste privé](../security/what-stays-p
   publics au niveau du jeton.
 - Un épargnant qui retire juste après chaque tirage qu'il a gagné laisse fuir un indice
   statistique par son propre comportement. Aucun contrat ne peut corriger celui-là.
-</content>

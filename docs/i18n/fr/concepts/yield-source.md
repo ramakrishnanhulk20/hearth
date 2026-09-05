@@ -225,4 +225,3 @@ coffre Morpho, qui est un chiffre appartenant à quelqu'un d'autre et qui change
 jours. Et elle ne prétend pas que l'adaptateur tourne : sur Sepolia, c'est la source
 sponsorisée qui est attachée, et la carte « Le pool en ce moment » du tableau de bord la
 nomme.
-</content>

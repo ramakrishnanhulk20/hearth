@@ -9,6 +9,12 @@ Seite wartet nicht darauf.
 Die Live-App liegt unter https://hearth-ram.vercel.app. Alles Folgende geht auch direkt
 über einen Block-Explorer, wenn Sie den Rohaufrufen lieber zusehen.
 
+Zwei Wege hinein, beide mit einer Wallet. Hat der Browser eine Erweiterung, nutzt "Wallet
+verbinden" sie. Hat er keine, zeigt "Mit dem Handy scannen" einen WalletConnect-Code, den eine
+Handy-Wallet liest, und das ist der einzige Weg auf einer Maschine, auf der Sie nichts
+installieren dürfen. Einem Browser ganz ohne Wallet wird gesagt, welche er installieren soll
+und wo, statt ihm einen Knopf zu geben, der auf halbem Weg versagt.
+
 ## 0. Einen Token wählen
 
 Hearth betreibt sieben Pools, einen je vertraulichem Token, den Zama auf Sepolia
@@ -29,13 +35,23 @@ der URL: `/app/usdc`, `/app/weth` und so weiter.
 
 Die Auswahl führt außerdem Zamas offiziellen **Confidential tGBP** auf, ausgegraut, weil
 sein zugrunde liegendes Minting dem Herausgeber gehört und niemand sonst den Token
-bekommen kann. Wer ihn wählt, sieht eine Seite, die den Token benennt, beide Verträge
-verlinkt und keine Wallet-Aktion anbietet, statt eines Einzahlen-Buttons, der nur
-zurückgewiesen würde.
+bekommen kann. Der Grund steht unter seinem Namen, in der Sprache, in der Sie lesen, und wer
+ihn wählt, sieht eine Seite, die den Token benennt, beide Verträge verlinkt und keine
+Wallet-Aktion anbietet, statt eines Einzahlen-Buttons, der nur zurückgewiesen würde. Ein Pool,
+der seine erste Ziehung noch nicht abgeschlossen hat, nutzt dieselbe Zeile unter seinem Namen,
+um zu sagen, wann diese Ziehung ist, denn dort gibt es eine Uhrzeit zu nennen und keinen Preis.
 
-Die App liest sich in sechzehn Sprachen, wählbar über den Button in der oberen Leiste.
-Englisch behält die schlichten URLs, jede andere Sprache stellt ihren Code voran, derselbe
-Bildschirm auf Japanisch ist also `/ja/app/usdc`.
+Die App liest sich in sechzehn Sprachen, wählbar über den Button in der oberen Leiste oder den
+in der Konsolenleiste. Englisch behält die schlichten URLs, jede andere Sprache stellt ihren
+Code voran, derselbe Bildschirm auf Japanisch ist also `/ja/app/usdc`. Arabisch spiegelt das
+Layout. Jede Sprache behält westliche Ziffern und eine Vierundzwanzig-Stunden-Uhr in UTC,
+Arabisch eingeschlossen, damit eine Zahl auf dem Bildschirm zu der Zahl auf einem
+Block-Explorer passt, und jedes Betragsfeld nimmt ein Komma oder einen Punkt als Dezimalzeichen
+an und weist nur einen Betrag zurück, der beide trägt. Diese Dokumentationsseiten sind auf
+dieselbe Weise übersetzt, Seite für Seite, und eine Seite, die noch niemand übersetzt hat,
+zeigt die englische mit einer Zeile oben, die genau das sagt. Jede Übersetzung stammt von einem
+Modell und nicht von einem Muttersprachler: Englisch ist die Quelle der Wahrheit für jede Zahl
+und jeden Vertragsnamen, wie die [Liste der Grenzen](../limitations.md) festhält.
 
 ## Verträge, mit denen Sie zu tun haben
 
@@ -94,7 +110,11 @@ cUSDC.wrap(yourAddress, 1000000000)
 
 In der App sind diese beiden Aufrufe Schritt 2 des Einzahlens, "Schirmen Sie Ihr USDC ab".
 Der Button heißt "Abschirmen", und "Wrapper freigeben", solange die Erlaubnis für den
-Wrapper unter dem eingetippten Betrag liegt.
+Wrapper unter dem eingetippten Betrag liegt. Die Freigabe wird einmal verlangt, für eine
+große Erlaubnis, jedes Abschirmen nach dem ersten ist also eine Transaktion statt zweier.
+Sie erreicht genau einen Vertrag, den vertraulichen Wrapper dieses Tokens, und lässt ihn den
+öffentlichen Mock-Token aus Ihrer Wallet ziehen, sonst nichts. Der Bildschirm sagt beides
+neben dem Button, statt es Sie suchen zu lassen.
 
 Sie halten jetzt 1.000 vertrauliches USDC. Ab hier ist Ihr Guthaben ein Chiffrat-Handle,
 und nur Sie können es lesen.
@@ -117,6 +137,16 @@ Die App baut die verschlüsselte Eingabe und ihren Beweis mit dem SDK von Zama f
 Empfangs-Hook des Vaults schreibt genau den Betrag gut, den der Token tatsächlich bewegt
 hat, nicht den, den Sie verlangt haben. Ein aus welchem Grund auch immer zu kleiner
 Transfer kann also keine Scheineinlage erzeugen.
+
+Das hat eine Folge, die man kennen sollte, bevor man eine Zahl eintippt. Mehr einzuzahlen zu
+verlangen, als Ihr vertrauliches Guthaben hergibt, wird auf der Blockchain nirgends abgelehnt:
+Der Token bewegt, was die Wallet hat, und das kann nichts sein, und die Transaktion gelingt,
+ohne irgendetwas erreicht zu haben. Diese Linie hält also der Bildschirm selbst. Sobald Sie Ihr
+vertrauliches Guthaben mit dem Auge geöffnet haben, sagt das Einzahlungsfeld "Das ist mehr, als
+Sie halten", und der Button bleibt aus. Der Abschirmung-aufheben-Bildschirm geht weiter, denn
+dort gibt es nichts zu öffnen: Er liest Ihr öffentliches Tokenguthaben vor dem Durchlauf und
+danach noch einmal, und sind beide gleich, sagt er "Nichts hat sich bewegt", nennt den zu
+großen Betrag als üblichen Grund und zeigt auf "Alles davon".
 
 Der Vault lehnt eine Einzahlung ab, deren Betrag oder deren resultierende Einlage Sie über
 die Obergrenze je Sparer heben würde, die bei einer Periode von einer Stunde etwa 5
@@ -229,6 +259,16 @@ zu drücken sendet eine gewöhnliche Abhebung über genau diesen Betrag, und Sch
 den Rest nach Hause. Auf der Blockchain sind eine Einlösung und eine Abhebung derselbe
 Aufruf mit derselben Form, und genau das bewahrt einen Gewinner davor aufzufallen.
 
+Das eine Auge auf dieser Karte öffnet drei Zahlen auf einmal: Ihr Gewicht für die Ziehung,
+die Gutschrift dieser Ziehung, und `confidentialWinningsOf`, also alles, was der Vault dieser
+Wallet über alle Ziehungen hinweg noch schuldet. Der Button hängt an der Gutschrift und an
+dieser laufenden Zahl, und er bietet die kleinere von beiden an. Die Gutschrift einer Ziehung
+ändert sich nie mehr, sobald sie geschrieben ist, eine Karte, die allein an der Gutschrift
+hängt, würde nach einem Neuladen also denselben Preis erneut anbieten, und die Blockchain
+würde ihn einlösen, aus Ihrer eigenen Einlage. Die laufende Zahl fällt in dem Moment, in dem
+eine Einlösung landet, und genau das nimmt den Button weg und lässt die Karte sagen, dass der
+Preis bereits herausgeholt wurde, während die Zahl als Aufzeichnung der Ziehung stehen bleibt.
+
 Es gibt auch nichts zu drücken, um gutgeschrieben zu werden. Die Auswertung läuft die
 Sparerliste ab einem Punkt ab, den der Seed dieser Ziehung bestimmt. Der Button "Die
 Ziehung voranbringen" auf der Karte dieser Ziehung und "Voranbringen" auf dem Bildschirm
@@ -266,7 +306,13 @@ genauen Argumentlisten stehen in Zamas Wrapper, nicht in unserem.
 
 Der erste Aufruf verbrennt den verschlüsselten Betrag und markiert ihn zur öffentlichen
 Entschlüsselung. Der zweite gibt die Klartext-Token frei, sobald Zamas Protokoll den
-Klartext und seinen Beweis erzeugt hat. Der Betrag, den Sie entwrappen, ist öffentlich,
+Klartext und seinen Beweis erzeugt hat. Die App liest Ihr öffentliches Tokenguthaben vor dem
+ersten Aufruf und nach dem zweiten noch einmal und meldet die Differenz, "Abschirmung
+aufgehoben, 250.00 USDC" ist also eine gemessene Tatsache und nicht die Zahl, die Sie
+eingetippt haben. Ist diese Differenz null, sagt sie "Nichts hat sich bewegt", statt Erfolg zu
+melden: Beide Transaktionen sind tatsächlich gelandet, und der Wrapper gibt nichts frei, statt
+abzulehnen, wenn der Betrag über Ihrem vertraulichen Guthaben lag.
+Der Betrag, den Sie entwrappen, ist öffentlich,
 genau wie der Betrag, den Sie gewrappt haben, und es ist der erste Aufruf, der ihn
 veröffentlicht. Ein Entwrappen, das Sie nie abschließen, hat also bereits geleckt.
 
@@ -284,11 +330,14 @@ Die App ist eine Konsole mit einer Leiste am linken Rand, eine Aufgabe je Bildsc
 Weg ist also ein Gang diese Leiste hinunter.
 
 1. Öffnen Sie https://hearth-ram.vercel.app, folgen Sie "Der Pool" in der Kopfzeile nach
-   `/app` und verbinden Sie eine Wallet auf Sepolia. Sie landen im USDC-Pool unter
-   `/app/usdc`; der Tokenname oben in der Leiste wechselt den Pool. Das Dashboard öffnet
-   sich mit einem Block "Als Nächstes", der die eine zu erledigende Sache nennt.
+   `/app` und verbinden Sie eine Wallet auf Sepolia, mit der Browser-Erweiterung oder indem
+   Sie den Code mit einer Handy-Wallet scannen. Sie landen im USDC-Pool unter `/app/usdc`;
+   der Tokenname oben in der Leiste wechselt den Pool. Das Dashboard öffnet sich mit einem
+   Block "Als Nächstes", der die eine zu erledigende Sache nennt.
 2. "Einzahlen" in der Seitenleiste, das auf demjenigen seiner drei Schritte öffnet, bei dem
    Ihre Wallet steht. Klicken Sie "Test-USDC holen", dann "Abschirmen", dann "Einzahlen".
+   Das erste Abschirmen verlangt eine Freigabe des Wrappers, und kein Abschirmen danach
+   fragt noch einmal.
 3. Zurück auf dem Dashboard drücken Sie das Auge neben "Einlage" in "Was Sie halten" und
    signieren: Ihre Einlage und Ihre Gewinne erscheinen, nur im Browser.
 4. "Eine Ziehung durchführen" in der Seitenleiste, die Zeile mit "Jeder". Drücken Sie

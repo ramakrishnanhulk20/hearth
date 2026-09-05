@@ -32,8 +32,8 @@ für die Menschen, die es benutzen, und für die, die es prüfen.
 | [Was privat bleibt](security/what-stays-private.md) | Sieben Regeln: die Größenklasse und das Leck, das sie ersetzt hat, was ein festnagelbares Guthaben kostet, die Wrapping-Naht in beide Richtungen, was die Preiszahlen messen, die Token-Ebene, warum die Auswertung nichts verrät, und der verhaltensbedingte Rest. |
 | [Bedrohungsmodell](security/threat-model.md) | Neun Angreifer, was jeder von ihnen will, was sie aufhält und was nicht. Dazu die ausgeführten Fehlschläge unseres früheren Designs. |
 | [Zufall und Nachprüfbarkeit](security/randomness-and-verification.md) | Woher der Seed kommt, warum ihn niemand neu würfeln oder den Gewinn nachträglich vergrößern kann, und wie jeder einen Schwellenwert im Nachhinein nachrechnet. |
-| [Statische Analyse](security/static-analysis.md) | Die Läufe von slither und solhint, und der eine Grund hinter jeder der fünf Befundfamilien. |
-| [Der Keeper](operations/keeper.md) | Die Aufgabe des Keepers Schritt für Schritt, die Reihenfolgeregel, ein Prozess je Pool, was bei einem Ausfall passiert, und das Gasbudget. |
+| [Statische Analyse](security/static-analysis.md) | Die Läufe von slither und solhint, der eine Grund hinter jeder der fünf Befundfamilien, und das Abhängigkeits-Audit mit den zwei axios-Befunden, die es weiterhin meldet. |
+| [Der Keeper](operations/keeper.md) | Die Aufgabe des Keepers Schritt für Schritt, die Reihenfolgeregel, ein Prozess je Pool, wo die sieben Live-Keeper gehostet sind, was bei einem Ausfall passiert, und das Gasbudget. |
 | [Deployment](operations/deploying.md) | Ein Pool je Token ausrollen, Konstruktor-Signaturen und Parameter, Verifikation, und die zwei Sepolia-Parametersätze gegen einen für das Mainnet. |
 | [Grenzen](limitations.md) | Jede dokumentierte Einschränkung in einer nummerierten Liste von vierzehn. |
 | [FAQ](faq.md) | Zwölf kurze Antworten, beginnend mit der Frage, in welchem der sieben Token Sie sparen können, und samt der Frage, wo der Einlöse-Button geblieben ist. |

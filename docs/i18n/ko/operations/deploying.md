@@ -264,6 +264,7 @@ Zama의 것이고 시드된 지분과 방출 비율과 함께
 | `SEPOLIA_RPC_URL` | 아니요 | 당신 자신의 Sepolia 엔드포인트. 랜딩 페이지와 `/api/activity` 경로가 서버에서 체인을 읽으므로 이것은 브라우저에 결코 닿지 않습니다. 로그 조회에 필요합니다. 무료 공개 노드는 `eth_getLogs` 범위를 하루치 블록보다 훨씬 아래로 제한하기 때문입니다 |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | 예 | 선택 사항. 지갑 읽기가 이것을 쓰고, 설정되지 않으면 `https://ethereum-sepolia-rpc.publicnode.com`으로 물러납니다. 번들에 보이므로 공개해도 괜찮은 것이어야 합니다 |
 | `NEXT_PUBLIC_CHAIN_ID` | 예 | 이더리움 Sepolia는 `11155111`입니다. 설정되지 않으면 앱이 그 값을 기본으로 씁니다 |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | 예 | 선택 사항이고, Reown 대시보드 https://dashboard.reown.com 에서 무료로 받습니다. 설정하면 모든 연결 화면이 브라우저 확장 프로그램 옆에 "Scan with a phone"을 함께 내놓고, 휴대폰 지갑과 확장 프로그램을 깔 수 없는 컴퓨터가 그 길로 들어옵니다. 비워 두면 커넥터가 아예 만들어지지 않으므로, 스캔하는 순간 실패할 버튼을 누구에게도 내밀지 않습니다 |
 
 이제 어떤 컨트랙트 주소도 환경 변수가 아닙니다. 앱은 모든 풀을
 `packages/web/src/lib/chain/pools.json`에서 읽고, 그 파일은 배포 스크립트가 쓴 주소 파일들로부터

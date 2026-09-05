@@ -181,10 +181,11 @@ começa em um ponto diferente a cada sorteio, ninguém fica permanentemente no f
 
 ## Um keeper por pool
 
-`packages/keeper/ecosystem.config.cjs` sobe todos os sete sob o pm2, um processo cada. Um
-processo sabe qual pool conduz pelo `HEARTH_ADDRESSES_FILE`, o arquivo de endereços que a
+Um processo sabe qual pool conduz pelo `HEARTH_ADDRESSES_FILE`, o arquivo de endereços que a
 implantação daquele pool escreveu, que também lhe dá o símbolo do token, as casas decimais e o
 índice de conta com que assinar. `KEEPER_NAME` é a etiqueta que toda linha de log carrega.
+`packages/keeper/ecosystem.config.cjs` sobe todos os sete sob o pm2 em uma máquina, um processo
+cada.
 
 | Processo pm2 | `HEARTH_ADDRESSES_FILE` | `KEEPER_ACCOUNT_INDEX` |
 | --- | --- | --- |
@@ -202,6 +203,36 @@ está apontado para ele há dias. Os dois arquivos carregam os mesmos endereços
 
 Os índices são espaçados para que um pool posterior possa ser acrescentado sem renumerar, e cada
 conta precisa do próprio ETH da Sepolia. O índice 0 é o implantador e o keeper o recusa.
+
+## Onde rodam os sete que estão no ar
+
+O pm2 num laptop é um jeito de rodar os sete e ele continua funcionando. Não é o que está no ar.
+Os sete keepers da Sepolia rodam na Railway, um serviço por pool, então um laptop fechado não
+para sorteio nenhum.
+
+Um keeper é um processo de longa duração, e não uma função agendada: uma passada pode gastar
+dois minutos esperando o serviço de gestão de chaves (KMS), mais tempo do que a maioria das
+plataformas serverless permite. Serve qualquer hospedagem que mantenha um processo Node vivo, e
+o repositório carrega a configuração desta aqui:
+
+- O `railway.json`, na raiz do repositório, conduz o pool `usdc`.
+- O `railway/hearth-keeper-<slug>.json` conduz cada um dos outros seis. Cada comando de início
+  define ali mesmo o `KEEPER_NAME`, o `KEEPER_ACCOUNT_INDEX` e o `HEARTH_ADDRESSES_FILE` daquele
+  pool, então um serviço construído a partir de um deles só precisa de `RECOVERY_PHRASE` e
+  `SEPOLIA_RPC_URL`.
+
+O build é `npm run build -w @hearth/keeper` e o início é
+`node packages/keeper/dist/src/index.js`, em qualquer hospedagem. As ABIs de contrato de que o
+keeper precisa estão versionadas em `packages/keeper/abi`, então uma hospedagem que nunca compila
+os contratos ainda assim o roda, e a checagem de arranque compara a ABI carregada com as funções
+que o keeper chama, de modo que um desvio é relatado na partida e não na primeira transação. Os
+arquivos de endereços precisam estar versionados pelo mesmo motivo, e estão, em
+`packages/contracts/deployments/sepolia/`.
+
+Rode exatamente um processo por pool, onde quer que ele rode. Dois keepers assinando pela mesma
+conta disputam o mesmo nonce, então pare a cópia local antes de subir uma hospedada para o mesmo
+pool. A configuração passo a passo, serviço por serviço, está no README do próprio pacote do
+keeper, `packages/keeper/README.md`.
 
 ## Rodando
 

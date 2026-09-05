@@ -295,6 +295,7 @@ montrer.
 | `SEPOLIA_RPC_URL` | Non | Votre propre point d'accès Sepolia. La page d'accueil et la route `/api/activity` lisent la chaîne côté serveur, donc celle-ci n'atteint jamais un navigateur. Les requêtes de journaux en ont besoin, parce que le nœud public gratuit plafonne les plages d'`eth_getLogs` bien en dessous d'une journée de blocs |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Oui | Facultative. Les lectures du portefeuille l'utilisent et se rabattent sur `https://ethereum-sepolia-rpc.publicnode.com` quand elle n'est pas définie. Visible dans le bundle, donc il faut que ce soit un point d'accès que vous acceptez de publier |
 | `NEXT_PUBLIC_CHAIN_ID` | Oui | `11155111` pour Ethereum Sepolia. L'application s'y rabat si elle n'est pas définie |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Oui | Facultative, et gratuite depuis le tableau de bord de Reown à l'adresse https://dashboard.reown.com. Définissez-la et chaque écran de connexion propose « Scanner avec un téléphone » à côté de l'extension du navigateur, ce par quoi entrent un portefeuille sur téléphone et une machine sans extension. Laissée vide, le connecteur n'est pas construit du tout, donc personne ne se voit proposer un bouton qui échoue au moment où il scanne |
 
 Aucune adresse de contrat n'est plus une variable d'environnement. L'application lit chaque
 pool dans `packages/web/src/lib/chain/pools.json`, que `node scripts/sync-pools.mjs` génère à
@@ -331,4 +332,3 @@ couvre pas la préparation opérationnelle du réseau principal : l'adaptateur d
 Vault est spécifié contre l'interface de batcher publiée par Zama et n'est pas implémenté
 dans ce dépôt, et le passage en production est décrit dans
 [source de rendement](../concepts/yield-source.md).
-</content>

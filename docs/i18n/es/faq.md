@@ -13,7 +13,12 @@ separado. Los detalles están en [pools y tokens](concepts/pools-and-tokens.md).
 ## 2. ¿Dónde está el botón de cobro?
 
 En "Mis sorteos" dentro de la aplicación, en la tarjeta de ese sorteo, bajo "Tu resultado", una
-vez que lo has abierto con el ojo. Aparece solo cuando ese sorteo te abonó algo. Por debajo, y
+vez que lo has abierto con el ojo. Aparece solo cuando ese sorteo te abonó algo y la bóveda
+todavía le debe dinero a esta cartera: el mismo ojo abre a la vez el abono de ese sorteo y la
+cifra corriente de ganancias sin cobrar de la bóveda, y el botón ofrece la menor de las dos. Esa
+segunda cifra es lo que lo hace honesto. El abono de un sorteo no cambia nunca una vez escrito,
+así que un botón atado solo al abono ofrecería el mismo premio otra vez tras recargar y la cadena
+lo pagaría de tu propio principal. Por debajo, y
 a propósito, no es una transacción aparte: los premios se abonan a tu saldo cifrado de
 ganancias durante la evaluación, y el botón de cobro, que lleva la cantidad, envía un retiro
 corriente por ella, que en la cadena se ve exactamente igual que cualquier otro retiro. En la

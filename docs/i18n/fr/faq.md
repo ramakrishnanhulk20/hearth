@@ -14,7 +14,13 @@ séparément. Les détails sont dans [pools et jetons](concepts/pools-and-tokens
 
 Dans « Mes tirages » de l'application, sur la carte de ce tirage, sous « Votre résultat »,
 une fois que vous l'avez ouverte avec l'œil. Il n'apparaît que si ce tirage vous a crédité
-quelque chose. Sous le capot, ce n'est délibérément pas une transaction distincte : les lots
+quelque chose et que le coffre doit encore de l'argent à ce portefeuille : le même œil ouvre
+à la fois le crédit de ce tirage et le montant courant des gains non réclamés du coffre, et
+le bouton propose le plus petit des deux. C'est ce second montant qui le rend honnête. Le
+crédit d'un tirage ne change plus une fois écrit : un bouton adossé au seul crédit
+proposerait donc le même lot une deuxième fois après un rechargement, et la chaîne le
+paierait sur votre propre principal. Sous le capot, ce n'est délibérément pas une
+transaction distincte : les lots
 sont crédités sur votre solde de gains chiffré pendant l'évaluation, et le bouton de
 réclamation, qui porte le montant, envoie un retrait ordinaire pour ce montant, ce qui sur la
 chaîne ressemble exactement à n'importe quel autre retrait. Dans la plupart des protocoles à
@@ -126,4 +132,3 @@ publions ce compte à chaque tirage parce que c'est la même étape qui rend l'a
 à la réserve publique, ce qui est ce qui permet au gros lot de s'accumuler là où vous pouvez
 le regarder. Les quatre sont traités dans
 [ce qui reste privé](security/what-stays-private.md).
-</content>

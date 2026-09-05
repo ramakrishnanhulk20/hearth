@@ -109,7 +109,9 @@ jadi tidak ada selain penerbit yang bisa memperoleh token publiknya, tidak ada y
 membungkusnya menjadi yang rahasia, dan tidak ada pool yang bisa dibuka di atasnya sama sekali.
 
 Hearth tetap mencantumkannya di pemilih pool, dalam keadaan abu-abu, dengan alasannya tertulis
-di sebelahnya: `mint restricted to the issuer`. Memilihnya membuka halaman yang menyebut nama
+di bawah namanya. Berkas deployment menyatakan alasan itu satu kali, dalam bahasa Inggris, sebagai
+`mint restricted to the issuer`, dan aplikasinya mencetaknya dalam bahasa yang sedang dibaca
+pembacanya. Memilihnya membuka halaman yang menyebut nama
 token, menautkan kedua kontraknya di Etherscan, menyebutkan pembatasan itu milik siapa, dan
 tidak menawarkan aksi dompet apa pun, karena tombol setor yang gagal lebih buruk daripada tanpa
 tombol.
@@ -117,6 +119,25 @@ tombol.
 Meninggalkan token itu dari daftar akan lebih mudah dan akan tampak seolah Hearth sekadar belum
 sempat mengurusnya. Penabung yang mencari tGBP menemukan dua entri: pool mock yang berfungsi,
 dan token resmi yang tidak, beserta alasannya.
+
+## Apa yang ditunjukkan deretan pool itu
+
+Halaman depan ditutup dengan deretan berisi setiap pool, tiap selnya membawa hadiah utama pool itu
+saat ini, dibaca di server dalam satu multicall dan dikirim di dalam halamannya sehingga deretan itu
+sudah terisi ketika ceritanya berhenti bergulir. Pemilih pool di dalam konsol menampilkan angka yang
+sama dengan aturan yang sama.
+
+Dua dari aturan itu ada karena sebuah angka bisa menyesatkan:
+
+- Pool yang pembacaannya tidak kembali menulis `unread`, tidak pernah `0.00`. Sebuah node yang tidak
+  menjawab dan sebuah jackpot kosong terlihat sama begitu angka nol dituliskan.
+- Pool yang belum menutup undian pertamanya menulis **First draw HH:MM UTC** alih-alih sebuah angka,
+  di deretan itu maupun di bawah namanya pada pemilih pool. Uang hadiah baru sampai ke tier-tier
+  ketika undian pertama di-award, jadi sebelum penutupan itu jawaban yang jujur adalah sebuah waktu,
+  bukan `0.00`. Yang mana dari keduanya yang ditampilkan sebuah sel ditentukan oleh `lastClosedDraw`
+  yang masih terbaca nol, dan waktunya sendiri adalah `firstPeriodAt` ditambah `periodLength`, yaitu
+  akhir periode pertama dan saat paling awal undian 1 bisa ditutup. Jamnya adalah 24 jam UTC dalam
+  setiap bahasa.
 
 ## Dari mana aplikasi mendapat alamatnya
 

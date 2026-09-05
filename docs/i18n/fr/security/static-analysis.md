@@ -49,4 +49,3 @@ chiffrée est la bonne comparaison, s'il manque une autorisation sur la liste de
 d'accès, ou si une valeur est publiée alors qu'elle ne devrait pas l'être. Ces propriétés
 sont couvertes par les tests unitaires, les tests d'équité et d'invariants, et les scripts
 d'attaque exécutés dans [le modèle de menaces](threat-model.md).
-</content>

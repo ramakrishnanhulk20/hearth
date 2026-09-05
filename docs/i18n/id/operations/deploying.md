@@ -271,6 +271,7 @@ menjauh dari tempat host mencarinya, dan deploy-nya akan gagal tanpa petunjuk ya
 | `SEPOLIA_RPC_URL` | Tidak | Endpoint Sepolia Anda sendiri. Halaman muka dan rute `/api/activity` membaca rantai di server, jadi yang ini tidak pernah sampai ke browser. Kueri log membutuhkannya, karena node publik gratis membatasi rentang `eth_getLogs` jauh di bawah satu hari blok |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Ya | Opsional. Pembacaan dompet memakainya dan jatuh kembali ke `https://ethereum-sepolia-rpc.publicnode.com` ketika tidak disetel. Terlihat di bundel, jadi ia harus yang Anda rela publikasikan |
 | `NEXT_PUBLIC_CHAIN_ID` | Ya | `11155111` untuk Ethereum Sepolia. Aplikasi memakainya sebagai bawaan kalau tidak disetel |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Ya | Opsional, dan gratis dari dasbor Reown di https://dashboard.reown.com. Setel dia dan setiap layar koneksi menawarkan "Scan with a phone" di samping ekstensi peramban, itulah jalan masuk bagi dompet ponsel dan mesin yang tidak bisa dipasangi ekstensi. Dibiarkan kosong, konektornya tidak dibangun sama sekali, jadi tidak ada yang ditawari tombol yang gagal tepat saat mereka memindai |
 
 Tidak ada alamat kontrak yang menjadi variabel lingkungan lagi. Aplikasi membaca tiap pool dari
 `packages/web/src/lib/chain/pools.json`, yang dihasilkan `node scripts/sync-pools.mjs` dari berkas alamat

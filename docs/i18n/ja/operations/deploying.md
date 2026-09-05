@@ -249,6 +249,7 @@ Sepolia の 7 つのプールで、すべてのコントラクトが Etherscan �
 | `SEPOLIA_RPC_URL` | いいえ | あなた自身の Sepolia エンドポイント。ランディングページと `/api/activity` のルートはサーバー側でチェーンを読むので、これがブラウザに届くことはありません。ログの問い合わせにはこれが必要です。無料の公開ノードは `eth_getLogs` の範囲を 1 日ぶんのブロックよりはるかに小さく制限するからです |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | はい | 任意です。ウォレットからの読み取りがこれを使い、未設定なら `https://ethereum-sepolia-rpc.publicnode.com` にフォールバックします。バンドルに現れるので、公開してよいものでなければなりません |
 | `NEXT_PUBLIC_CHAIN_ID` | はい | イーサリアム Sepolia なら `11155111`。未設定ならアプリがこれを既定にします |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | はい | 任意で、Reown のダッシュボード https://dashboard.reown.com から無料で取得できます。設定すると、どの接続画面でもブラウザ拡張の横に「スマートフォンで読み取る」が出ます。スマートフォンのウォレットや、拡張を入れられないマシンはここから入ります。空のままならコネクタ自体が組み込まれないので、読み取った瞬間に失敗するボタンを誰も見せられません |
 
 コントラクトのアドレスはもう 1 つも環境変数ではありません。アプリはすべてのプールを `packages/web/src/lib/chain/pools.json` から
 読み、それは `node scripts/sync-pools.mjs` がデプロイスクリプトの書いたアドレスファイルから生成します。だからアプリが表示する

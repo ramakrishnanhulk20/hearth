@@ -13,7 +13,12 @@ trên trang này áp dụng cho từng pool một cách độc lập. Chi tiết
 ## 2. Nút nhận thưởng ở đâu?
 
 Ở mục "Kỳ quay của tôi" trong ứng dụng, trên thẻ của kỳ quay đó, dưới phần "Kết quả của bạn",
-sau khi bạn đã mở nó bằng con mắt. Nó chỉ xuất hiện khi kỳ quay đó có ghi có cho bạn thứ gì. Bên
+sau khi bạn đã mở nó bằng con mắt. Nó chỉ xuất hiện khi kỳ quay đó có ghi có cho bạn thứ gì và
+vault vẫn còn nợ ví này tiền: chỉ một con mắt mở ra cùng lúc khoản ghi có của kỳ quay đó và con
+số tiền thưởng chưa nhận mà vault đang giữ, rồi cái nút đưa ra con số nhỏ hơn trong hai con số
+ấy. Chính con số thứ hai làm cho nó thành thật. Khoản ghi có của một kỳ quay không bao giờ đổi
+một khi đã được ghi, nên một cái nút chỉ dựa vào khoản ghi có sẽ mời bạn nhận lại đúng giải đó
+sau khi tải lại trang, và chuỗi sẽ trả nó ra từ chính tiền gốc của bạn. Bên
 dưới, nó cố ý không phải một giao dịch riêng: giải thưởng được ghi có vào số dư tiền thưởng mã
 hoá của bạn trong lúc duyệt, còn nút nhận thưởng, vốn mang theo số tiền, chỉ gửi đi một lệnh rút
 bình thường cho số đó, và trên chuỗi nó trông y hệt mọi lệnh rút khác. Ở phần lớn giao thức

@@ -8,6 +8,12 @@ menyetor. Jalur dua menit di bagian bawah halaman ini tidak menunggu undian.
 Aplikasi live-nya ada di https://hearth-ram.vercel.app. Semua di bawah ini juga bisa
 dilakukan langsung dari block explorer kalau Anda lebih suka menonton panggilan mentahnya.
 
+Ada dua jalan masuk dengan dompet. Kalau peramban punya ekstensi, "Connect wallet" memakainya.
+Kalau tidak punya, "Scan with a phone" menampilkan kode WalletConnect yang dibaca dompet ponsel,
+dan itulah satu-satunya jalan di mesin yang tidak bisa Anda pasangi apa pun. Peramban yang sama
+sekali tidak punya dompet diberi tahu dompet mana yang perlu dipasang dan di mana, alih-alih
+disodori tombol yang gagal di tengah jalan.
+
 ## 0. Pilih sebuah token
 
 Hearth menjalankan tujuh pool, satu untuk tiap token rahasia yang Zama terbitkan di Sepolia.
@@ -28,12 +34,23 @@ membuka pemilihnya, dan pool tempat Anda berada adalah bagian pertama URL: `/app
 
 Pemilih itu juga mencantumkan **Confidential tGBP** resmi milik Zama, dalam keadaan abu-abu,
 karena mint token dasarnya milik penerbit dan tak seorang pun lain bisa memperoleh tokennya.
-Memilihnya membuka halaman yang menyebut nama token, menautkan kedua kontraknya dan tidak
-menawarkan aksi dompet apa pun, alih-alih tombol setor yang akan gagal.
+Alasannya duduk di bawah namanya, dalam bahasa yang sedang Anda baca, dan memilihnya membuka
+halaman yang menyebut nama token, menautkan kedua kontraknya dan tidak menawarkan aksi dompet
+apa pun, alih-alih tombol setor yang akan gagal. Pool yang belum menutup undian pertamanya
+memakai baris yang sama di bawah namanya untuk menyebut kapan undian itu, karena yang ada untuk
+diberikan adalah sebuah waktu, bukan sebuah hadiah.
 
-Aplikasi ini bisa dibaca dalam enam belas bahasa, dipilih dari tombol di bilah atas. Bahasa
-Inggris memakai URL polos dan bahasa lain menaruh kodenya di depan, jadi layar yang sama
-dalam bahasa Jepang adalah `/ja/app/usdc`.
+Aplikasi ini bisa dibaca dalam enam belas bahasa, dipilih dari tombol di bilah atas atau tombol
+di rel konsol. Bahasa Inggris memakai URL polos dan bahasa lain menaruh kodenya di depan, jadi
+layar yang sama dalam bahasa Jepang adalah `/ja/app/usdc`. Bahasa Arab mencerminkan tata
+letaknya. Setiap bahasa mempertahankan angka Barat dan jam 24 jam UTC, termasuk bahasa Arab,
+sehingga sebuah angka di layar cocok dengan angka di block explorer, dan setiap kolom jumlah
+menerima koma atau titik sebagai tanda desimal, hanya menolak jumlah yang membawa keduanya.
+Halaman-halaman dokumentasi ini diterjemahkan dengan cara yang sama, halaman per halaman, dan
+halaman yang belum diterjemahkan siapa pun menampilkan versi Inggrisnya dengan satu baris di
+atas yang mengatakannya. Setiap terjemahan ditulis oleh sebuah model, bukan penutur asli:
+bahasa Inggris adalah sumber kebenaran untuk setiap angka dan nama kontrak, seperti kata
+[daftar batasan](../limitations.md).
 
 ## Kontrak yang akan Anda sentuh
 
@@ -90,7 +107,11 @@ cUSDC.wrap(yourAddress, 1000000000)
 
 Di aplikasi, dua panggilan itu adalah langkah 2 dari Setor, "Shield your USDC". Tombolnya
 bertuliskan "Shield", dan "Approve the wrapper" selagi kuota izin wrapper masih kurang dari
-jumlah yang Anda ketik.
+jumlah yang Anda ketik. Izin itu diminta sekali saja, untuk kuota yang besar, jadi tiap shield
+setelah yang pertama cukup satu transaksi, bukan dua. Ia menjangkau tepat satu kontrak, yaitu
+wrapper rahasia token itu, dan membiarkannya menarik token mock publik keluar dari dompet Anda,
+tidak lebih. Layarnya menyebut kedua hal itu di samping tombolnya alih-alih membiarkannya Anda
+cari sendiri.
 
 Sekarang Anda memegang 1.000 confidential USDC. Mulai dari sini, saldo Anda adalah handle
 ciphertext dan hanya Anda yang bisa membacanya.
@@ -112,6 +133,16 @@ Aplikasi membangun masukan terenkripsi dan buktinya untuk Anda dengan SDK milik 
 penerima di vault mengkreditkan persis jumlah yang menurut token benar-benar berpindah, bukan
 jumlah yang Anda minta, jadi transfer yang kurang karena alasan apa pun tidak bisa menciptakan
 dana pokok fiktif.
+
+Itu punya satu konsekuensi yang layak diketahui sebelum Anda mengetik sebuah angka. Meminta
+setoran lebih banyak dari saldo rahasia Anda tidak ditolak di mana pun di on-chain: tokennya
+memindahkan apa yang dompet punya, yang bisa saja tidak ada, dan transaksinya berhasil tanpa
+mencapai apa pun. Jadi layarnya sendiri yang memegang batas itu. Begitu Anda membuka saldo
+rahasia Anda dengan ikon mata, kolom setornya berbunyi "That is more than you hold" dan
+tombolnya tetap mati. Layar unshield melangkah lebih jauh, karena di sana tidak ada yang bisa
+dibuka: ia membaca saldo token publik Anda sebelum jalannya dan sekali lagi sesudahnya, dan
+kalau keduanya sama persis ia berbunyi "Nothing moved", menyebut jumlah yang kebesaran sebagai
+sebab yang biasa, dan menunjuk ke "All of it".
 
 Vault menolak setoran yang jumlahnya, atau yang dana pokok hasilnya, akan mendorong Anda
 melewati batas per penabung, yang pada periode satu jam kira-kira 5 miliar token dan pada
@@ -219,6 +250,16 @@ mengirim penarikan biasa untuk persis jumlah itu, dan langkah 8 membawa sisanya 
 on-chain, sebuah klaim dan sebuah penarikan adalah panggilan yang sama dengan bentuk yang
 sama, dan itulah yang membuat pemenang tidak menonjol.
 
+Satu ikon mata di kartu itu membuka tiga angka sekaligus: bobot Anda untuk undian tersebut,
+kredit undian itu, dan `confidentialWinningsOf`, yaitu semua yang masih vault utangkan kepada
+dompet ini di seluruh undian. Tombolnya bergantung pada kreditnya sekaligus angka berjalan itu,
+dan ia menawarkan yang lebih kecil di antara keduanya. Kredit sebuah undian tidak pernah berubah
+begitu ditulis, jadi kartu yang hanya bergantung pada kredit itu akan menawarkan hadiah yang
+sama lagi setelah halaman dimuat ulang dan rantainya akan menghormatinya, dari dana pokok Anda
+sendiri. Angka berjalan itu turun begitu sebuah klaim mendarat, dan itulah yang mengambil
+tombolnya pergi dan meninggalkan kartu yang mengatakan hadiahnya sudah diambil, dengan angkanya
+tetap disimpan sebagai catatan undian tersebut.
+
 Tidak ada juga yang perlu ditekan supaya dikreditkan. Evaluasi menelusuri daftar penabung dari
 titik yang ditentukan seed undian itu. Tombol "Advance the draw" di kartu undian itu, dan
 "Advance" di layar "Run a draw", keduanya memajukan penelusuran bersama itu alih-alih memilih
@@ -254,6 +295,11 @@ persisnya ada di wrapper milik Zama, bukan milik kami.
 
 Panggilan pertama membakar jumlah terenkripsi itu dan menandainya untuk dekripsi publik. Yang
 kedua melepaskan token terangnya begitu protokol Zama menghasilkan teks terang dan buktinya.
+Aplikasi membaca saldo token publik Anda sebelum panggilan pertama dan sekali lagi sesudah yang
+kedua, lalu melaporkan selisihnya, sehingga "unshielded 250.00 USDC" adalah fakta yang terukur,
+bukan angka yang Anda ketik. Ketika selisih itu nol ia berbunyi "Nothing moved" alih-alih
+menyatakan berhasil: kedua transaksi memang mendarat, dan wrapper tidak melepaskan apa pun
+alih-alih menolak ketika jumlahnya di atas saldo rahasia Anda.
 Jumlah yang Anda buka bungkusnya bersifat publik, persis seperti jumlah yang Anda bungkus, dan
 panggilan pertamalah yang mempublikasikannya, jadi unwrap yang tidak pernah Anda tuntaskan pun
 sudah bocor.
@@ -271,11 +317,13 @@ Aplikasi ini adalah konsol dengan rel di sisi kiri, satu tugas per layar, jadi j
 berjalan menuruni rel itu.
 
 1. Buka https://hearth-ram.vercel.app, ikuti "The pool" di header menuju `/app`, dan
-   sambungkan dompet di Sepolia. Anda mendarat di pool USDC pada `/app/usdc`; nama token di
-   puncak rel mengganti pool. Dasbor terbuka dengan blok bertanda "Next" yang menyebut satu
-   hal yang perlu dilakukan.
+   sambungkan dompet di Sepolia, dengan ekstensi peramban atau dengan memindai kodenya memakai
+   dompet ponsel. Anda mendarat di pool USDC pada `/app/usdc`; nama token di puncak rel
+   mengganti pool. Dasbor terbuka dengan blok bertanda "Next" yang menyebut satu hal yang perlu
+   dilakukan.
 2. "Deposit" di bilah samping, yang terbuka pada langkah mana pun dari tiga langkahnya sesuai
-   posisi dompet Anda. Klik "Get test USDC", lalu "Shield", lalu "Deposit".
+   posisi dompet Anda. Klik "Get test USDC", lalu "Shield", lalu "Deposit". Shield pertama
+   meminta satu persetujuan wrapper dan tidak ada shield sesudahnya yang meminta lagi.
 3. Kembali ke dasbor, tekan mata di samping "Principal" di "What you hold" dan tanda tangani:
    dana pokok dan kemenangan Anda keduanya muncul, hanya di browser.
 4. "Run a draw" di bilah samping, baris bertanda "Anyone". Tekan "Close", lalu "Award", untuk

@@ -10,6 +10,12 @@ L'application en ligne est à l'adresse https://hearth-ram.vercel.app. Tout ce q
 aussi se faire directement depuis un explorateur de blocs si vous préférez regarder les
 appels bruts.
 
+Deux façons d'entrer avec un portefeuille. Si le navigateur a une extension, « Connecter un
+portefeuille » l'utilise. S'il n'en a aucune, « Scanner avec un téléphone » affiche un code
+WalletConnect qu'un portefeuille mobile lit, ce qui est le seul chemin sur une machine où
+vous ne pouvez rien installer. À un navigateur sans aucun portefeuille, on dit lequel
+installer et où, plutôt que de lui tendre un bouton qui échoue à mi-parcours.
+
 ## 0. Choisir un jeton
 
 Hearth fait tourner sept pools, un par jeton confidentiel que Zama publie sur Sepolia.
@@ -30,13 +36,24 @@ partie de l'URL : `/app/usdc`, `/app/weth` et ainsi de suite.
 
 Le sélecteur affiche aussi le **Confidential tGBP** officiel de Zama, grisé, parce que le
 `mint` de son jeton sous-jacent appartient à l'émetteur et que personne d'autre ne peut
-obtenir le jeton. Le choisir affiche une page qui nomme le jeton, renvoie vers les deux
-contrats et ne propose aucune action de portefeuille, plutôt qu'un bouton de dépôt qui
-échouerait.
+obtenir le jeton. La raison se trouve sous son nom, dans la langue que vous lisez, et le
+choisir affiche une page qui nomme le jeton, renvoie vers les deux contrats et ne propose
+aucune action de portefeuille, plutôt qu'un bouton de dépôt qui échouerait. Un pool qui n'a
+pas encore clôturé son premier tirage se sert de cette même ligne sous son nom pour dire
+quand ce tirage a lieu, parce qu'il y a une heure à donner plutôt qu'un lot.
 
-L'application se lit en seize langues, choisies depuis le bouton de la barre du haut.
-L'anglais garde les URL simples et toutes les autres langues placent leur code devant : le
-même écran en japonais est donc `/ja/app/usdc`.
+L'application se lit en seize langues, choisies depuis le bouton de la barre du haut ou
+celui de la barre latérale de la console. L'anglais garde les URL simples et toutes les
+autres langues placent leur code devant : le même écran en japonais est donc `/ja/app/usdc`.
+L'arabe inverse la mise en page. Toutes les langues, l'arabe compris, gardent les chiffres
+occidentaux et une horloge de vingt-quatre heures en UTC, si bien qu'un montant à l'écran
+correspond au montant sur un explorateur de blocs, et tout champ de montant accepte la
+virgule comme le point pour la décimale, ne refusant qu'un montant qui porte les deux. Ces
+pages de documentation sont traduites de la même façon, page pour page, et une page que
+personne n'a encore traduite affiche la version anglaise avec une ligne en haut qui le dit.
+Chaque traduction a été écrite par un modèle et non par une personne de langue maternelle :
+l'anglais est la source de vérité pour chaque nombre et chaque nom de contrat, comme le dit
+la page [limites](../limitations.md).
 
 ## Les contrats que vous allez toucher
 
@@ -96,7 +113,11 @@ cUSDC.wrap(yourAddress, 1000000000)
 
 Dans l'application, ces deux appels sont l'étape 2 du Dépôt, « Blindez vos USDC ». Le bouton
 affiche « Blinder », et « Approuver le wrapper » tant que l'autorisation donnée au wrapper
-est inférieure au montant que vous avez saisi.
+est inférieure au montant que vous avez saisi. L'approbation est demandée une seule fois,
+pour une autorisation large, si bien que chaque blindage après le premier est une seule
+transaction au lieu de deux. Elle atteint exactement un contrat, le wrapper confidentiel de
+ce jeton, et lui permet de sortir le jeton public simulé de votre portefeuille, rien d'autre.
+L'écran dit ces deux choses à côté du bouton plutôt que de les laisser à découvrir.
 
 Vous détenez maintenant 1,000 USDC confidentiels. À partir d'ici, votre solde est un handle
 chiffré et vous seul pouvez le lire.
@@ -119,6 +140,16 @@ L'application construit pour vous l'entrée chiffrée et sa preuve avec le SDK d
 crochet de réception du coffre crédite exactement le montant que le jeton dit avoir
 réellement déplacé, pas le montant que vous avez demandé : un transfert insuffisant, pour
 quelque raison que ce soit, ne peut donc pas créer de principal fantôme.
+
+Cela a une conséquence à connaître avant de saisir un montant. Demander à déposer plus que
+votre solde confidentiel n'est refusé nulle part sur la chaîne : le jeton déplace ce que le
+portefeuille détient, ce qui peut être rien, et la transaction réussit sans avoir rien
+accompli. C'est donc l'écran qui tient cette ligne. Une fois votre solde confidentiel ouvert
+avec l'œil, le champ de dépôt affiche « C'est plus que ce que vous détenez » et le bouton
+reste éteint. L'écran de déblindage va plus loin, parce qu'il n'y a rien à y ouvrir : il lit
+votre solde de jeton public avant l'opération puis après elle, et si les deux sont
+identiques il affiche « Rien n'a bougé », désigne le montant trop grand comme la cause
+habituelle, et pointe vers « Tout ».
 
 Le coffre refuse un dépôt dont le montant, ou dont le principal résultant, vous ferait
 passer au-dessus du plafond par épargnant, qui est d'environ 5 milliards de jetons sur une
@@ -232,6 +263,15 @@ montant, et l'étape 8 ramène le reste chez vous. Sur la chaîne, une réclamat
 retrait sont le même appel de la même forme, et c'est cela qui empêche un gagnant de se
 détacher du lot.
 
+L'œil unique de cette carte ouvre trois montants à la fois : votre poids pour le tirage, le
+crédit de ce tirage, et `confidentialWinningsOf`, c'est-à-dire tout ce que le coffre doit
+encore à ce portefeuille, tirages confondus. Le bouton est adossé au crédit comme à ce
+montant courant, et il propose le plus petit des deux. Le crédit d'un tirage ne change plus
+une fois écrit : une carte adossée au seul crédit proposerait donc le même lot une deuxième
+fois après un rechargement, et la chaîne l'honorerait, sur votre propre principal. Le montant
+courant baisse dès qu'une réclamation aboutit, ce qui retire le bouton et laisse la carte
+dire que le lot a déjà été sorti, le montant restant conservé comme trace de ce tirage.
+
 Il n'y a rien non plus à presser pour être crédité. L'évaluation parcourt la liste des
 épargnants à partir d'un point décidé par la graine de ce tirage. Le bouton « Faire avancer
 le tirage » sur la carte du tirage, et « Avancer » sur l'écran « Lancer un tirage », font
@@ -269,7 +309,12 @@ pas dans le nôtre.
 
 Le premier appel brûle le montant chiffré et le marque pour déchiffrement public. Le second
 libère les jetons en clair une fois que le protocole de Zama a produit le texte clair et sa
-preuve. Le montant que vous désenveloppez est public, exactement comme le montant que vous
+preuve. L'application lit votre solde de jeton public avant le premier appel et de nouveau
+après le second, et rapporte la différence : « 250.00 USDC déblindés » est donc un fait
+mesuré et non le nombre que vous avez saisi. Quand cette différence est nulle, elle affiche
+« Rien n'a bougé » au lieu de déclarer une réussite : les deux transactions ont bien abouti,
+et le wrapper ne libère rien plutôt que de refuser quand le montant dépassait votre solde
+confidentiel. Le montant que vous désenveloppez est public, exactement comme le montant que vous
 avez enveloppé, et c'est le premier appel qui le publie : un désenveloppement que vous ne
 finalisez jamais a donc déjà fui.
 
@@ -287,12 +332,14 @@ L'application est une console avec une barre à gauche, une tâche par écran : 
 donc une descente de cette barre.
 
 1. Ouvrez https://hearth-ram.vercel.app, suivez « Le pool » dans l'en-tête jusqu'à `/app`,
-   et connectez un portefeuille sur Sepolia. Vous arrivez dans le pool USDC, à `/app/usdc` ;
-   le nom du jeton en haut de la barre change de pool. Le tableau de bord s'ouvre sur un
-   bloc marqué « Suivant » qui nomme la seule chose à faire.
+   et connectez un portefeuille sur Sepolia, avec l'extension du navigateur ou en scannant
+   le code avec un portefeuille sur téléphone. Vous arrivez dans le pool USDC, à
+   `/app/usdc` ; le nom du jeton en haut de la barre change de pool. Le tableau de bord
+   s'ouvre sur un bloc marqué « Suivant » qui nomme la seule chose à faire.
 2. « Dépôt » dans la barre latérale, qui s'ouvre sur celle de ses trois étapes où votre
    portefeuille en est. Cliquez sur « Obtenir des USDC de test », puis « Blinder », puis
-   « Déposer ».
+   « Déposer ». Le premier blindage demande une approbation du wrapper, et aucun blindage
+   après lui ne la redemande.
 3. De retour sur le tableau de bord, appuyez sur l'œil à côté de « Principal » dans « Ce que
    vous détenez » et signez : votre principal et vos gains apparaissent tous les deux, dans
    le navigateur uniquement.
@@ -310,4 +357,3 @@ donc une descente de cette barre.
 
 Rien dans ce parcours n'a besoin que nous soyons en ligne. Chaque étape du tirage est
 ouverte à tous.
-</content>

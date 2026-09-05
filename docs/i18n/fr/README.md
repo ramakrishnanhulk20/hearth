@@ -32,10 +32,8 @@ qui l'auditent.
 | [Ce qui reste privé](security/what-stays-private.md) | Sept règles : la tranche et la fuite qu'elle remplace, ce que coûte un solde identifié, le point de fuite de l'enveloppement dans les deux sens, ce que mesurent les comptes de lots, la couche jeton, pourquoi l'évaluation ne trahit rien, et le résidu comportemental. |
 | [Modèle de menaces](security/threat-model.md) | Neuf attaquants, ce que chacun veut, ce qui l'arrête, et ce qui ne l'arrête pas. Plus les échecs exécutés de notre conception précédente. |
 | [Aléa et vérification](security/randomness-and-verification.md) | D'où vient la graine, pourquoi personne ne peut la retirer ni redimensionner ce qu'elle fait gagner, et comment n'importe qui recalcule un seuil après coup. |
-| [Analyse statique](security/static-analysis.md) | Les passages de slither et de solhint, et la raison unique derrière chacune des cinq familles de résultats. |
-| [Le keeper](operations/keeper.md) | Le travail du keeper étape par étape, la règle d'ordonnancement, un processus par pool, ce qui se passe quand il est arrêté, et le budget en gaz. |
+| [Analyse statique](security/static-analysis.md) | Les passages de slither et de solhint, la raison unique derrière chacune des cinq familles de résultats, et l'audit des dépendances avec les deux résultats axios qu'il signale encore. |
+| [Le keeper](operations/keeper.md) | Le travail du keeper étape par étape, la règle d'ordonnancement, un processus par pool, où sont hébergés les sept keepers en service, ce qui se passe quand il est arrêté, et le budget en gaz. |
 | [Déploiement](operations/deploying.md) | Déployer un pool par jeton, signatures et paramètres des constructeurs, vérification, et les deux jeux de paramètres Sepolia face à un jeu pour le réseau principal. |
 | [Limites](limitations.md) | Toutes les limites documentées en une liste numérotée de quatorze. |
 | [FAQ](faq.md) | Douze réponses courtes, à commencer par le jeton dans lequel vous pouvez épargner, et jusqu'à savoir où est passé le bouton de réclamation. |
-</content>
-</invoke>

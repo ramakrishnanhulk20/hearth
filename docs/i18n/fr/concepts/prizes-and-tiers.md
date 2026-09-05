@@ -288,4 +288,3 @@ qui gagne, ce qui est dans [la désignation des gagnants](winner-selection.md). 
 fait aucune promesse de confidentialité sur la taille des lots : celle-ci est publique ici
 par conception, et ce que les comptes de lots publiés divulguent est exposé dans
 [ce qui reste privé](../security/what-stays-private.md).
-</content>

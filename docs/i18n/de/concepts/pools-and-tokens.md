@@ -111,15 +111,35 @@ Herausgeber beschränkt, niemand außer dem Herausgeber kann den öffentlichen T
 bekommen, niemand kann in den vertraulichen wrappen, und darauf lässt sich überhaupt kein
 Pool eröffnen.
 
-Hearth führt ihn trotzdem in der Poolauswahl auf, ausgegraut, mit dem Grund daneben:
-`mint restricted to the issuer`. Wer ihn wählt, öffnet eine Seite, die den Token benennt,
-beide Verträge auf Etherscan verlinkt, sagt, wessen Beschränkung das ist, und keine
-Wallet-Aktion anbietet, denn ein Einzahlen-Button, der zurückweist, ist schlimmer als kein
-Button.
+Hearth führt ihn trotzdem in der Poolauswahl auf, ausgegraut, mit dem Grund unter seinem
+Namen. Die Deployment-Datei nennt diesen Grund ein einziges Mal, auf Englisch, als
+`mint restricted to the issuer`, und die App gibt ihn in der Sprache aus, in der gerade
+gelesen wird. Wer ihn wählt, öffnet eine Seite, die den Token benennt, beide Verträge auf
+Etherscan verlinkt, sagt, wessen Beschränkung das ist, und keine Wallet-Aktion anbietet, denn
+ein Einzahlen-Button, der zurückweist, ist schlimmer als kein Button.
 
 Den Token wegzulassen wäre einfacher gewesen und hätte so ausgesehen, als wäre Hearth
 schlicht noch nicht dazu gekommen. Wer nach tGBP sucht, findet zwei Einträge: den
 Mock-Pool, der funktioniert, und den offiziellen Token, der es nicht tut, mit dem Grund.
+
+## Was die Reihe der Pools zeigt
+
+Die Startseite endet mit einer Reihe aller Pools, jede Zelle trägt den Hauptpreis dieses Pools
+in diesem Moment, auf dem Server in einem Multicall gelesen und in der Seite mitgeliefert,
+damit die Reihe schon gefüllt ist, wenn die Geschichte aufhört zu scrollen. Die Auswahl in der
+Konsole zeigt dieselben Zahlen nach denselben Regeln.
+
+Zwei dieser Regeln gibt es, weil eine Zahl in die Irre führen kann:
+
+- Ein Pool, dessen Lesezugriff nicht zurückkam, sagt `ungelesen`, nie `0.00`. Ein Knoten, der
+  nicht geantwortet hat, und ein leerer Topf sehen gleich aus, sobald eine Null dasteht.
+- Ein Pool, der seine erste Ziehung noch nicht abgeschlossen hat, sagt statt einer Zahl
+  **Erste Ziehung HH:MM UTC**, in der Reihe und unter seinem Namen in der Auswahl. Preisgeld
+  erreicht die Stufen erst, wenn die erste Ziehung ausgeschüttet ist, vor diesem Abschluss ist
+  die ehrliche Antwort also eine Uhrzeit und keine `0.00`. Welches von beiden eine Zelle zeigt,
+  entscheidet `lastClosedDraw`, das noch null liest, und die Uhrzeit selbst ist `firstPeriodAt`
+  plus `periodLength`, das Ende der ersten Periode und der früheste Moment, in dem Ziehung 1
+  abschließen kann. Die Uhr läuft in jeder Sprache im Vierundzwanzig-Stunden-Format in UTC.
 
 ## Woher die App die Adressen bekommt
 

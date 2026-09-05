@@ -177,10 +177,11 @@ tidak ada yang duduk permanen di belakang.
 
 ## Satu keeper per pool
 
-`packages/keeper/ecosystem.config.cjs` menjalankan ketujuhnya di bawah pm2, satu proses masing-masing.
 Sebuah proses diberi tahu pool mana yang digerakkannya oleh `HEARTH_ADDRESSES_FILE`, yaitu berkas alamat
 yang ditulis deploy pool itu, yang juga memberinya simbol token, desimal dan indeks akun untuk
 menandatangani. `KEEPER_NAME` adalah tag yang dibawa tiap baris log.
+`packages/keeper/ecosystem.config.cjs` menjalankan ketujuhnya di bawah pm2 pada satu mesin, satu proses
+masing-masing.
 
 | Proses pm2 | `HEARTH_ADDRESSES_FILE` | `KEEPER_ACCOUNT_INDEX` |
 | --- | --- | --- |
@@ -198,6 +199,35 @@ berhari-hari. Kedua berkas membawa alamat yang sama.
 
 Indeksnya disebar supaya pool baru bisa ditambahkan tanpa penomoran ulang, dan tiap akun butuh ETH
 Sepolia-nya sendiri. Indeks 0 adalah deployer dan keeper menolaknya.
+
+## Di mana ketujuh keeper yang hidup itu berjalan
+
+pm2 di sebuah laptop adalah satu cara menjalankan ketujuhnya dan cara itu masih bekerja. Itu bukan yang
+sedang hidup. Ketujuh keeper Sepolia berjalan di Railway, satu layanan per pool, jadi laptop yang
+ditutup tidak menghentikan undian mana pun.
+
+Keeper adalah proses yang berjalan lama, bukan fungsi terjadwal: satu lintasan bisa menghabiskan dua
+menit menunggu layanan pengelolaan kunci, lebih lama dari yang diizinkan kebanyakan platform serverless.
+Host mana pun yang menjaga sebuah proses Node tetap hidup bisa dipakai, dan repositori ini membawa
+konfigurasi untuk yang satu ini:
+
+- `railway.json` di akar repositori menggerakkan pool `usdc`.
+- `railway/hearth-keeper-<slug>.json` menggerakkan masing-masing dari enam pool lainnya. Tiap perintah
+  start menyetel `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` dan `HEARTH_ADDRESSES_FILE` pool itu langsung di
+  tempat, jadi layanan yang dibangun dari salah satunya hanya butuh `RECOVERY_PHRASE` dan
+  `SEPOLIA_RPC_URL`.
+
+Build-nya `npm run build -w @hearth/keeper` dan start-nya `node packages/keeper/dist/src/index.js` di
+host mana pun. ABI kontrak yang dibutuhkan keeper di-commit di bawah `packages/keeper/abi`, jadi host
+yang tidak pernah mengompilasi kontraknya tetap menjalankannya, dan pemeriksaan saat boot membandingkan
+ABI yang dimuat dengan fungsi-fungsi yang dipanggil keeper sehingga penyimpangan dilaporkan saat mulai,
+bukan pada transaksi pertama. Berkas alamatnya harus di-commit karena alasan yang sama, dan memang
+begitu, di bawah `packages/contracts/deployments/sepolia/`.
+
+Jalankan tepat satu proses per pool di mana pun ia berjalan. Dua keeper yang menandatangani dari satu
+akun berebut nonce yang sama, jadi hentikan salinan lokal sebelum menyalakan yang di-host untuk pool
+yang sama. Penyiapan langkah demi langkah, layanan demi layanan, ada di README milik paket keeper
+sendiri, `packages/keeper/README.md`.
 
 ## Menjalankannya
 

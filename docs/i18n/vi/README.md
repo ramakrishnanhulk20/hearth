@@ -30,8 +30,8 @@ cùng thiết kế đó, viết lại cho người dùng và cho người kiểm
 | [Những gì được giữ kín](security/what-stays-private.md) | Bảy quy tắc: bậc công bố và lỗ rò mà nó thay thế, cái giá của một số dư bị ghim, đường nối lúc bọc token theo cả hai chiều, số đếm giải thưởng đo cái gì, tầng token, vì sao việc duyệt không phải một dấu hiệu, và phần dư hành vi. |
 | [Mô hình mối đe doạ](security/threat-model.md) | Chín kiểu kẻ tấn công, mỗi bên muốn gì, cái gì chặn được họ, và cái gì không. Kèm những thất bại đã thực thi trên thiết kế cũ của chúng tôi. |
 | [Tính ngẫu nhiên và cách kiểm chứng](security/randomness-and-verification.md) | Seed đến từ đâu, vì sao không ai quay lại được hay đổi được giá trị nó trúng, và cách bất kỳ ai cũng tính lại được một ngưỡng sau khi mọi chuyện đã xong. |
-| [Phân tích tĩnh](security/static-analysis.md) | Các lượt chạy slither và solhint, cùng một lý do đứng sau mỗi nhóm trong năm nhóm phát hiện. |
-| [Keeper](operations/keeper.md) | Công việc của keeper theo từng bước, quy tắc thứ tự, mỗi pool một tiến trình, chuyện gì xảy ra khi nó ngừng chạy, và ngân sách gas. |
+| [Phân tích tĩnh](security/static-analysis.md) | Các lượt chạy slither và solhint, một lý do đứng sau mỗi nhóm trong năm nhóm phát hiện, và lượt kiểm tra phụ thuộc cùng hai phát hiện axios mà nó vẫn báo. |
+| [Keeper](operations/keeper.md) | Công việc của keeper theo từng bước, quy tắc thứ tự, mỗi pool một tiến trình, bảy keeper đang chạy được đặt ở đâu, chuyện gì xảy ra khi nó ngừng chạy, và ngân sách gas. |
 | [Triển khai](operations/deploying.md) | Triển khai một pool cho mỗi token, chữ ký và tham số hàm khởi tạo, xác minh hợp đồng, và hai bộ tham số Sepolia đặt cạnh một bộ cho mainnet. |
 | [Giới hạn](limitations.md) | Toàn bộ mười bốn giới hạn đã ghi nhận, trong một danh sách đánh số. |
 | [Câu hỏi thường gặp](faq.md) | Mười hai câu trả lời ngắn, mở đầu bằng việc bạn tiết kiệm được bằng token nào trong bảy token, và có cả câu nút nhận thưởng đi đâu mất. |

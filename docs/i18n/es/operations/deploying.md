@@ -281,6 +281,7 @@ despliegue fallaría sin nada evidente a lo que apuntar.
 | `SEPOLIA_RPC_URL` | No | Tu propio punto de acceso de Sepolia. La página de inicio y la ruta `/api/activity` leen la cadena en el servidor, así que esta nunca llega a un navegador. Las consultas de registros la necesitan, porque el nodo público gratuito limita los rangos de `eth_getLogs` muy por debajo de un día de bloques |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Sí | Opcional. Las lecturas de la cartera la usan y recurren a `https://ethereum-sepolia-rpc.publicnode.com` cuando no está definida. Es visible en el paquete, así que tiene que ser una que no te importe publicar |
 | `NEXT_PUBLIC_CHAIN_ID` | Sí | `11155111` para Ethereum Sepolia. La aplicación lo usa por defecto si no está definida |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Sí | Opcional, y gratuita desde el panel de Reown en https://dashboard.reown.com. Defínela y cada pantalla de conexión ofrece "Escanear con el móvil" junto a la extensión del navegador, que es por donde entran una cartera de móvil y una máquina sin extensión. Si se deja en blanco, el conector no se construye siquiera, así que a nadie se le ofrece un botón que falla justo en el momento de escanear |
 
 Ninguna dirección de contrato es ya una variable de entorno. La aplicación lee todos los pools de
 `packages/web/src/lib/chain/pools.json`, que `node scripts/sync-pools.mjs` genera a partir de los

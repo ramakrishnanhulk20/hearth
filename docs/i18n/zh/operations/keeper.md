@@ -155,10 +155,10 @@ keeper 卡住会让资金池损失开奖次数，不会损失钱。存款和提�
 
 ## 一池一个 keeper
 
-`packages/keeper/ecosystem.config.cjs` 在 pm2 下启动全部七个，一池一个进程。
 一个进程由 `HEARTH_ADDRESSES_FILE` 告知自己驱动哪个池，
 那就是那个池的部署所写出的地址文件，它同时也给出代币符号、小数位和用来签名的账户序号。
 `KEEPER_NAME` 是每一行日志都带的标签。
+`packages/keeper/ecosystem.config.cjs` 在一台机器上用 pm2 启动全部七个，一池一个进程。
 
 | pm2 进程 | `HEARTH_ADDRESSES_FILE` | `KEEPER_ACCOUNT_INDEX` |
 | --- | --- | --- |
@@ -176,6 +176,31 @@ keeper 卡住会让资金池损失开奖次数，不会损失钱。存款和提�
 
 这些序号故意隔开，好让之后加一个池不必重新编号，而且每个账户都需要自己的 Sepolia ETH。
 序号 0 是部署者，keeper 会拒绝它。
+
+## 线上那七个跑在哪
+
+在一台笔记本上用 pm2 跑全部七个是一种做法，它到今天也还能跑。但它不是线上的那一种。
+线上的七个 Sepolia keeper 全都跑在 Railway 上，一池一个服务，所以合上笔记本不会停掉任何一期开奖。
+
+keeper 是一个长期运行的进程，而不是一个定时函数：一轮执行可能要在密钥管理服务上等两分钟，
+比大多数 serverless 平台允许的时长都长。任何能让一个 Node 进程一直活着的托管平台都可以，
+而仓库里带着这一家的配置：
+
+- 仓库根目录的 `railway.json` 驱动 `usdc` 池。
+- `railway/hearth-keeper-<slug>.json` 各驱动其余六个池中的一个。每一条启动命令都在行内设好那个池的
+  `KEEPER_NAME`、`KEEPER_ACCOUNT_INDEX` 和 `HEARTH_ADDRESSES_FILE`，
+  所以用其中一份建出来的服务，只还需要 `RECOVERY_PHRASE` 和 `SEPOLIA_RPC_URL`。
+
+在任何托管平台上，构建都是 `npm run build -w @hearth/keeper`，启动都是
+`node packages/keeper/dist/src/index.js`。keeper 需要的那几份合约 ABI 已经提交在
+`packages/keeper/abi` 下，所以一台从不编译合约的机器也跑得动它；而且启动检查会把加载到的 ABI
+和 keeper 要调用的那些函数对一遍，让不一致在启动时就被报出来，而不是等到第一笔交易。
+地址文件出于同样的原因也必须提交，它们确实提交了，在
+`packages/contracts/deployments/sepolia/` 下。
+
+不管跑在哪，每个池都只跑一个进程。两个 keeper 用同一个账户签名，会为同一个 nonce 互相抢，
+所以要为同一个池启动托管的那一个之前，先把本地那一个停掉。一个服务一个服务的分步设置，
+写在 keeper 包自己的 README，也就是 `packages/keeper/README.md` 里。
 
 ## 怎么跑它
 

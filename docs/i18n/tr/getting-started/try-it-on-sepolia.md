@@ -8,6 +8,11 @@ seçin. Sayfanın sonundaki iki dakikalık yol bir çekilişi beklemez.
 Canlı uygulama burada: https://hearth-ram.vercel.app. Aşağıdaki her şey, ham çağrıları
 izlemeyi tercih ediyorsanız doğrudan bir blok gezgininden de yapılabilir.
 
+Cüzdanla girmenin iki yolu var. Tarayıcıda bir eklenti varsa "Cüzdan bağla" onu kullanır.
+Hiç yoksa "Telefonla tarayın", bir mobil cüzdanın okuduğu bir WalletConnect kodu gösterir, ki
+hiçbir şey kuramayacağınız bir makinede tek yol budur. Hiç cüzdanı olmayan bir tarayıcıya ise,
+yarı yolda başarısız olan bir düğme verilmek yerine, hangisini nereden kuracağı söylenir.
+
 ## 0. Bir token seçin
 
 Hearth yedi havuz çalıştırır, Zama'nın Sepolia'da yayımladığı her gizli token için bir tane.
@@ -27,13 +32,23 @@ ve devamı.
 | Confidential XAUt (Mock) | `xaut` | 6 saat | `0x24377AE4AA0C45ecEe71225007f17c5D423dd940` |
 
 Seçici, Zama'nın resmi **Confidential tGBP**'sini de soluk halde listeler, çünkü dayanak
-tokenin basımı ihraççıya aittir ve başka kimse o tokeni edinemez. Onu seçtiğinizde, geri
-dönecek bir yatırma düğmesi yerine, tokenin adını veren, her iki sözleşmeye bağlantı veren
-ve hiçbir cüzdan işlemi sunmayan bir sayfa görürsünüz.
+tokenin basımı ihraççıya aittir ve başka kimse o tokeni edinemez. Sebep, okuduğunuz dilde,
+adının altında durur, ve onu seçtiğinizde, geri dönecek bir yatırma düğmesi yerine, tokenin
+adını veren, her iki sözleşmeye bağlantı veren ve hiçbir cüzdan işlemi sunmayan bir sayfa
+görürsünüz. İlk çekilişini henüz kapatmamış bir havuz da adının altındaki aynı satırı, o
+çekilişin ne zaman olduğunu söylemek için kullanır, çünkü orada verilecek bir ödül değil bir
+saat vardır.
 
-Uygulama on altı dilde okunur, dil üst çubuktaki düğmeden seçilir. İngilizce düz URL'leri
-korur, diğer bütün diller kendi kodunu başa koyar, yani aynı ekranın Japoncası
-`/ja/app/usdc` olur.
+Uygulama on altı dilde okunur, dil üst çubuktaki düğmeden ya da konsol çubuğundakinden
+seçilir. İngilizce düz URL'leri korur, diğer bütün diller kendi kodunu başa koyar, yani aynı
+ekranın Japoncası `/ja/app/usdc` olur. Arapça düzeni aynalar. Arapça dahil her dil Batı
+rakamlarını ve yirmi dört saatlik UTC saatini korur, böylece ekrandaki bir rakam blok
+gezginindeki rakamla örtüşür, ve her tutar alanı ondalık işareti olarak virgülü de noktayı da
+kabul eder, yalnızca ikisini birden taşıyan bir tutarı reddeder. Bu belge sayfaları da aynı
+biçimde, sayfa sayfa çevrildi, ve henüz kimsenin çevirmediği bir sayfa, tepesinde bunu söyleyen
+bir satırla İngilizcesini gösterir. Her çeviriyi anadili konuşuru değil bir model yazdı: her
+rakam ve her sözleşme adı için doğrunun kaynağı İngilizcedir,
+[kısıtlar listesinin](../limitations.md) söylediği gibi.
 
 ## Dokunacağınız sözleşmeler
 
@@ -91,7 +106,11 @@ cUSDC.wrap(yourAddress, 1000000000)
 
 Uygulamada bu iki çağrı, Yatır ekranının 2. adımıdır, "USDC'nizi gizleyin". Düğmede "Gizle"
 yazar, sarmalayıcının harcama izni yazdığınız tutarın altında kaldığı sürece ise
-"Sarmalayıcıya izin ver" yazar.
+"Sarmalayıcıya izin ver" yazar. İzin bir kez, geniş bir limit için istenir, dolayısıyla
+ilkinden sonraki her gizleme iki işlem yerine tek işlemdir. İzin tam olarak tek bir sözleşmeye,
+o tokenin gizli sarmalayıcısına ulaşır ve ona yalnızca açık taklit tokeni cüzdanınızdan çekme
+yetkisi verir, başka hiçbir şey değil. Ekran bu ikisini de düğmenin yanında söyler, sizin
+bulmanıza bırakmaz.
 
 Artık 1,000 gizli USDC'niz var. Bu noktadan sonra bakiyeniz şifreli bir handle'dır ve onu
 yalnızca siz okuyabilirsiniz.
@@ -113,6 +132,15 @@ Uygulama şifreli girdiyi ve kanıtını sizin için Zama'nın SDK'sıyla oluşt
 kancası, istediğiniz tutarı değil tokenin gerçekten hareket ettiğini söylediği tutarı tam
 olarak hesaba geçirir, dolayısıyla herhangi bir sebeple eksik kalan bir transfer hayali
 anapara yaratamaz.
+
+Bunun, bir rakam yazmadan önce bilmeye değer bir sonucu var. Gizli bakiyenizden fazlasını
+yatırmak istemek zincirin hiçbir yerinde reddedilmez: token cüzdanda ne varsa onu hareket
+ettirir, ki bu hiçbir şey de olabilir, ve işlem hiçbir şey başarmamış olarak başarılı olur.
+Dolayısıyla bu çizgiyi ekranın kendisi tutar. Gizli bakiyenizi gözle bir kez açtığınızda,
+yatırma alanı "Bu, elinizdekinden fazla" der ve düğme kapalı kalır. Gizliliği kaldırma ekranı
+daha da ileri gider, çünkü orada açılacak bir şey yoktur: açık token bakiyenizi işlemden önce
+ve sonra tekrar okur, ikisi birbirinin aynıysa "Hiçbir şey hareket etmedi" der, her zamanki
+sebep olarak fazla büyük tutarı gösterir ve "Hepsi" seçeneğini işaret eder.
 
 Kasa, tutarı ya da ortaya çıkacak anaparası tasarruf sahibi başına üst sınırı aşacak bir
 yatırmayı reddeder. Bu sınır bir saatlik dönemde yaklaşık 5 milyar token, altı saatlik
@@ -220,6 +248,15 @@ tam olarak o tutar için sıradan bir çekim gönderir, 8. adım da kalanı eve 
 bir talep ile bir çekim, aynı biçimdeki aynı çağrıdır, ve bir kazananın göze batmasını
 engelleyen de budur.
 
+O karttaki tek göz, üç rakamı birden açar: o çekilişteki ağırlığınız, o çekilişin alacağı, ve
+`confidentialWinningsOf`, yani kasanın bütün çekilişler boyunca bu cüzdana hâlâ borçlu olduğu
+her şey. Düğme hem alacağa hem de o güncel toplama bağlıdır, ve ikisinin küçüğünü sunar. Bir
+çekilişin alacağı bir kez yazıldıktan sonra hiç değişmez, dolayısıyla yalnızca alacağa bağlı
+bir kart, sayfa yenilendikten sonra aynı ödülü tekrar sunardı ve zincir de bunu sizin kendi
+anaparanızdan karşılardı. Güncel toplam, bir talep gerçekleştiği anda düşer, düğmeyi kaldıran
+da budur, ve kart ödülün çoktan çekilmiş olduğunu söyler, rakam ise o çekilişin kaydı olarak
+durur.
+
 Hesabınıza geçmesi için basılacak bir şey de yoktur. Değerlendirme, tasarruf sahipleri
 listesinde o çekilişin tohumunun belirlediği bir noktadan yürür. O çekilişin kartındaki
 "Çekilişi ilerlet" düğmesi ile "Çekiliş yürüt" ekranındaki "İlerlet", ikisi de sizi listeden
@@ -253,7 +290,12 @@ için zaten sabitlediği ağırlık değişmez.
 uyarı kartı durur. Tam argüman listeleri bizim değil Zama'nın sarmalayıcısındadır.
 
 İlk çağrı şifreli tutarı yakar ve onu genel şifre çözme için işaretler. İkincisi, Zama'nın
-protokolü açık metni ve kanıtını ürettikten sonra açık tokenleri serbest bırakır.
+protokolü açık metni ve kanıtını ürettikten sonra açık tokenleri serbest bırakır. Uygulama,
+açık token bakiyenizi ilk çağrıdan önce ve ikinci çağrıdan sonra tekrar okur ve farkı bildirir,
+dolayısıyla "Gizlilik kaldırıldı, 250.00 USDC" yazdığınız rakam değil, ölçülmüş bir olgudur. Bu
+fark sıfır olduğunda, başarı ilan etmek yerine "Hiçbir şey hareket etmedi" der: her iki işlem de
+gerçekten gerçekleşti, ve tutar gizli bakiyenizin üzerindeyse sarmalayıcı reddetmek yerine
+hiçbir şey serbest bırakmaz.
 Sarmalamasını çözdüğünüz tutar, tıpkı sarmaladığınız tutar gibi herkese açıktır, ve onu
 yayımlayan ilk çağrıdır, dolayısıyla hiç sonlandırmadığınız bir çözme bile çoktan sızdırmış
 olur.
@@ -271,11 +313,13 @@ Uygulama, solunda bir menü şeridi olan bir konsoldur, ekran başına tek iş, 
 şeridin aşağı doğru yürünmesidir.
 
 1. https://hearth-ram.vercel.app adresini açın, başlıktaki "Havuz" bağlantısıyla `/app`
-   ekranına gidin ve Sepolia'da bir cüzdan bağlayın. `/app/usdc` adresinde USDC havuzuna
-   düşersiniz, menünün üstündeki token adı havuzları değiştirir. Gösterge paneli, yapılacak
-   tek şeyi söyleyen "Sıradaki" işaretli bir blokla açılır.
+   ekranına gidin ve Sepolia'da, tarayıcı eklentisiyle ya da kodu bir telefon cüzdanıyla
+   tarayarak bir cüzdan bağlayın. `/app/usdc` adresinde USDC havuzuna düşersiniz, menünün
+   üstündeki token adı havuzları değiştirir. Gösterge paneli, yapılacak tek şeyi söyleyen
+   "Sıradaki" işaretli bir blokla açılır.
 2. Yan menüde "Yatır", cüzdanınızın geldiği adıma göre üç adımından hangisine denk geliyorsa
-   orada açılır. Sırayla "Test USDC'si al", "Gizle", sonra "Yatır"a tıklayın.
+   orada açılır. Sırayla "Test USDC'si al", "Gizle", sonra "Yatır"a tıklayın. İlk gizleme
+   sarmalayıcı için bir izin ister, ondan sonraki hiçbir gizleme bir daha sormaz.
 3. Gösterge paneline dönün, "Elinizdekiler" kartında "Anapara" yanındaki göze basın ve
    imzalayın: anaparanız ve kazancınız birlikte belirir, yalnızca tarayıcıda.
 4. Yan menüde "Çekiliş yürüt", "Herkes" işaretli satır. Son biten dönemi kendiniz kapatıp

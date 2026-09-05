@@ -8,6 +8,11 @@ phút ở cuối trang này thì không phải chờ kỳ nào cả.
 Ứng dụng đang chạy ở https://hearth-ram.vercel.app. Mọi thứ bên dưới cũng làm thẳng từ block
 explorer được, nếu bạn thích xem các lệnh gọi thô.
 
+Có hai lối vào bằng ví. Nếu trình duyệt có tiện ích mở rộng, "Kết nối ví" sẽ dùng nó. Nếu không
+có tiện ích nào, "Quét bằng điện thoại" hiện một mã WalletConnect cho ví trên điện thoại đọc, và
+đó là lối duy nhất trên một cái máy mà bạn không cài được gì. Một trình duyệt hoàn toàn không có
+ví thì được chỉ nên cài ví nào và cài ở đâu, thay vì bị đưa cho một cái nút hỏng giữa chừng.
+
 ## 0. Chọn một token
 
 Hearth chạy bảy pool, mỗi pool cho một token bảo mật mà Zama phát hành trên Sepolia. Mỗi pool
@@ -26,13 +31,22 @@ thì nằm ở phần đầu của URL: `/app/usdc`, `/app/weth` và cứ thế.
 | Confidential XAUt (Mock) | `xaut` | 6 giờ | `0x24377AE4AA0C45ecEe71225007f17c5D423dd940` |
 
 Bộ chọn cũng liệt kê **Confidential tGBP** chính thức của Zama, để mờ, vì quyền mint token cơ
-sở thuộc về đơn vị phát hành và không ai khác lấy được token đó. Chọn nó sẽ ra một trang gọi
-tên token, dẫn tới cả hai hợp đồng và không đưa ra thao tác ví nào, thay vì một nút gửi tiền
-chỉ để bị revert.
+sở thuộc về đơn vị phát hành và không ai khác lấy được token đó. Lý do nằm ngay dưới tên nó,
+bằng thứ tiếng bạn đang đọc, và chọn nó sẽ ra một trang gọi tên token, dẫn tới cả hai hợp đồng
+và không đưa ra thao tác ví nào, thay vì một nút gửi tiền chỉ để bị revert. Pool nào chưa đóng
+kỳ quay đầu tiên cũng dùng đúng dòng dưới tên đó để nói kỳ quay ấy vào lúc nào, vì lúc đó có một
+thời điểm để đưa ra chứ chưa có tiền giải.
 
-Ứng dụng đọc được bằng mười sáu ngôn ngữ, chọn từ nút trên thanh đầu trang. Tiếng Anh giữ URL
-trơn còn mọi ngôn ngữ khác đặt mã của mình lên trước, nên cùng màn hình đó bằng tiếng Nhật là
-`/ja/app/usdc`.
+Ứng dụng đọc được bằng mười sáu ngôn ngữ, chọn từ nút trên thanh đầu trang hoặc nút trên thanh
+bên của bảng điều khiển. Tiếng Anh giữ URL trơn còn mọi ngôn ngữ khác đặt mã của mình lên trước,
+nên cùng màn hình đó bằng tiếng Nhật là `/ja/app/usdc`. Tiếng Ả Rập lật gương toàn bộ bố cục.
+Mọi ngôn ngữ đều giữ chữ số phương Tây và đồng hồ 24 giờ UTC, kể cả tiếng Ả Rập, nên một con số
+trên màn hình khớp với con số trên block explorer, và mọi ô nhập số tiền đều nhận dấu phẩy hoặc
+dấu chấm làm dấu thập phân, chỉ từ chối số tiền mang cả hai. Chính các trang tài liệu này cũng
+được dịch theo cách đó, trang đối trang, còn trang nào chưa ai dịch thì hiện bản tiếng Anh kèm
+một dòng ở đầu nói rõ điều đó. Mọi bản dịch đều do một mô hình viết chứ không phải người bản
+ngữ: tiếng Anh là bản gốc đáng tin cho mọi con số và tên hợp đồng, như
+[danh sách giới hạn](../limitations.md) đã ghi.
 
 ## Những hợp đồng bạn sẽ chạm tới
 
@@ -87,6 +101,10 @@ cUSDC.wrap(yourAddress, 1000000000)
 
 Trong ứng dụng, hai lệnh đó là bước 2 của Gửi tiền, "Shield số USDC của bạn". Nút ghi
 "Shield", và ghi "Cấp quyền cho lớp bọc" khi hạn mức của lớp bọc còn thiếu so với số bạn nhập.
+Quyền đó chỉ được xin một lần, với một hạn mức lớn, nên mọi lần shield sau lần đầu chỉ còn một
+giao dịch thay vì hai. Nó chạm tới đúng một hợp đồng, là lớp bọc bảo mật của token đó, và cho
+phép hợp đồng ấy rút token mock công khai ra khỏi ví bạn, không gì khác. Màn hình nói cả hai
+điều đó ngay cạnh cái nút chứ không để bạn tự đi tìm.
 
 Giờ bạn đang giữ 1.000 USDC bảo mật. Từ đây trở đi, số dư của bạn là một handle bản mã và chỉ
 mình bạn đọc được.
@@ -107,6 +125,15 @@ cUSDC.confidentialTransferAndCall(vault, encryptedAmount, inputProof, "")
 Ứng dụng dựng sẵn đầu vào đã mã hoá và bằng chứng của nó cho bạn bằng SDK của Zama. Hook nhận
 tiền của vault ghi có đúng số tiền mà token nói là đã thực sự chuyển, chứ không phải số bạn
 xin, nên một lần chuyển bị thiếu vì bất kỳ lý do gì cũng không thể tạo ra tiền gốc ảo.
+
+Chuyện đó kéo theo một hệ quả đáng biết trước khi bạn gõ một con số. Xin gửi nhiều hơn số dư
+bảo mật của bạn thì trên chuỗi không chỗ nào từ chối cả: token chuyển đúng số mà ví có, có thể
+là không có gì, và giao dịch vẫn thành công mà chẳng làm được gì. Nên chính màn hình giữ lấy
+lằn ranh đó. Một khi bạn đã mở số dư bảo mật bằng con mắt, ô nhập tiền gửi ghi "Số đó lớn hơn
+số bạn đang giữ" và cái nút vẫn tắt. Màn hình unshield còn đi xa hơn, vì bên đó không có gì để
+mở: nó đọc số dư token công khai của bạn trước lượt chạy rồi đọc lại sau đó, và nếu hai lần
+bằng nhau thì nó ghi "Không có gì dịch chuyển", gọi tên số tiền quá lớn là nguyên nhân thường
+gặp, và chỉ sang nút "Tất cả".
 
 Vault từ chối một khoản gửi mà số tiền của nó, hoặc tiền gốc sau khi cộng vào, sẽ đẩy bạn vượt
 trần mỗi người gửi, trần đó với kỳ một giờ là khoảng 5 tỷ token và với kỳ sáu giờ là khoảng
@@ -210,6 +237,15 @@ bình thường đúng số tiền ấy, còn bước 8 đem phần còn lại v
 thưởng và một lần rút tiền là cùng một lệnh gọi với cùng hình dạng, và đó là thứ giữ cho người
 trúng không nổi bật lên.
 
+Con mắt duy nhất trên tấm thẻ đó mở ra ba con số cùng lúc: trọng số của bạn cho kỳ quay ấy,
+khoản ghi có của chính kỳ quay ấy, và `confidentialWinningsOf`, tức tất cả những gì vault còn
+nợ ví này qua mọi kỳ quay. Cái nút dựa vào cả khoản ghi có lẫn con số đang chạy đó, và nó đưa
+ra con số nhỏ hơn trong hai con số. Khoản ghi có của một kỳ quay không bao giờ đổi một khi đã
+được ghi, nên một tấm thẻ chỉ dựa vào khoản ghi có sẽ mời bạn nhận lại đúng giải đó sau khi tải
+lại trang, và chuỗi sẽ chấp nhận, lấy ra từ chính tiền gốc của bạn. Con số đang chạy kia tụt
+xuống ngay khi một lệnh nhận thưởng vào block, đó là thứ lấy cái nút đi và để lại tấm thẻ nói
+rằng giải đã được rút ra rồi, với con số được giữ lại làm ghi chép của kỳ quay.
+
 Cũng chẳng có gì phải nhấn để được ghi có cả. Việc duyệt đi qua danh sách người gửi từ một
 điểm do seed của kỳ quay đó quyết định. Nút "Đẩy kỳ quay đi tiếp" trên thẻ của kỳ quay, và nút
 "Đi tiếp" ở màn hình "Chạy một kỳ quay", đều đẩy chung một vòng duyệt đó tiến lên chứ không
@@ -244,8 +280,12 @@ bạn nhấn "Hoàn tất unshield" trên nó. Danh sách tham số chính xác 
 không phải của chúng tôi.
 
 Lệnh đầu đốt số tiền đã mã hoá và đánh dấu nó để giải mã công khai. Lệnh thứ hai giải phóng
-token bản rõ sau khi protocol của Zama đã sinh ra bản rõ và bằng chứng của nó. Số tiền bạn bọc
-ngược là công khai, y hệt số tiền bạn đã bọc vào, và chính lệnh đầu tiên là lệnh công bố nó,
+token bản rõ sau khi protocol của Zama đã sinh ra bản rõ và bằng chứng của nó. Ứng dụng đọc số
+dư token công khai của bạn trước lệnh đầu và đọc lại sau lệnh thứ hai, rồi báo phần chênh lệch,
+nên "đã unshield 250,00 USDC" là một sự thật đo được chứ không phải con số bạn đã gõ. Khi phần
+chênh lệch đó bằng không, nó ghi "Không có gì dịch chuyển" thay vì tuyên bố thành công: cả hai
+giao dịch đều đã vào block, và lớp bọc không nhả gì ra chứ không từ chối khi số tiền lớn hơn số
+dư bảo mật của bạn. Số tiền bạn bọc ngược là công khai, y hệt số tiền bạn đã bọc vào, và chính lệnh đầu tiên là lệnh công bố nó,
 nên một lần unwrap mà bạn không bao giờ hoàn tất thì cũng đã rò ra rồi.
 
 Từ đó có thêm một điều đáng biết. Nếu bạn bọc vào rồi bọc ngược ra hết, chênh lệch giữa hai
@@ -260,10 +300,12 @@ những số tròn không liên quan tới vị thế của bạn, hoặc để 
 chính là đi dọc thanh đó xuống.
 
 1. Mở https://hearth-ram.vercel.app, theo mục "Pool" trên đầu trang để tới `/app`, rồi kết nối
-   ví trên Sepolia. Bạn sẽ vào pool USDC ở `/app/usdc`; tên token ở đầu thanh bên dùng để đổi
-   pool. Bảng điều khiển mở ra với một khối ghi "Tiếp theo" gọi tên đúng một việc cần làm.
+   ví trên Sepolia, bằng tiện ích mở rộng của trình duyệt hoặc bằng cách quét mã bằng ví trên
+   điện thoại. Bạn sẽ vào pool USDC ở `/app/usdc`; tên token ở đầu thanh bên dùng để đổi pool.
+   Bảng điều khiển mở ra với một khối ghi "Tiếp theo" gọi tên đúng một việc cần làm.
 2. "Gửi tiền" ở thanh bên, màn hình này mở ngay tại bước mà ví của bạn đang dừng trong ba
-   bước. Nhấn "Lấy USDC thử nghiệm", rồi "Shield", rồi "Gửi tiền".
+   bước. Nhấn "Lấy USDC thử nghiệm", rồi "Shield", rồi "Gửi tiền". Lần shield đầu tiên xin một
+   lần cấp quyền cho lớp bọc, và không lần shield nào sau đó hỏi lại.
 3. Quay lại bảng điều khiển, nhấn con mắt bên cạnh "Tiền gốc" trong "Bạn đang giữ" rồi ký:
    tiền gốc và tiền thưởng của bạn cùng hiện ra, chỉ trong trình duyệt.
 4. "Chạy một kỳ quay" ở thanh bên, dòng ghi "Bất kỳ ai". Nhấn "Đóng", rồi "Trao giải", để tự

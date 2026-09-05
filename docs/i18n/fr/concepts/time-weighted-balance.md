@@ -163,4 +163,3 @@ temporelle est une fonctionnalité de confidentialité : votre poids est chiffr�
 tranche dans laquelle tombe le total du pool est publiée à chaque tirage, et avec très peu
 d'épargnants cette tranche fixe un poids à un facteur deux près. Voir
 [ce qui reste privé](../security/what-stays-private.md).
-</content>

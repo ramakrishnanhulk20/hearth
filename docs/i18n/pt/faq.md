@@ -13,7 +13,12 @@ ele. Todo o resto desta página vale para cada pool por conta própria. Detalhes
 ## 2. Onde está o botão de resgate?
 
 Em "Meus sorteios" no aplicativo, no cartão daquele sorteio, sob "Seu resultado", depois que você
-o abriu com o olho. Ele aparece apenas quando aquele sorteio te creditou alguma coisa. Por baixo
+o abriu com o olho. Ele aparece apenas quando aquele sorteio te creditou alguma coisa e o cofre
+ainda deve dinheiro a essa carteira: o mesmo olho abre juntos o crédito daquele sorteio e o total
+corrente de ganhos não resgatados do cofre, e o botão oferece o menor dos dois. É esse segundo
+número que o torna honesto. O crédito de um sorteio nunca muda depois de escrito, então um botão
+preso só ao crédito ofereceria o mesmo prêmio de novo depois de um recarregamento, e a blockchain
+o pagaria com o seu próprio principal. Por baixo
 ele deliberadamente não é uma transação separada: os prêmios são creditados no seu saldo cifrado
 de ganhos durante a avaliação, e o botão de resgate, que carrega o valor, envia um saque comum
 daquele valor, o que na blockchain se parece exatamente com qualquer outro saque. Na maioria dos

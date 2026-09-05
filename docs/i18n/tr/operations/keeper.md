@@ -181,10 +181,11 @@ bir noktadan başladığı için kimse kalıcı olarak arkada oturmaz.
 
 ## Havuz başına bir keeper
 
-`packages/keeper/ecosystem.config.cjs`, yedisini de pm2 altında başlatır, her biri bir süreç.
 Bir sürece hangi havuzu sürdüğünü `HEARTH_ADDRESSES_FILE` söyler, yani o havuzun dağıtımının
 yazdığı adres dosyası, ki bu ona token sembolünü, ondalıkları ve imza atacağı hesap indeksini de
 verir. `KEEPER_NAME` ise her kayıt satırının taşıdığı etikettir.
+`packages/keeper/ecosystem.config.cjs`, yedisini de tek bir makinede pm2 altında başlatır, her
+biri bir süreç.
 
 | pm2 süreci | `HEARTH_ADDRESSES_FILE` | `KEEPER_ACCOUNT_INDEX` |
 | --- | --- | --- |
@@ -203,6 +204,36 @@ yönlendirilmiştir. İki dosya da aynı adresleri taşır.
 İndeksler, sonradan bir havuz eklendiğinde yeniden numaralandırma gerekmesin diye aralıklı
 seçildi, ve her hesabın kendi Sepolia ETH'sine ihtiyacı var. 0 indeksi dağıtıcıdır ve keeper onu
 kabul etmez.
+
+## Canlıdaki yedisi nerede çalışıyor
+
+Bir dizüstünde pm2, yedisini birden çalıştırmanın bir yolu ve hâlâ işe yarıyor. Canlıda olan bu
+değil. Yedi Sepolia keeper'ının hepsi Railway üzerinde çalışıyor, havuz başına bir servis,
+böylece kapanan bir dizüstü hiçbir çekilişi durdurmaz.
+
+Keeper, zamanlanmış bir fonksiyon değil, uzun süre çalışan bir süreçtir: tek bir tur, anahtar
+yönetim servisini (KMS) beklerken iki dakika geçirebilir, ki bu çoğu sunucusuz platformun izin
+verdiğinden uzundur. Bir Node sürecini hayatta tutan her barındırma işi görür, ve depo bunun
+yapılandırmasını taşıyor:
+
+- Deponun kökündeki `railway.json`, `usdc` havuzunu sürer.
+- `railway/hearth-keeper-<slug>.json`, diğer altısının her birini sürer. Her başlatma komutu o
+  havuzun `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` ve `HEARTH_ADDRESSES_FILE` değerlerini kendi
+  içinde verir, dolayısıyla bunlardan biriyle kurulan bir servise yalnızca `RECOVERY_PHRASE` ve
+  `SEPOLIA_RPC_URL` gerekir.
+
+Derleme `npm run build -w @hearth/keeper`, başlatma ise her barındırmada
+`node packages/keeper/dist/src/index.js`. Keeper'ın ihtiyaç duyduğu sözleşme ABI'ları
+`packages/keeper/abi` altında depoya işlenmiştir, dolayısıyla sözleşmeleri hiç derlemeyen bir
+barındırma da onu çalıştırır, ve açılış kontrolü yüklenen ABI'yı keeper'ın çağırdığı
+fonksiyonlarla karşılaştırır, böylece bir sapma ilk işlemde değil, başlangıçta bildirilir. Adres
+dosyalarının da aynı sebeple depoya işlenmiş olması gerekir, ve öyleler,
+`packages/contracts/deployments/sepolia/` altında.
+
+Nerede çalışırsa çalışsın, havuz başına tam olarak bir süreç çalıştırın. Tek bir hesaptan imza
+atan iki keeper aynı nonce için birbiriyle yarışır, o yüzden aynı havuz için barındırılan bir
+kopyayı başlatmadan önce yereldekini durdurun. Servis servis, adım adım kurulum, keeper
+paketinin kendi README dosyasında, `packages/keeper/README.md` içinde.
 
 ## Çalıştırmak
 

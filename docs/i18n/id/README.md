@@ -32,8 +32,8 @@ memakainya dan orang yang mengauditnya.
 | [Apa yang tetap privat](security/what-stays-private.md) | Tujuh aturan: bracket dan kebocoran yang digantikannya, harga dari saldo yang bisa dipatok, celah pembungkusan di dua arah, apa yang diukur oleh jumlah hadiah, lapisan token, mengapa evaluasi bukan petunjuk, dan sisa risiko perilaku. |
 | [Model ancaman](security/threat-model.md) | Sembilan penyerang, apa yang diincar masing-masing, apa yang menghentikannya, dan apa yang tidak. Ditambah kegagalan desain kami sebelumnya yang benar-benar dieksekusi. |
 | [Keacakan dan verifikasi](security/randomness-and-verification.md) | Dari mana seed berasal, mengapa tidak ada yang bisa mengulang undiannya atau mengubah besar hadiahnya, dan bagaimana siapa pun menghitung ulang sebuah ambang batas setelahnya. |
-| [Analisis statis](security/static-analysis.md) | Hasil jalannya slither dan solhint, dan satu alasan di balik masing-masing dari lima keluarga temuan. |
-| [Keeper](operations/keeper.md) | Tugas keeper langkah demi langkah, aturan urutan, satu proses per pool, apa yang terjadi ketika ia mati, dan anggaran gas-nya. |
+| [Analisis statis](security/static-analysis.md) | Hasil jalannya slither dan solhint, satu alasan di balik masing-masing dari lima keluarga temuan, dan audit dependensi dengan dua temuan axios yang masih dilaporkannya. |
+| [Keeper](operations/keeper.md) | Tugas keeper langkah demi langkah, aturan urutan, satu proses per pool, di mana ketujuh keeper yang hidup itu dijalankan, apa yang terjadi ketika ia mati, dan anggaran gas-nya. |
 | [Deployment](operations/deploying.md) | Men-deploy satu pool per token, tanda tangan dan parameter konstruktor, verifikasi, dan dua set parameter Sepolia dibandingkan satu set mainnet. |
 | [Batasan](limitations.md) | Semua batasan yang terdokumentasi dalam satu daftar bernomor berisi empat belas butir. |
 | [FAQ](faq.md) | Dua belas jawaban singkat, dimulai dari token mana saja dari tujuh itu yang bisa Anda tabung, termasuk ke mana perginya tombol klaim. |

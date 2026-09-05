@@ -13,7 +13,12 @@ Ayrıntılar: [havuzlar ve tokenler](concepts/pools-and-tokens.md).
 ## 2. Talep düğmesi nerede?
 
 Uygulamada "Çekilişlerim" ekranında, o çekilişin kartında, göz simgesiyle açtıktan sonra
-"Sonucunuz" başlığının altında. Yalnızca o çekiliş hesabınıza bir şey geçirdiyse görünür.
+"Sonucunuz" başlığının altında. Yalnızca o çekiliş hesabınıza bir şey geçirdiyse ve kasa bu
+cüzdana hâlâ para borçluysa görünür: aynı göz, o çekilişin alacağını ve kasanın henüz talep
+edilmemiş kazançlarının güncel toplamını birlikte açar, düğme de ikisinin küçüğünü sunar. Onu
+dürüst kılan işte bu ikinci sayı. Bir çekilişin alacağı bir kez yazıldıktan sonra hiç değişmez,
+dolayısıyla yalnızca alacağa bakan bir düğme sayfa yenilendikten sonra aynı ödülü tekrar sunardı
+ve zincir de bunu sizin kendi anaparanızdan öderdi.
 Perde arkasında bunun ayrı bir işlem olmaması bilinçli bir tercih: ödüller değerlendirme
 sırasında şifreli kazanç bakiyenize eklenir, tutarı üzerinde yazan talep düğmesi de bunun
 için sıradan bir çekim gönderir, ki bu zincirde tıpkı başka herhangi bir çekim gibi görünür.

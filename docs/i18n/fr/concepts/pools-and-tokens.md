@@ -111,16 +111,36 @@ Zama publie aussi sur Sepolia un **Confidential tGBP** non simulé, à l'adresse
 l'émetteur : personne d'autre que lui ne peut obtenir le jeton public, personne ne peut
 l'envelopper dans le jeton confidentiel, et aucun pool ne peut être ouvert dessus.
 
-Hearth le liste quand même dans le sélecteur de pools, grisé, avec la raison écrite à côté :
-`mint restricted to the issuer`. Le choisir ouvre une page qui nomme le jeton, renvoie vers
-les deux contrats sur Etherscan, dit de qui vient la restriction, et ne propose aucune
-action de portefeuille, parce qu'un bouton de dépôt qui échoue est pire que pas de bouton du
-tout.
+Hearth le liste quand même dans le sélecteur de pools, grisé, avec la raison écrite sous son
+nom. Le fichier de déploiement énonce cette raison une seule fois, en anglais, sous la forme
+`mint restricted to the issuer`, et l'application l'affiche dans la langue que vous lisez. Le
+choisir ouvre une page qui nomme le jeton, renvoie vers les deux contrats sur Etherscan, dit
+de qui vient la restriction, et ne propose aucune action de portefeuille, parce qu'un bouton
+de dépôt qui échoue est pire que pas de bouton du tout.
 
 Laisser le jeton hors de la liste aurait été plus simple et aurait donné l'impression que
 Hearth n'y était simplement pas encore arrivé. Un épargnant qui cherche le tGBP trouve deux
 entrées : le pool simulé qui fonctionne, et le jeton officiel qui ne fonctionne pas, avec la
 raison.
+
+## Ce que montre la rangée de pools
+
+La page d'accueil se termine par une rangée de tous les pools, chaque case portant le gros lot
+de ce pool à l'instant présent, lu sur le serveur en un seul multicall et livré dans la page,
+si bien que la rangée est déjà remplie quand le récit cesse de défiler. Le sélecteur dans la
+console affiche les mêmes montants selon les mêmes règles.
+
+Deux de ces règles existent parce qu'un nombre peut induire en erreur :
+
+- Un pool dont la lecture n'est pas revenue affiche `non lu`, jamais `0.00`. Un nœud qui n'a
+  pas répondu et une cagnotte vide se ressemblent dès qu'un zéro est écrit.
+- Un pool qui n'a pas encore clôturé son premier tirage affiche **Premier tirage HH:MM UTC** à
+  la place d'un montant, sur la rangée comme sous son nom dans le sélecteur. L'argent des lots
+  n'atteint les paliers qu'une fois le premier tirage attribué : avant cette clôture, la
+  réponse honnête est une heure et non `0.00`. Ce qu'une case montre se décide sur
+  `lastClosedDraw` qui vaut encore zéro, et l'heure elle-même est `firstPeriodAt` plus
+  `periodLength`, la fin de la première période et le premier moment où le tirage 1 peut
+  clôturer. L'horloge est en vingt-quatre heures et en UTC dans toutes les langues.
 
 ## D'où l'application tire les adresses
 
@@ -159,4 +179,3 @@ Sept pools veut dire sept processus keeper, chacun signant depuis son propre ind
 compte de la même phrase de récupération, parce que deux processus sur un même compte se
 disputent le même nonce. Le tableau et le fichier pm2 sont dans
 [le keeper](../operations/keeper.md).
-</content>

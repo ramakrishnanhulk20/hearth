@@ -290,6 +290,7 @@ Offensichtliches darauf zeigt.
 | `SEPOLIA_RPC_URL` | Nein | Ihr eigener Sepolia-Endpunkt. Die Landing Page und die Route `/api/activity` lesen die Blockchain auf dem Server, dieser hier erreicht also nie einen Browser. Log-Abfragen brauchen ihn, denn der kostenlose öffentliche Node deckelt `eth_getLogs`-Bereiche weit unter einem Tag an Blöcken |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Ja | Optional. Die Wallet-Lesezugriffe nutzen ihn und fallen auf `https://ethereum-sepolia-rpc.publicnode.com` zurück, wenn er nicht gesetzt ist. Im Bundle sichtbar, es muss also einer sein, den Sie veröffentlichen möchten |
 | `NEXT_PUBLIC_CHAIN_ID` | Ja | `11155111` für Ethereum Sepolia. Die App nimmt das als Standard, wenn nichts gesetzt ist |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Ja | Optional, und kostenlos im Dashboard von Reown unter https://dashboard.reown.com. Setzen Sie ihn, und jeder Verbindungsbildschirm bietet neben der Browser-Erweiterung "Mit dem Handy scannen" an, und genau so kommen eine Handy-Wallet und eine Maschine ohne Erweiterung herein. Bleibt er leer, wird der Connector gar nicht erst gebaut, niemandem wird also ein Knopf angeboten, der im Moment des Scannens versagt |
 
 Keine Vertragsadresse ist noch eine Umgebungsvariable. Die App liest jeden Pool aus
 `packages/web/src/lib/chain/pools.json`, das `node scripts/sync-pools.mjs` aus den

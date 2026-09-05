@@ -258,6 +258,7 @@ Sepolia 上七个池，每个合约都已在 Etherscan 上验证。每个池持�
 | `SEPOLIA_RPC_URL` | 否 | 你自己的 Sepolia 端点。落地页和 `/api/activity` 路由在服务端读链，所以这一个从不会到达浏览器。日志查询需要它，因为免费的公共节点把 `eth_getLogs` 的区块范围限制得远低于一天的区块量 |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | 是 | 可选。钱包相关的读取会用它，未设置时回落到 `https://ethereum-sepolia-rpc.publicnode.com`。它在打包产物里可见，所以必须是一个你乐意公开的端点 |
 | `NEXT_PUBLIC_CHAIN_ID` | 是 | 以太坊 Sepolia 是 `11155111`。未设置时应用默认用它 |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | 是 | 可选，在 Reown 的后台 https://dashboard.reown.com 免费拿。设了它，每一个连接界面都会在浏览器扩展旁边给出「用手机扫码」，手机钱包和一台装不了扩展的机器就是这样进来的。留空则整个连接器根本不会被构建，于是没有人会拿到一个扫码那一刻才失败的按钮 |
 
 现在没有任何合约地址是环境变量。应用从
 `packages/web/src/lib/chain/pools.json` 读取每一个池，

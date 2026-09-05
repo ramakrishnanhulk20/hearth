@@ -207,4 +207,3 @@ cours de tirage, ce qui est dans [lots et paliers](prizes-and-tiers.md). Et elle
 rien cacher de qui a participé : la liste des épargnants, les lots d'évaluation et le nombre
 de lots par palier sont tous publics. Voir
 [ce qui reste privé](../security/what-stays-private.md).
-</content>

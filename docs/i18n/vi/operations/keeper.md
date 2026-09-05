@@ -171,10 +171,11 @@ không ai ngồi mãi ở cuối hàng.
 
 ## Mỗi pool một keeper
 
-`packages/keeper/ecosystem.config.cjs` khởi động cả bảy dưới pm2, mỗi pool một tiến trình. Một
-tiến trình được cho biết nó vận hành pool nào qua `HEARTH_ADDRESSES_FILE`, tức tệp địa chỉ mà
+Một tiến trình được cho biết nó vận hành pool nào qua `HEARTH_ADDRESSES_FILE`, tức tệp địa chỉ mà
 lần triển khai của pool đó đã ghi, và tệp này cũng cho nó ký hiệu token, số chữ số thập phân và
 chỉ số tài khoản để ký. `KEEPER_NAME` là cái nhãn mà mọi dòng log đều mang theo.
+`packages/keeper/ecosystem.config.cjs` khởi động cả bảy dưới pm2 trên một máy, mỗi pool một tiến
+trình.
 
 | Tiến trình pm2 | `HEARTH_ADDRESSES_FILE` | `KEEPER_ACCOUNT_INDEX` |
 | --- | --- | --- |
@@ -192,6 +193,34 @@ nhiều ngày rồi. Cả hai tệp mang cùng các địa chỉ.
 
 Các chỉ số được rải thưa ra để về sau thêm một pool mà không phải đánh số lại, và mỗi tài khoản
 cần ETH Sepolia riêng. Chỉ số 0 là tài khoản triển khai và keeper từ chối nó.
+
+## Bảy keeper đang chạy được đặt ở đâu
+
+pm2 trên một chiếc laptop là một cách chạy cả bảy và cách đó vẫn dùng được. Nó không phải cái đang
+chạy thật. Cả bảy keeper Sepolia chạy trên Railway, mỗi pool một dịch vụ, nên một chiếc laptop gập
+lại không làm dừng kỳ quay nào.
+
+Keeper là một tiến trình sống lâu chứ không phải một hàm chạy theo lịch: một lượt có thể mất hai
+phút chờ dịch vụ quản lý khoá, dài hơn mức phần lớn nền tảng serverless cho phép. Bất kỳ máy chủ
+nào giữ được một tiến trình Node sống đều dùng được, và kho mã mang sẵn cấu hình cho máy chủ này:
+
+- `railway.json` ở gốc kho mã vận hành pool `usdc`.
+- `railway/hearth-keeper-<slug>.json` vận hành từng pool trong sáu pool còn lại. Mỗi lệnh khởi
+  động đặt thẳng `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` và `HEARTH_ADDRESSES_FILE` của pool đó, nên
+  một dịch vụ dựng từ một trong các tệp này chỉ cần `RECOVERY_PHRASE` và `SEPOLIA_RPC_URL`.
+
+Lệnh build là `npm run build -w @hearth/keeper` và lệnh khởi động là
+`node packages/keeper/dist/src/index.js`, trên máy chủ nào cũng vậy. Các ABI hợp đồng mà keeper cần
+đã được commit dưới `packages/keeper/abi`, nên một máy chủ chưa từng biên dịch hợp đồng vẫn chạy
+được nó, và bước kiểm tra lúc khởi động đối chiếu ABI đã nạp với những hàm mà keeper gọi, nên một
+sai lệch được báo ngay lúc khởi động chứ không đợi tới giao dịch đầu tiên. Các tệp địa chỉ phải
+được commit vì cùng lý do đó, và chúng đã được commit, dưới
+`packages/contracts/deployments/sepolia/`.
+
+Chạy đúng một tiến trình cho mỗi pool, dù chạy ở đâu. Hai keeper cùng ký từ một tài khoản sẽ tranh
+nhau cùng một nonce, nên hãy dừng bản chạy cục bộ trước khi khởi động bản đặt trên máy chủ cho cùng
+pool đó. Phần cài đặt từng bước, từng dịch vụ một, nằm trong README riêng của gói keeper,
+`packages/keeper/README.md`.
 
 ## Chạy nó
 

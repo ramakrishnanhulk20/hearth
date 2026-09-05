@@ -275,6 +275,7 @@ lần ra.
 | `SEPOLIA_RPC_URL` | Không | Điểm cuối Sepolia của riêng bạn. Trang chủ và route `/api/activity` đọc chuỗi ở phía máy chủ, nên biến này không bao giờ tới trình duyệt. Các truy vấn log cần nó, vì nút công khai miễn phí giới hạn khoảng của `eth_getLogs` thấp hơn hẳn một ngày block |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Có | Tuỳ chọn. Các lượt đọc từ ví dùng nó và lùi về `https://ethereum-sepolia-rpc.publicnode.com` khi nó không được đặt. Nó lộ ra trong bundle, nên phải là điểm cuối bạn sẵn lòng công bố |
 | `NEXT_PUBLIC_CHAIN_ID` | Có | `11155111` cho Ethereum Sepolia. Ứng dụng mặc định về giá trị này nếu không đặt |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Có | Tuỳ chọn, và lấy miễn phí ở bảng điều khiển của Reown tại https://dashboard.reown.com. Đặt nó thì mọi màn hình kết nối sẽ đưa thêm "Quét bằng điện thoại" bên cạnh tiện ích mở rộng của trình duyệt, đó là lối vào cho ví trên điện thoại và cho máy không cài được tiện ích nào. Để trống thì connector không được dựng lên chút nào, nên không ai bị đưa cho một cái nút hỏng đúng lúc họ quét |
 
 Không còn địa chỉ hợp đồng nào là biến môi trường nữa. Ứng dụng đọc mọi pool từ
 `packages/web/src/lib/chain/pools.json`, tệp mà `node scripts/sync-pools.mjs` sinh ra từ các tệp

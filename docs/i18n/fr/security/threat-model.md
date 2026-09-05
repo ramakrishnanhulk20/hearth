@@ -368,4 +368,3 @@ Chaque affirmation ci-dessus a un test. Les sorties exécutées atterrissent sou
 - La vérification formelle. Hearth est auto-audité avec des attaques exécutées et des tests
   de propriété. Il n'a pas été audité par un tiers, et cette page est le substitut honnête,
   pas un remplacement.
-</content>

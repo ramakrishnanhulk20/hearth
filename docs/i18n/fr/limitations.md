@@ -336,4 +336,3 @@ Le bouton est un argument de constructeur et un déploiement qui préfère la me
 - **Hearth n'a pas été audité par un tiers.** Il est auto-audité avec des attaques exécutées
   et des tests de propriété, et le [modèle de menaces](security/threat-model.md) est le
   substitut honnête plutôt qu'un remplacement.
-</content>

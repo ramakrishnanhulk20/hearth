@@ -135,9 +135,10 @@ keeper。這一版為什麼每期都公布三個，寫在[獎金與層級](../co
 
 ## 一池一支 keeper
 
-`packages/keeper/ecosystem.config.cjs` 用 pm2 啟動全部七支，各一支程序。一支程序由
+一支程序由
 `HEARTH_ADDRESSES_FILE` 告訴它自己驅動哪個池，也就是該池部署時寫出的那個位址檔，而那個檔案同時給了
 它代幣符號、小數位數，以及要用哪個帳戶索引簽名。`KEEPER_NAME` 是每一行日誌都會帶的標籤。
+`packages/keeper/ecosystem.config.cjs` 在一台機器上用 pm2 啟動全部七支，各一支程序。
 
 | pm2 程序 | `HEARTH_ADDRESSES_FILE` | `KEEPER_ACCOUNT_INDEX` |
 | --- | --- | --- |
@@ -154,6 +155,30 @@ keeper。這一版為什麼每期都公布三個，寫在[獎金與層級](../co
 
 那些索引刻意排得比較開，這樣之後要加池不必重新編號，而且每個帳戶都需要自己的 Sepolia ETH。索引 0 是
 部署者，keeper 會拒絕它。
+
+## 線上那七支跑在哪
+
+在一台筆電上用 pm2 跑全部七支是一種做法，到今天也還跑得動。但那不是線上的那一種。線上的七支 Sepolia
+keeper 全都跑在 Railway 上，一池一個服務，所以闔上筆電不會停掉任何一期抽獎。
+
+keeper 是一支長時間執行的程序，而不是一個排程函式：一輪執行可能要在金鑰管理服務上等兩分鐘，比多數
+serverless 平台允許的時間還長。任何能讓一支 Node 程序一直活著的託管平台都可以，而程式庫裡帶著這一家
+的設定：
+
+- 程式庫根目錄的 `railway.json` 驅動 `usdc` 池。
+- `railway/hearth-keeper-<slug>.json` 各驅動其餘六個池的其中一個。每一條啟動指令都在行內設好該池的
+  `KEEPER_NAME`、`KEEPER_ACCOUNT_INDEX` 和 `HEARTH_ADDRESSES_FILE`，所以用其中一份建出來的服務，只
+  還需要 `RECOVERY_PHRASE` 和 `SEPOLIA_RPC_URL`。
+
+在任何託管平台上，建置都是 `npm run build -w @hearth/keeper`，啟動都是
+`node packages/keeper/dist/src/index.js`。keeper 需要的那幾份合約 ABI 已經提交在 `packages/keeper/abi`
+底下，所以一台從不編譯合約的機器也跑得動它；而且開機檢查會把載入的 ABI 和 keeper 會呼叫的那些函式
+對過一遍，讓不一致在啟動時就被報出來，而不是等到第一筆交易。位址檔基於同樣的理由也必須提交，而它們
+確實提交了，在 `packages/contracts/deployments/sepolia/` 底下。
+
+不管跑在哪，每個池都只跑一支程序。兩支 keeper 用同一個帳戶簽名，會為了同一個 nonce 互相搶，所以要為
+同一個池啟動託管的那一支之前，先把本地那一支停掉。一個服務一個服務的分步設定，寫在 keeper 套件自己
+的 README，也就是 `packages/keeper/README.md`。
 
 ## 怎麼跑它
 

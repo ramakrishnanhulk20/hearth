@@ -13,7 +13,12 @@ Rinciannya di [pool dan token](concepts/pools-and-tokens.md).
 ## 2. Di mana tombol klaimnya?
 
 Di "My draws" pada aplikasi, di kartu undian itu, di bawah "Your result" setelah Anda membukanya
-dengan ikon mata. Ia hanya muncul kalau undian itu mengkreditkan sesuatu kepada Anda. Di balik
+dengan ikon mata. Ia hanya muncul kalau undian itu mengkreditkan sesuatu kepada Anda dan vault masih
+berutang uang kepada dompet ini: satu ikon mata itu membuka kredit undian tersebut bersama angka
+kemenangan belum diklaim yang masih dipegang vault, dan tombolnya menawarkan yang lebih kecil di
+antara keduanya. Angka kedua itulah yang membuatnya jujur. Kredit sebuah undian tidak pernah berubah
+begitu ditulis, jadi tombol yang hanya bergantung pada kredit itu akan menawarkan hadiah yang sama
+lagi setelah halaman dimuat ulang dan rantainya akan membayarnya dari dana pokok Anda sendiri. Di balik
 layar ia sengaja bukan transaksi terpisah: hadiah dikreditkan ke saldo kemenangan terenkripsi Anda
 selama evaluasi, dan tombol klaim, yang memuat jumlahnya, mengirim penarikan biasa untuk itu, yang
 di on-chain terlihat persis seperti penarikan lain mana pun. Di kebanyakan protokol hadiah, hanya
