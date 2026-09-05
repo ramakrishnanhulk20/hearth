@@ -1,0 +1,15 @@
+{
+  "vault": "0xEEC26386F273c6678cA538AcA18e1d9384eA9F09",
+  "pool": "0x873B285404199D46325a294Aa0EC7a79C30A7fF7",
+  "source": "0xdD352D70311E834ab75307f53d5C276060081d23",
+  "asset": "0xf2D628d2598aF4eAF94CB76a437Ff86CA78FfbFB",
+  "underlying": "0x75355a85c6FB9df5f0C80FF54e8747EEe9a0BF57",
+  "firstPeriodAt": 1788624000,
+  "periodLength": 21600,
+  "slug": "zama",
+  "symbol": "cZAMAMock",
+  "underlyingSymbol": "ZAMAMock",
+  "name": "Confidential ZAMA (Mock)",
+  "decimals": 6,
+  "keeperAccountIndex": 13
+}

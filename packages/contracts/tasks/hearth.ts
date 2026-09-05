@@ -2,12 +2,17 @@ import { FhevmType, type FhevmTypeEuint } from "@fhevm/hardhat-plugin";
 import type { Contract, ContractTransactionReceipt, ContractTransactionResponse, Signer } from "ethers";
 import { task, types } from "hardhat/config";
 import type { HardhatRuntimeEnvironment, HttpNetworkConfig } from "hardhat/types";
-import { networkConfig } from "../hearth.config";
+import { deploymentName, poolConfig } from "../hearth.config";
+import type { HearthPool } from "../hearth.config";
 import type { HearthPrizePool, HearthVault, SponsoredYieldSource } from "../types";
 
 /**
  * Operator tasks for a deployed Hearth: spread gas, seed a demo pool, read the state, drive a whole
  * draw the way the keeper does, and prove the promise end to end.
+ *
+ * Every task takes --token, because Hearth runs one independent pool per confidential token and a
+ * task acts on exactly one of them. The slug defaults to the network's first pool, so every command
+ * that worked before this option existed still means the same thing.
  *
  * Everything here is what any saver could do from the app. No step needs an owner key.
  */
@@ -17,17 +22,20 @@ const STATUS_NAMES = ["not closed", "closed", "awarded", "empty", "skipped"] as 
 export const EVALUATE_BATCH = 4;
 
 /**
- * Account roles, zero based, all derived from the one recovery phrase. Index 0 deploys and owns,
- * index 1 is the keeper and never a saver, so nothing the keeper signs carries a saver's
- * information, and indexes 2 to 6 are the demo savers. The prover is the last and smallest of
- * them, so a prove run reads a real saver's own numbers rather than a fresh address's.
+ * Account roles, zero based, all derived from the one recovery phrase. Index 0 deploys and owns
+ * every pool. Index 1 keeps the first pool and indexes 10 upward keep the rest, one keeper each, so
+ * a keeper's stuck nonce or empty tank stops one pool and not the others. A keeper is never a
+ * saver, so nothing a keeper signs carries a saver's information.
+ *
+ * Indexes 2 to 6 are the five demo savers, and they save in every pool: the same five people
+ * holding USDC, WETH and gold is what a real product looks like. The prover is the last and
+ * smallest of them, so a prove run reads a real saver's own numbers rather than a fresh address's.
+ * Which keeper index belongs to which pool is in hearth.config.ts.
  */
 export const KEEPER_ACCOUNT = 1;
 export const FIRST_SAVER_ACCOUNT = 2;
+export const LAST_SAVER_ACCOUNT = 6;
 export const PROVER_ACCOUNT = 6;
-
-const SEED_STAKES = [1_200, 600, 300, 150, 75].map((whole) => BigInt(whole) * 1_000_000n);
-const PROVE_STAKE = 500_000_000n;
 
 /** How far back the tasks look for draws worth acting on or reading. */
 const RECENT_DRAWS = 4;
@@ -35,6 +43,8 @@ const RECENT_DRAWS = 4;
 /** Only the calls the tasks make, so the same code drives our wrapper and Zama's. */
 export const WRAPPER_ABI = [
   "function rate() view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
   "function underlying() view returns (address)",
   "function wrap(address to, uint256 amount)",
   "function confidentialBalanceOf(address account) view returns (bytes32)",
@@ -43,6 +53,8 @@ export const WRAPPER_ABI = [
 
 export const ERC20_ABI = [
   "function balanceOf(address account) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function mint(address to, uint256 amount)",
   "function claim()",
@@ -77,6 +89,16 @@ export type Hearth = {
     readonly underlying: string;
   };
   readonly periodLength: bigint;
+  /** The parameters this pool was deployed and seeded with. */
+  readonly config: HearthPool;
+  readonly slug: string;
+  /** The short name printed next to an amount, for example USDC or WETH. */
+  readonly unit: string;
+  /** Public tokens the wrapper takes for one of its own base units. Six decimals of ether is 1e12. */
+  readonly rate: bigint;
+  readonly underlyingDecimals: number;
+  /** The account index that drives this pool's draws. */
+  readonly keeperAccount: number;
 };
 
 class ProveFailed extends Error {}
@@ -85,12 +107,33 @@ export function group(value: bigint | number): string {
   return value.toLocaleString("en-US");
 }
 
-export function usd(units: bigint): string {
+/**
+ * An amount in base units, printed with the decimals the token that holds it carries. Every place
+ * is printed and the trailing zeros then taken off, because a pool holding ether has to show 0.075
+ * as 0.075 rather than round it to 0.07, and a pool holding dollars reads better as 1,200 than as
+ * 1,200.000000.
+ */
+export function plain(units: bigint, decimals: number): string {
   const negative = units < 0n;
   const absolute = negative ? -units : units;
-  const whole = (absolute / 1_000_000n).toLocaleString("en-US");
-  const fraction = (absolute % 1_000_000n).toString().padStart(6, "0").slice(0, 2);
-  return `${negative ? "-" : ""}${whole}.${fraction}`;
+  const scale = 10n ** BigInt(decimals);
+  const whole = (absolute / scale).toLocaleString("en-US");
+  const fraction = (absolute % scale).toString().padStart(decimals, "0").replace(/0+$/, "");
+  return `${negative ? "-" : ""}${whole}${fraction === "" ? "" : `.${fraction}`}`;
+}
+
+/**
+ * A confidential amount with the pool's own short name, for example "0.075 WETH". The decimals come
+ * from the pool's configuration, which `load` has already checked against the wrapper on chain, so
+ * an amount can never be printed on a scale the chain disagrees with.
+ */
+export function money(ctx: Hearth, units: bigint): string {
+  return `${plain(units, ctx.config.decimals)} ${ctx.unit}`;
+}
+
+/** A public token amount, which carries the token's own decimals rather than the wrapper's six. */
+export function publicMoney(ctx: Hearth, units: bigint): string {
+  return `${plain(units, ctx.underlyingDecimals)} ${ctx.unit}`;
 }
 
 export function duration(seconds: bigint): string {
@@ -440,7 +483,7 @@ export async function send(what: string, call: Promise<ContractTransactionRespon
   return receipt;
 }
 
-export async function load(hre: HardhatRuntimeEnvironment): Promise<Hearth> {
+export async function load(hre: HardhatRuntimeEnvironment, slug?: string): Promise<Hearth> {
   if (hre.network.name === "hardhat") {
     throw new Error(
       "The in-process hardhat network has no FHEVM coprocessor outside `hardhat test`, and its chain " +
@@ -449,11 +492,16 @@ export async function load(hre: HardhatRuntimeEnvironment): Promise<Hearth> {
   }
   await hre.fhevm.initializeCLIApi();
 
-  const named = async (name: string): Promise<string> => {
+  const config = poolConfig(hre.network.name, slug);
+  const named = async (base: string): Promise<string> => {
+    const name = deploymentName(base, config.slug);
     // hardhat-deploy answers with undefined rather than null for a name it has never saved.
     const deployment = await hre.deployments.getOrNull(name);
     if (!deployment) {
-      throw new Error(`${name} is not deployed on ${hre.network.name}. Run: hardhat deploy --network ${hre.network.name}`);
+      throw new Error(
+        `${name} is not deployed on ${hre.network.name}. Run: HEARTH_TOKEN=${config.slug} hardhat deploy ` +
+          `--network ${hre.network.name}`,
+      );
     }
     return deployment.address;
   };
@@ -476,6 +524,17 @@ export async function load(hre: HardhatRuntimeEnvironment): Promise<Hearth> {
   const assetAddress = await vault.asset();
   const asset = new hre.ethers.Contract(assetAddress, WRAPPER_ABI, hre.ethers.provider);
   const underlyingAddress = (await asset.underlying()) as string;
+  const underlying = new hre.ethers.Contract(underlyingAddress, ERC20_ABI, hre.ethers.provider);
+
+  // Every amount in hearth.config.ts is in wrapper base units, so a wrapper on a different scale
+  // would make every stake, prize and sponsorship the wrong size. Better to stop than to seed it.
+  const decimals = Number(await asset.decimals());
+  if (decimals !== config.decimals) {
+    throw new Error(
+      `the ${config.slug} wrapper at ${assetAddress} reads ${decimals} decimals and hearth.config.ts expects ` +
+        `${config.decimals}, so nothing here would be the size it says it is`,
+    );
+  }
 
   return {
     hre,
@@ -483,21 +542,38 @@ export async function load(hre: HardhatRuntimeEnvironment): Promise<Hearth> {
     pool,
     source,
     asset,
-    underlying: new hre.ethers.Contract(underlyingAddress, ERC20_ABI, hre.ethers.provider),
+    underlying,
     addresses: { ...addresses, asset: assetAddress, underlying: underlyingAddress },
     periodLength: await vault.periodLength(),
+    config,
+    slug: config.slug,
+    unit: config.unit,
+    rate: (await asset.rate()) as bigint,
+    underlyingDecimals: Number(await underlying.decimals()),
+    keeperAccount: config.keeperAccountIndex,
   };
 }
 
 /**
- * Gets `amount` of the public token to `who`. Zama's mock USDC mints to anyone; the local TestUSDC
- * has a faucet on a cooldown instead, which is why a short balance can still fail here.
+ * What the public token charges for `units` of the wrapper. The wrapper caps itself at six decimals
+ * and mints `amount / rate()`, so a token with eighteen decimals costs a million million public
+ * base units for one wrapper base unit, and a six decimal token costs one.
  */
-export async function obtain(ctx: Hearth, who: Signer, amount: bigint): Promise<void> {
+export function publicCost(ctx: Hearth, units: bigint): bigint {
+  return units * ctx.rate;
+}
+
+/**
+ * Gets enough of the public token to `who` to wrap `units` of the confidential one. Zama's mock
+ * tokens mint to anyone, capped at a million tokens a call; the local TestUSDC has a faucet on a
+ * cooldown instead, which is why a short balance can still fail here.
+ */
+export async function obtain(ctx: Hearth, who: Signer, units: bigint): Promise<void> {
   const address = await who.getAddress();
+  const amount = publicCost(ctx, units);
   const held = (await ctx.underlying.balanceOf(address)) as bigint;
   if (held >= amount) {
-    console.log(`  ${address} already holds ${usd(held)} USDC, so nothing is minted`);
+    console.log(`  ${address} already holds ${publicMoney(ctx, held)}, so nothing is minted`);
     return;
   }
 
@@ -507,7 +583,7 @@ export async function obtain(ctx: Hearth, who: Signer, amount: bigint): Promise<
   const token = ctx.underlying.connect(who) as Contract;
 
   if (has("mint(address,uint256)")) {
-    await send(`  minted ${usd(amount - held)} USDC to ${address}`, token.mint(address, amount - held));
+    await send(`  minted ${publicMoney(ctx, amount - held)} to ${address}`, token.mint(address, amount - held));
   } else if (has("claim()")) {
     await send(`  claimed the faucet for ${address}`, token.claim());
   } else {
@@ -517,24 +593,25 @@ export async function obtain(ctx: Hearth, who: Signer, amount: bigint): Promise<
   const now = (await ctx.underlying.balanceOf(address)) as bigint;
   if (now < amount) {
     throw new Error(
-      `${address} holds ${usd(now)} USDC but needs ${usd(amount)}. The faucet pays a fixed amount on a cooldown, ` +
+      `${address} holds ${publicMoney(ctx, now)} but needs ${publicMoney(ctx, amount)}. The faucet pays a fixed amount on a cooldown, ` +
         "so wait for it or use a different account.",
     );
   }
 }
 
-export async function wrapAndDeposit(ctx: Hearth, who: Signer, amount: bigint): Promise<void> {
+export async function wrapAndDeposit(ctx: Hearth, who: Signer, units: bigint): Promise<void> {
   const address = await who.getAddress();
+  const amount = publicCost(ctx, units);
   await send(
-    `  approved the wrapper to take ${usd(amount)} USDC from ${address}`,
+    `  approved the wrapper to take ${publicMoney(ctx, amount)} from ${address}`,
     (ctx.underlying.connect(who) as Contract).approve(ctx.addresses.asset, amount),
   );
   await send(
-    `  wrapped ${usd(amount)} USDC into confidential USDC for ${address}`,
+    `  wrapped it into ${money(ctx, units)} of the confidential wrapper for ${address}`,
     (ctx.asset.connect(who) as Contract).wrap(address, amount),
   );
 
-  const input = await ctx.hre.fhevm.createEncryptedInput(ctx.addresses.asset, address).add64(amount).encrypt();
+  const input = await ctx.hre.fhevm.createEncryptedInput(ctx.addresses.asset, address).add64(units).encrypt();
   await send(
     `  deposited an encrypted amount into the vault for ${address}`,
     (ctx.asset.connect(who) as Contract)["confidentialTransferAndCall(address,bytes32,bytes,bytes)"](
@@ -602,7 +679,7 @@ export async function awardClosedDraws(ctx: Hearth, keeper: Signer, period: numb
     const harvested = asBigint(published.values[3], "the harvest");
     console.log(
       `  the KMS signed: seed ${seed}, scale count ${scaleCount}, someone held a balance: ${nonEmpty}, ` +
-        `harvest ${usd(harvested)} USDC`,
+        `harvest ${money(ctx, harvested)}`,
     );
 
     await send(
@@ -684,49 +761,87 @@ async function reconcileCarries(ctx: Hearth, keeper: Signer): Promise<void> {
     const published = await publicDecrypt(ctx.hre, [handle]);
     const carry = asBigint(published.values[0], `the ${TIER_NAMES[tier]} carry`);
     await send(
-      `reconciled the ${TIER_NAMES[tier]} tier, putting ${usd(carry)} USDC back on offer`,
+      `reconciled the ${TIER_NAMES[tier]} tier, putting ${money(ctx, carry)} back on offer`,
       ctx.pool.connect(keeper).reconcile(tier, carry, published.proof),
     );
   }
 }
 
-task("hearth:spread-gas", "Sends ETH from the deployer to the keeper and the demo savers")
+/** Parses a "10,11,12" list of account indexes and refuses anything that is not one. */
+function accountList(raw: string, derived: number): number[] {
+  const indexes = raw
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part !== "")
+    .map((part) => {
+      const index = Number(part);
+      if (!Number.isInteger(index) || index < 0) throw new Error(`"${part}" is not an account index`);
+      if (index >= derived) {
+        throw new Error(
+          `account index ${index} does not exist: this network derives ${derived}. Raise the account count in ` +
+            "hardhat.config.ts, or check the keeper indexes in hearth.config.ts.",
+        );
+      }
+      return index;
+    });
+  if (indexes.length === 0) throw new Error("the account list is empty");
+  return indexes;
+}
+
+task("hearth:spread-gas", "Sends ETH from the deployer to a pool's keeper and the demo savers")
+  .addOptionalParam("token", "Which pool's keeper is funded", "", types.string)
   .addOptionalParam("amount", "ETH each saver receives", "0.15", types.string)
-  .addOptionalParam("keeper", "ETH the keeper receives", "1.5", types.string)
-  .addOptionalParam("count", "Index of the last saver account", 6, types.int)
-  .setAction(async (args: { amount: string; keeper: string; count: number }, hre) => {
-    const signers = await hre.ethers.getSigners();
-    if (signers.length <= args.count) {
-      throw new Error(
-        `This network derives ${signers.length} account(s), so index ${args.count} does not exist. ` +
-          "Set RECOVERY_PHRASE in packages/contracts/.env, which derives ten.",
-      );
-    }
+  .addOptionalParam("keeper", "ETH each keeper receives", "1.5", types.string)
+  .addOptionalParam("count", "Index of the last saver account", LAST_SAVER_ACCOUNT, types.int)
+  .addOptionalParam("keepers", "Comma-separated keeper indexes to fund instead of one pool's, for example 10,11,12", "", types.string)
+  .addOptionalParam("savers", "Whether the demo savers are topped up as well", true, types.boolean)
+  .setAction(
+    async (
+      args: { token: string; amount: string; keeper: string; count: number; keepers: string; savers: boolean },
+      hre,
+    ) => {
+      const signers = await hre.ethers.getSigners();
+      if (signers.length <= args.count) {
+        throw new Error(
+          `This network derives ${signers.length} account(s), so index ${args.count} does not exist. ` +
+            "Set RECOVERY_PHRASE in packages/contracts/.env, which derives sixteen.",
+        );
+      }
 
-    const from = signers[0];
-    console.log(
-      `${await from.getAddress()} holds ${hre.ethers.formatEther(await hre.ethers.provider.getBalance(from))} ETH`,
-    );
+      // A list of keeper indexes funds several pools in one pass, which is what opening six pools
+      // at once needs. Without it the run funds the one keeper the --token pool uses.
+      const keepers =
+        args.keepers === ""
+          ? [poolConfig(hre.network.name, args.token).keeperAccountIndex]
+          : accountList(args.keepers, signers.length);
 
-    const pay = async (index: number, ether: string, role: string): Promise<void> => {
-      const to = await signers[index].getAddress();
-      const tx = await from.sendTransaction({ to, value: hre.ethers.parseEther(ether) });
-      const receipt = await tx.wait();
-      const held = await hre.ethers.provider.getBalance(to);
+      const from = signers[0];
       console.log(
-        `sent ${ether} ETH to the ${role} at index ${index}, ${to}, which now holds ` +
-          `${hre.ethers.formatEther(held)} ETH (tx ${tx.hash}, gas ${group(receipt?.gasUsed ?? 0n)})`,
+        `${await from.getAddress()} holds ${hre.ethers.formatEther(await hre.ethers.provider.getBalance(from))} ETH`,
       );
-    };
 
-    // The keeper gets its own larger share because it pays for every close, award, evaluation
-    // batch, finalization and reconciliation, draw after draw, while a saver pays only for its
-    // own deposit and withdrawal.
-    await pay(KEEPER_ACCOUNT, args.keeper, "keeper");
-    for (let index = FIRST_SAVER_ACCOUNT; index <= args.count; index++) {
-      await pay(index, args.amount, "saver");
-    }
-  });
+      const pay = async (index: number, ether: string, role: string): Promise<void> => {
+        const to = await signers[index].getAddress();
+        const tx = await from.sendTransaction({ to, value: hre.ethers.parseEther(ether) });
+        const receipt = await tx.wait();
+        const held = await hre.ethers.provider.getBalance(to);
+        console.log(
+          `sent ${ether} ETH to the ${role} at index ${index}, ${to}, which now holds ` +
+            `${hre.ethers.formatEther(held)} ETH (tx ${tx.hash}, gas ${group(receipt?.gasUsed ?? 0n)})`,
+        );
+      };
+
+      // A keeper gets its own larger share because it pays for every close, award, evaluation
+      // batch, finalization and reconciliation, draw after draw, while a saver pays only for its
+      // own deposit and withdrawal.
+      for (const index of keepers) await pay(index, args.keeper, "keeper");
+      if (args.savers) {
+        for (let index = FIRST_SAVER_ACCOUNT; index <= args.count; index++) {
+          await pay(index, args.amount, "saver");
+        }
+      }
+    },
+  );
 
 task("hearth:warp", "Moves the local chain's clock forward. Local networks only")
   .addParam("seconds", "How many seconds to skip", undefined, types.int)
@@ -745,12 +860,23 @@ task("hearth:warp", "Moves the local chain's clock forward. Local networks only"
     }
   });
 
-task("hearth:verify", "Publishes every deployed contract's source with the arguments the deploy recorded").setAction(
-  async (_args, hre) => {
+task("hearth:verify", "Publishes one pool's deployed source with the arguments the deploy recorded")
+  .addOptionalParam("token", "Which pool to verify", "", types.string)
+  .setAction(async (args: { token: string }, hre) => {
+    const slug = poolConfig(hre.network.name, args.token).slug;
     // hardhat-deploy's own etherscan-verify still posts to the per-network v1 endpoints, which
     // Etherscan retired. hardhat-verify 2.1.3 posts to the v2 endpoint with a chain id, which is
     // what a single ETHERSCAN_API_KEY works against.
-    for (const name of ["TestUSDC", "ConfidentialUSDC", "HearthVault", "HearthPrizePool", "SponsoredYieldSource"]) {
+    //
+    // The two local mock tokens carry no slug because only a local network deploys them.
+    const names = [
+      "TestUSDC",
+      "ConfidentialUSDC",
+      deploymentName("HearthVault", slug),
+      deploymentName("HearthPrizePool", slug),
+      deploymentName("SponsoredYieldSource", slug),
+    ];
+    for (const name of names) {
       const deployment = await hre.deployments.getOrNull(name);
       if (!deployment) continue;
       try {
@@ -765,46 +891,55 @@ task("hearth:verify", "Publishes every deployed contract's source with the argum
         }
       }
     }
-  },
-);
+  });
 
-task("hearth:seed", "Sponsors the yield source and fills the pool with five savers of different sizes").setAction(
-  async (_args, hre) => {
-    const ctx = await load(hre);
-    const config = networkConfig(hre.network.name);
+task("hearth:seed", "Sponsors the yield source and fills the pool with five savers of different sizes")
+  .addOptionalParam("token", "Which pool to seed", "", types.string)
+  .setAction(async (args: { token: string }, hre) => {
+    const ctx = await load(hre, args.token);
+    const config = ctx.config;
     const signers = await hre.ethers.getSigners();
     const deployer = signers[0];
 
-    console.log(`Seeding Hearth on ${hre.network.name}.`);
+    console.log(
+      `Seeding the Hearth ${ctx.unit} pool on ${hre.network.name}, vault ${ctx.addresses.vault}. The wrapper reads ` +
+        `${ctx.config.decimals} decimals at a rate of ${ctx.rate} public base units to one of its own, and the public ` +
+        `token reads ${ctx.underlyingDecimals} decimals.`,
+    );
     // A seed that stops half way, for example on a relayer hiccup, must be safe to run again, so
     // every step checks the chain for what is already done before spending anything.
     if ((await ctx.source.balance()) >= config.initialSponsorship) {
       console.log(`the yield source already holds its sponsorship, so nothing more is sponsored`);
     } else {
-      console.log(`sponsoring the yield source with ${usd(config.initialSponsorship)} USDC`);
+      // `sponsor` takes the public token amount, not wrapper units: it wraps what it pulls and
+      // books `amount / rate()`. On an eighteen decimal token the two differ by a factor of 1e12,
+      // so the rate has to be applied here or the source would be funded a millionth of a millionth
+      // of what the config says.
+      const cost = publicCost(ctx, config.initialSponsorship);
+      console.log(`sponsoring the yield source with ${money(ctx, config.initialSponsorship)}`);
       await obtain(ctx, deployer, config.initialSponsorship);
       await send(
-        `  approved the source to take ${usd(config.initialSponsorship)} USDC`,
-        (ctx.underlying.connect(deployer) as Contract).approve(ctx.addresses.source, config.initialSponsorship),
+        `  approved the source to take ${publicMoney(ctx, cost)}`,
+        (ctx.underlying.connect(deployer) as Contract).approve(ctx.addresses.source, cost),
       );
       await send(
-        `  sponsored ${usd(config.initialSponsorship)} USDC`,
-        ctx.source.connect(deployer).sponsor(config.initialSponsorship),
+        `  sponsored ${money(ctx, config.initialSponsorship)} of prize money`,
+        ctx.source.connect(deployer).sponsor(cost),
       );
     }
     console.log(
-      `the source now holds ${usd(await ctx.source.balance())} USDC and releases ` +
-        `${usd((await ctx.source.ratePerSecond()) * ctx.periodLength)} USDC a period`,
+      `the source now holds ${money(ctx, await ctx.source.balance())} and releases ` +
+        `${money(ctx, (await ctx.source.ratePerSecond()) * ctx.periodLength)} a period`,
     );
 
-    for (let index = 0; index < SEED_STAKES.length; index++) {
+    for (let index = 0; index < config.seedStakes.length; index++) {
       const saver = signers[FIRST_SAVER_ACCOUNT + index];
-      const stake = SEED_STAKES[index];
+      const stake = config.seedStakes[index];
       const address = await saver.getAddress();
       if (await ctx.vault.isSaver(address)) {
         console.log(`saver at account index ${FIRST_SAVER_ACCOUNT + index}, ${address}, is already in the pool`);
       } else {
-        console.log(`saver at account index ${FIRST_SAVER_ACCOUNT + index}, ${address}, is depositing ${usd(stake)} USDC`);
+        console.log(`saver at account index ${FIRST_SAVER_ACCOUNT + index}, ${address}, is depositing ${money(ctx, stake)}`);
         await obtain(ctx, saver, stake);
         await wrapAndDeposit(ctx, saver, stake);
       }
@@ -818,7 +953,7 @@ task("hearth:seed", "Sponsors the yield source and fills the pool with five save
           ctx.addresses.vault,
           saver,
         );
-        console.log(`  they decrypted their own principal and it reads ${usd(principal)} USDC`);
+        console.log(`  they decrypted their own principal and it reads ${money(ctx, principal)}`);
       } catch (error) {
         // The deposit is on chain either way; a failed self-decryption is the relayer's problem and
         // is reported rather than allowed to strand the remaining savers.
@@ -828,85 +963,99 @@ task("hearth:seed", "Sponsors the yield source and fills the pool with five save
     }
 
     console.log(`the vault now has ${await ctx.vault.saverCount()} savers and period ${await ctx.vault.currentPeriod()} is running`);
-  },
-);
+  });
 
-task("hearth:status", "Prints everything an operator needs to see about a live pool").setAction(async (_args, hre) => {
-  const ctx = await load(hre);
-  const signers = await hre.ethers.getSigners();
-  const now = await chainNow(hre);
+task("hearth:status", "Prints everything an operator needs to see about a live pool")
+  .addOptionalParam("token", "Which pool to read", "", types.string)
+  .setAction(async (args: { token: string }, hre) => {
+    const ctx = await load(hre, args.token);
+    const signers = await hre.ethers.getSigners();
+    const now = await chainNow(hre);
 
-  const period = await ctx.vault.currentPeriod();
-  const ends = await ctx.vault.periodEnd(period);
-  console.log(`Hearth on ${hre.network.name}, vault ${ctx.addresses.vault}, pool ${ctx.addresses.pool}`);
-  console.log(`period ${period} ends in ${duration(ends - now)} at ${at(ends)}`);
-
-  const closable = Number(await ctx.pool.closableDraw());
-  if (closable === 0) {
-    console.log("no draw can be closed right now");
-  } else {
-    const deadline = await ctx.pool.closeDeadline(closable);
-    console.log(`draw ${closable} can be closed for another ${duration(deadline - now)}`);
-  }
-
-  const newest = Number(period) - 1;
-  for (let drawId = Math.max(1, newest - 2); drawId <= newest; drawId++) {
-    const draw = await ctx.pool.drawOf(drawId);
-    const prize = draw.prize.map((value) => usd(value)).join(" / ");
-    const offered = draw.offered.reduce((total, value) => total + value, 0n);
-    const evaluated = await ctx.vault.evaluatedCount(drawId);
-    const walk = await ctx.vault.walkOf(drawId);
+    const period = await ctx.vault.currentPeriod();
+    const ends = await ctx.vault.periodEnd(period);
     console.log(
-      `draw ${drawId}: ${statusName(draw.status)}, prizes ${prize} USDC, ${usd(offered)} USDC offered, ` +
-        `${evaluated} of ${walk.count === 0n ? await ctx.vault.saverCount() : walk.count} savers evaluated`,
+      `Hearth ${ctx.unit} on ${hre.network.name}, vault ${ctx.addresses.vault}, pool ${ctx.addresses.pool}, ` +
+        `a period of ${ctx.periodLength} seconds`,
     );
-  }
+    console.log(`period ${period} ends in ${duration(ends - now)} at ${at(ends)}`);
 
-  for (let tier = 0; tier < TIER_NAMES.length; tier++) {
-    const liquidity = await ctx.pool.liquidity(tier);
-    const [, publishedAt, pending] = await ctx.vault.publishedCarry(tier);
-    const carry = pending ? `a carry published at draw ${publishedAt} is waiting to be reconciled` : "no carry pending";
-    console.log(`the ${TIER_NAMES[tier]} tier holds ${usd(liquidity)} USDC of plaintext liquidity, ${carry}`);
-  }
+    const closable = Number(await ctx.pool.closableDraw());
+    if (closable === 0) {
+      console.log("no draw can be closed right now");
+    } else {
+      const deadline = await ctx.pool.closeDeadline(closable);
+      console.log(`draw ${closable} can be closed for another ${duration(deadline - now)}`);
+    }
 
-  console.log(`draws run against a range of 2^${await ctx.pool.scaleBits()}, and the vault has ${await ctx.vault.saverCount()} savers`);
+    const newest = Number(period) - 1;
+    for (let drawId = Math.max(1, newest - 2); drawId <= newest; drawId++) {
+      const draw = await ctx.pool.drawOf(drawId);
+      const prize = draw.prize.map((value) => plain(value, ctx.config.decimals)).join(" / ");
+      const offered = draw.offered.reduce((total, value) => total + value, 0n);
+      const evaluated = await ctx.vault.evaluatedCount(drawId);
+      const walk = await ctx.vault.walkOf(drawId);
+      console.log(
+        `draw ${drawId}: ${statusName(draw.status)}, prizes ${prize} ${ctx.unit}, ${money(ctx, offered)} offered, ` +
+          `${evaluated} of ${walk.count === 0n ? await ctx.vault.saverCount() : walk.count} savers evaluated`,
+      );
+    }
 
-  const balance = await ctx.source.balance();
-  const rate = await ctx.source.ratePerSecond();
-  const perDraw = rate * ctx.periodLength;
-  const runway = perDraw === 0n ? "for ever, because the rate is zero" : `${balance / perDraw} more draws`;
-  console.log(
-    `the sponsor holds ${usd(balance)} USDC and releases ${usd(perDraw)} USDC a draw, which lasts ${runway}`,
-  );
-  console.log(`${usd(await ctx.source.harvestable())} USDC is ready for the next harvest`);
+    for (let tier = 0; tier < TIER_NAMES.length; tier++) {
+      const liquidity = await ctx.pool.liquidity(tier);
+      const [, publishedAt, pending] = await ctx.vault.publishedCarry(tier);
+      const carry = pending ? `a carry published at draw ${publishedAt} is waiting to be reconciled` : "no carry pending";
+      console.log(`the ${TIER_NAMES[tier]} tier holds ${money(ctx, liquidity)} of plaintext liquidity, ${carry}`);
+    }
 
-  const keeper = await signers[KEEPER_ACCOUNT].getAddress();
-  console.log(
-    `the keeper, account index ${KEEPER_ACCOUNT} at ${keeper}, holds ` +
-      `${hre.ethers.formatEther(await hre.ethers.provider.getBalance(keeper))} ETH`,
-  );
-  console.log(`the vault is ${(await ctx.vault.paused()) ? "paused" : "running"}, the pool is ${(await ctx.pool.paused()) ? "paused" : "running"}`);
-});
+    console.log(`draws run against a range of 2^${await ctx.pool.scaleBits()}, and the vault has ${await ctx.vault.saverCount()} savers`);
 
-task("hearth:draw", "Drives one whole draw from the keeper account, exactly as the keeper would").setAction(
-  async (_args, hre) => {
-    const ctx = await load(hre);
-    const keeper = (await hre.ethers.getSigners())[KEEPER_ACCOUNT];
-    console.log(`driving a draw from the keeper account ${await keeper.getAddress()}`);
+    const balance = await ctx.source.balance();
+    const rate = await ctx.source.ratePerSecond();
+    const perDraw = rate * ctx.periodLength;
+    const runway = perDraw === 0n ? "for ever, because the rate is zero" : `${balance / perDraw} more draws`;
+    console.log(
+      `the sponsor holds ${money(ctx, balance)} and releases ${money(ctx, perDraw)} a draw, which lasts ${runway}`,
+    );
+    console.log(`${money(ctx, await ctx.source.harvestable())} is ready for the next harvest`);
+
+    const keeper = await signers[ctx.keeperAccount].getAddress();
+    console.log(
+      `the keeper, account index ${ctx.keeperAccount} at ${keeper}, holds ` +
+        `${hre.ethers.formatEther(await hre.ethers.provider.getBalance(keeper))} ETH`,
+    );
+    for (let index = FIRST_SAVER_ACCOUNT; index <= LAST_SAVER_ACCOUNT; index++) {
+      const saver = await signers[index].getAddress();
+      const held = await ctx.vault.isSaver(saver);
+      console.log(
+        `saver ${index} at ${saver} is ${held ? "in this pool" : "not in this pool yet"} and holds ` +
+          `${hre.ethers.formatEther(await hre.ethers.provider.getBalance(saver))} ETH`,
+      );
+    }
+    console.log(`the vault is ${(await ctx.vault.paused()) ? "paused" : "running"}, the pool is ${(await ctx.pool.paused()) ? "paused" : "running"}`);
+  });
+
+task("hearth:draw", "Drives one whole draw from the keeper account, exactly as the keeper would")
+  .addOptionalParam("token", "Which pool to draw", "", types.string)
+  .setAction(async (args: { token: string }, hre) => {
+    const ctx = await load(hre, args.token);
+    const keeper = (await hre.ethers.getSigners())[ctx.keeperAccount];
+    console.log(`driving a ${ctx.unit} draw from the keeper account ${await keeper.getAddress()}`);
     const outcome = await driveDraw(ctx, keeper);
     if (outcome.closed === null && outcome.awarded === null) {
       console.log("nothing was left to do on this pass");
     }
-  },
-);
+  });
 
 task("hearth:prove", "Proves the whole promise end to end from one saver's account")
+  .addOptionalParam("token", "Which pool to prove", "", types.string)
   .addOptionalParam("wait", "On Sepolia, wait for the deposit's period to end instead of stopping", false, types.boolean)
-  .setAction(async (args: { wait: boolean }, hre) => {
-    const ctx = await load(hre);
+  .setAction(async (args: { token: string; wait: boolean }, hre) => {
+    const ctx = await load(hre, args.token);
     const signers = await hre.ethers.getSigners();
     const saver = signers[PROVER_ACCOUNT];
-    const keeper = signers[KEEPER_ACCOUNT];
+    const keeper = signers[ctx.keeperAccount];
+    const proveStake = ctx.config.proveStake;
     const address = await saver.getAddress();
     const started = Date.now();
     let step = 0;
@@ -914,27 +1063,42 @@ task("hearth:prove", "Proves the whole promise end to end from one saver's accou
     const say = (text: string, gas?: bigint): void => {
       step += 1;
       const elapsed = ((Date.now() - started) / 1000).toFixed(1);
-      const cost = gas === undefined ? "" : `, gas ${group(gas)}`;
-      console.log(`${step}. ${text} (${elapsed}s${cost})`);
+      const gasNote = gas === undefined ? "" : `, gas ${group(gas)}`;
+      console.log(`${step}. ${text} (${elapsed}s${gasNote})`);
     };
 
-    console.log(`Proving Hearth on ${hre.network.name} from ${address}. Every line below is a real transaction or a real decryption.`);
+    console.log(
+      `Proving the Hearth ${ctx.unit} pool on ${hre.network.name} from ${address}. Every line below is a real ` +
+        "transaction or a real decryption.",
+    );
 
     const before = await userDecrypt(hre, await ctx.vault.confidentialBalanceOf(address), ctx.addresses.vault, saver);
     const walletBefore = await userDecrypt(hre, await ctx.asset.confidentialBalanceOf(address), ctx.addresses.asset, saver);
 
-    await obtain(ctx, saver, PROVE_STAKE);
-    await wrapAndDeposit(ctx, saver, PROVE_STAKE);
+    const cost = publicCost(ctx, proveStake);
+    await obtain(ctx, saver, proveStake);
+    // Read after the mint and before the wrap, so what the wrap itself took is what this compares.
+    const publicBefore = (await ctx.underlying.balanceOf(address)) as bigint;
+    await wrapAndDeposit(ctx, saver, proveStake);
+    const publicAfter = (await ctx.underlying.balanceOf(address)) as bigint;
     const depositPeriod = Number(await ctx.vault.currentPeriod());
+    if (publicBefore - publicAfter !== cost) {
+      throw new ProveFailed(
+        `my public balance fell by ${publicMoney(ctx, publicBefore - publicAfter)}, not the ` +
+          `${publicMoney(ctx, cost)} the wrapper charges for ${money(ctx, proveStake)}`,
+      );
+    }
     say(
-      `I took ${usd(PROVE_STAKE)} of test USDC, wrapped it into confidential USDC and deposited it in period ${depositPeriod}`,
+      `I took ${publicMoney(ctx, cost)} of test money, which is my ${money(ctx, proveStake)} stake times the ` +
+        `wrapper's rate of ${group(ctx.rate)}, wrapped it and deposited it in period ${depositPeriod}: my public ` +
+        `balance went from ${publicMoney(ctx, publicBefore)} to ${publicMoney(ctx, publicAfter)}`,
     );
 
     const principal = await userDecrypt(hre, await ctx.vault.confidentialBalanceOf(address), ctx.addresses.vault, saver);
-    if (principal - before !== PROVE_STAKE) {
-      throw new ProveFailed(`my principal moved by ${usd(principal - before)} USDC, not the ${usd(PROVE_STAKE)} I deposited`);
+    if (principal - before !== proveStake) {
+      throw new ProveFailed(`my principal moved by ${money(ctx, principal - before)}, not the ${money(ctx, proveStake)} I deposited`);
     }
-    say(`I signed an EIP-712 request and decrypted my own principal: ${usd(principal)} USDC, up by exactly what I deposited`);
+    say(`I signed an EIP-712 request and decrypted my own principal: ${money(ctx, principal)}, up by exactly what I deposited`);
 
     const stranger = hre.ethers.Wallet.createRandom().connect(hre.ethers.provider);
     let refused = "";
@@ -982,13 +1146,13 @@ task("hearth:prove", "Proves the whole promise end to end from one saver's accou
 
     say(
       `draw ${drawId} was closed, awarded against a KMS-signed seed and evaluated for every saver, and the ` +
-        `${usd(PROVE_STAKE)} USDC I just deposited counts from period ${depositPeriod} onward, weighted by the part ` +
+        `${money(ctx, proveStake)} I just deposited counts from period ${depositPeriod} onward, weighted by the part ` +
         "of that period that was still to run",
     );
 
     const weight = await userDecrypt(hre, await ctx.vault.weightHandle(drawId, address), ctx.addresses.vault, saver);
     const credit = await userDecrypt(hre, await ctx.vault.creditHandle(drawId, address), ctx.addresses.vault, saver);
-    say(`I decrypted my own weight for that draw, ${group(weight)} balance-seconds, and my credit, ${usd(credit)} USDC`);
+    say(`I decrypted my own weight for that draw, ${group(weight)} balance-seconds, and my credit, ${money(ctx, credit)}`);
 
     const params = await ctx.pool.drawParams(drawId);
     let expected = 0n;
@@ -1000,40 +1164,40 @@ task("hearth:prove", "Proves the whole promise end to end from one saver's accou
       }
     }
     if (credit > expected) {
-      throw new ProveFailed(`I was credited ${usd(credit)} USDC but the public thresholds only allow ${usd(expected)}`);
+      throw new ProveFailed(`I was credited ${money(ctx, credit)} but the public thresholds only allow ${money(ctx, expected)}`);
     }
     const clamped = expected === credit ? "which matches to the unit" : "the difference being a tier that ran out of prize money";
-    say(`I recomputed my own outcome from the public thresholds: ${usd(expected)} USDC against the ${usd(credit)} credited, ${clamped}`);
+    say(`I recomputed my own outcome from the public thresholds: ${money(ctx, expected)} against the ${money(ctx, credit)} credited, ${clamped}`);
 
     // Exactly the stake plus the winnings, never withdrawAll, so the seeded principal stays in the
     // pool and running this again finds the demo exactly as it was.
     const winnings = await userDecrypt(hre, await ctx.vault.confidentialWinningsOf(address), ctx.addresses.vault, saver);
-    const asked = PROVE_STAKE + winnings;
+    const asked = proveStake + winnings;
     const input = await hre.fhevm.createEncryptedInput(ctx.addresses.vault, address).add64(asked).encrypt();
     const receipt = await mine(ctx.vault.connect(saver).withdraw(input.handles[0], input.inputProof));
 
     const leftInPool = await userDecrypt(hre, await ctx.vault.confidentialBalanceOf(address), ctx.addresses.vault, saver);
     const leftUnclaimed = await userDecrypt(hre, await ctx.vault.confidentialWinningsOf(address), ctx.addresses.vault, saver);
     if (leftInPool !== before) {
-      throw new ProveFailed(`my principal is ${usd(leftInPool)} USDC after the withdrawal, not the ${usd(before)} I started with`);
+      throw new ProveFailed(`my principal is ${money(ctx, leftInPool)} after the withdrawal, not the ${money(ctx, before)} I started with`);
     }
     if (leftUnclaimed !== 0n) {
-      throw new ProveFailed(`${usd(leftUnclaimed)} USDC of winnings is still unclaimed, so the withdrawal did not take all of it`);
+      throw new ProveFailed(`${money(ctx, leftUnclaimed)} of winnings is still unclaimed, so the withdrawal did not take all of it`);
     }
     say(
-      `I withdrew exactly the ${usd(PROVE_STAKE)} I deposited plus ${usd(winnings)} of winnings, in one confidential ` +
-        `transfer that looks the same whether or not I won, leaving my ${usd(before)} of seeded principal in the pool`,
+      `I withdrew exactly the ${money(ctx, proveStake)} I deposited plus ${money(ctx, winnings)} of winnings, in one confidential ` +
+        `transfer that looks the same whether or not I won, leaving my ${money(ctx, before)} of seeded principal in the pool`,
       receipt.gasUsed,
     );
 
     const walletAfter = await userDecrypt(hre, await ctx.asset.confidentialBalanceOf(address), ctx.addresses.asset, saver);
     const grew = walletAfter - walletBefore;
     if (grew !== asked) {
-      throw new ProveFailed(`my confidential wallet grew by ${usd(grew)} USDC, but I withdrew ${usd(asked)} USDC`);
+      throw new ProveFailed(`my confidential wallet grew by ${money(ctx, grew)}, but I withdrew ${money(ctx, asked)}`);
     }
     say(
-      `my confidential wallet went from ${usd(walletBefore)} to ${usd(walletAfter)} USDC, up by the ${usd(PROVE_STAKE)} ` +
-        `I put in plus ${usd(winnings)} of winnings`,
+      `my confidential wallet went from ${money(ctx, walletBefore)} to ${money(ctx, walletAfter)}, up by the ${money(ctx, proveStake)} ` +
+        `I put in plus ${money(ctx, winnings)} of winnings`,
     );
 
     console.log(

@@ -3,7 +3,7 @@ import type { ContractTransactionReceipt, ContractTransactionResponse, Interface
 import { checkAbis, loadAbi, structFieldIndex } from "./abi.js";
 import type { KeeperConfig, LoadedKeeper } from "./config.js";
 import { describeConfig } from "./config.js";
-import { group, gwei, line, problem, usdc } from "./log.js";
+import { amount, group, gwei, line, problem, units } from "./log.js";
 import type { Action, DrawSnapshot, TickSnapshot } from "./plan.js";
 import {
   DrawStatus,
@@ -34,9 +34,11 @@ function num(value: unknown): number {
   return Number(value as bigint | number);
 }
 
-function prizeText(prize: readonly bigint[]): string {
+/** The symbol is printed once at the end, because three tiers each carrying it reads as noise. */
+function prizeText(prize: readonly bigint[], config: KeeperConfig): string {
   if (prize.length === 0) return "prize sizes not readable";
-  return `${prize.length} tiers, prizes ${prize.map((value) => usdc(value)).join(" / ")} USDC`;
+  const sizes = prize.map((value) => units(value, config.decimals)).join(" / ");
+  return `${prize.length} tiers, prizes ${sizes} ${config.symbol}`;
 }
 
 function tierName(tier: number): string {
@@ -262,6 +264,11 @@ export class Keeper {
     }
   }
 
+  /** An amount in the pool's own confidential token, with that token's decimals and symbol. */
+  private money(value: bigint): string {
+    return amount(value, this.config.decimals, this.config.symbol);
+  }
+
   private read(contract: Contract, signature: string, args: readonly unknown[] = []): Promise<unknown> {
     return contract.getFunction(signature)(...args) as Promise<unknown>;
   }
@@ -382,7 +389,7 @@ export class Keeper {
     const receipt = await this.send(`closed draw ${drawId}`, this.pool, "closeDraw(uint32)", [drawId]);
     if (receipt === null) return;
     const row = await this.readDraw(drawId);
-    line(`draw ${drawId} is waiting for its award: ${prizeText(row.prize)}`);
+    line(`draw ${drawId} is waiting for its award: ${prizeText(row.prize, this.config)}`);
   }
 
   private async award(drawId: number, row: DrawRow | undefined): Promise<void> {
@@ -392,7 +399,7 @@ export class Keeper {
     const award = readAward(decrypted.values);
 
     const receipt = await this.send(
-      `awarded draw ${drawId}: ${prizeText(row.prize)}, harvest ${usdc(award.harvested)} USDC`,
+      `awarded draw ${drawId}: ${prizeText(row.prize, this.config)}, harvest ${this.money(award.harvested)}`,
       this.pool,
       "awardDraw",
       [drawId, award.seed, award.scaleCount, award.nonEmpty, award.harvested, decrypted.proof],
@@ -414,7 +421,7 @@ export class Keeper {
     const decrypted = await this.decryptor.publicDecrypt([String(published[0])]);
     const carry = asBigint(decrypted.values[0], `the ${tierName(tier)} carry`);
     await this.send(
-      `reconciled the ${tierName(tier)} tier: ${usdc(carry)} USDC back into the prize liquidity`,
+      `reconciled the ${tierName(tier)} tier: ${this.money(carry)} back into the prize liquidity`,
       this.pool,
       "reconcile",
       [tier, carry, decrypted.proof],

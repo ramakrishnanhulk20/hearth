@@ -1,0 +1,15 @@
+{
+  "vault": "0xCe95dAa01f5354aA8887A5952E403D26d452c323",
+  "pool": "0xC531D54ee2c695e0eBfe8b8258e9Fd80fd507095",
+  "source": "0xDEa2BD6351072F735B6ea83c357bF157d83c01af",
+  "asset": "0xfCE5c7069c5525eF6c8C2b2E35A745bA20a2F7CC",
+  "underlying": "0x93c931278A2aad1916783F952f94276eA5111442",
+  "firstPeriodAt": 1788624000,
+  "periodLength": 21600,
+  "slug": "tgbp",
+  "symbol": "ctGBPMock",
+  "underlyingSymbol": "tGBPMock",
+  "name": "Confidential tGBP (Mock)",
+  "decimals": 6,
+  "keeperAccountIndex": 14
+}

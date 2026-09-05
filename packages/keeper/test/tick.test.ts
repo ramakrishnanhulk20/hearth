@@ -130,9 +130,13 @@ class StubChain {
 
 function config(): KeeperConfig {
   return {
+    name: "usdc",
     rpcUrl: "http://stub",
     chainId: 11155111,
+    accountIndex: 1,
     keeperAddress: `0x${"cd".repeat(20)}`,
+    symbol: "cUSDC",
+    decimals: 6,
     vault: `0x${"01".repeat(20)}`,
     pool: `0x${"02".repeat(20)}`,
     source: null,

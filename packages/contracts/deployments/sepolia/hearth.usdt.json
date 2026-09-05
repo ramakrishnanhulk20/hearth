@@ -1,0 +1,15 @@
+{
+  "vault": "0xe54F44dE64F8A7abc0647eaae547dD59ce0EFfac",
+  "pool": "0x6a83Beb2Dc3f258107Cad5e17BC57657fAd4fbd1",
+  "source": "0x5bb1Cd5380Cb9f2B15569030fF0dB7a445cF54cA",
+  "asset": "0x4E7B06D78965594eB5EF5414c357ca21E1554491",
+  "underlying": "0xa7dA08FafDC9097Cc0E7D4f113A61e31d7e8e9b0",
+  "firstPeriodAt": 1788620400,
+  "periodLength": 21600,
+  "slug": "usdt",
+  "symbol": "cUSDTMock",
+  "underlyingSymbol": "USDTMock",
+  "name": "Confidential USDT (Mock)",
+  "decimals": 6,
+  "keeperAccountIndex": 10
+}

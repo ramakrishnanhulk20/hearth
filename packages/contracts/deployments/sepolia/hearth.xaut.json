@@ -1,0 +1,15 @@
+{
+  "vault": "0x77f701101d66FbD522A3bFdC2c00DB09a4F57daE",
+  "pool": "0x9a2888aca42c707A3BC0D561FdF6ff8Abfda5201",
+  "source": "0x03fDdAA7C4323C53CE511CC49D4c33B26B492af7",
+  "asset": "0xe4FcF848739845BC81Dee1d5352cf3844F0a60C7",
+  "underlying": "0x24377AE4AA0C45ecEe71225007f17c5D423dd940",
+  "firstPeriodAt": 1788624000,
+  "periodLength": 21600,
+  "slug": "xaut",
+  "symbol": "cXAUtMock",
+  "underlyingSymbol": "XAUtMock",
+  "name": "Confidential XAUt (Mock)",
+  "decimals": 6,
+  "keeperAccountIndex": 15
+}

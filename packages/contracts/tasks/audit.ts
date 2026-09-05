@@ -4,11 +4,11 @@ import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signer
 import { Interface, type Contract, type ContractTransactionReceipt, type ContractTransactionResponse } from "ethers";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { task } from "hardhat/config";
+import { task, types } from "hardhat/config";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
+import { deploymentName, poolConfig } from "../hearth.config";
 import {
   FIRST_SAVER_ACCOUNT,
-  KEEPER_ACCOUNT,
   TIER_NAMES,
   asBigint,
   asBoolean,
@@ -18,11 +18,14 @@ import {
   driveDraw,
   group,
   load,
+  money,
   obtain,
+  plain,
+  publicCost,
   publicDecrypt,
+  publicMoney,
   send,
   statusName,
-  usd,
   userDecrypt,
   walkComplete,
   warp,
@@ -49,7 +52,6 @@ const LOOKBACK = 24;
 
 /** A wallet that has never touched Hearth, used for the flash deposit. */
 const FLASH_ACCOUNT = 7;
-const FLASH_STAKE = 1_000_000_000n;
 const FLASH_SECONDS = 30n;
 
 const FAKE_SAVERS = 25;
@@ -57,13 +59,41 @@ const FAKE_GAS = "0.02";
 
 /** The saver kept in the pool while the bracket is walked down for the over-subscription row. */
 const DUST_ACCOUNT = 6;
-const TOP_UP = 3_000_000_000n;
-const SEED_STAKES = [1_200, 600, 300, 150, 75].map((whole) => BigInt(whole) * 1_000_000n);
-const SPONSORSHIP = 10_000_000_000n;
 const FAUCET_COOLDOWN = 8n * 60n * 60n;
 
-/** Below this the tiers have too little on offer for an over-subscribed tier to mean anything. */
-const MINIMUM_PRIZE_LIQUIDITY = 100_000_000n;
+/**
+ * Every amount an attack spends is measured off the pool it is attacking, taken from that pool's own
+ * line in hearth.config.ts. A pool that holds ether seeds savers of 0.6 where a pool that holds
+ * dollars seeds 1,200, so one fixed number would be nonsense in one of them: it would buy nothing in
+ * the dollar pool or more ether than the mock will mint. The multiples below are the ones the first
+ * pool was audited with.
+ */
+function largestStake(ctx: Hearth): bigint {
+  return ctx.config.seedStakes.reduce((biggest, stake) => (stake > biggest ? stake : biggest), 0n);
+}
+
+/** The flash deposit matches the biggest saver, so its weight reads as a share of a real holder's. */
+function flashStake(ctx: Hearth): bigint {
+  return largestStake(ctx);
+}
+
+/** Two and a half times the biggest saver, which is more than the bracket can follow in one draw. */
+function topUp(ctx: Hearth): bigint {
+  return (largestStake(ctx) * 5n) / 2n;
+}
+
+/**
+ * Below a hundredth of what hearth:seed sponsored, the tiers hold too little on offer for an
+ * over-subscribed tier to mean anything.
+ */
+function minimumPrizeLiquidity(ctx: Hearth): bigint {
+  return ctx.config.initialSponsorship / 100n;
+}
+
+/** A line of tier amounts with the pool's short name printed once at the end. */
+function tierAmounts(a: Audit, values: readonly bigint[]): string {
+  return `${values.map((value) => plain(value, a.ctx.config.decimals)).join(" / ")} ${a.ctx.unit}`;
+}
 
 type Verdict = "PASS" | "FAIL" | "NOT RUN";
 
@@ -334,15 +364,17 @@ async function evaluateToTheEnd(a: Audit, drawId: number, batch: number): Promis
   return { calls, gas };
 }
 
-async function wrapOnly(a: Audit, who: HardhatEthersSigner, amount: bigint): Promise<void> {
+/** `units` is wrapper base units, so the public side is multiplied by the wrapper's own rate. */
+async function wrapOnly(a: Audit, who: HardhatEthersSigner, units: bigint): Promise<void> {
   const address = await who.getAddress();
+  const cost = publicCost(a.ctx, units);
   await send(
-    `  approved the wrapper to take ${usd(amount)} USDC from ${address}`,
-    (a.ctx.underlying.connect(who) as Contract).approve(a.ctx.addresses.asset, amount),
+    `  approved the wrapper to take ${publicMoney(a.ctx, cost)} from ${address}`,
+    (a.ctx.underlying.connect(who) as Contract).approve(a.ctx.addresses.asset, cost),
   );
   await send(
-    `  wrapped ${usd(amount)} USDC for ${address}`,
-    (a.ctx.asset.connect(who) as Contract).wrap(address, amount),
+    `  wrapped ${money(a.ctx, units)} for ${address}`,
+    (a.ctx.asset.connect(who) as Contract).wrap(address, cost),
   );
 }
 
@@ -495,7 +527,7 @@ async function rowAggregate(a: Audit): Promise<void> {
     const [newer, older] = brackets;
     const newRange = powerOfTwo(newer.bits);
     const oldRange = powerOfTwo(older.bits);
-    const perPeriod = (value: bigint): string => usd(value / a.ctx.periodLength);
+    const perPeriod = (value: bigint): string => money(a.ctx, value / a.ctx.periodLength);
     detail(
       `draw ${older.drawId} published 2^${older.bits} and draw ${newer.drawId} published 2^${newer.bits}, ` +
         "which is everything the chain says about either total",
@@ -506,7 +538,7 @@ async function rowAggregate(a: Audit): Promise<void> {
     );
     detail(
       `the move between them is bounded to (${perPeriod(newRange / 2n - oldRange)}, ${perPeriod(newRange - oldRange / 2n)}) ` +
-        "USDC held for a whole period, a factor-of-two band and not a number",
+        `${a.ctx.unit} held for a whole period, a factor-of-two band and not a number`,
     );
   } else {
     detail(`only ${brackets.length} awarded draw is on chain, so the bracket difference has nothing to compare against yet`);
@@ -524,7 +556,8 @@ async function rowAggregate(a: Audit): Promise<void> {
     finish(
       a,
       "PASS",
-      "the aggregate handle refused both a random wallet and the owner; the bracket difference needs two awarded draws and this pool has one",
+      `the aggregate handle refused both a random wallet and the owner; the bracket difference needs two awarded ` +
+        `draws and this pool has ${brackets.length}`,
     );
   }
 }
@@ -549,17 +582,18 @@ async function rowFlashDeposit(a: Audit): Promise<void> {
   }
 
   const flash = a.signers[FLASH_ACCOUNT];
+  const stake = flashStake(a.ctx);
   const flashAddress = await flash.getAddress();
   const holder = a.signers[FIRST_SAVER_ACCOUNT];
   const holderAddress = await holder.getAddress();
 
-  await obtain(a.ctx, flash, FLASH_STAKE);
-  await wrapOnly(a, flash, FLASH_STAKE);
+  await obtain(a.ctx, flash, stake);
+  await wrapOnly(a, flash, stake);
 
   const period = await currentPeriod(a);
   const ends = await a.ctx.vault.periodEnd(period);
   await warpTo(a, ends - FLASH_SECONDS - 2n, `so the deposit lands ${FLASH_SECONDS} seconds before period ${period} ends`);
-  const receipt = await depositOnly(a, flash, FLASH_STAKE);
+  const receipt = await depositOnly(a, flash, stake);
   const block = await a.hre.ethers.provider.getBlock(receipt.blockNumber);
   if (block === null) throw new Error("the node returned no block for the flash deposit");
   const held = ends - BigInt(block.timestamp);
@@ -582,17 +616,17 @@ async function rowFlashDeposit(a: Audit): Promise<void> {
 
   detail(
     `the flash wallet decrypted its own weight for draw ${period}: ${group(flashWeight)} balance-seconds from ` +
-      `${usd(FLASH_STAKE)} USDC held for ${held} seconds`,
+      `${money(a.ctx, stake)} held for ${held} seconds`,
   );
   detail(
-    `the full-period holder decrypted theirs: ${group(holderWeight)} balance-seconds from ${usd(holderStake)} USDC ` +
+    `the full-period holder decrypted theirs: ${group(holderWeight)} balance-seconds from ${money(a.ctx, holderStake)} ` +
       `held for all ${a.ctx.periodLength} seconds`,
   );
 
-  const exact = FLASH_STAKE * held;
-  const bound = (holderWeight * held * FLASH_STAKE) / (a.ctx.periodLength * holderStake);
+  const exact = stake * held;
+  const bound = (holderWeight * held * stake) / (a.ctx.periodLength * holderStake);
   detail(
-    `the flash wallet brought ${ratio(FLASH_STAKE, holderStake)} of the other saver's money and came away with ` +
+    `the flash wallet brought ${ratio(stake, holderStake)} of the other saver's money and came away with ` +
       `${ratio(flashWeight, holderWeight)} of its odds`,
   );
   detail(`the time-weighted ceiling for that stake and that many seconds is ${group(bound)} balance-seconds`);
@@ -752,7 +786,7 @@ async function rowLateClose(a: Audit): Promise<void> {
   const status = Number((await a.ctx.pool.drawOf(target)).status);
   const finalize = await refused(() => a.ctx.vault.connect(a.keeper).finalizeDraw(target));
 
-  detail(`tier liquidity before ${before.map(usd).join(" / ")} USDC and after ${after.map(usd).join(" / ")} USDC`);
+  detail(`tier liquidity before ${tierAmounts(a, before)} and after ${tierAmounts(a, after)}`);
   detail(`draw ${target} reads ${statusName(status)}, and finalizeDraw(${target}) answers ${finalize ?? "SUCCEEDED"}`);
   detail(
     "a draw whose close never landed keeps that status for ever: its liquidity was never moved into it, and the " +
@@ -788,7 +822,7 @@ async function rowMissedAward(a: Audit): Promise<void> {
   await closeDraw(a, closable);
   const offered = (await a.ctx.pool.drawParams(closable)).offered.map((value) => BigInt(value));
   const offeredTotal = offered.reduce((total, value) => total + value, 0n);
-  detail(`draw ${closable} closed with ${usd(offeredTotal)} USDC of tier liquidity moved into it`);
+  detail(`draw ${closable} closed with ${money(a.ctx, offeredTotal)} of tier liquidity moved into it`);
 
   await warpTo(a, await a.ctx.pool.windowEndsAt(closable), `so the whole window of draw ${closable} passed with no award`);
   const before = await liquidityTotal(a);
@@ -797,18 +831,18 @@ async function rowMissedAward(a: Audit): Promise<void> {
   const status = Number((await a.ctx.pool.drawOf(closable)).status);
   const finalized = await a.ctx.vault.finalized(closable);
 
-  detail(`the late award booked a harvest of ${usd(award.harvested)} USDC and marked the draw ${statusName(status)}`);
-  detail(`tier liquidity went from ${usd(before)} to ${usd(after)} USDC, which is the ${usd(offeredTotal)} offered plus the harvest`);
+  detail(`the late award booked a harvest of ${money(a.ctx, award.harvested)} and marked the draw ${statusName(status)}`);
+  detail(`tier liquidity went from ${money(a.ctx, before)} to ${money(a.ctx, after)}, which is the ${money(a.ctx, offeredTotal)} offered plus the harvest`);
   detail(`the vault reads the draw as finalized: ${finalized}, so nothing is left riding on it`);
 
   if (status === SKIPPED && after === before + offeredTotal + award.harvested && finalized) {
     finish(
       a,
       "PASS",
-      `the draw reads Skipped, every one of the ${usd(offeredTotal)} USDC offered is back in the tiers and the ${usd(award.harvested)} USDC harvest was still booked`,
+      `the draw reads Skipped, every one of the ${money(a.ctx, offeredTotal)} offered is back in the tiers and the ${money(a.ctx, award.harvested)} harvest was still booked`,
     );
   } else {
-    finish(a, "FAIL", `the draw reads ${statusName(status)} and liquidity moved from ${usd(before)} to ${usd(after)} USDC`);
+    finish(a, "FAIL", `the draw reads ${statusName(status)} and liquidity moved from ${money(a.ctx, before)} to ${money(a.ctx, after)}`);
   }
 }
 
@@ -849,7 +883,7 @@ async function rowBrokenYield(a: Audit): Promise<void> {
   const status = Number((await a.ctx.pool.drawOf(closable)).status);
   const award = await readAward(a, closable);
   detail(`the close succeeded and emitted HarvestFailed ${failures.length} time(s) for draw ${closable}`);
-  detail(`the draw reads ${statusName(status)} and its harvest handle publicly decrypts to ${usd(award.harvested)} USDC`);
+  detail(`the draw reads ${statusName(status)} and its harvest handle publicly decrypts to ${money(a.ctx, award.harvested)}`);
 
   await send("  put the working yield source back", a.ctx.pool.connect(owner).setYieldSource(original));
   await awardDraw(a, closable);
@@ -857,7 +891,7 @@ async function rowBrokenYield(a: Audit): Promise<void> {
   if (failures.length === 1 && status === 1 && award.harvested === 0n) {
     finish(a, "PASS", `the close went through with a source that reverts, emitted HarvestFailed and booked a zero harvest`);
   } else {
-    finish(a, "FAIL", `the close emitted ${failures.length} HarvestFailed events and booked ${usd(award.harvested)} USDC`);
+    finish(a, "FAIL", `the close emitted ${failures.length} HarvestFailed events and booked ${money(a.ctx, award.harvested)}`);
   }
 }
 
@@ -869,7 +903,7 @@ async function rowOverSubscribed(a: Audit): Promise<void> {
     return;
   }
 
-  const savers = SEED_STAKES.map((_, index) => a.signers[FIRST_SAVER_ACCOUNT + index]);
+  const savers = a.ctx.config.seedStakes.map((_, index) => a.signers[FIRST_SAVER_ACCOUNT + index]);
   const dust = a.signers[DUST_ACCOUNT];
   const vault = a.ctx.addresses.vault;
 
@@ -906,19 +940,21 @@ async function rowOverSubscribed(a: Audit): Promise<void> {
 
   // A tier with nothing on offer has nothing to clamp, so top the sponsorship up when the drip has
   // run dry. Sponsoring is public and touches nothing about who wins.
-  if ((await a.ctx.source.harvestable()) + (await liquidityTotal(a)) < MINIMUM_PRIZE_LIQUIDITY) {
+  if ((await a.ctx.source.harvestable()) + (await liquidityTotal(a)) < minimumPrizeLiquidity(a.ctx)) {
     const owner = a.signers[0];
     await warp(a.hre, FAUCET_COOLDOWN + 1n);
     detail("the drip has run dry, so the clock moved past the faucet cooldown to refill the sponsorship");
     try {
-      await obtain(a.ctx, owner, SPONSORSHIP);
+      const refill = a.ctx.config.initialSponsorship;
+      const cost = publicCost(a.ctx, refill);
+      await obtain(a.ctx, owner, refill);
       await send(
-        `  approved the source to take ${usd(SPONSORSHIP)} USDC`,
-        (a.ctx.underlying.connect(owner) as Contract).approve(a.ctx.addresses.source, SPONSORSHIP),
+        `  approved the source to take ${publicMoney(a.ctx, cost)}`,
+        (a.ctx.underlying.connect(owner) as Contract).approve(a.ctx.addresses.source, cost),
       );
       await send(
-        `  sponsored ${usd(SPONSORSHIP)} USDC so the tiers have something to over-subscribe`,
-        a.ctx.source.connect(owner).sponsor(SPONSORSHIP),
+        `  sponsored ${money(a.ctx, refill)} so the tiers have something to over-subscribe`,
+        a.ctx.source.connect(owner).sponsor(cost),
       );
     } catch (error) {
       detail(`the sponsorship could not be refilled: ${describe(error)}`);
@@ -926,11 +962,12 @@ async function rowOverSubscribed(a: Audit): Promise<void> {
   }
 
   await warpToNextPeriod(a, "so the top-ups all count for a whole period");
-  detail(`every saver now deposits ${usd(TOP_UP)} USDC, which is far more than the published bracket can follow in one draw`);
+  const top = topUp(a.ctx);
+  detail(`every saver now deposits ${money(a.ctx, top)}, which is far more than the published bracket can follow in one draw`);
   for (const saver of savers) {
-    await obtain(a.ctx, saver, TOP_UP);
-    await wrapOnly(a, saver, TOP_UP);
-    await depositOnly(a, saver, TOP_UP);
+    await obtain(a.ctx, saver, top);
+    await wrapOnly(a, saver, top);
+    await depositOnly(a, saver, top);
   }
 
   await warpToNextPeriod(a, "so the top-up period is over and its draw can run");
@@ -953,8 +990,8 @@ async function rowOverSubscribed(a: Audit): Promise<void> {
   const params = await a.ctx.pool.drawParams(drawId);
   const offered = params.offered.map((value) => BigInt(value));
   detail(
-    `draw ${drawId} runs against 2^${params.scaleBits} with prizes of ${params.prize.map((value) => usd(value)).join(" / ")} USDC ` +
-      `and ${offered.map(usd).join(" / ")} USDC on offer`,
+    `draw ${drawId} runs against 2^${params.scaleBits} with prizes of ${tierAmounts(a, params.prize.map((value) => BigInt(value)))} ` +
+      `and ${tierAmounts(a, offered)} on offer`,
   );
 
   const owed = [0n, 0n, 0n];
@@ -967,8 +1004,8 @@ async function rowOverSubscribed(a: Audit): Promise<void> {
     for (let tier = 0; tier < TIER_NAMES.length; tier++) owed[tier] += perTier[tier];
     credited += credit;
     detail(
-      `${address} weighs ${group(weight)}, the public thresholds owe it ${usd(perTier.reduce((x, y) => x + y, 0n))} USDC ` +
-        `and the vault credited ${usd(credit)} USDC`,
+      `${address} weighs ${group(weight)}, the public thresholds owe it ${money(a.ctx, perTier.reduce((x, y) => x + y, 0n))} ` +
+        `and the vault credited ${money(a.ctx, credit)}`,
     );
   }
 
@@ -982,14 +1019,14 @@ async function rowOverSubscribed(a: Audit): Promise<void> {
     if (owed[tier] > available) clamped = true;
     if (paid > available) overpaid = true;
     detail(
-      `the ${TIER_NAMES[tier]} tier had ${usd(available)} USDC available, the thresholds asked it for ${usd(owed[tier])} USDC, ` +
-        `it paid ${usd(paid)} USDC and has ${usd(left)} USDC left`,
+      `the ${TIER_NAMES[tier]} tier had ${money(a.ctx, available)} available, the thresholds asked it for ${money(a.ctx, owed[tier])}, ` +
+        `it paid ${money(a.ctx, paid)} and has ${money(a.ctx, left)} left`,
     );
   }
   detail("the available and remaining figures on those three lines come from the local mock's clear-text store, which does not exist on Sepolia");
 
   const total = offered.reduce((x, y) => x + y, 0n) + carryBefore.reduce((x, y) => x + y, 0n);
-  detail(`savers were credited ${usd(credited)} USDC in total against ${usd(total)} USDC the draw held`);
+  detail(`savers were credited ${money(a.ctx, credited)} in total against ${money(a.ctx, total)} the draw held`);
 
   await restorePool(a, savers);
 
@@ -997,7 +1034,7 @@ async function rowOverSubscribed(a: Audit): Promise<void> {
     finish(
       a,
       "PASS",
-      `the thresholds asked for ${usd(owed.reduce((x, y) => x + y, 0n))} USDC, the draw held ${usd(total)} USDC and paid ${usd(credited)} USDC, never more`,
+      `the thresholds asked for ${money(a.ctx, owed.reduce((x, y) => x + y, 0n))}, the draw held ${money(a.ctx, total)} and paid ${money(a.ctx, credited)}, never more`,
     );
   } else if (!clamped) {
     finish(
@@ -1006,7 +1043,7 @@ async function rowOverSubscribed(a: Audit): Promise<void> {
       `no tier could be pushed past what it had on offer even after the bracket was walked down, so the clamp never bit; the unit test "matches an off-chain mirror of every threshold, and pays what the mirror says" in test/Hearth.ts checks the same arithmetic including the clamp`,
     );
   } else {
-    finish(a, "FAIL", `a tier paid more than it held: credited ${usd(credited)} USDC against ${usd(total)} USDC available`);
+    finish(a, "FAIL", `a tier paid more than it held: credited ${money(a.ctx, credited)} against ${money(a.ctx, total)} available`);
   }
 }
 
@@ -1016,7 +1053,7 @@ async function restorePool(a: Audit, savers: HardhatEthersSigner[]): Promise<voi
   for (let index = 0; index < savers.length; index++) {
     const saver = savers[index];
     await send(`  ${await saver.getAddress()} withdrew everything`, a.ctx.vault.connect(saver).withdrawAll());
-    await depositOnly(a, saver, SEED_STAKES[index]);
+    await depositOnly(a, saver, a.ctx.config.seedStakes[index]);
   }
 }
 
@@ -1024,7 +1061,7 @@ async function restorePool(a: Audit, savers: HardhatEthersSigner[]): Promise<voi
 async function rowProofReplay(a: Audit): Promise<void> {
   begin("10", "An award proof cannot be replayed against another draw");
   const pool = a.ctx.pool;
-  const deployment = await a.hre.deployments.get("HearthPrizePool");
+  const deployment = await a.hre.deployments.get(deploymentName("HearthPrizePool", a.ctx.slug));
   const from = deployment.receipt?.blockNumber ?? 0;
   const to = await a.hre.ethers.provider.getBlockNumber();
   const events = await queryChunked(a, from, to);
@@ -1047,7 +1084,7 @@ async function rowProofReplay(a: Audit): Promise<void> {
 
   const [drawId, seed, scaleCount, nonEmpty, harvested, proof] = call.args;
   detail(`lifted the KMS proof of draw ${drawId} out of the public transaction ${latest.transactionHash}`);
-  detail(`it carries seed ${seed}, scale count ${scaleCount}, non-empty ${nonEmpty}, harvest ${usd(harvested)} USDC and ${(proof as string).length / 2 - 1} bytes of signatures`);
+  detail(`it carries seed ${seed}, scale count ${scaleCount}, non-empty ${nonEmpty}, harvest ${money(a.ctx, harvested)} and ${(proof as string).length / 2 - 1} bytes of signatures`);
 
   let target: number | null = null;
   const period = await currentPeriod(a);
@@ -1113,8 +1150,12 @@ function rowProperties(a: Audit): void {
   finish(a, "NOT RUN", "a property test over a random sequence of actions belongs in the suite, not in a live run");
 }
 
-task("hearth:audit", "Executes every attack in the threat model against a live deployment").setAction(
-  async (_args, hre) => {
+task("hearth:audit", "Executes every attack in the threat model against a live deployment")
+  .addOptionalParam("token", "Which pool to attack", "", types.string)
+  .setAction(async (args: { token: string }, hre) => {
+    // Read before anything is loaded, so a run that dies on a missing deployment still files its
+    // transcript under the pool it was attacking.
+    const slug = poolConfig(hre.network.name, args.token).slug;
     const transcript: string[] = [];
     const printed = console.log;
     console.log = (...args: unknown[]): void => {
@@ -1125,23 +1166,23 @@ task("hearth:audit", "Executes every attack in the threat model against a live d
     const started = Date.now();
     let rows: RowResult[] = [];
     try {
-      const ctx = await load(hre);
+      const ctx = await load(hre, args.token);
       const signers = await hre.ethers.getSigners();
       const a: Audit = {
         hre,
         ctx,
         signers,
-        keeper: signers[KEEPER_ACCOUNT],
+        keeper: signers[ctx.keeperAccount],
         local: hre.network.name !== "sepolia",
         rows: [],
       };
       rows = a.rows;
 
-      console.log(`Hearth self-audit on ${hre.network.name}, ${new Date().toISOString()}`);
+      console.log(`Hearth ${ctx.unit} self-audit on ${hre.network.name}, ${new Date().toISOString()}`);
       console.log(`vault ${ctx.addresses.vault}, pool ${ctx.addresses.pool}, asset ${ctx.addresses.asset}`);
       console.log(
         `period ${await currentPeriod(a)}, ${await ctx.vault.saverCount()} savers, bracket 2^${await ctx.pool.scaleBits()}, ` +
-          `tier liquidity ${usd(await liquidityTotal(a))} USDC`,
+          `tier liquidity ${money(a.ctx, await liquidityTotal(a))}`,
       );
       console.log(
         "Every row below is one line of the table \"What is checked, and how\" in docs/security/threat-model.md, in order.",
@@ -1171,7 +1212,7 @@ task("hearth:audit", "Executes every attack in the threat model against a live d
       if (transcript.length > 0) {
         const directory = join(hre.config.paths.root, "..", "..", "docs", "security", "attacks");
         mkdirSync(directory, { recursive: true });
-        const file = join(directory, `${hre.network.name}-${Math.floor(Date.now() / 1000)}.log`);
+        const file = join(directory, `${hre.network.name}-${slug}-${Math.floor(Date.now() / 1000)}.log`);
         writeFileSync(file, `${transcript.join("\n")}\n`, "utf8");
         console.log(`\nThe whole transcript above is saved at ${file}`);
       }
@@ -1181,5 +1222,4 @@ task("hearth:audit", "Executes every attack in the threat model against a live d
     if (failed.length > 0) {
       throw new Error(`${failed.length} attack row(s) failed: ${failed.map((row) => row.row).join(", ")}`);
     }
-  },
-);
+  });

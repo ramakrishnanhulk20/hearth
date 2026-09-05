@@ -1,0 +1,15 @@
+{
+  "vault": "0x3D1A182782B68fE270A66294C9adaC7F005c4f14",
+  "pool": "0x1a11e7C689F244fA8Dd5f4abA8F2F3131090cc1C",
+  "source": "0x40DF298f15c6136294eC651aD7b0c1C6F221DE8F",
+  "asset": "0x46208622DA27d91db4f0393733C8BA082ed83158",
+  "underlying": "0xff54739b16576FA5402F211D0b938469Ab9A5f3F",
+  "firstPeriodAt": 1788624000,
+  "periodLength": 21600,
+  "slug": "weth",
+  "symbol": "cWETHMock",
+  "underlyingSymbol": "WETHMock",
+  "name": "Confidential WETH (Mock)",
+  "decimals": 6,
+  "keeperAccountIndex": 11
+}

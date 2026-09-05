@@ -57,12 +57,14 @@ addresses. Everything else has a default.
 
 | Variable | Where it usually lives | Meaning |
 |---|---|---|
-| `RECOVERY_PHRASE` | `packages/contracts/.env` | Your seed phrase. The keeper signs with account 2 of it (`m/44'/60'/0'/0/1`), the same account Hardhat calls `keeper`. Account 1 is the deployer and is left alone. `MNEMONIC` is read as an alias, for a machine that already sets that name. |
+| `RECOVERY_PHRASE` | `packages/contracts/.env` | Your seed phrase. The keeper signs with one account of it, `m/44'/60'/0'/0/<KEEPER_ACCOUNT_INDEX>`, and index 1 is the account Hardhat calls `keeper`. Index 0 is the deployer, is refused here, and is left alone. `MNEMONIC` is read as an alias, for a machine that already sets that name. |
 | `SEPOLIA_RPC_URL` | `packages/contracts/.env` | Your Sepolia endpoint. Defaults to a shared public node, which is fine for a demo and slow under load. |
 | `HEARTH_VAULT` | `packages/keeper/.env` | Deployed `HearthVault`. |
 | `HEARTH_POOL` | `packages/keeper/.env` | Deployed `HearthPrizePool`. |
 | `HEARTH_SOURCE` | `packages/keeper/.env` | Optional. Printed at boot so you can see which yield source is wired. The keeper never calls it; the pool harvests from it. |
-| `HEARTH_ADDRESSES_FILE` | | Optional JSON file with `vault`, `pool` and `source` instead of the three variables. |
+| `HEARTH_ADDRESSES_FILE` | | The JSON file the deploy script writes for one pool, instead of the three variables. It also carries that pool's `slug`, `symbol`, `decimals` and `keeperAccountIndex`, which become the defaults for the three settings below. A file holding only the addresses still works. |
+| `KEEPER_ACCOUNT_INDEX` | | Which account of the phrase this process signs from. Defaults to `keeperAccountIndex` in the address file, or 1. Index 0 is refused, because it is the deployer. |
+| `KEEPER_NAME` | | The name printed in front of every log line. Defaults to the address file's `slug`, or `hearth`. |
 | `KEEPER_POLL_SECONDS` | | Seconds between passes. Default 30. |
 | `KEEPER_BATCH` | | Savers per `evaluate` call. Default 4. The vault stops at `MAX_BATCH` savers of encrypted work per call whatever you ask for, and the keeper prints both numbers at boot. |
 | `KEEPER_LOOKBACK_DRAWS` | | How many past draws each pass reads. Default 4. |
@@ -121,46 +123,102 @@ Forever, in the foreground:
 npm run start -w @hearth/keeper
 ```
 
+Both of those drive whichever pool `HEARTH_ADDRESSES_FILE` points at. To check another pool, point
+at that pool's file for the one command:
+
+```
+HEARTH_ADDRESSES_FILE=../contracts/deployments/sepolia/hearth.weth.json npm run plan -w @hearth/keeper
+```
+
 Under pm2, which is how it should run for a demo, from the repo root:
 
 ```
 npm run build -w @hearth/keeper
 pm2 start packages/keeper/ecosystem.config.cjs
-pm2 logs hearth-keeper
+pm2 logs
 pm2 save
-pm2 startup          # follow the command it prints, so a reboot brings the keeper back
+pm2 startup          # follow the command it prints, so a reboot brings the keepers back
 ```
 
 On Windows, `pm2 startup` is not supported. Either install `pm2-windows-startup` (`npm install -g
 pm2-windows-startup && pm2-startup install`) or add a Task Scheduler entry at logon that runs
-`pm2 resurrect`. The demo keeper runs under pm2 on a Windows machine; the logon hook is a
+`pm2 resurrect`. The demo keepers run under pm2 on a Windows machine; the logon hook is a
 one-time install.
 
-Run exactly one instance. Two keepers on the same account race for the same nonce.
+## One keeper per pool
+
+Hearth runs seven pools, one per confidential token, and each pool is a separate set of contracts
+with its own draw clock, hourly on usdc and every six hours on the rest. One process drives one pool. `ecosystem.config.cjs` starts all seven:
+
+| pm2 process | Address file | `KEEPER_ACCOUNT_INDEX` |
+|---|---|---|
+| `hearth-keeper-usdc` | `hearth.json` | 1 |
+| `hearth-keeper-usdt` | `hearth.usdt.json` | 10 |
+| `hearth-keeper-weth` | `hearth.weth.json` | 11 |
+| `hearth-keeper-bron` | `hearth.bron.json` | 12 |
+| `hearth-keeper-zama` | `hearth.zama.json` | 13 |
+| `hearth-keeper-tgbp` | `hearth.tgbp.json` | 14 |
+| `hearth-keeper-xaut` | `hearth.xaut.json` | 15 |
+
+Every process signs from its own account of the same seed phrase, so seven keepers sending in the
+same minute never take the same nonce. Two processes on one account would, and one of them would
+sit there replacing the other's transaction. That is the whole reason the indexes are spread out:
+they are far enough apart that a later pool can be added without renumbering. Each account needs
+its own Sepolia ETH, and each process says at boot which address and which index it is using.
+
+Every log line is prefixed with the pool name, so seven interleaved logs stay readable:
+
+```
+pm2 logs                       # all seven, prefixed
+pm2 logs hearth-keeper-weth    # one pool
+pm2 restart hearth-keeper-weth # one pool, without touching the others
+```
+
+The single `hearth-keeper` process this file replaces signs from account 1, the same account
+`hearth-keeper-usdc` uses. Stop and remove it before starting the new set, or the two will race:
+
+```
+pm2 stop hearth-keeper && pm2 delete hearth-keeper
+pm2 start packages/keeper/ecosystem.config.cjs
+pm2 save
+```
+
+pm2 starts an app whose address file is missing and the process exits at boot with the path it
+looked at, which is what you see until that pool is deployed. Start only the pools that exist:
+
+```
+pm2 start packages/keeper/ecosystem.config.cjs --only hearth-keeper-usdc,hearth-keeper-weth
+```
+
+One last trap. pm2 sets `HEARTH_ADDRESSES_FILE` per process, and `packages/keeper/.env` cannot
+overwrite it, because the keeper never lets a file overwrite a variable that is already set. But
+`HEARTH_VAULT` and `HEARTH_POOL` are read before the address file, so if that `.env` still holds
+them, all seven processes would drive the same pool. Take them out before you start the seven.
 
 ## Reading the log
 
-Every line is one fact. Times are UTC.
+Every line is one fact. Times are UTC, and the name in brackets is the pool this process drives.
+Amounts carry that pool's own token symbol and its own decimals, both read from the address file.
 
 ```
-09:14:02 hearth keeper: live, keeper 0x7099..., vault 0x..., pool 0x..., batch 4, poll 30s, no gas cap
-09:14:03 keeper balance 0.412 ETH
-09:14:04 tier reconcile cadence: grand every draw, mid every draw, frequent every draw
-09:14:04 evaluating 4 savers per call, the vault allows up to 4
-09:14:05 period 43, watching draws from 39 upward
-09:14:07 finalized draw 39 (gas 509,463)
-09:14:08 the grand tier is due, asking the relayer for its carry
-09:14:16 reconciled the grand tier: 24.80 USDC back into the prize liquidity (gas 459,994)
-09:14:17 the mid tier is due, asking the relayer for its carry
-09:14:25 reconciled the mid tier: 4.20 USDC back into the prize liquidity (gas 459,994)
-09:14:26 the frequent tier is due, asking the relayer for its carry
-09:14:34 reconciled the frequent tier: 1.60 USDC back into the prize liquidity (gas 459,994)
-09:14:37 closed draw 41 (gas 1,422,474)
-09:14:38 draw 41 is waiting for its award: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC
-09:14:39 draw 41: asking the relayer for the seed, the scale, the empty flag and the harvest
-09:14:53 awarded draw 41: 3 tiers, prizes 12.40 / 2.10 / 0.40 USDC, harvest 3.60 USDC (gas 435,578)
-09:15:07 evaluated draw 41: 4 of 9 savers done (gas 3,417,699)
-09:15:38 nothing to do: period 43, draw 41 has 8 of 9 savers evaluated
+09:14:02 [usdc] hearth keeper: live, keeper 0x7099... (account 1), vault 0x..., pool 0x..., cUSDC, batch 4, poll 30s, no gas cap
+09:14:03 [usdc] keeper balance 0.412 ETH
+09:14:04 [usdc] tier reconcile cadence: grand every draw, mid every draw, frequent every draw
+09:14:04 [usdc] evaluating 4 savers per call, the vault allows up to 4
+09:14:05 [usdc] period 43, watching draws from 39 upward
+09:14:07 [usdc] finalized draw 39 (gas 509,463)
+09:14:08 [usdc] the grand tier is due, asking the relayer for its carry
+09:14:16 [usdc] reconciled the grand tier: 24.80 cUSDC back into the prize liquidity (gas 459,994)
+09:14:17 [usdc] the mid tier is due, asking the relayer for its carry
+09:14:25 [usdc] reconciled the mid tier: 4.20 cUSDC back into the prize liquidity (gas 459,994)
+09:14:26 [usdc] the frequent tier is due, asking the relayer for its carry
+09:14:34 [usdc] reconciled the frequent tier: 1.60 cUSDC back into the prize liquidity (gas 459,994)
+09:14:37 [usdc] closed draw 41 (gas 1,422,474)
+09:14:38 [usdc] draw 41 is waiting for its award: 3 tiers, prizes 12.40 / 2.10 / 0.40 cUSDC
+09:14:39 [usdc] draw 41: asking the relayer for the seed, the scale, the empty flag and the harvest
+09:14:53 [usdc] awarded draw 41: 3 tiers, prizes 12.40 / 2.10 / 0.40 cUSDC, harvest 3.60 cUSDC (gas 435,578)
+09:15:07 [usdc] evaluated draw 41: 4 of 9 savers done (gas 3,417,699)
+09:15:38 [usdc] nothing to do: period 43, draw 41 has 8 of 9 savers evaluated
 ```
 
 What each kind of line means:
@@ -256,7 +314,12 @@ touches a network, a wallet or the relayer.
   waiting, and giving up after the configured number of tries.
 - **The boot ABI check**: a renamed function or a renamed struct field is caught at boot, with
   every mismatch listed in one message.
-- **The number formatting** in the log lines, including an amount too large for a double.
+- **The number formatting** in the log lines: an amount too large for a double, a pool whose
+  token has different decimals and a different symbol, and the pool name every line is prefixed
+  with.
+- **The per-pool settings**: which account each process signs from (the environment first, then
+  the address file, then account 1), an index that is not a whole number or is the deployer's
+  being refused, and an address file holding only the three addresses still loading.
 
 Not covered: the live relayer and KMS, real gas, nonce behaviour under a reorg, and anything the
 contracts do once called. Those belong to the contracts test suite and to a live run on Sepolia.
@@ -278,18 +341,37 @@ that never compiles the contracts. The boot check still compares the loaded ABI 
 functions the keeper calls, so a drift between the two is reported at startup rather than on the
 first transaction.
 
-Five variables are required:
+Six variables are required, and they describe one pool:
 
 | Variable | Value |
 | --- | --- |
-| `RECOVERY_PHRASE` | The twelve word phrase. The keeper signs from account index 1, which holds no owner rights over the contracts |
+| `RECOVERY_PHRASE` | The twelve word phrase. The keeper signs from its own account index, which holds no owner rights over the contracts |
 | `SEPOLIA_RPC_URL` | Your own endpoint. A pass makes up to 28 requests, so give the keeper one that is not shared with the app |
 | `HEARTH_VAULT` | The deployed vault |
 | `HEARTH_POOL` | The deployed prize pool |
 | `HEARTH_SOURCE` | The deployed yield source |
+| `KEEPER_ACCOUNT_INDEX` | The account this pool's keeper signs from, from the table above. Leave it out and it is 1 |
 
-Everything else has a default that suits an hourly period. `KEEPER_POLL_SECONDS` is 30,
-`KEEPER_BATCH` is 4, and `KEEPER_MAX_FEE_GWEI` is unset, which means no ceiling.
+`KEEPER_NAME` is worth setting too, so the hosted log says which pool it is. Everything else has a
+default that suits an hourly period: `KEEPER_POLL_SECONDS` is 30, `KEEPER_BATCH` is 4, and
+`KEEPER_MAX_FEE_GWEI` is unset, which means no ceiling.
 
-Run exactly one instance. Two keepers signing from the same account race for the same nonce, so
-stop the local one before starting a hosted one.
+The root `railway.json` starts the cUSDC keeper with the variables above. For the other pools the
+`railway/` folder at the repository root carries one config file per pool, and each one already
+names the pool: its start command sets `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` and
+`HEARTH_ADDRESSES_FILE` inline, so a service built from it needs only `RECOVERY_PHRASE` and
+`SEPOLIA_RPC_URL`. To host all seven on Railway:
+
+1. In the project, add a service from this same repository, once per pool.
+2. In that service's settings, set the config file path to `railway/hearth-keeper-<slug>.json`
+   (Settings, Config-as-code). Leave the root directory as the repository root, because the
+   address file lives under `packages/contracts/deployments`.
+3. Give the service `RECOVERY_PHRASE` and `SEPOLIA_RPC_URL`; shared variables work.
+4. Deploy, and confirm the first log line reads `[<slug>] hearth keeper: ...` with the right
+   account index. Only then stop the laptop copy: `pm2 stop hearth-keeper-<slug>`.
+
+The address files must be committed for a host to read them; they are under
+`packages/contracts/deployments/sepolia/`.
+
+Run exactly one process per pool. Two keepers signing from the same account race for the same
+nonce, so stop the local one before starting a hosted one for the same pool.

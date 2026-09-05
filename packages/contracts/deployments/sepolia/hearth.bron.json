@@ -1,0 +1,15 @@
+{
+  "vault": "0x18086DC8271f8A73c5Ea985fd519527Dbb991279",
+  "pool": "0x2Ed982979CD184494B947a1E38E597494a38ACe4",
+  "source": "0x0cD1155D752bD81b3a437a6f0B3965CAA2A1C8e9",
+  "asset": "0xaa5612FA27c927a0c7961f5AEFEE5ba3A0F9C891",
+  "underlying": "0xFf021fB13cA64e5354c62c954b949a88cfDEb25E",
+  "firstPeriodAt": 1788624000,
+  "periodLength": 21600,
+  "slug": "bron",
+  "symbol": "cBRONMock",
+  "underlyingSymbol": "BRONMock",
+  "name": "Confidential BRON (Mock)",
+  "decimals": 6,
+  "keeperAccountIndex": 12
+}

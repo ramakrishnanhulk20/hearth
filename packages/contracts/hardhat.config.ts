@@ -17,6 +17,9 @@ function secret(name: string, fallback = ""): string {
 }
 
 const HARDHAT_DEFAULT_ACCOUNTS = "test test test test test test test test test test test junk";
+// One account per role: the deployer, the seven pool keepers, the five demo savers, the audit's flash
+// wallet, and two spare. Every pool keeps its own keeper so one pool's stuck nonce cannot stall another.
+const ACCOUNT_COUNT = 16;
 // RECOVERY_PHRASE is the name the wallet export uses; MNEMONIC is kept for older env files.
 const MNEMONIC = secret("RECOVERY_PHRASE") || secret("MNEMONIC", HARDHAT_DEFAULT_ACCOUNTS);
 const SEPOLIA_RPC_URL = secret("SEPOLIA_RPC_URL", "https://ethereum-sepolia-rpc.publicnode.com");
@@ -24,9 +27,9 @@ const ETHERSCAN_API_KEY = secret("ETHERSCAN_API_KEY");
 const PRIVATE_KEY = secret("PRIVATE_KEY");
 
 function sepoliaAccounts(): string[] | { mnemonic: string; count: number } {
-  if (MNEMONIC !== HARDHAT_DEFAULT_ACCOUNTS) return { mnemonic: MNEMONIC, count: 10 };
+  if (MNEMONIC !== HARDHAT_DEFAULT_ACCOUNTS) return { mnemonic: MNEMONIC, count: ACCOUNT_COUNT };
   if (PRIVATE_KEY) return [PRIVATE_KEY.startsWith("0x") ? PRIVATE_KEY : `0x${PRIVATE_KEY}`];
-  return { mnemonic: MNEMONIC, count: 10 };
+  return { mnemonic: MNEMONIC, count: ACCOUNT_COUNT };
 }
 
 const config: HardhatUserConfig = {
@@ -46,11 +49,11 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      accounts: { mnemonic: MNEMONIC, count: 10 },
+      accounts: { mnemonic: MNEMONIC, count: ACCOUNT_COUNT },
       chainId: 31337,
     },
     localhost: {
-      accounts: { mnemonic: MNEMONIC, count: 10 },
+      accounts: { mnemonic: MNEMONIC, count: ACCOUNT_COUNT },
       chainId: 31337,
       url: "http://127.0.0.1:8545",
     },

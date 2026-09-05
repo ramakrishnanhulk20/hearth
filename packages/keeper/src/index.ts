@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { loadConfig } from "./config.js";
 import { Keeper } from "./keeper.js";
-import { line, problem } from "./log.js";
+import { line, problem, useName } from "./log.js";
 
 const USAGE = `hearth-keeper: drives Hearth draws on Sepolia.
 
@@ -11,7 +11,10 @@ const USAGE = `hearth-keeper: drives Hearth draws on Sepolia.
   hearth-keeper --help       this text
 
 Settings come from packages/contracts/.env (and packages/keeper/.env if you make one).
-Required: RECOVERY_PHRASE, HEARTH_VAULT, HEARTH_POOL. See the package README for the rest.`;
+Required: RECOVERY_PHRASE, HEARTH_VAULT, HEARTH_POOL. See the package README for the rest.
+
+One process drives one pool. HEARTH_ADDRESSES_FILE names the pool, KEEPER_ACCOUNT_INDEX picks the
+account it signs from, and KEEPER_NAME is the name printed in front of every line.`;
 
 interface Flags {
   readonly once: boolean;
@@ -46,6 +49,7 @@ async function main(): Promise<number> {
   }
 
   const loaded = loadConfig({ dryRun: flags.dryRun });
+  useName(loaded.config.name);
   const keeper = await Keeper.connect(loaded);
 
   if (flags.once) {

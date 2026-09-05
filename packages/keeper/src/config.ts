@@ -3,8 +3,8 @@ import { join, resolve } from "node:path";
 import dotenv from "dotenv";
 import { HDNodeWallet, Mnemonic, getAddress, isAddress, parseUnits } from "ethers";
 import { findRepoRoot } from "./abi.js";
-// Aliased because this file already has its own gwei(), the parser that reads the setting.
-import { gwei as formatGwei } from "./log.js";
+// gwei is aliased because this file already has its own gwei(), the parser that reads the setting.
+import { DEFAULT_DECIMALS, DEFAULT_SYMBOL, gwei as formatGwei } from "./log.js";
 
 export class ConfigError extends Error {
   constructor(message: string) {
@@ -14,9 +14,19 @@ export class ConfigError extends Error {
 }
 
 /** Account index 1 of the seed phrase. Index 0 is the deployer and owns the contracts, so the
- * keeper runs on its own address and a stuck keeper nonce never blocks a deploy. */
-export const KEEPER_PATH = "m/44'/60'/0'/0/1";
+ * keeper runs on its own address and a stuck keeper nonce never blocks a deploy. Each pool gets
+ * its own index, because two keepers signing from one account race for the same nonce. */
+export const DEFAULT_ACCOUNT_INDEX = 1;
 
+/** The last index a BIP44 path can address without hardening it. */
+const MAX_ACCOUNT_INDEX = 2 ** 31 - 1;
+
+/** The signing path for an account index of the seed phrase. */
+export function keeperPath(index: number): string {
+  return `m/44'/60'/0'/0/${index}`;
+}
+
+const DEFAULT_NAME = "hearth";
 const DEFAULT_RPC = "https://ethereum-sepolia-rpc.publicnode.com";
 const SEPOLIA_CHAIN_ID = 11155111;
 
@@ -28,9 +38,15 @@ export interface RelayerSettings {
 }
 
 export interface KeeperConfig {
+  /** Short name of the pool this process drives, printed in front of every log line. */
+  readonly name: string;
   readonly rpcUrl: string;
   readonly chainId: number;
+  readonly accountIndex: number;
   readonly keeperAddress: string;
+  /** How the pool's confidential token is written in a log line. */
+  readonly symbol: string;
+  readonly decimals: number;
   readonly vault: string;
   readonly pool: string;
   readonly source: string | null;
@@ -129,10 +145,19 @@ function address(name: string, raw: string | null, problems: string[]): string |
   return getAddress(raw);
 }
 
+/**
+ * What the keeper reads out of the file the deploy script writes. The deploy script writes more
+ * than this (the asset, the underlying, the period), and every field here is optional, so the
+ * older file that carried only the three addresses still loads.
+ */
 interface AddressFile {
   readonly vault?: string;
   readonly pool?: string;
   readonly source?: string;
+  readonly slug?: string;
+  readonly symbol?: string;
+  readonly decimals?: number;
+  readonly keeperAccountIndex?: number;
   readonly HearthVault?: string;
   readonly HearthPrizePool?: string;
   readonly SponsoredYieldSource?: string;
@@ -154,12 +179,33 @@ function addressesFromFile(problems: string[]): AddressFile {
   }
 }
 
-function keeperWallet(problems: string[]): HDNodeWallet | null {
+/** A whole number taken from the address file, checked before it is trusted as a default. */
+function fileInteger(field: string, raw: unknown, min: number, max: number, problems: string[]): number | null {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== "number" || !Number.isInteger(raw) || raw < min || raw > max) {
+    problems.push(
+      `the address file field "${field}" must be a whole number between ${min} and ${max}, got ${JSON.stringify(raw)}`,
+    );
+    return null;
+  }
+  return raw;
+}
+
+function fileText(field: string, raw: unknown, problems: string[]): string | null {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== "string" || raw.trim() === "") {
+    problems.push(`the address file field "${field}" must be a non-empty piece of text, got ${JSON.stringify(raw)}`);
+    return null;
+  }
+  return raw.trim();
+}
+
+function keeperWallet(index: number, problems: string[]): HDNodeWallet | null {
   const phrase = text("RECOVERY_PHRASE") ?? text("MNEMONIC");
   if (phrase === null) {
     problems.push(
       "RECOVERY_PHRASE is missing. Put your twelve word seed phrase in packages/contracts/.env; " +
-        "the keeper signs with account 2 of that phrase and never prints it.",
+        `the keeper signs with account index ${index} of that phrase and never prints it.`,
     );
     return null;
   }
@@ -167,15 +213,27 @@ function keeperWallet(problems: string[]): HDNodeWallet | null {
     problems.push("RECOVERY_PHRASE is not a valid seed phrase. Check the word count and the spelling.");
     return null;
   }
-  return HDNodeWallet.fromPhrase(phrase, "", KEEPER_PATH);
+  return HDNodeWallet.fromPhrase(phrase, "", keeperPath(index));
 }
 
 export function loadConfig(overrides: ConfigOverrides = {}): LoadedKeeper {
   const files = loadEnvFiles();
   const problems: string[] = [];
 
-  const wallet = keeperWallet(problems);
   const fromFile = addressesFromFile(problems);
+
+  // The address file carries the defaults for the pool it belongs to, so one variable per process
+  // (HEARTH_ADDRESSES_FILE) is enough to run a second pool. An env value still wins over the file.
+  const slug = fileText("slug", fromFile.slug, problems);
+  const fileIndex = fileInteger("keeperAccountIndex", fromFile.keeperAccountIndex, 1, MAX_ACCOUNT_INDEX, problems);
+  const accountIndex = integer(
+    "KEEPER_ACCOUNT_INDEX",
+    fileIndex ?? DEFAULT_ACCOUNT_INDEX,
+    1,
+    MAX_ACCOUNT_INDEX,
+    problems,
+  );
+  const wallet = keeperWallet(accountIndex, problems);
 
   const vault = address("HEARTH_VAULT", text("HEARTH_VAULT") ?? fromFile.vault ?? fromFile.HearthVault ?? null, problems);
   const pool = address(
@@ -212,9 +270,13 @@ export function loadConfig(overrides: ConfigOverrides = {}): LoadedKeeper {
   };
 
   const config: KeeperConfig = {
+    name: text("KEEPER_NAME") ?? slug ?? DEFAULT_NAME,
     rpcUrl: text("SEPOLIA_RPC_URL") ?? DEFAULT_RPC,
     chainId,
+    accountIndex,
     keeperAddress: wallet?.address ?? "",
+    symbol: fileText("symbol", fromFile.symbol, problems) ?? DEFAULT_SYMBOL,
+    decimals: fileInteger("decimals", fromFile.decimals, 0, 18, problems) ?? DEFAULT_DECIMALS,
     vault: vault ?? "",
     pool: pool ?? "",
     source,
@@ -250,7 +312,8 @@ export function describeConfig(config: KeeperConfig): string {
   const gas = config.maxFeePerGas === null ? "no gas cap" : `gas cap ${formatGwei(config.maxFeePerGas)} gwei`;
   const mode = config.dryRun ? "dry run" : "live";
   return (
-    `${mode}, keeper ${config.keeperAddress}, vault ${config.vault}, pool ${config.pool}, ` +
+    `${mode}, keeper ${config.keeperAddress} (account ${config.accountIndex}), ` +
+    `vault ${config.vault}, pool ${config.pool}, ${config.symbol}, ` +
     `batch ${config.batchSize}, poll ${config.pollMs / 1000}s, ${gas}`
   );
 }
