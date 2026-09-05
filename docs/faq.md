@@ -13,7 +13,12 @@ on this page applies to each pool on its own. Details in
 ## 2. Where is the claim button?
 
 On "My draws" in the app, on that draw's card, under "Your result" once you have opened it
-with the eye. It appears only when that draw credited you something. Under the hood it is
+with the eye. It appears only when that draw credited you something and the vault still
+owes this wallet money: the one eye opens the draw's credit and the vault's running
+unclaimed-winnings figure together, and the button offers the smaller of the two. That
+second figure is what makes it honest. A draw's credit never changes once it is written,
+so a button gated on the credit alone would offer the same prize again after a reload and
+the chain would pay it out of your own principal. Under the hood it is
 deliberately not a separate transaction: prizes are credited to your encrypted winnings
 balance during evaluation, and the claim button, which carries the amount, sends an
 ordinary withdrawal for it, which on chain looks exactly like any other withdrawal. In

@@ -551,7 +551,7 @@ first segment of all for every language but English.
 | `/app/<slug>` | `currentPeriod`, `periodEnd`, `saverCount`, `drawOf`, `drawParams`, `liquidity`, `confidentialBalanceOf`, `confidentialWinningsOf`, `harvestable` | none |
 | `/app/<slug>/deposit` | the public token's `balanceOf` and `allowance`, the wrapper's `rate` and `decimals`, `maxPrincipal` | `mint`, `approve`, `wrap`, `confidentialTransferAndCall` |
 | `/app/<slug>/withdraw` | `confidentialBalanceOf`, `confidentialWinningsOf`, the wrapper's unwrap state | `withdraw`, `withdrawAll`, `unwrap`, `finalizeUnwrap` |
-| `/app/<slug>/draws` | `drawOf`, `drawParams`, `weightHandle`, `creditHandle`, `evaluatedCount`, `walkOf` | `evaluate`, and `withdraw` behind the claim button |
+| `/app/<slug>/draws` | `drawOf`, `drawParams`, `weightHandle`, `creditHandle`, `evaluatedCount`, `walkOf`, `confidentialWinningsOf` | `evaluate`, and `withdraw` behind the claim button |
 | `/app/<slug>/run` | `closableDraw`, `canClose`, `closeDeadline`, `windowEndsAt`, `publishedCarry` | `closeDraw`, `awardDraw`, `evaluate`, `finalizeDraw`, `reconcile` |
 | `/verify?pool=<slug>` | `drawParams`, `thresholdOf` | none |
 
@@ -559,6 +559,18 @@ Reading a saver's own encrypted values is an EIP-712 user decryption through Zam
 relayer, not a contract call, and the award and reconcile buttons fetch the same KMS-signed
 public decryptions the keeper does, in the browser, in the handle order
 `[seed, scaleCount, nonEmpty, harvested]`.
+
+**The claim gate.** A draw card decrypts three handles on one signature: that draw's weight,
+that draw's credit, and `confidentialWinningsOf`, the running figure of what the vault still
+owes the wallet. The claim button needs both the credit and that running figure to be above
+zero and sends the smaller of the two. A credit handle never changes once written, so a gate
+on the credit alone would offer a spent prize again after a reload and the vault would clamp
+the request into principal.
+
+**Wallet connectors.** `packages/web/src/lib/chain/wagmi.ts` always builds the injected
+connector and adds WalletConnect only when `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` is set.
+There is no sensible default for a project id, and a connector built without one fails at
+the moment somebody scans the code, so the screens name the missing path instead.
 
 **Languages.** Sixteen, listed in `packages/web/src/i18n/routing.ts`, chosen from a button
 in the top bar. English keeps the unprefixed URLs; every other locale prefixes them, so the

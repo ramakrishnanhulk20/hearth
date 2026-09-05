@@ -360,7 +360,7 @@ The root `railway.json` starts the cUSDC keeper with the variables above. For th
 `railway/` folder at the repository root carries one config file per pool, and each one already
 names the pool: its start command sets `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` and
 `HEARTH_ADDRESSES_FILE` inline, so a service built from it needs only `RECOVERY_PHRASE` and
-`SEPOLIA_RPC_URL`. To host all seven on Railway:
+`SEPOLIA_RPC_URL`. All seven keepers run this way on Railway since 6 September 2026. To host them:
 
 1. In the project, add a service from this same repository, once per pool.
 2. In that service's settings, set the config file path to `railway/hearth-keeper-<slug>.json`

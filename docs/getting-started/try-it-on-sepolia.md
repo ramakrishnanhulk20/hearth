@@ -8,6 +8,12 @@ two-minute path at the bottom of this page does not wait for one.
 The live app is at https://hearth-ram.vercel.app. Everything below can also be done straight from a block
 explorer if you prefer to watch the raw calls.
 
+Two ways in with a wallet. If the browser has an extension, "Connect wallet" uses it. If it
+has none, "Scan with a phone" shows a WalletConnect code that a mobile wallet reads, which
+is the only path on a machine you cannot install anything on. A browser with no wallet at
+all is told which one to install and where, rather than being handed a button that fails
+halfway.
+
 ## 0. Pick a token
 
 Hearth runs seven pools, one per confidential token Zama publishes on Sepolia. Each is a
@@ -27,13 +33,22 @@ so on.
 | Confidential XAUt (Mock) | `xaut` | 6 hours | `0x24377AE4AA0C45ecEe71225007f17c5D423dd940` |
 
 The picker also lists Zama's official **Confidential tGBP**, greyed out, because its
-underlying mint belongs to the issuer and nobody else can obtain the token. Choosing it
-shows a page that names the token, links both contracts and offers no wallet action, rather
-than a deposit button that would revert.
+underlying mint belongs to the issuer and nobody else can obtain the token. The reason sits
+under its name, in the language you are reading, and choosing it shows a page that names the
+token, links both contracts and offers no wallet action, rather than a deposit button that
+would revert. A pool that has not closed its first draw yet uses that same line under its
+name to say when that draw is, because there is a time to give rather than a prize.
 
-The app reads in sixteen languages, chosen from the button in the top bar. English keeps
-the plain URLs and every other language puts its code in front, so the same screen in
-Japanese is `/ja/app/usdc`.
+The app reads in sixteen languages, chosen from the button in the top bar or the one in the
+console rail. English keeps the plain URLs and every other language puts its code in front,
+so the same screen in Japanese is `/ja/app/usdc`. Arabic mirrors the layout. Every language
+keeps Western digits and a twenty-four hour UTC clock, Arabic included, so a figure on the
+screen matches the figure on a block explorer, and every amount field accepts a comma or a
+point as the decimal mark, refusing only an amount that carries both. These documentation
+pages are translated the same way, page for page, and a page nobody has translated yet shows
+the English one with a line at the top saying so. Every translation was written by a model
+rather than a native speaker: English is the source of truth for every number and contract
+name, as [limitations](../limitations.md) says.
 
 ## Contracts you will touch
 
@@ -90,7 +105,11 @@ cUSDC.wrap(yourAddress, 1000000000)
 
 In the app those two calls are step 2 of Deposit, "Shield your USDC". The button reads
 "Shield", and "Approve the wrapper" while the wrapper's allowance is short of the amount
-you typed.
+you typed. The approval is asked for once, for a large allowance, so every shield after
+the first is a single transaction instead of two. It reaches exactly one contract, that
+token's confidential wrapper, and lets it pull the public mock token out of your wallet
+and nothing else. The screen says both of those things beside the button rather than
+leaving them to be found.
 
 You now hold 1,000 confidential USDC. From here on, your balance is a ciphertext handle
 and only you can read it.
@@ -111,6 +130,15 @@ cUSDC.confidentialTransferAndCall(vault, encryptedAmount, inputProof, "")
 The app builds the encrypted input and its proof for you with Zama's SDK. The vault's
 receive hook credits exactly the amount the token says actually moved, not the amount you
 asked for, so a transfer that is short for any reason cannot create phantom principal.
+
+That has one consequence worth knowing before you type a figure. Asking to deposit more
+than your confidential balance is not refused anywhere on chain: the token moves what the
+wallet has, which can be nothing, and the transaction succeeds having achieved nothing. So
+the screen holds that line itself. Once you have opened your confidential balance with the
+eye, the deposit field says "That is more than you hold" and the button stays off. The
+unshield screen goes further, because there is nothing to open there: it reads your public
+token balance before the run and again after it, and if the two are identical it says
+"Nothing moved", names the over-large amount as the usual cause, and points at "All of it".
 
 The vault refuses a deposit whose amount, or whose resulting principal, would push you
 above the per-saver cap, which on a one-hour period is about 5 billion tokens and on a
@@ -218,6 +246,15 @@ withdrawal for exactly that amount, and step 8 takes the rest home. On chain a c
 withdrawal are the same call with the same shape, and that is what keeps a winner from
 standing out.
 
+The one eye on that card opens three figures at once: your weight for the draw, that
+draw's credit, and `confidentialWinningsOf`, which is everything the vault still owes this
+wallet across every draw. The button is gated on both the credit and that running figure,
+and it offers the smaller of the two. A draw's credit never changes once it is written, so
+a card gated on the credit alone would offer the same prize again after a reload and the
+chain would honour it, out of your own principal. The running figure falls the moment a
+claim lands, which is what takes the button away and leaves the card saying the prize has
+already been taken out, with the figure kept as the draw's record.
+
 There is nothing to press to be credited, either. Evaluation walks the saver list from a
 point that draw's seed decides. The "Advance the draw" button on that draw's card, and
 "Advance" on the "Run a draw" screen, both move that shared walk forward rather than
@@ -252,7 +289,11 @@ Zama's wrapper, not ours.
 
 The first call burns the encrypted amount and marks it for public decryption. The second
 releases the plaintext tokens once Zama's protocol has produced the cleartext and its
-proof. The amount you unwrap is public, exactly like the amount you wrapped, and it is the
+proof. The app reads your public token balance before the first call and again after the
+second, and reports the difference, so "unshielded 250.00 USDC" is a measured fact rather
+than the number you typed. When that difference is zero it says "Nothing moved" instead of
+declaring success: both transactions did land, and the wrapper releases nothing rather
+than refusing when the amount was above your confidential balance. The amount you unwrap is public, exactly like the amount you wrapped, and it is the
 first call that publishes it, so an unwrap you never finalize has already leaked.
 
 That gives a second thing worth knowing. If you wrap in and unwrap out in full, the
@@ -268,11 +309,12 @@ The app is a console with a rail down the left, one task per screen, so the path
 down that rail.
 
 1. Open https://hearth-ram.vercel.app, follow "The pool" in the header to `/app`, and connect a wallet on
-   Sepolia. You land in the USDC pool at `/app/usdc`; the token name at the top of the rail
-   switches pools. The dashboard opens with a block marked "Next" naming the one thing to
-   do.
+   Sepolia, with the browser extension or by scanning the code with a phone wallet. You land
+   in the USDC pool at `/app/usdc`; the token name at the top of the rail switches pools. The
+   dashboard opens with a block marked "Next" naming the one thing to do.
 2. "Deposit" in the sidebar, which opens on whichever of its three steps your wallet is up
-   to. Click "Get test USDC", then "Shield", then "Deposit".
+   to. Click "Get test USDC", then "Shield", then "Deposit". The first shield asks for one
+   approval of the wrapper and no shield after it asks again.
 3. Back on the dashboard, press the eye beside "Principal" in "What you hold" and sign:
    your principal and your winnings both appear, in the browser only.
 4. "Run a draw" in the sidebar, the row marked "Anyone". Press "Close", then "Award", to

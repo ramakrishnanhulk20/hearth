@@ -29,8 +29,8 @@ is the same design explained for the people who use it and the people who audit 
 | [security/what-stays-private.md](security/what-stays-private.md) | Seven rules: the bracket and the leak it replaced, what a pinned balance costs, the wrap seam in both directions, what the prize counts measure, the token layer, why evaluation is not a tell, and the behavioural residual. |
 | [security/threat-model.md](security/threat-model.md) | Nine attackers, what each wants, what stops them, and what does not. Plus the executed failures of our previous design. |
 | [security/randomness-and-verification.md](security/randomness-and-verification.md) | Where the seed comes from, why nobody can re-roll it or resize what it wins, and how anyone recomputes a threshold after the fact. |
-| [security/static-analysis.md](security/static-analysis.md) | The slither and solhint runs, and the one reason behind each of the five families of findings. |
-| [operations/keeper.md](operations/keeper.md) | The keeper's job step by step, the ordering rule, one process per pool, what happens when it is down, and the gas budget. |
+| [security/static-analysis.md](security/static-analysis.md) | The slither and solhint runs, the one reason behind each of the five families of findings, and the dependency audit with the two axios findings it still reports. |
+| [operations/keeper.md](operations/keeper.md) | The keeper's job step by step, the ordering rule, one process per pool, where the live seven are hosted, what happens when it is down, and the gas budget. |
 | [operations/deploying.md](operations/deploying.md) | Deploying one pool per token, constructor signatures and parameters, verification, and the two Sepolia parameter sets against a mainnet one. |
 | [limitations.md](limitations.md) | Every documented limitation in one numbered list of fourteen. |
 | [faq.md](faq.md) | Twelve short answers, starting with which of the seven tokens you can save in, and including where the claim button went. |

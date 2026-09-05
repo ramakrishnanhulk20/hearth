@@ -179,10 +179,11 @@ starts at a different point every draw, nobody sits permanently at the back.
 
 ## One keeper per pool
 
-`packages/keeper/ecosystem.config.cjs` starts all seven under pm2, one process each. A
-process is told which pool it drives by `HEARTH_ADDRESSES_FILE`, the address file that
+A process is told which pool it drives by `HEARTH_ADDRESSES_FILE`, the address file that
 pool's deploy wrote, which also gives it the token symbol, the decimals and the account
 index to sign from. `KEEPER_NAME` is the tag every log line carries.
+`packages/keeper/ecosystem.config.cjs` starts all seven under pm2 on one machine, one
+process each.
 
 | pm2 process | `HEARTH_ADDRESSES_FILE` | `KEEPER_ACCOUNT_INDEX` |
 | --- | --- | --- |
@@ -200,6 +201,35 @@ been pointed at it for days. Both files carry the same addresses.
 
 The indexes are spread out so a later pool can be added without renumbering, and each
 account needs its own Sepolia ETH. Index 0 is the deployer and the keeper refuses it.
+
+## Where the live seven run
+
+pm2 on a laptop is one way to run all seven and it still works. It is not what is live. All
+seven Sepolia keepers run on Railway, one service per pool, so a closed laptop stops no
+draws.
+
+A keeper is a long-running process rather than a scheduled function: one pass can spend two
+minutes waiting on the key management service, which is longer than most serverless
+platforms allow. Any host that keeps a Node process alive will do, and the repository
+carries the configuration for this one:
+
+- `railway.json` at the repository root drives the `usdc` pool.
+- `railway/hearth-keeper-<slug>.json` drives each of the other six. Each start command sets
+  that pool's `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` and `HEARTH_ADDRESSES_FILE` inline, so a
+  service built from one of them needs only `RECOVERY_PHRASE` and `SEPOLIA_RPC_URL`.
+
+The build is `npm run build -w @hearth/keeper` and the start is
+`node packages/keeper/dist/src/index.js` on any host. The contract ABIs the keeper needs are
+committed under `packages/keeper/abi`, so a host that never compiles the contracts still
+runs it, and the boot check compares the loaded ABI against the functions the keeper calls
+so a drift is reported at startup rather than on the first transaction. The address files
+have to be committed for the same reason, and they are, under
+`packages/contracts/deployments/sepolia/`.
+
+Run exactly one process per pool wherever it runs. Two keepers signing from one account race
+each other for the same nonce, so stop a local copy before starting a hosted one for the
+same pool. The step-by-step setup, service by service, is in the keeper package's own
+README, `packages/keeper/README.md`.
 
 ## Running it
 

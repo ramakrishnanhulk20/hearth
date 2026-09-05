@@ -278,6 +278,7 @@ nothing obvious to point at.
 | `SEPOLIA_RPC_URL` | No | Your own Sepolia endpoint. The landing page and the `/api/activity` route read the chain on the server, so this one never reaches a browser. Log queries need it, because the free public node caps `eth_getLogs` ranges far below a day of blocks |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Yes | Optional. The wallet reads use it and fall back to `https://ethereum-sepolia-rpc.publicnode.com` when it is unset. Visible in the bundle, so it must be one you are happy to publish |
 | `NEXT_PUBLIC_CHAIN_ID` | Yes | `11155111` for Ethereum Sepolia. The app defaults to it if unset |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Yes | Optional, and free from Reown's dashboard at https://dashboard.reown.com. Set it and every connect screen offers "Scan with a phone" beside the browser extension, which is how a phone wallet and a machine with no extension get in. Left blank the connector is not built at all, so nobody is offered a button that fails at the moment they scan |
 
 No contract address is an environment variable any more. The app reads every pool from
 `packages/web/src/lib/chain/pools.json`, which `node scripts/sync-pools.mjs` generates from

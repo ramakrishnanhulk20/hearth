@@ -102,14 +102,35 @@ Zama also publishes a non-mock **Confidential tGBP** on Sepolia, at
 issuer, so nobody but the issuer can obtain the public token, nobody can wrap into the
 confidential one, and no pool can be opened on it at all.
 
-Hearth lists it in the pool picker anyway, greyed out, with the reason written next to it:
-`mint restricted to the issuer`. Choosing it opens a page that names the token, links both
-contracts on Etherscan, says whose restriction it is, and offers no wallet action, because
-a deposit button that reverts is worse than no button.
+Hearth lists it in the pool picker anyway, greyed out, with the reason written under its
+name. The deployment file states that reason once, in English, as
+`mint restricted to the issuer`, and the app prints it in the language the reader is on.
+Choosing it opens a page that names the token, links both contracts on Etherscan, says
+whose restriction it is, and offers no wallet action, because a deposit button that reverts
+is worse than no button.
 
 Leaving the token off the list would have been easier and would have looked like Hearth
 had simply not got to it. A saver who goes looking for tGBP finds two entries: the mock
 pool that works, and the official token that does not, with the reason.
+
+## What the row of pools shows
+
+The landing page ends with a row of every pool, each cell carrying that pool's grand prize
+right now, read on the server in one multicall and shipped inside the page so the row is
+already filled in when the story stops scrolling. The picker inside the console shows the
+same figures against the same rules.
+
+Two of those rules exist because a number can be misleading:
+
+- A pool whose read did not come back says `unread`, never `0.00`. An unanswered node and
+  an empty jackpot look identical once a zero is written down.
+- A pool that has not closed its first draw yet says **First draw HH:MM UTC** instead of a
+  figure, on the shelf and under its name in the picker. Prize money only reaches the tiers
+  when the first draw is awarded, so before that close the honest answer is a time, not
+  `0.00`. Which of the two a cell shows is decided by `lastClosedDraw` still reading zero,
+  and the time itself is `firstPeriodAt` plus `periodLength`, the end of the first period
+  and the earliest moment draw 1 can close. The clock is twenty-four hour UTC in every
+  language.
 
 ## Where the app gets the addresses
 

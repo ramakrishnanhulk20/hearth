@@ -46,7 +46,7 @@ million million).
 | `xaut` | [`0xe4FcF848739845BC81Dee1d5352cf3844F0a60C7`](https://sepolia.etherscan.io/address/0xe4FcF848739845BC81Dee1d5352cf3844F0a60C7#code) | [`0x24377AE4AA0C45ecEe71225007f17c5D423dd940`](https://sepolia.etherscan.io/address/0x24377AE4AA0C45ecEe71225007f17c5D423dd940#code) |
 
 The USDC pool came first: block `11622398`, first period `1788386400 (2 September 2026,
-22:00:00 UTC)`, hourly draws ever since and now past draw 66. The other six were deployed
+22:00:00 UTC)`, hourly draws ever since (draw 66 had run by 5 September; the dashboard shows the current count). The other six were deployed
 on 5 September 2026, in blocks `11641314` through `11641523`, with period 1 starting at
 `1788620400` for `usdt` and `1788624000` for the rest.
 
@@ -176,7 +176,11 @@ the one a transparent chain cannot offer. Full argument in
 - `withdraw` and `withdrawAll` are the only exits. They pay winnings first, then principal.
 - There is no claim function. Prizes are credited to a separate encrypted winnings balance
   during evaluation, so the app's claim button, which carries the amount, sends an ordinary
-  withdrawal that looks exactly like every other withdrawal.
+  withdrawal that looks exactly like every other withdrawal. The button is gated on
+  `confidentialWinningsOf`, what the vault still owes that wallet, decrypted in the browser
+  alongside the draw's own credit, and it offers the smaller of the two. So a card cannot
+  offer the same prize twice after a reload, and the button goes away once the money is
+  taken.
 - Principal is never locked. Deposits and withdrawals keep working while a draw is running
   and while the contracts are paused.
 
@@ -354,7 +358,7 @@ chose the visible jackpot, and says so in [limitations](docs/limitations.md).
 
 Every figure here came from `drawParams(drawId)` on the deployed `usdc` prize pool
 `0xA0785AacF30B6FE46EDc53CD8A9db1d94FeF5Df2`, read on 3 September 2026. That pool draws
-hourly and is now past draw 66; these are its first seven. The three prize columns are that
+hourly and had run draw 66 by 5 September; these are its first seven. The three prize columns are that
 draw's `prize[tier]` in USDC and the bracket is its `scaleBits`.
 
 | Draw | Status | Grand | Mid | Frequent | Bracket |
@@ -566,21 +570,30 @@ over batch age and pausing. Detail and addresses: [yield source](docs/concepts/y
 Nothing here needs us to be online. Every step of a draw is permissionless.
 
 The app is a console: a rail down the left with one task per screen. The path is a walk down
-that rail.
+that rail. Every screen carries the same care: a not-found page and an error page in the
+app's own skin, each offering a way back rather than a stack trace, faint text lifted to a
+contrast ratio of 4.6 to 1, a scroll cue on the landing page, and a decryption that is taking
+its time showing the seconds elapsed with a button to stop waiting.
 
 1. Open https://hearth-ram.vercel.app, follow **The pool** in the header to `/app`, and connect a wallet on
-   Sepolia. You land in the USDC pool at `/app/usdc`; the token name at the top of the rail
-   opens the picker for the other six. **Dashboard** opens with a block marked **Next**
-   naming the one thing your wallet is up to, and a button that goes straight to it.
+   Sepolia, either the extension in the browser or **Scan with a phone**, which is
+   WalletConnect and the only path on a machine with no extension. A browser with no wallet
+   at all is told what to install rather than shown a button that fails. You land in the USDC
+   pool at `/app/usdc`; the token name at the top of the rail opens the picker for the other
+   six. **Dashboard** opens with a block marked **Next** naming the one thing your wallet is
+   up to, and a button that goes straight to it.
 2. **Deposit** in the sidebar. It opens on whichever of its three steps your wallet is
    actually up to. Step 1 is **Get test USDC**, and its button says the same, with that
    pool's own token in the label. That calls `mint` on Zama's mock token, which has no owner
    check and a cap of one million tokens per call. A wallet that already holds some finds
    step 1 already done, with **Get a million more** on it.
 3. Step 2 is **Shield your USDC**: type an amount and press **Shield**. That button reads
-   **Approve the wrapper** until the wrapper's allowance covers the amount you typed. Step 3
-   is **Deposit into the vault**: type an amount and press **Deposit**. The two are separate
-   steps on purpose. The deposit amount is encrypted before it leaves your browser.
+   **Approve the wrapper** until the wrapper's allowance covers the amount you typed, and the
+   approval is asked for once, for a large allowance, so every shield after it is a single
+   transaction. It reaches one contract, that token's confidential wrapper, and the token is
+   a faucet mock with no value anywhere. Step 3 is **Deposit into the vault**: type an amount
+   and press **Deposit**. The two are separate steps on purpose. The deposit amount is
+   encrypted before it leaves your browser.
 4. Back on **Dashboard**, press the eye beside **Principal** in **What you hold** and sign the
    message. Your principal and your unclaimed winnings both appear, in the browser only. One
    eye opens both. That signature is not a transaction.
@@ -600,9 +613,17 @@ that rail.
    vault** tab, and press **Withdraw everything** to take principal and winnings back in one
    transfer.
 
-The app reads in sixteen languages, chosen from a button in the top bar, with the language
-code as the first part of the URL for every language but English, so a reader in Japanese
-walks the same path at `/ja/app/usdc`.
+The app reads in sixteen languages, chosen from a button in the top bar and from another
+in the console rail. The language code is the first part of the URL for every
+language but English, so a reader in Japanese walks the same path at `/ja/app/usdc`. Arabic
+mirrors the whole layout, and every language keeps Western digits and a twenty-four hour UTC
+clock, Arabic included, so a figure on the screen reads the same as the figure on a block
+explorer. The amount field takes a comma or a point as the decimal mark, whichever the
+keyboard puts under the thumb, and refuses an amount carrying both. The documentation is
+translated page for page under `docs/i18n/<locale>/`, and a page that has no translation
+falls back to the English one with a line at the top saying so. Every translation was written
+by a model rather than a native speaker, which [limitations](docs/limitations.md) states
+plainly; English is the source of truth for every number and every contract name.
 
 ### The prove-it command
 
@@ -751,8 +772,16 @@ pm2 logs hearth-keeper-weth                      # one pool's log
 Which pool a process drives is `HEARTH_ADDRESSES_FILE`, which also gives it the token
 symbol, the decimals and its `KEEPER_ACCOUNT_INDEX`: `usdc` 1, `usdt` 10, `weth` 11, `bron`
 12, `zama` 13, `tgbp` 14, `xaut` 15. `KEEPER_NAME` is the tag every log line carries, so
-seven interleaved logs stay readable. Settings, the pm2 file and the Chainlink Automation
-registration are in [packages/keeper/README.md](packages/keeper/README.md).
+seven interleaved logs stay readable.
+
+The pm2 file is the way to run all seven on one machine. The seven that are live run on
+Railway instead, one service per pool: the repository carries `railway.json` at its root for
+the `usdc` keeper and `railway/hearth-keeper-<slug>.json` for the other six, each start
+command already naming that pool's `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` and address file,
+so a service needs only `RECOVERY_PHRASE` and `SEPOLIA_RPC_URL`. The keeper carries its own
+ABIs under `packages/keeper/abi`, so a host that never compiles the contracts can still run
+it. Settings, the hosting steps and the Chainlink Automation registration are in
+[packages/keeper/README.md](packages/keeper/README.md).
 
 ### App
 
@@ -767,6 +796,16 @@ The app takes its addresses from `packages/web/src/lib/chain/pools.json`, which
 `scripts/sync-pools.mjs` generates from the deployment files. The three public environment
 variables that used to hold one pool's vault, prize pool and yield source no longer exist;
 delete them from any environment that still sets them.
+
+`packages/web/.env.example` lists the four the app does read, each with a comment on where
+its value comes from:
+
+| Variable | Public in the browser | What it does |
+| --- | --- | --- |
+| `SEPOLIA_RPC_URL` | No | The server-side endpoint. The landing page and the activity route read the chain on the server, so this one never reaches a browser |
+| `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Yes | The endpoint the browser uses. Optional: unset falls back to a shared public node |
+| `NEXT_PUBLIC_CHAIN_ID` | Yes | `11155111`. The app defaults to it |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Yes | Optional, free from Reown's dashboard. Set it and the connect screens offer **Scan with a phone** beside the browser extension, which is the only way in on a machine with no extension. Left blank the connector is not built at all, so nobody meets a button that fails at the moment they scan |
 
 ### Operator scripts
 
@@ -1103,6 +1142,7 @@ hearth/
 │   ├── web/              the Next.js app and the documentation site it serves
 │   └── keeper/           the script that drives draws, one process per pool, with its
 │                         own suite and the pm2 file for all seven
+├── railway/              one hosting config per pool, for the keepers that run live
 ├── docs/                 the written record: getting started, concepts, security, operations
 ├── ARCHITECTURE.md       the implementation specification, with the three diagrams
 └── README.md
@@ -1173,7 +1213,11 @@ the one worth reading. Executed attack outputs land under `docs/security/attacks
 
 **Static analysis:** [docs/security/static-analysis.md](docs/security/static-analysis.md).
 slither reports 85 results on these contracts and solhint none; the page gives the one reason
-behind each family and names the two results that deserved a second look.
+behind each family and names the two results that deserved a second look. The same page
+carries the dependency audit, which is not clean and says why: `npm audit --omit=dev` at the
+root reports two `axios` findings, one under the deploy tool and one under the WalletConnect
+connector's own dependencies, neither in code the app runs, and neither fixable without a
+change that costs more than it buys.
 
 ### Limitations
 
