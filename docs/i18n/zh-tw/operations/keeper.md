@@ -158,17 +158,18 @@ keeper。這一版為什麼每期都公布三個，寫在[獎金與層級](../co
 
 ## 線上那七支跑在哪
 
-在一台筆電上用 pm2 跑全部七支是一種做法，到今天也還跑得動。但那不是線上的那一種。線上的七支 Sepolia
-keeper 全都跑在 Railway 上，一池一個服務，所以闔上筆電不會停掉任何一期抽獎。
+在一台筆電上用 pm2 跑全部七支是一種做法，到今天也還跑得動。cUSDC 那支 keeper 跑在 Railway 上；其餘
+六支還跑在 pm2 底下，直到它們各自的 Railway 服務建起來，一池一個服務，這樣闔上筆電就不會停掉任何一
+期抽獎。
 
 keeper 是一支長時間執行的程序，而不是一個排程函式：一輪執行可能要在金鑰管理服務上等兩分鐘，比多數
 serverless 平台允許的時間還長。任何能讓一支 Node 程序一直活著的託管平台都可以，而程式庫裡帶著這一家
 的設定：
 
-- 程式庫根目錄的 `railway.json` 驅動 `usdc` 池。
-- `railway/hearth-keeper-<slug>.json` 各驅動其餘六個池的其中一個。每一條啟動指令都在行內設好該池的
-  `KEEPER_NAME`、`KEEPER_ACCOUNT_INDEX` 和 `HEARTH_ADDRESSES_FILE`，所以用其中一份建出來的服務，只
-  還需要 `RECOVERY_PHRASE` 和 `SEPOLIA_RPC_URL`。
+- 程式庫根目錄的 `railway.json` 就是 `usdc` 那個服務當初建出來所依據的那份。
+- `railway/hearth-keeper-<slug>.json` 記下其餘六個各自的取值。Railway 新建服務時已經不再讀設定檔了，
+  所以那些取值要填進服務自己的設定裡：先是這裡給出的建置與啟動指令，然後把 `RECOVERY_PHRASE`、
+  `SEPOLIA_RPC_URL`、`HEARTH_ADDRESSES_FILE`、`KEEPER_ACCOUNT_INDEX` 和 `KEEPER_NAME` 當成變數填上。
 
 在任何託管平台上，建置都是 `npm run build -w @hearth/keeper`，啟動都是
 `node packages/keeper/dist/src/index.js`。keeper 需要的那幾份合約 ABI 已經提交在 `packages/keeper/abi`

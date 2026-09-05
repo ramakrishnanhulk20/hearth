@@ -162,17 +162,17 @@ Sepolia の上限、1 トランザクションあたり 20,000,000 コンピュ�
 
 ## 稼働中の 7 つがどこで動いているか
 
-ノート PC の pm2 で 7 つすべてを動かすのも一つのやり方で、今でも動きます。ただし、稼働中のものはそれではありません。稼働中の
-Sepolia キーパー 7 つはすべて Railway 上で、プールごとに 1 サービスとして動いているので、ノート PC を閉じても抽選は止まりません。
+ノート PC の pm2 で 7 つすべてを動かすのも一つのやり方で、今でも動きます。cUSDC のキーパーは Railway 上で動いています。残りの 6 つは、
+それぞれの Railway サービスができるまで pm2 の下で動いています。プールごとに 1 サービスにすれば、ノート PC を閉じても抽選は止まりません。
 
 キーパーはスケジュール実行の関数ではなく、長時間動き続けるプロセスです。1 回のパスで鍵管理サービスの応答を 2 分待つことがあり、
 これはたいていのサーバーレス基盤が許す時間より長いからです。Node のプロセスを生かしておけるホストならどれでも構いませんが、
 リポジトリにはこのホスト向けの設定が入っています。
 
-- リポジトリのルートにある `railway.json` が `usdc` プールを動かします。
-- `railway/hearth-keeper-<slug>.json` が残り 6 つのプールをそれぞれ動かします。どの起動コマンドもそのプールの `KEEPER_NAME`、
-  `KEEPER_ACCOUNT_INDEX`、`HEARTH_ADDRESSES_FILE` をインラインで設定するので、そこから作ったサービスに必要なのは
-  `RECOVERY_PHRASE` と `SEPOLIA_RPC_URL` だけです。
+- リポジトリのルートにある `railway.json` は、`usdc` のサービスがそこから作られたものです。
+- `railway/hearth-keeper-<slug>.json` には、残り 6 つそれぞれの値が記録してあります。Railway は新しいサービスで設定ファイルを読まなく
+  なったので、それらの値はサービス自身の設定に入れます。ここに示したビルドコマンドと起動コマンド、そして `RECOVERY_PHRASE`、
+  `SEPOLIA_RPC_URL`、`HEARTH_ADDRESSES_FILE`、`KEEPER_ACCOUNT_INDEX`、`KEEPER_NAME` を変数として設定します。
 
 どのホストでも、ビルドは `npm run build -w @hearth/keeper`、起動は `node packages/keeper/dist/src/index.js` です。キーパーが必要と
 するコントラクトの ABI は `packages/keeper/abi` にコミットしてあるので、コントラクトを一度もコンパイルしないホストでも動きます。

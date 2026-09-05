@@ -220,19 +220,22 @@ le refuse.
 ## Où tournent les sept keepers en service
 
 pm2 sur un ordinateur portable est une façon de faire tourner les sept, et elle marche
-toujours. Ce n'est pas ce qui est en service. Les sept keepers Sepolia tournent sur Railway,
-un service par pool, si bien qu'un portable fermé n'arrête aucun tirage.
+toujours. Le keeper cUSDC tourne sur Railway ; les six autres tournent sous pm2 en attendant
+d'avoir leurs propres services Railway, un service par pool, si bien qu'un portable fermé
+n'arrête aucun tirage.
 
 Un keeper est un processus de longue durée et non une fonction planifiée : une passe peut
 passer deux minutes à attendre le service de gestion des clés, ce qui dépasse ce que la
 plupart des plateformes sans serveur autorisent. N'importe quel hébergeur qui maintient un
 processus Node en vie fera l'affaire, et le dépôt porte la configuration pour celui-ci :
 
-- `railway.json` à la racine du dépôt pilote le pool `usdc`.
-- `railway/hearth-keeper-<slug>.json` pilote chacun des six autres. Chaque commande de
-  démarrage fixe en ligne les `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` et
-  `HEARTH_ADDRESSES_FILE` de ce pool, si bien qu'un service construit à partir de l'un
-  d'eux ne demande que `RECOVERY_PHRASE` et `SEPOLIA_RPC_URL`.
+- `railway.json` à la racine du dépôt est ce à partir de quoi le service `usdc` a été
+  construit.
+- `railway/hearth-keeper-<slug>.json` consigne les valeurs de chacun des six autres. Railway
+  ne lit plus de fichier de configuration pour un nouveau service, ces valeurs vont donc dans
+  les réglages du service lui-même : les commandes de construction et de démarrage données
+  ici, puis `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`, `HEARTH_ADDRESSES_FILE`,
+  `KEEPER_ACCOUNT_INDEX` et `KEEPER_NAME` comme variables.
 
 La construction est `npm run build -w @hearth/keeper` et le démarrage
 `node packages/keeper/dist/src/index.js`, sur n'importe quel hébergeur. Les ABI de contrats

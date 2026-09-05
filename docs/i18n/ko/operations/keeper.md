@@ -184,19 +184,20 @@ Sepolia ETH가 필요합니다. 인덱스 0은 배포자이고 키퍼는 그것�
 
 ## 지금 도는 일곱은 어디에서 실행되는가
 
-노트북 위의 pm2는 일곱 개를 모두 돌리는 한 가지 방법이고 지금도 잘 돌아갑니다. 다만 실제로 운영
-중인 방식은 그것이 아닙니다. Sepolia 키퍼 일곱 개는 모두 Railway에서 풀당 서비스 하나로 돌아가고,
-그래서 노트북을 닫아도 멈추는 추첨은 없습니다.
+노트북 위의 pm2는 일곱 개를 모두 돌리는 한 가지 방법이고 지금도 잘 돌아갑니다. cUSDC 키퍼는
+Railway에서 돌아가고, 나머지 여섯 개는 각자의 Railway 서비스가 생길 때까지 pm2 아래에서 돌아갑니다.
+풀당 서비스 하나씩 두면 노트북을 닫아도 멈추는 추첨은 없습니다.
 
 키퍼는 예약 실행 함수가 아니라 오래 살아 있는 프로세스입니다. 한 번의 순회가 키 관리 서비스를
 기다리며 2분을 쓸 수 있고, 이는 대부분의 서버리스 플랫폼이 허용하는 시간보다 깁니다. Node
 프로세스를 계속 살려 두는 호스트라면 어디든 됩니다. 저장소에는 지금 쓰는 호스트의 설정이 들어
 있습니다.
 
-- 저장소 루트의 `railway.json`이 `usdc` 풀을 몹니다.
-- `railway/hearth-keeper-<slug>.json`이 나머지 여섯 개를 각각 몹니다. 시작 명령마다 그 풀의
-  `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX`, `HEARTH_ADDRESSES_FILE`을 그 자리에서 지정하므로, 그중
-  하나로 만든 서비스에는 `RECOVERY_PHRASE`와 `SEPOLIA_RPC_URL`만 있으면 됩니다.
+- 저장소 루트의 `railway.json`은 `usdc` 서비스를 만들 때 쓴 그 파일입니다.
+- `railway/hearth-keeper-<slug>.json`은 나머지 여섯 개 각각의 값을 적어 둔 것입니다. Railway는 이제
+  새 서비스에서 설정 파일을 읽지 않으므로, 그 값들은 서비스 자체의 설정으로 들어갑니다. 여기 적힌
+  빌드 명령과 시작 명령을 넣고, `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`, `HEARTH_ADDRESSES_FILE`,
+  `KEEPER_ACCOUNT_INDEX`, `KEEPER_NAME`을 변수로 넣습니다.
 
 빌드는 `npm run build -w @hearth/keeper`이고 시작은 어느 호스트에서든
 `node packages/keeper/dist/src/index.js`입니다. 키퍼가 필요로 하는 컨트랙트 ABI는

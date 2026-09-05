@@ -207,20 +207,21 @@ kabul etmez.
 
 ## Canlıdaki yedisi nerede çalışıyor
 
-Bir dizüstünde pm2, yedisini birden çalıştırmanın bir yolu ve hâlâ işe yarıyor. Canlıda olan bu
-değil. Yedi Sepolia keeper'ının hepsi Railway üzerinde çalışıyor, havuz başına bir servis,
-böylece kapanan bir dizüstü hiçbir çekilişi durdurmaz.
+Bir dizüstünde pm2, yedisini birden çalıştırmanın bir yolu ve hâlâ işe yarıyor. cUSDC keeper'ı
+Railway üzerinde çalışıyor; diğer altısı, kendi Railway servisleri açılana kadar pm2 altında
+çalışıyor, havuz başına bir servis, böylece kapanan bir dizüstü hiçbir çekilişi durdurmaz.
 
 Keeper, zamanlanmış bir fonksiyon değil, uzun süre çalışan bir süreçtir: tek bir tur, anahtar
 yönetim servisini (KMS) beklerken iki dakika geçirebilir, ki bu çoğu sunucusuz platformun izin
 verdiğinden uzundur. Bir Node sürecini hayatta tutan her barındırma işi görür, ve depo bunun
 yapılandırmasını taşıyor:
 
-- Deponun kökündeki `railway.json`, `usdc` havuzunu sürer.
-- `railway/hearth-keeper-<slug>.json`, diğer altısının her birini sürer. Her başlatma komutu o
-  havuzun `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` ve `HEARTH_ADDRESSES_FILE` değerlerini kendi
-  içinde verir, dolayısıyla bunlardan biriyle kurulan bir servise yalnızca `RECOVERY_PHRASE` ve
-  `SEPOLIA_RPC_URL` gerekir.
+- Deponun kökündeki `railway.json`, `usdc` servisinin kendisinden kurulduğu dosyadır.
+- `railway/hearth-keeper-<slug>.json`, diğer altısının her birinin değerlerini tutar. Railway artık
+  yeni bir servis için yapılandırma dosyası okumuyor, o yüzden bu değerler servisin kendi
+  ayarlarına giriyor: burada verilen derleme ve başlatma komutları, ardından değişken olarak
+  `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`, `HEARTH_ADDRESSES_FILE`, `KEEPER_ACCOUNT_INDEX` ve
+  `KEEPER_NAME`.
 
 Derleme `npm run build -w @hearth/keeper`, başlatma ise her barındırmada
 `node packages/keeper/dist/src/index.js`. Keeper'ın ihtiyaç duyduğu sözleşme ABI'ları

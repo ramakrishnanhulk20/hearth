@@ -216,7 +216,7 @@ carries the configuration for this one:
 - `railway.json` at the repository root is what the `usdc` service was built from.
 - `railway/hearth-keeper-<slug>.json` records the values for each of the other six. Railway no
   longer reads a config file for a new service, so those values go into the service's own
-  settings: the build and start commands above, then `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`,
+  settings: the build and start commands given below, then `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`,
   `HEARTH_ADDRESSES_FILE`, `KEEPER_ACCOUNT_INDEX` and `KEEPER_NAME` as variables.
 
 The build is `npm run build -w @hearth/keeper` and the start is

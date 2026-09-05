@@ -218,19 +218,22 @@ Keeper lehnt ihn ab.
 
 ## Wo die sieben Live-Keeper laufen
 
-pm2 auf einem Laptop ist ein Weg, alle sieben zu betreiben, und er funktioniert weiterhin. Live
-ist er nicht. Alle sieben Sepolia-Keeper laufen auf Railway, ein Service je Pool, ein
-zugeklappter Laptop hält also keine Ziehung auf.
+pm2 auf einem Laptop ist ein Weg, alle sieben zu betreiben, und er funktioniert weiterhin. Der
+cUSDC-Keeper läuft auf Railway; die übrigen sechs laufen unter pm2, bis es ihre eigenen
+Railway-Services gibt, ein Service je Pool, damit ein zugeklappter Laptop keine Ziehung aufhält.
 
 Ein Keeper ist ein dauerhaft laufender Prozess und keine geplante Funktion: ein Durchlauf kann
 zwei Minuten damit verbringen, auf den Schlüsselverwaltungsdienst (KMS) zu warten, und das ist
 länger, als die meisten Serverless-Plattformen zulassen. Jeder Host, der einen Node-Prozess am
 Leben hält, genügt, und das Repository trägt die Konfiguration für diesen einen:
 
-- `railway.json` im Wurzelverzeichnis des Repositorys treibt den `usdc`-Pool an.
-- `railway/hearth-keeper-<slug>.json` treibt jeden der übrigen sechs an. Jeder Startbefehl setzt
-  `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` und `HEARTH_ADDRESSES_FILE` dieses Pools direkt darin,
-  ein daraus gebauter Service braucht also nur `RECOVERY_PHRASE` und `SEPOLIA_RPC_URL`.
+- `railway.json` im Wurzelverzeichnis des Repositorys ist das, woraus der `usdc`-Service gebaut
+  wurde.
+- `railway/hearth-keeper-<slug>.json` hält die Werte für jeden der übrigen sechs fest. Railway
+  liest für einen neuen Service keine Konfigurationsdatei mehr, diese Werte gehen also in die
+  Einstellungen des Services selbst: die hier genannten Build- und Startbefehle, dann
+  `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`, `HEARTH_ADDRESSES_FILE`, `KEEPER_ACCOUNT_INDEX` und
+  `KEEPER_NAME` als Variablen.
 
 Der Build ist `npm run build -w @hearth/keeper` und der Start
 `node packages/keeper/dist/src/index.js`, auf jedem Host. Die Vertrags-ABIs, die der Keeper

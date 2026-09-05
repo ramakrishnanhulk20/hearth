@@ -202,20 +202,21 @@ Sepolia-nya sendiri. Indeks 0 adalah deployer dan keeper menolaknya.
 
 ## Di mana ketujuh keeper yang hidup itu berjalan
 
-pm2 di sebuah laptop adalah satu cara menjalankan ketujuhnya dan cara itu masih bekerja. Itu bukan yang
-sedang hidup. Ketujuh keeper Sepolia berjalan di Railway, satu layanan per pool, jadi laptop yang
-ditutup tidak menghentikan undian mana pun.
+pm2 di sebuah laptop adalah satu cara menjalankan ketujuhnya dan cara itu masih bekerja. Keeper cUSDC
+berjalan di Railway; enam sisanya berjalan di bawah pm2 sampai layanan Railway masing-masing ada, satu
+layanan per pool, supaya laptop yang ditutup tidak menghentikan undian mana pun.
 
 Keeper adalah proses yang berjalan lama, bukan fungsi terjadwal: satu lintasan bisa menghabiskan dua
 menit menunggu layanan pengelolaan kunci, lebih lama dari yang diizinkan kebanyakan platform serverless.
 Host mana pun yang menjaga sebuah proses Node tetap hidup bisa dipakai, dan repositori ini membawa
 konfigurasi untuk yang satu ini:
 
-- `railway.json` di akar repositori menggerakkan pool `usdc`.
-- `railway/hearth-keeper-<slug>.json` menggerakkan masing-masing dari enam pool lainnya. Tiap perintah
-  start menyetel `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` dan `HEARTH_ADDRESSES_FILE` pool itu langsung di
-  tempat, jadi layanan yang dibangun dari salah satunya hanya butuh `RECOVERY_PHRASE` dan
-  `SEPOLIA_RPC_URL`.
+- `railway.json` di akar repositori adalah berkas yang dipakai membangun layanan `usdc`.
+- `railway/hearth-keeper-<slug>.json` mencatat nilai untuk masing-masing dari enam pool lainnya. Railway
+  tidak lagi membaca berkas konfigurasi untuk layanan baru, jadi nilai-nilai itu masuk ke pengaturan
+  layanan itu sendiri: perintah build dan start yang disebut di sini, lalu `RECOVERY_PHRASE`,
+  `SEPOLIA_RPC_URL`, `HEARTH_ADDRESSES_FILE`, `KEEPER_ACCOUNT_INDEX` dan `KEEPER_NAME` sebagai
+  variabel.
 
 Build-nya `npm run build -w @hearth/keeper` dan start-nya `node packages/keeper/dist/src/index.js` di
 host mana pun. ABI kontrak yang dibutuhkan keeper di-commit di bawah `packages/keeper/abi`, jadi host

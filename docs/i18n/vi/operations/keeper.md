@@ -196,18 +196,20 @@ cần ETH Sepolia riêng. Chỉ số 0 là tài khoản triển khai và keeper 
 
 ## Bảy keeper đang chạy được đặt ở đâu
 
-pm2 trên một chiếc laptop là một cách chạy cả bảy và cách đó vẫn dùng được. Nó không phải cái đang
-chạy thật. Cả bảy keeper Sepolia chạy trên Railway, mỗi pool một dịch vụ, nên một chiếc laptop gập
-lại không làm dừng kỳ quay nào.
+pm2 trên một chiếc laptop là một cách chạy cả bảy và cách đó vẫn dùng được. Keeper cUSDC chạy trên
+Railway; sáu keeper còn lại chạy dưới pm2 cho tới khi có dịch vụ Railway riêng của chúng, mỗi pool
+một dịch vụ, để một chiếc laptop gập lại không làm dừng kỳ quay nào.
 
 Keeper là một tiến trình sống lâu chứ không phải một hàm chạy theo lịch: một lượt có thể mất hai
 phút chờ dịch vụ quản lý khoá, dài hơn mức phần lớn nền tảng serverless cho phép. Bất kỳ máy chủ
 nào giữ được một tiến trình Node sống đều dùng được, và kho mã mang sẵn cấu hình cho máy chủ này:
 
-- `railway.json` ở gốc kho mã vận hành pool `usdc`.
-- `railway/hearth-keeper-<slug>.json` vận hành từng pool trong sáu pool còn lại. Mỗi lệnh khởi
-  động đặt thẳng `KEEPER_NAME`, `KEEPER_ACCOUNT_INDEX` và `HEARTH_ADDRESSES_FILE` của pool đó, nên
-  một dịch vụ dựng từ một trong các tệp này chỉ cần `RECOVERY_PHRASE` và `SEPOLIA_RPC_URL`.
+- `railway.json` ở gốc kho mã là tệp mà dịch vụ `usdc` đã được dựng từ đó.
+- `railway/hearth-keeper-<slug>.json` ghi lại các giá trị cho từng pool trong sáu pool còn lại.
+  Railway không còn đọc tệp cấu hình cho một dịch vụ mới nữa, nên các giá trị đó đi vào phần cài
+  đặt của chính dịch vụ: lệnh build và lệnh khởi động nêu ở đây, rồi `RECOVERY_PHRASE`,
+  `SEPOLIA_RPC_URL`, `HEARTH_ADDRESSES_FILE`, `KEEPER_ACCOUNT_INDEX` và `KEEPER_NAME` dưới dạng
+  biến.
 
 Lệnh build là `npm run build -w @hearth/keeper` và lệnh khởi động là
 `node packages/keeper/dist/src/index.js`, trên máy chủ nào cũng vậy. Các ABI hợp đồng mà keeper cần

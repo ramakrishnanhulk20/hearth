@@ -207,20 +207,21 @@ cuenta necesita su propio ETH de Sepolia. El índice 0 es el desplegador y el ke
 
 ## Dónde corren los siete que están en marcha
 
-pm2 en un portátil es una manera de correr los siete y sigue funcionando. No es lo que está en
-marcha. Los siete keepers de Sepolia corren en Railway, un servicio por pool, así que un portátil
-cerrado no detiene ningún sorteo.
+pm2 en un portátil es una manera de correr los siete y sigue funcionando. El keeper de cUSDC corre
+en Railway; los otros seis corren bajo pm2 hasta que existan sus propios servicios de Railway, un
+servicio por pool, para que un portátil cerrado no detenga ningún sorteo.
 
 Un keeper es un proceso de larga duración y no una función programada: una pasada puede pasarse
 dos minutos esperando al servicio de gestión de claves, que es más de lo que permiten casi todas
 las plataformas sin servidor. Vale cualquier hosting que mantenga vivo un proceso de Node, y el
 repositorio lleva la configuración para este:
 
-- `railway.json` en la raíz del repositorio mueve el pool `usdc`.
-- `railway/hearth-keeper-<slug>.json` mueve cada uno de los otros seis. Cada comando de arranque
-  fija en línea el `KEEPER_NAME`, el `KEEPER_ACCOUNT_INDEX` y el `HEARTH_ADDRESSES_FILE` de ese
-  pool, así que un servicio construido a partir de uno de ellos solo necesita `RECOVERY_PHRASE` y
-  `SEPOLIA_RPC_URL`.
+- `railway.json` en la raíz del repositorio es a partir de lo que se construyó el servicio `usdc`.
+- `railway/hearth-keeper-<slug>.json` recoge los valores de cada uno de los otros seis. Railway ya
+  no lee un archivo de configuración para un servicio nuevo, así que esos valores van en los
+  ajustes del propio servicio: los comandos de construcción y arranque que aparecen aquí, y luego
+  `RECOVERY_PHRASE`, `SEPOLIA_RPC_URL`, `HEARTH_ADDRESSES_FILE`, `KEEPER_ACCOUNT_INDEX` y
+  `KEEPER_NAME` como variables.
 
 La construcción es `npm run build -w @hearth/keeper` y el arranque es
 `node packages/keeper/dist/src/index.js` en cualquier hosting. Los ABI de los contratos que el

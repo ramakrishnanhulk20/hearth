@@ -179,17 +179,19 @@ keeper 卡住会让资金池损失开奖次数，不会损失钱。存款和提�
 
 ## 线上那七个跑在哪
 
-在一台笔记本上用 pm2 跑全部七个是一种做法，它到今天也还能跑。但它不是线上的那一种。
-线上的七个 Sepolia keeper 全都跑在 Railway 上，一池一个服务，所以合上笔记本不会停掉任何一期开奖。
+在一台笔记本上用 pm2 跑全部七个是一种做法，它到今天也还能跑。cUSDC 那个 keeper 跑在 Railway 上；
+其余六个还跑在 pm2 下，直到它们各自的 Railway 服务建起来，一池一个服务，
+这样合上笔记本就不会停掉任何一期开奖。
 
 keeper 是一个长期运行的进程，而不是一个定时函数：一轮执行可能要在密钥管理服务上等两分钟，
 比大多数 serverless 平台允许的时长都长。任何能让一个 Node 进程一直活着的托管平台都可以，
 而仓库里带着这一家的配置：
 
-- 仓库根目录的 `railway.json` 驱动 `usdc` 池。
-- `railway/hearth-keeper-<slug>.json` 各驱动其余六个池中的一个。每一条启动命令都在行内设好那个池的
-  `KEEPER_NAME`、`KEEPER_ACCOUNT_INDEX` 和 `HEARTH_ADDRESSES_FILE`，
-  所以用其中一份建出来的服务，只还需要 `RECOVERY_PHRASE` 和 `SEPOLIA_RPC_URL`。
+- 仓库根目录的 `railway.json` 就是 `usdc` 那个服务当初建出来所依据的那份。
+- `railway/hearth-keeper-<slug>.json` 记下其余六个各自的取值。Railway 新建服务时已经不再读配置文件了，
+  所以这些取值要填进服务自己的设置里：先是这里给出的构建和启动命令，
+  然后把 `RECOVERY_PHRASE`、`SEPOLIA_RPC_URL`、`HEARTH_ADDRESSES_FILE`、
+  `KEEPER_ACCOUNT_INDEX` 和 `KEEPER_NAME` 作为变量填上。
 
 在任何托管平台上，构建都是 `npm run build -w @hearth/keeper`，启动都是
 `node packages/keeper/dist/src/index.js`。keeper 需要的那几份合约 ABI 已经提交在
