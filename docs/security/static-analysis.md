@@ -43,3 +43,21 @@ slither reasons about plaintext control flow. It cannot tell whether an encrypte
 the right comparison, whether an access-control list grant is missing, or whether a value is
 published that should not be. Those properties are covered by the unit tests, the fairness and
 invariant tests, and the executed attack scripts in [the threat model](threat-model.md).
+
+## Dependency audit
+
+`npm audit --omit=dev` at the repository root reports two findings on 6 September 2026, both in
+`axios`, and both in code the app never runs:
+
+- `axios@0.21.4` under `hardhat-deploy@0.11.45`, in the contracts package. It is deployment
+  tooling that runs on the operator's machine and never ships in a bundle. `hardhat-deploy` 0.11
+  pins the 0.21 line, so the only fix is a major upgrade of the deploy tool, which would change
+  the deployment records this repository depends on.
+- `axios` under `@coinbase/cdp-sdk`, which `@wagmi/connectors` pulls in with the WalletConnect
+  connector. Hearth never imports axios and never calls Coinbase's SDK; the advisories concern
+  server-side proxy handling and request forgery in Node, not a browser bundle. `npm audit fix`
+  moves the nested copy to another vulnerable release rather than out of the range, so it is
+  left as the lockfile records it.
+
+The web package on its own, with the connector removed, audits clean, which is how the
+3 September figure of zero findings was produced.
