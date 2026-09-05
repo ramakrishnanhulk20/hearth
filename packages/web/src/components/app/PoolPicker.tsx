@@ -279,7 +279,14 @@ function Row({
           {pool.symbol}
         </span>
         <span className="block truncate text-[11.5px] text-faint">
-          {restricted ? reason : pool.name}
+          {/* A pool nobody has funded yet answers the question behind the question here, under
+              its own name: not what the prize is, but when there will be one. In the prize
+              column that sentence is wider than the rail and squeezed every name to a letter. */}
+          {restricted
+            ? reason
+            : prize.firstDrawAt !== null
+              ? t("firstDraw", { time: format.clock(prize.firstDrawAt) })
+              : pool.name}
         </span>
       </span>
 
@@ -294,13 +301,7 @@ function Row({
           >
             {t("zamaList")}
           </a>
-        ) : prize.firstDrawAt !== null ? (
-          // Nothing has funded this pool yet, so the column answers the question behind the
-          // question: not what the prize is, but when there will be one.
-          <span className="block max-w-[8.5rem] text-[11.5px] leading-tight tabular-nums text-faint">
-            {t("firstDraw", { time: format.clock(prize.firstDrawAt) })}
-          </span>
-        ) : (
+        ) : prize.firstDrawAt !== null ? null : (
           <span
             className={`text-[13px] tabular-nums ${selected ? "text-flameInk" : "text-parchment"}`}
           >
