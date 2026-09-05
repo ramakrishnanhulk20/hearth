@@ -48,3 +48,21 @@ karşılaştırma olup olmadığını, bir erişim kontrol listesi izninin eksik
 yayımlanmaması gereken bir değerin yayımlanıp yayımlanmadığını söyleyemez. Bu özellikler birim
 testleriyle, adalet ve değişmezlik testleriyle, ve [tehdit modelindeki](threat-model.md)
 çalıştırılmış saldırı betikleriyle kapsanıyor.
+
+## Bağımlılık denetimi
+
+Depo kökünde `npm audit --omit=dev`, 6 Eylül 2026'da iki bulgu bildiriyor, ikisi de `axios`
+içinde ve ikisi de uygulamanın hiç çalıştırmadığı kodda:
+
+- Sözleşme paketinde, `hardhat-deploy@0.11.45` altındaki `axios@0.21.4`. Bu, operatörün
+  makinesinde çalışan bir dağıtım aracıdır ve hiçbir zaman bir paketin içinde gönderilmez.
+  `hardhat-deploy` 0.11, 0.21 hattına sabitler, dolayısıyla tek çözüm dağıtım aracının bir ana
+  sürüm yükseltmesidir, ki bu da bu deponun dayandığı dağıtım kayıtlarını değiştirir.
+- `@wagmi/connectors`'ın WalletConnect konektörüyle birlikte getirdiği `@coinbase/cdp-sdk`
+  altındaki `axios`. Hearth axios'u hiç import etmez ve Coinbase'in SDK'sını hiç çağırmaz; o
+  uyarılar Node içinde sunucu tarafı vekil sunucu işlemesi ve istek sahteciliğiyle ilgilidir, bir
+  tarayıcı paketiyle değil. `npm audit fix` iç içe geçmiş kopyayı aralığın dışına çıkarmak yerine
+  bir başka açık sürüme taşıyor, bu yüzden lockfile'ın kaydettiği gibi bırakıldı.
+
+web paketi tek başına, konektör çıkarılmış haliyle, denetimden tertemiz geçiyor, 3 Eylül'deki
+sıfır bulgu rakamı da böyle üretildi.

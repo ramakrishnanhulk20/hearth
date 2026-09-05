@@ -50,3 +50,23 @@ verschlüsselter Vergleich der richtige Vergleich ist, ob eine Gewährung auf de
 fehlt, oder ob ein Wert veröffentlicht wird, der es nicht sollte. Diese Eigenschaften decken
 die Unit-Tests, die Fairness- und Invariantentests und die ausgeführten Angriffsskripte im
 [Bedrohungsmodell](threat-model.md) ab.
+
+## Abhängigkeits-Audit
+
+`npm audit --omit=dev` im Wurzelverzeichnis des Repositorys meldet am 6. September 2026 zwei
+Befunde, beide in `axios` und beide in Code, den die App nie ausführt:
+
+- `axios@0.21.4` unter `hardhat-deploy@0.11.45`, im Vertragspaket. Es ist Deployment-Werkzeug,
+  das auf der Maschine des Betreibers läuft und nie in einem Bundle ausgeliefert wird.
+  `hardhat-deploy` 0.11 legt die 0.21-Linie fest, die einzige Behebung ist also ein
+  Major-Upgrade des Deploy-Werkzeugs, und das würde die Deployment-Aufzeichnungen ändern, auf
+  die sich dieses Repository stützt.
+- `axios` unter `@coinbase/cdp-sdk`, das `@wagmi/connectors` mit dem WalletConnect-Connector
+  hereinzieht. Hearth importiert axios nie und ruft Coinbases SDK nie auf; die Meldungen
+  betreffen serverseitige Proxy-Behandlung und Request Forgery in Node, nicht ein
+  Browser-Bundle. `npm audit fix` verschiebt die verschachtelte Kopie auf eine andere
+  verwundbare Version statt aus dem Bereich heraus, sie bleibt also so, wie der Lockfile sie
+  festhält.
+
+Das web-Paket für sich, mit entferntem Connector, läuft sauber durch das Audit, und so kam die
+Zahl von null Befunden vom 3. September zustande.

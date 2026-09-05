@@ -48,3 +48,21 @@ phải phép so đúng hay không, một lần cấp quyền trên danh sách ki
 không, hay một giá trị lẽ ra không nên công bố có bị công bố hay không. Những tính chất đó được
 phủ bởi các bài kiểm thử đơn vị, các bài kiểm thử về công bằng và bất biến, cùng những script
 tấn công đã thực thi trong [mô hình mối đe doạ](threat-model.md).
+
+## Kiểm toán phụ thuộc
+
+`npm audit --omit=dev` ở thư mục gốc của kho báo về hai phát hiện vào ngày 6 tháng 9 năm 2026, cả
+hai đều nằm trong `axios`, và cả hai đều nằm trong phần mã mà ứng dụng không bao giờ chạy:
+
+- `axios@0.21.4` dưới `hardhat-deploy@0.11.45`, trong gói hợp đồng. Đó là công cụ triển khai chạy
+  trên máy của người vận hành và không bao giờ đi kèm trong một bundle. `hardhat-deploy` 0.11 ghim
+  vào dòng 0.21, nên cách sửa duy nhất là nâng cấp lớn công cụ triển khai, việc đó sẽ làm đổi
+  những bản ghi triển khai mà kho này đang dựa vào.
+- `axios` dưới `@coinbase/cdp-sdk`, thứ mà `@wagmi/connectors` kéo theo cùng với connector
+  WalletConnect. Hearth không bao giờ import axios và không bao giờ gọi SDK của Coinbase; các
+  cảnh báo đó nói về việc xử lý proxy phía máy chủ và giả mạo yêu cầu trong Node, không phải một
+  bundle trình duyệt. `npm audit fix` chuyển bản sao lồng bên trong sang một bản phát hành khác
+  cũng dính lỗi chứ không đưa nó ra khỏi khoảng đó, nên nó được để nguyên như lockfile ghi.
+
+Riêng gói web, khi bỏ connector đi, thì kiểm toán sạch, và đó là cách con số không phát hiện nào
+của ngày 3 tháng 9 được tạo ra.

@@ -49,3 +49,22 @@ comparación correcta, si falta una concesión en la lista de control de acceso,
 valor que no debería. Esas propiedades las cubren las pruebas unitarias, las pruebas de equidad y
 de invariantes, y los scripts de ataque ejecutados que hay en
 [el modelo de amenazas](threat-model.md).
+
+## Auditoría de dependencias
+
+`npm audit --omit=dev` en la raíz del repositorio reporta dos hallazgos a 6 de septiembre de 2026,
+los dos en `axios`, y los dos en código que la aplicación nunca ejecuta:
+
+- `axios@0.21.4` bajo `hardhat-deploy@0.11.45`, en el paquete de contratos. Es herramienta de
+  despliegue que corre en la máquina del operador y nunca se publica dentro de un bundle.
+  `hardhat-deploy` 0.11 fija la línea 0.21, así que el único arreglo es una subida de versión mayor
+  de la herramienta de despliegue, que cambiaría los registros de despliegue de los que depende
+  este repositorio.
+- `axios` bajo `@coinbase/cdp-sdk`, que `@wagmi/connectors` arrastra con el conector de
+  WalletConnect. Hearth nunca importa axios ni llama al SDK de Coinbase; los avisos tratan del
+  manejo de proxy en el servidor y de la falsificación de peticiones en Node, no de un bundle de
+  navegador. `npm audit fix` mueve la copia anidada a otra versión vulnerable en lugar de sacarla
+  del rango, así que se deja tal como la registra el lockfile.
+
+El paquete web por su cuenta, con el conector quitado, audita limpio, y así es como salió la cifra
+de cero hallazgos del 3 de septiembre.

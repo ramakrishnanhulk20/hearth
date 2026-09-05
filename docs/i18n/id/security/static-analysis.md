@@ -49,3 +49,21 @@ terenkripsi adalah perbandingan yang benar, apakah ada pemberian izin di daftar 
 hilang, atau apakah ada nilai yang dipublikasikan padahal seharusnya tidak. Sifat-sifat itu dicakup
 oleh pengujian unit, pengujian keadilan dan invarian, serta skrip serangan yang dieksekusi di
 [model ancaman](threat-model.md).
+
+## Audit dependensi
+
+`npm audit --omit=dev` di akar repositori melaporkan dua temuan pada 6 September 2026, keduanya di
+`axios`, dan keduanya di kode yang tidak pernah dijalankan aplikasinya:
+
+- `axios@0.21.4` di bawah `hardhat-deploy@0.11.45`, di paket kontrak. Itu perkakas deployment yang
+  jalan di mesin operator dan tidak pernah ikut terkirim dalam sebuah bundle. `hardhat-deploy` 0.11
+  mengunci jalur 0.21, jadi satu-satunya perbaikan adalah peningkatan versi mayor perkakas deploy
+  itu, yang akan mengubah catatan deployment yang menjadi sandaran repositori ini.
+- `axios` di bawah `@coinbase/cdp-sdk`, yang ditarik `@wagmi/connectors` bersama konektor
+  WalletConnect. Hearth tidak pernah mengimpor axios dan tidak pernah memanggil SDK Coinbase;
+  peringatan-peringatan itu soal penanganan proxy di sisi server dan pemalsuan permintaan di Node,
+  bukan soal bundle peramban. `npm audit fix` memindahkan salinan bersarang itu ke rilis rentan
+  yang lain alih-alih keluar dari rentangnya, jadi ia dibiarkan seperti yang dicatat lockfile.
+
+Paket web sendirian, dengan konektornya dilepas, auditnya bersih, dan begitulah angka nol temuan
+pada 3 September itu dihasilkan.

@@ -46,3 +46,21 @@ comparação cifrada é a comparação certa, se falta uma concessão na lista d
 ou se um valor que não deveria está sendo publicado. Essas propriedades são cobertas pelos
 testes unitários, pelos testes de justiça e de invariantes, e pelos scripts de ataque executados
 em [o modelo de ameaças](threat-model.md).
+
+## Auditoria de dependências
+
+`npm audit --omit=dev` na raiz do repositório reporta dois achados em 6 de setembro de 2026, os
+dois no `axios`, e os dois em código que o app nunca roda:
+
+- `axios@0.21.4` sob `hardhat-deploy@0.11.45`, no pacote de contratos. É ferramenta de implantação
+  que roda na máquina do operador e nunca vai dentro de um bundle. O `hardhat-deploy` 0.11 fixa a
+  linha 0.21, então a única correção é uma subida de versão maior da ferramenta de implantação, o
+  que mudaria os registros de implantação de que este repositório depende.
+- `axios` sob `@coinbase/cdp-sdk`, que o `@wagmi/connectors` puxa junto com o conector do
+  WalletConnect. O Hearth nunca importa axios e nunca chama o SDK da Coinbase; os avisos tratam de
+  tratamento de proxy no servidor e de falsificação de requisição no Node, não de um bundle de
+  navegador. O `npm audit fix` move a cópia aninhada para outra versão vulnerável em vez de tirá-la
+  da faixa, então ela fica como o lockfile registra.
+
+O pacote web sozinho, com o conector removido, audita limpo, e foi assim que saiu o número de zero
+achados de 3 de setembro.
