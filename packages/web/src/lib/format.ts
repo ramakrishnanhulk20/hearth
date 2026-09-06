@@ -119,19 +119,27 @@ export type Format = {
 };
 
 export function createFormat(locale: string, words: FormatWords): Format {
+  // The reader's own decimal mark, so 1.200,00 never appears with a grouped whole and a foreign
+  // point after it. Every locale here writes Western digits, which is what -u-nu-latn pins.
+  const decimalMark =
+    new Intl.NumberFormat(`${locale}-u-nu-latn`).formatToParts(1.1).find((part) => part.type === "decimal")
+      ?.value ?? ".";
+
   const amount = (base: bigint, decimals: number): string => {
     const negative = base < 0n;
     const absolute = negative ? -base : base;
     const whole = group(locale, absolute / unit(decimals));
-    const fraction = (absolute % unit(decimals)).toString().padStart(decimals, "0").slice(0, 2);
-    const written = `${whole}.${fraction.padEnd(2, "0")}`;
-    // Two decimals is the right scale for money on screen, and it turns dust into a flat zero. A
-    // balance that is not empty must never read as empty, so anything below the smallest figure
-    // this can write says it is below it instead.
-    if (absolute > 0n && whole === group(locale, 0) && fraction === "00") {
-      return `${negative ? "-" : ""}${words("dust")}`;
+    const digits = (absolute % unit(decimals)).toString().padStart(decimals, "0");
+    const zeroWhole = whole === group(locale, 0);
+    // Two decimals is the right scale for a stablecoin, but a grand prize in ether or gold sits
+    // below a cent of its own unit, so a figure under 0.01 keeps four places, trimmed. Only
+    // what is too small even for that says it is below the smallest figure written here.
+    if (absolute > 0n && zeroWhole && digits.slice(0, 2) === "00") {
+      const fine = digits.slice(0, 4).replace(/0+$/, "");
+      if (fine === "") return `${negative ? "-" : ""}${words("dust")}`;
+      return `${negative ? "-" : ""}${whole}${decimalMark}${fine}`;
     }
-    return `${negative ? "-" : ""}${written}`;
+    return `${negative ? "-" : ""}${whole}${decimalMark}${digits.slice(0, 2).padEnd(2, "0")}`;
   };
 
   return {

@@ -899,7 +899,7 @@
   },
   "format": {
     "pending": "...",
-    "dust": "<0,01",
+    "dust": "<0,0001",
     "now": "bây giờ",
     "seconds": "{seconds} giây",
     "minutesSeconds": "{minutes} phút {seconds} giây",

@@ -915,7 +915,7 @@
 
   "format": {
     "pending": "...",
-    "dust": "<0,01",
+    "dust": "<0,0001",
     "now": "şimdi",
     "seconds": "{seconds} sn",
     "minutesSeconds": "{minutes} dk {seconds} sn",

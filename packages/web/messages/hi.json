@@ -899,7 +899,7 @@
   },
   "format": {
     "pending": "...",
-    "dust": "<0.01",
+    "dust": "<0.0001",
     "now": "अभी",
     "seconds": "{seconds} सेकंड",
     "minutesSeconds": "{minutes} मिनट {seconds} सेकंड",

@@ -915,7 +915,7 @@
 
   "format": {
     "pending": "...",
-    "dust": "<0,01",
+    "dust": "<0,0001",
     "now": "agora",
     "seconds": "{seconds}s",
     "minutesSeconds": "{minutes}m {seconds}s",
