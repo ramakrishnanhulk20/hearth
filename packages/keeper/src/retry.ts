@@ -98,6 +98,86 @@ export function isRetryableRelayerError(error: unknown): boolean {
   return RETRYABLE.some((needle) => text.includes(needle));
 }
 
+/** The JSON-RPC codes a public endpoint answers with when the caller is asking too often. -32007
+ * is what our Sepolia endpoint returns; -32005 is the older "limit exceeded" code other providers
+ * still use. */
+const RATE_LIMIT_CODES = new Set([-32005, -32007]);
+const RATE_LIMIT_WORDS = /request limit|rate limit|too many requests/i;
+const RATE_LIMIT_CODE_TEXT = /-3200[57]\b/;
+const HTTP_TOO_MANY = /\b429\b/;
+
+/** Where ethers files the endpoint's own answer. It does not put it in the message: a refused read
+ * arrives as "could not coalesce error" with the node's code and body hidden underneath. */
+const NESTED_FIELDS = ["cause", "error", "info", "responseBody", "responseStatus"] as const;
+const TEXT_FIELDS = ["message", "shortMessage", "details", "label", "name", "statusText"] as const;
+const CODE_FIELDS = ["code", "status", "statusCode"] as const;
+
+function rateLimitFound(error: unknown, depth: number): boolean {
+  if (depth > 6 || error === null || error === undefined) return false;
+  if (typeof error === "string") {
+    return RATE_LIMIT_WORDS.test(error) || RATE_LIMIT_CODE_TEXT.test(error) || HTTP_TOO_MANY.test(error);
+  }
+  if (typeof error === "number") return RATE_LIMIT_CODES.has(error) || error === 429;
+  if (typeof error !== "object") return false;
+  const record = error as Record<string, unknown>;
+  for (const key of TEXT_FIELDS) {
+    const value = record[key];
+    if (typeof value === "string" && RATE_LIMIT_WORDS.test(value)) return true;
+  }
+  for (const key of CODE_FIELDS) {
+    const value = record[key];
+    if (typeof value === "number" && (RATE_LIMIT_CODES.has(value) || value === 429)) return true;
+    if (typeof value === "string" && (HTTP_TOO_MANY.test(value) || RATE_LIMIT_CODE_TEXT.test(value))) return true;
+  }
+  for (const key of NESTED_FIELDS) {
+    if (rateLimitFound(record[key], depth + 1)) return true;
+  }
+  return false;
+}
+
+/**
+ * True when the endpoint refused the request because it was asked too often, rather than because
+ * the call was wrong. Matches the HTTP status, the JSON-RPC code and the wording, at every depth
+ * ethers and the SDK nest a failure to, so a limit hidden three objects down is still found.
+ *
+ * It deliberately does not look at revert data: a contract's own error is never a rate limit.
+ */
+export function isRateLimited(error: unknown): boolean {
+  return rateLimitFound(error, 0);
+}
+
+/** Five tries: the endpoint counts per second, so four short waits clear anything that is going to
+ * clear. Beyond that the pass ends and the next one starts fresh rather than holding a slot. */
+export const RATE_LIMIT_ATTEMPTS = 5;
+const RATE_LIMIT_BASE_MS = 400;
+
+/** 400ms, 800, 1600, 3200, each with up to a quarter more at random so two keepers refused in the
+ * same second do not come back in the same millisecond. */
+export function rateLimitDelay(attempt: number, random: () => number): number {
+  return Math.round(RATE_LIMIT_BASE_MS * 2 ** (attempt - 1) * (1 + 0.25 * random()));
+}
+
+/**
+ * Runs a read, waiting out a refusal that says "too many requests" and nothing else.
+ *
+ * Only reads go through here. A transaction that is refused is left to the next pass, because a
+ * send that may already be in the node's pool must never be retried blindly.
+ */
+export async function waitOutRateLimit<T>(run: () => Promise<T>, hooks: RetryHooks = {}): Promise<T> {
+  const sleep = hooks.sleep ?? REAL_SLEEP;
+  const random = hooks.random ?? Math.random;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await run();
+    } catch (error) {
+      if (attempt >= RATE_LIMIT_ATTEMPTS || !isRateLimited(error)) throw error;
+      const delay = rateLimitDelay(attempt, random);
+      hooks.onRetry?.(attempt, delay, error);
+      await sleep(delay);
+    }
+  }
+}
+
 /** Exponential backoff with jitter in the second half of each step, so two keepers started
  * together do not hammer the relayer in lockstep. */
 export function backoffDelay(attempt: number, policy: RetryPolicy, random: () => number): number {

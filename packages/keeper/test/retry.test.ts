@@ -1,6 +1,8 @@
-// Covers the retry policy: which relayer failures are worth asking again about, how long the
-// keeper waits between tries, and that a permanent failure is not retried forever.
-// Does not cover real network timing or the relayer's own queueing.
+// Covers the two retry policies: which relayer failures are worth asking again about, which RPC
+// refusals mean "you are asking too often", how long the keeper waits between tries, and that a
+// permanent failure is not retried forever.
+// Does not cover real network timing, the relayer's own queueing, or the pacing that sits
+// underneath the read retry: that is stagger.test.ts.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
@@ -9,7 +11,16 @@ import {
   RelayerRequestFailedError,
   RpcRateLimitError,
 } from "@zama-fhe/sdk";
-import { backoffDelay, errorText, isRetryableRelayerError, withRetry } from "../src/retry.js";
+import {
+  RATE_LIMIT_ATTEMPTS,
+  backoffDelay,
+  errorText,
+  isRateLimited,
+  isRetryableRelayerError,
+  rateLimitDelay,
+  waitOutRateLimit,
+  withRetry,
+} from "../src/retry.js";
 
 const POLICY = { attempts: 4, baseDelayMs: 1_000, maxDelayMs: 8_000 };
 const NOW = { sleep: async (): Promise<void> => undefined, random: (): number => 1 };
@@ -148,4 +159,120 @@ test("a failure that never clears gives up after the configured number of tries"
   );
   assert.equal(tries, POLICY.attempts);
   assert.deepEqual(waits, [1_000, 2_000, 4_000]);
+});
+
+// The body the endpoint actually answers with when seven keepers read at once, copied from the
+// measured response.
+const MEASURED_BODY = '{"code":-32007,"message":"50/second request limit reached, please contact us"}';
+
+/** What ethers hands back for that answer: the sentence says nothing, the node's code is nested. */
+function coalesced(): unknown {
+  return Object.assign(new Error("could not coalesce error"), {
+    code: "UNKNOWN_ERROR",
+    shortMessage: "could not coalesce error",
+    error: { code: -32007, message: "50/second request limit reached, please contact us" },
+    info: {
+      error: { code: -32007, message: "50/second request limit reached, please contact us" },
+      payload: { method: "eth_call", params: [] },
+    },
+  });
+}
+
+test("the refusal the endpoint gives seven keepers at once is read as a rate limit", () => {
+  assert.equal(isRateLimited(coalesced()), true);
+  assert.equal(
+    isRateLimited(
+      Object.assign(new Error("server response 429 Too Many Requests"), {
+        code: "SERVER_ERROR",
+        shortMessage: "exceeded maximum retry limit",
+        info: { responseStatus: "429 Too Many Requests", responseBody: MEASURED_BODY },
+      }),
+    ),
+    true,
+  );
+  assert.equal(isRateLimited({ info: { error: { code: -32005, message: "limit exceeded" } } }), true);
+  assert.equal(isRateLimited({ info: { responseBody: MEASURED_BODY } }), true);
+  assert.equal(isRateLimited(new Error("read failed", { cause: coalesced() })), true);
+  assert.equal(isRateLimited({ error: { message: "Too Many Requests" } }), true);
+});
+
+test("a revert, a timeout and a nonce mistake are not rate limits", () => {
+  const reverted = Object.assign(new Error("execution reverted (unknown custom error)"), {
+    code: "CALL_EXCEPTION",
+    shortMessage: "execution reverted (unknown custom error)",
+    data: "0x8baa579f",
+    info: { error: { code: 3, message: "execution reverted", data: "0x8baa579f" } },
+  });
+  const timedOut = Object.assign(new Error("request timeout"), {
+    code: "TIMEOUT",
+    shortMessage: "request timeout",
+    info: { timeout: 120_000 },
+  });
+  const nonce = Object.assign(new Error("nonce has already been used"), {
+    code: "NONCE_EXPIRED",
+    shortMessage: "nonce has already been used",
+    info: { error: { code: -32000, message: "nonce too low" } },
+  });
+  for (const error of [reverted, timedOut, nonce, null, undefined, "just a string"]) {
+    assert.equal(isRateLimited(error), false, `${String(error)} should not read as a rate limit`);
+  }
+});
+
+test("the read wait doubles from 400ms and carries up to a quarter more at random", () => {
+  const steady = (attempt: number): number => rateLimitDelay(attempt, () => 0);
+  assert.deepEqual([steady(1), steady(2), steady(3), steady(4)], [400, 800, 1_600, 3_200]);
+  assert.deepEqual(
+    [1, 2, 3, 4].map((attempt) => rateLimitDelay(attempt, () => 1)),
+    [500, 1_000, 2_000, 4_000],
+  );
+});
+
+test("a read refused twice then answered comes back, after two waits", async () => {
+  const waits: number[] = [];
+  let tries = 0;
+  const value = await waitOutRateLimit(
+    async () => {
+      tries += 1;
+      if (tries <= 2) throw coalesced();
+      return "the answer";
+    },
+    { sleep: async (ms) => { waits.push(ms); }, random: () => 0 },
+  );
+  assert.equal(value, "the answer");
+  assert.equal(tries, 3);
+  assert.deepEqual(waits, [400, 800]);
+});
+
+test("a read that reverts throws at once, with no wait at all", async () => {
+  let waits = 0;
+  let tries = 0;
+  await assert.rejects(
+    waitOutRateLimit(
+      async () => {
+        tries += 1;
+        throw Object.assign(new Error("execution reverted"), { code: "CALL_EXCEPTION" });
+      },
+      { sleep: async () => { waits += 1; }, random: () => 0 },
+    ),
+    /execution reverted/,
+  );
+  assert.equal(tries, 1);
+  assert.equal(waits, 0);
+});
+
+test("a read refused five times gives up and hands the refusal back to the pass", async () => {
+  const waits: number[] = [];
+  let tries = 0;
+  await assert.rejects(
+    waitOutRateLimit(
+      async () => {
+        tries += 1;
+        throw coalesced();
+      },
+      { sleep: async (ms) => { waits.push(ms); }, random: () => 0 },
+    ),
+    /could not coalesce error/,
+  );
+  assert.equal(tries, RATE_LIMIT_ATTEMPTS);
+  assert.deepEqual(waits, [400, 800, 1_600, 3_200]);
 });

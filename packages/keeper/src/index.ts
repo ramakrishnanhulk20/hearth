@@ -16,7 +16,12 @@ Settings come from packages/contracts/.env (and packages/keeper/.env if you make
 Required: RECOVERY_PHRASE, HEARTH_VAULT, HEARTH_POOL. See the package README for the rest.
 
 One process drives one pool. HEARTH_ADDRESSES_FILE names the pool, KEEPER_ACCOUNT_INDEX picks the
-account it signs from, and KEEPER_NAME is the name printed in front of every line.`;
+account it signs from, and KEEPER_NAME is the name printed in front of every line.
+
+Several keepers on one endpoint: each one starts its first pass after a period boundary a few
+seconds later than the last, worked out from its account index, and KEEPER_STAGGER_SECONDS (0 to
+60) overrides that. KEEPER_MAX_RPS (1 to 100, default 15) is how many requests a second one keeper
+will start.`;
 
 interface Flags {
   readonly once: boolean;

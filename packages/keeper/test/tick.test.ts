@@ -143,6 +143,8 @@ function config(): KeeperConfig {
     pollMs: 30_000,
     idleMs: 600_000,
     nearMs: 120_000,
+    staggerMs: 0,
+    minGapMs: 0,
     batchSize: 4,
     lookbackDraws: 4,
     scanFrom: 0,

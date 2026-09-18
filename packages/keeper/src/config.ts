@@ -21,6 +21,22 @@ export const DEFAULT_ACCOUNT_INDEX = 1;
 /** The last index a BIP44 path can address without hardening it. */
 const MAX_ACCOUNT_INDEX = 2 ** 31 - 1;
 
+/** Seven keepers share one RPC endpoint and five of the pools share the same six-hour boundaries,
+ * so without an offset they would all read at the same second and the endpoint would refuse most
+ * of them. The account index already differs per pool, so it decides the offset and nothing has to
+ * be configured. Eight slots of four seconds spread the seven we run across half a minute, which
+ * is inside one poll interval, so no keeper is ever a pass late because of it. */
+const STAGGER_SLOTS = 8;
+const STAGGER_STEP_SECONDS = 4;
+
+/** The largest offset the setting accepts. The derived default never comes near it. */
+const MAX_STAGGER_SECONDS = 60;
+
+/** How many seconds after a period boundary the keeper on this account starts its first pass. */
+export function defaultStaggerSeconds(accountIndex: number): number {
+  return (accountIndex % STAGGER_SLOTS) * STAGGER_STEP_SECONDS;
+}
+
 /** The signing path for an account index of the seed phrase. */
 export function keeperPath(index: number): string {
   return `m/44'/60'/0'/0/${index}`;
@@ -56,6 +72,11 @@ export interface KeeperConfig {
   readonly idleMs: number;
   /** How close to a period boundary counts as "a draw is about to need me", on either side of it. */
   readonly nearMs: number;
+  /** How long after a period boundary this keeper takes its first look, so seven keepers sharing
+   *  one endpoint do not all read in the same second. */
+  readonly staggerMs: number;
+  /** The shortest gap between two requests this keeper starts. Its own speed limit. */
+  readonly minGapMs: number;
   readonly batchSize: number;
   readonly lookbackDraws: number;
   /** Zero means "start at the current window", any other value pins the oldest draw watched. */
@@ -262,6 +283,17 @@ export function loadConfig(overrides: ConfigOverrides = {}): LoadedKeeper {
   const pollSeconds = integer("KEEPER_POLL_SECONDS", 30, 5, 3600, problems);
   const idleSeconds = integer("KEEPER_IDLE_SECONDS", 600, 30, 3600, problems);
   const nearSeconds = integer("KEEPER_NEAR_SECONDS", 120, 30, 1800, problems);
+  const staggerSeconds = integer(
+    "KEEPER_STAGGER_SECONDS",
+    defaultStaggerSeconds(accountIndex),
+    0,
+    MAX_STAGGER_SECONDS,
+    problems,
+  );
+  // Measured from a data centre: a round trip is a few milliseconds, so a pass's twenty-eight
+  // reads land inside one second and one keeper alone trips a fifty a second endpoint. Fifteen
+  // spreads the same pass over two seconds, which no boundary is tight enough to care about.
+  const maxRps = integer("KEEPER_MAX_RPS", 15, 1, 100, problems);
   const batchSize = integer("KEEPER_BATCH", 4, 1, 256, problems);
   const lookbackDraws = integer("KEEPER_LOOKBACK_DRAWS", 4, 1, 64, problems);
   const scanFrom = integer("KEEPER_SCAN_FROM", 0, 0, 1_000_000, problems);
@@ -290,6 +322,8 @@ export function loadConfig(overrides: ConfigOverrides = {}): LoadedKeeper {
     pollMs: pollSeconds * 1000,
     idleMs: idleSeconds * 1000,
     nearMs: nearSeconds * 1000,
+    staggerMs: staggerSeconds * 1000,
+    minGapMs: Math.ceil(1000 / maxRps),
     batchSize,
     lookbackDraws,
     scanFrom,
@@ -320,9 +354,13 @@ export function loadConfig(overrides: ConfigOverrides = {}): LoadedKeeper {
 export function describeConfig(config: KeeperConfig): string {
   const gas = config.maxFeePerGas === null ? "no gas cap" : `gas cap ${formatGwei(config.maxFeePerGas)} gwei`;
   const mode = config.dryRun ? "dry run" : "live";
+  // The pace is printed as the rate that was asked for, not as the gap it became, because the gap
+  // is rounded up to a whole millisecond and reads a digit low.
+  const pace = `at most ${Math.round(1000 / config.minGapMs)} requests a second`;
   return (
     `${mode}, keeper ${config.keeperAddress} (account ${config.accountIndex}), ` +
     `vault ${config.vault}, pool ${config.pool}, ${config.symbol}, ` +
-    `batch ${config.batchSize}, poll ${config.pollMs / 1000}s, rest ${config.idleMs / 1000}s, ${gas}`
+    `batch ${config.batchSize}, poll ${config.pollMs / 1000}s, rest ${config.idleMs / 1000}s, ` +
+    `stagger ${config.staggerMs / 1000}s, ${pace}, ${gas}`
   );
 }

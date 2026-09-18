@@ -68,6 +68,8 @@ addresses. Everything else has a default.
 | `KEEPER_POLL_SECONDS` | | Seconds between passes while there is work to do or a period boundary is close. Default 30. |
 | `KEEPER_IDLE_SECONDS` | | The longest the keeper sleeps when the last pass found nothing to do. Default 600, minimum 30, maximum 3600. |
 | `KEEPER_NEAR_SECONDS` | | How close to the end of a period counts as "about to have work", on both sides of it. Inside this window the keeper is back on `KEEPER_POLL_SECONDS`. Default 120, minimum 30, maximum 1800. |
+| `KEEPER_STAGGER_SECONDS` | | How many seconds after a period boundary this keeper takes its first look, so seven keepers on one endpoint do not all read at the same second. Default is worked out from the account index, `(index % 8) * 4`, which gives the seven pools 4 to 28 seconds. Between 0 and 60. |
+| `KEEPER_MAX_RPS` | | The most requests a second this one keeper will start. Default 15, between 1 and 100. Its own speed limit, applied to every read including the retried ones. |
 | `KEEPER_BATCH` | | Savers per `evaluate` call. Default 4. The vault stops at `MAX_BATCH` savers of encrypted work per call whatever you ask for, and the keeper prints both numbers at boot. |
 | `KEEPER_LOOKBACK_DRAWS` | | How many past draws each pass reads. Default 4. |
 | `KEEPER_SCAN_FROM` | | Pin the oldest draw watched. Default 0, meaning the current window. |
@@ -123,6 +125,61 @@ Give the keeper its own endpoint rather than sharing the app's. The app polls th
 from every open tab, and one shared free-tier key runs out under both. When it does the keeper
 logs `tick failed while reading the chain` with the endpoint's own code, and tries again next
 pass: nothing is lost, but draws land late.
+
+## Several keepers on one endpoint
+
+Measured, not guessed. The endpoint we run on allows 50 requests a second and answers the rest
+with HTTP 429 and a body of `{"code":-32007,"message":"50/second request limit reached ..."}`.
+ethers does not put any of that in the sentence it raises: the pass fails with
+`could not coalesce error (UNKNOWN_ERROR)` and the node's own code sits three objects down.
+
+Two different things trip that limit, so there are two different answers.
+
+One keeper on its own. A pass makes about 28 reads and boot makes 8. On a laptop those round
+trips take about six seconds all together, roughly 10 requests a second, and nothing ever
+happens. From a data centre the same reads take a few milliseconds each, so the whole pass lands
+inside one second, and a lone keeper with the endpoint to itself failed its first pass. The
+answer is `KEEPER_MAX_RPS`, default 15: the keeper holds each request until at least 67ms after
+the previous one started, so a full pass takes about two seconds and boot about half a second.
+Requests queue in the order they were asked, so nothing bursts.
+
+Seven keepers at once. Five of the pools share the same six-hour boundaries and the hourly pool
+shares every one of them, so without an offset all seven would start their first pass of a new
+period in the same second. Each keeper waits a few seconds past the boundary before it looks, and
+the offset comes from the account index it already has:
+
+| pm2 process | `KEEPER_ACCOUNT_INDEX` | Starts its first pass after the boundary |
+|---|---|---|
+| `hearth-keeper-usdc` | 1 | 4s |
+| `hearth-keeper-usdt` | 10 | 8s |
+| `hearth-keeper-weth` | 11 | 12s |
+| `hearth-keeper-bron` | 12 | 16s |
+| `hearth-keeper-zama` | 13 | 20s |
+| `hearth-keeper-tgbp` | 14 | 24s |
+| `hearth-keeper-xaut` | 15 | 28s |
+
+The offset moves two wakes only: the one that opens the near window, which puts each keeper's
+polls inside the window on its own seconds, and the one that crosses the boundary, which lands
+the first pass of the new period exactly its own number of seconds late. It is never added to a
+pass that left work behind, and never to the plain resting nap, so nothing is ever late because
+of it. `KEEPER_STAGGER_SECONDS` overrides the number; 0 turns it off.
+
+The arithmetic says neither is enough on its own. Seven keepers at 15 a second is 105 requests in
+the worst second, still twice the limit. What keeps the real number under it is that the offsets
+are 4 seconds apart and a paced pass takes about 2 seconds, so only one or two keepers are ever
+in a full pass in the same second, and the other five are asleep or asking their two resting
+questions.
+
+So the third answer is patience. Any read that comes back as a rate limit, whether by HTTP 429,
+by JSON-RPC code -32007 or -32005, or by wording, is tried again up to five times, waiting 400ms,
+800, 1600 and 3200 with up to a quarter more at random. Anything else, a revert, a timeout, a
+nonce mistake, is thrown at once with no wait. A pass that waited says so once, as
+`waited out the endpoint's rate limit N times this pass`, rather than one line per read.
+
+Transactions are deliberately not retried. A send that the endpoint refuses may already be in the
+node's pool, and asking again is how the same draw gets closed twice. The action's own catch logs
+it and the next pass, 30 seconds later, picks it up: the contracts only allow each step once, so a
+late retry costs a little gas and nothing else.
 
 ## Running it
 
@@ -222,7 +279,7 @@ Every line is one fact. Times are UTC, and the name in brackets is the pool this
 Amounts carry that pool's own token symbol and its own decimals, both read from the address file.
 
 ```
-09:14:02 [usdc] hearth keeper: live, keeper 0x7099... (account 1), vault 0x..., pool 0x..., cUSDC, batch 4, poll 30s, rest 600s, no gas cap
+09:14:02 [usdc] hearth keeper: live, keeper 0x7099... (account 1), vault 0x..., pool 0x..., cUSDC, batch 4, poll 30s, rest 600s, stagger 4s, at most 15 requests a second, no gas cap
 09:14:03 [usdc] keeper balance 0.412 ETH
 09:14:04 [usdc] tier reconcile cadence: grand every draw, mid every draw, frequent every draw
 09:14:04 [usdc] evaluating 4 savers per call, the vault allows up to 4

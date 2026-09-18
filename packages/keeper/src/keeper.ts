@@ -4,6 +4,7 @@ import { checkAbis, loadAbi, structFieldIndex } from "./abi.js";
 import type { KeeperConfig, LoadedKeeper } from "./config.js";
 import { describeConfig } from "./config.js";
 import { amount, group, gwei, line, problem, units } from "./log.js";
+import { Pacer } from "./pace.js";
 import type { Action, DrawSnapshot, TickSnapshot } from "./plan.js";
 import {
   DrawStatus,
@@ -17,6 +18,7 @@ import {
 } from "./plan.js";
 import type { Decryptor } from "./relayer.js";
 import { asBigint, connectRelayer, readAward } from "./relayer.js";
+import { isRateLimited, waitOutRateLimit } from "./retry.js";
 
 /** Roughly a few draws of gas at Sepolia prices. Below this the keeper says so at boot. */
 const MIN_COMFORTABLE_BALANCE = 20_000_000_000_000_000n;
@@ -72,6 +74,8 @@ export interface WakeSnapshot {
   readonly pollMs: number;
   readonly idleMs: number;
   readonly nearMs: number;
+  /** How long after the boundary this keeper wants its first pass to land. */
+  readonly staggerMs: number;
 }
 
 /**
@@ -83,17 +87,43 @@ export interface WakeSnapshot {
  * spending twenty-eight requests every thirty seconds to learn nothing.
  *
  * Fails toward polling: anything unknown, stale or in the past returns the fast rate.
+ *
+ * The stagger is the one thing here that is about the other six keepers. Five of the pools share
+ * the same six-hour boundaries, so the two wakes that are aimed at a boundary carry this keeper's
+ * own offset: the one that opens the near window, and the one that crosses the boundary. The
+ * result is that the first pass of a new period lands `staggerMs` after the boundary rather than
+ * on it. The offset is never added to a wake that is not aimed at a boundary: not to a pass that
+ * left work behind, not to the plain idle nap, and not once the boundary is already behind us,
+ * where the keeper is late and should look now.
  */
 export function nextWake(snapshot: WakeSnapshot, now: number): number {
-  const { pollMs, idleMs, nearMs } = snapshot;
+  const { pollMs, idleMs, nearMs, staggerMs } = snapshot;
   if (snapshot.pending) return pollMs;
   if (snapshot.periodLength <= 0) return pollMs;
+
   const endsInMs = (snapshot.firstPeriodAt + snapshot.period * snapshot.periodLength - now) * 1000;
-  // One line covers all three cases. Before the window it is the time left until the window opens,
-  // capped at the idle rate. Inside the window that time is below the poll rate, so the floor
-  // takes over. Past the boundary it is negative, which means the period here is stale and the
-  // floor sends the keeper to look.
-  return Math.max(pollMs, Math.min(idleMs, endsInMs - nearMs));
+  const untilWindowMs = endsInMs - nearMs;
+
+  // The boundary is already behind us, so the period this keeper is holding is stale: look now.
+  if (endsInMs <= 0) return pollMs;
+
+  // Nothing in view. Nap, and work the boundary out again on the way back.
+  if (untilWindowMs > idleMs) return Math.max(pollMs, idleMs);
+
+  // Still outside the window, so this wake is the one that opens it. The offset goes here, which
+  // is what puts each keeper's polls inside the window on its own seconds.
+  if (untilWindowMs > pollMs) return untilWindowMs + staggerMs;
+
+  // Inside the window. The poll that would reach the boundary is aimed at the boundary plus the
+  // offset instead, so this keeper's first pass of the new period is its own second and not the
+  // same second as the other six. The polls before it stay at the plain rate: offsetting those
+  // too would drift the whole series and land the keepers back on top of each other.
+  //
+  // The floor still applies, so a keeper whose polls happen to fall closer than one poll minus
+  // its offset to the boundary lands late. That only happens when something woke it off the
+  // offset schedule, and the next period puts it back.
+  if (pollMs >= endsInMs) return Math.max(pollMs, endsInMs + staggerMs);
+  return pollMs;
 }
 
 export class Keeper {
@@ -104,6 +134,10 @@ export class Keeper {
   private readonly ifaces: readonly Interface[];
   private readonly drawFields: Map<string, number>;
   private readonly decryptor: Decryptor;
+  /** This keeper's own speed limit, shared by every request it starts. */
+  private readonly pacer: Pacer;
+  /** How many times this pass waited out a refusal, so the log says it once rather than per read. */
+  private rateLimitWaits = 0;
   private scanFrom = 1;
   private stopped = false;
   private wake: (() => void) | null = null;
@@ -121,6 +155,8 @@ export class Keeper {
    * the boot checks. This takes them ready made, which is how the tick test drives a whole pass
    * against a stub chain with no network and no wallet. `periods` is what `connect` would have
    * read off the pool at boot; left out, the keeper polls at the fast rate and never rests.
+   * `pacer` is passed in by `connect` so the boot checks it makes before there is a keeper count
+   * against the same speed limit as everything after them.
    */
   constructor(
     config: KeeperConfig,
@@ -130,6 +166,7 @@ export class Keeper {
     drawFields: Map<string, number>,
     decryptor: Decryptor,
     periods: PeriodClock = { firstPeriodAt: 0, periodLength: 0 },
+    pacer: Pacer | null = null,
   ) {
     this.config = config;
     this.provider = provider;
@@ -138,6 +175,7 @@ export class Keeper {
     this.drawFields = drawFields;
     this.decryptor = decryptor;
     this.ifaces = [pool.interface, vault.interface];
+    this.pacer = pacer ?? new Pacer(config.minGapMs);
     this.firstPeriodAt = periods.firstPeriodAt;
     this.periodLength = periods.periodLength;
   }
@@ -149,7 +187,8 @@ export class Keeper {
     checkAbis(poolAbi, vaultAbi);
 
     const provider = new JsonRpcProvider(config.rpcUrl);
-    const network = await provider.getNetwork();
+    const pacer = new Pacer(config.minGapMs);
+    const network = await pacer.run(() => provider.getNetwork());
     if (Number(network.chainId) !== config.chainId) {
       throw new Error(`SEPOLIA_RPC_URL points at chain ${network.chainId}, but the keeper expects ${config.chainId}.`);
     }
@@ -158,7 +197,7 @@ export class Keeper {
       ["HEARTH_POOL", config.pool],
       ["HEARTH_VAULT", config.vault],
     ] as const) {
-      if ((await provider.getCode(where)) === "0x") {
+      if ((await pacer.run(() => provider.getCode(where))) === "0x") {
         throw new Error(`There is no contract at ${where}, which ${name} points at.`);
       }
     }
@@ -178,6 +217,8 @@ export class Keeper {
       new Contract(config.vault, vaultAbi, signer),
       structFieldIndex(poolAbi, "drawOf"),
       relayer,
+      { firstPeriodAt: 0, periodLength: 0 },
+      pacer,
     );
     await keeper.reportBoot();
     return keeper;
@@ -205,7 +246,22 @@ export class Keeper {
     line("keeper stopped");
   }
 
+  /**
+   * One pass. The count of waited-out refusals is reset here and reported once at the end, because
+   * a busy pass can be refused several times and one line per read would bury everything else.
+   */
   async tick(): Promise<void> {
+    this.rateLimitWaits = 0;
+    try {
+      await this.pass();
+    } finally {
+      if (this.rateLimitWaits > 0) {
+        line(`waited out the endpoint's rate limit ${this.rateLimitWaits} times this pass`);
+      }
+    }
+  }
+
+  private async pass(): Promise<void> {
     if (await this.resting()) return;
 
     // Cleared before the reads, so a pass that throws leaves the keeper on the fast rate.
@@ -249,6 +305,7 @@ export class Keeper {
       pollMs: this.config.pollMs,
       idleMs: this.config.idleMs,
       nearMs: this.config.nearMs,
+      staggerMs: this.config.staggerMs,
     };
   }
 
@@ -267,7 +324,10 @@ export class Keeper {
   private async resting(): Promise<boolean> {
     if (!this.lastTickIdle) return false;
     const sleepMs = this.untilNextPass();
-    if (sleepMs <= this.config.pollMs) return false;
+    // The stagger rides on top of every wake aimed at a boundary, so it has to be allowed for
+    // here too. Without it, a sleep of one poll plus the offset would read as "far from the
+    // boundary" and the near window would quietly drop to the two question pass.
+    if (sleepMs <= this.config.pollMs + this.config.staggerMs) return false;
 
     const period = num(await this.read(this.pool, "currentPeriod"));
     const closableDraw = num(await this.read(this.pool, "closableDraw"));
@@ -292,7 +352,7 @@ export class Keeper {
     line(`hearth keeper: ${describeConfig(this.config)}`);
     if (this.config.source !== null) line(`yield source ${this.config.source}`);
 
-    const balance = await this.provider.getBalance(this.config.keeperAddress);
+    const balance = await this.patiently(() => this.provider.getBalance(this.config.keeperAddress));
     if (balance < MIN_COMFORTABLE_BALANCE) {
       problem(`the keeper account holds only ${formatEther(balance)} ETH. Top it up on Sepolia.`);
     } else {
@@ -399,12 +459,29 @@ export class Keeper {
     return amount(value, this.config.decimals, this.config.symbol);
   }
 
+  /**
+   * Every read the keeper makes goes through here: paced first, so it never starts requests faster
+   * than its own limit, then patient, so a refusal that says "too many requests" is waited out
+   * instead of failing the pass. The pacer sits underneath, which means a retried read is paced
+   * again rather than jumping the queue.
+   *
+   * Transactions are deliberately not routed through this. A send that may already be in the
+   * node's pool is left to the next pass.
+   */
+  private patiently<T>(run: () => Promise<T>): Promise<T> {
+    return waitOutRateLimit(() => this.pacer.run(run), {
+      onRetry: () => {
+        this.rateLimitWaits += 1;
+      },
+    });
+  }
+
   private read(contract: Contract, signature: string, args: readonly unknown[] = []): Promise<unknown> {
-    return contract.getFunction(signature)(...args) as Promise<unknown>;
+    return this.patiently(() => contract.getFunction(signature)(...args) as Promise<unknown>);
   }
 
   private async readState(): Promise<{ snapshot: TickSnapshot; rows: Map<number, DrawRow> }> {
-    const block = await this.provider.getBlock("latest");
+    const block = await this.patiently(() => this.provider.getBlock("latest"));
     if (block === null) throw new Error("the node returned no latest block");
 
     const period = num(await this.read(this.pool, "currentPeriod"));
@@ -561,7 +638,7 @@ export class Keeper {
   private async gasIsAffordable(): Promise<boolean> {
     const cap = this.config.maxFeePerGas;
     if (cap === null) return true;
-    const fees = await this.provider.getFeeData();
+    const fees = await this.patiently(() => this.provider.getFeeData());
     const current = fees.maxFeePerGas;
     if (current === null || current <= cap) return true;
     line(`gas is ${gwei(current)} gwei, above the ${gwei(cap)} gwei cap, so nothing is sent this tick`);
@@ -622,9 +699,11 @@ export class Keeper {
    * otherwise into the sentence plus the endpoint's own verdict.
    *
    * The second half is what lets an operator tell a rate limit from a bug. A read that fails comes
-   * back as "exceeded maximum retry limit" and nothing else, which reads the same whether the node
-   * throttled us or the call was wrong; ethers keeps the difference in `code` and in the HTTP
-   * status. The request URL is deliberately left out, because it carries the API key.
+   * back as "exceeded maximum retry limit" or "could not coalesce error" and nothing else, which
+   * reads the same whether the node throttled us or the call was wrong; ethers keeps the
+   * difference in `code` and in the HTTP status. When it is a rate limit the sentence says so in
+   * words, because neither of those two phrases means anything to the person reading the log. The
+   * request URL is deliberately left out, because it carries the API key.
    */
   private causeText(error: unknown): string {
     const named = this.namedRevert(error);
@@ -637,7 +716,8 @@ export class Keeper {
     if (typeof status === "string" && status !== "") parts.push(status);
 
     const text = this.plainText(error);
-    return parts.length === 0 ? text : `${text} (${parts.join(", ")})`;
+    const said = parts.length === 0 ? text : `${text} (${parts.join(", ")})`;
+    return isRateLimited(error) ? `${said}, which is the endpoint's request limit, not a fault in the call` : said;
   }
 
   private namedRevert(error: unknown): string | null {

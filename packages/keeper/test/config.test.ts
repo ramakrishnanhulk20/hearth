@@ -29,6 +29,8 @@ const KEYS = [
   "KEEPER_POLL_SECONDS",
   "KEEPER_IDLE_SECONDS",
   "KEEPER_NEAR_SECONDS",
+  "KEEPER_STAGGER_SECONDS",
+  "KEEPER_MAX_RPS",
 ] as const;
 
 /** Writes an address file and runs loadConfig against it with a clean environment, then puts the
@@ -145,6 +147,37 @@ test("a resting rate outside its range is refused rather than quietly clamped", 
     ["KEEPER_NEAR_SECONDS", "0"],
     ["KEEPER_NEAR_SECONDS", "1801"],
     ["KEEPER_NEAR_SECONDS", "90.5"],
+  ] as const;
+  for (const [key, value] of bad) {
+    assert.throws(
+      () => withFile(USDC_POOL, { [key]: value }),
+      (error: unknown) => error instanceof ConfigError && error.message.includes(`${key} must be a whole number`),
+      `${key}="${value}" should have been refused`,
+    );
+  }
+});
+
+test("the offset that spreads seven keepers comes from the account index, and the setting wins", () => {
+  assert.equal(withFile({ ...USDC_POOL, keeperAccountIndex: 12 }).config.staggerMs, 16_000);
+  assert.equal(withFile({ ...USDC_POOL, keeperAccountIndex: 1 }).config.staggerMs, 4_000);
+  assert.equal(withFile(USDC_POOL, { KEEPER_STAGGER_SECONDS: "0" }).config.staggerMs, 0);
+  assert.equal(withFile(USDC_POOL, { KEEPER_STAGGER_SECONDS: "45" }).config.staggerMs, 45_000);
+});
+
+test("the keeper's own speed limit defaults to fifteen requests a second, and the setting wins", () => {
+  assert.equal(withFile(USDC_POOL).config.minGapMs, 67);
+  assert.equal(withFile(USDC_POOL, { KEEPER_MAX_RPS: "10" }).config.minGapMs, 100);
+  assert.equal(withFile(USDC_POOL, { KEEPER_MAX_RPS: "100" }).config.minGapMs, 10);
+});
+
+test("an offset or a speed limit outside its range is refused rather than quietly clamped", () => {
+  const bad = [
+    ["KEEPER_STAGGER_SECONDS", "-1"],
+    ["KEEPER_STAGGER_SECONDS", "61"],
+    ["KEEPER_STAGGER_SECONDS", "4.5"],
+    ["KEEPER_MAX_RPS", "0"],
+    ["KEEPER_MAX_RPS", "101"],
+    ["KEEPER_MAX_RPS", "fast"],
   ] as const;
   for (const [key, value] of bad) {
     assert.throws(

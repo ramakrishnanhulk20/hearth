@@ -29,6 +29,7 @@ function resting(): WakeSnapshot {
     pollMs: POLL,
     idleMs: IDLE,
     nearMs: NEAR,
+    staggerMs: 0,
   };
 }
 
@@ -156,6 +157,8 @@ function config(): KeeperConfig {
     pollMs: POLL,
     idleMs: IDLE,
     nearMs: NEAR,
+    staggerMs: 0,
+    minGapMs: 0,
     batchSize: 4,
     lookbackDraws: 4,
     scanFrom: 0,
