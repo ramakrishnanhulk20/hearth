@@ -26,6 +26,9 @@ const KEYS = [
   "MNEMONIC",
   "KEEPER_ACCOUNT_INDEX",
   "KEEPER_NAME",
+  "KEEPER_POLL_SECONDS",
+  "KEEPER_IDLE_SECONDS",
+  "KEEPER_NEAR_SECONDS",
 ] as const;
 
 /** Writes an address file and runs loadConfig against it with a clean environment, then puts the
@@ -121,4 +124,33 @@ test("the token symbol and decimals come from the address file", () => {
   const { config } = withFile({ ...USDC_POOL, slug: "weth", symbol: "cWETH", decimals: 9 });
   assert.equal(config.symbol, "cWETH");
   assert.equal(config.decimals, 9);
+});
+
+test("the resting rates default to ten minutes and two minutes, and the environment sets them", () => {
+  const { config } = withFile(USDC_POOL);
+  assert.equal(config.pollMs, 30_000);
+  assert.equal(config.idleMs, 600_000);
+  assert.equal(config.nearMs, 120_000);
+
+  const tuned = withFile(USDC_POOL, { KEEPER_IDLE_SECONDS: "900", KEEPER_NEAR_SECONDS: "45" }).config;
+  assert.equal(tuned.idleMs, 900_000);
+  assert.equal(tuned.nearMs, 45_000);
+});
+
+test("a resting rate outside its range is refused rather than quietly clamped", () => {
+  const bad = [
+    ["KEEPER_IDLE_SECONDS", "29"],
+    ["KEEPER_IDLE_SECONDS", "3601"],
+    ["KEEPER_IDLE_SECONDS", "ten minutes"],
+    ["KEEPER_NEAR_SECONDS", "0"],
+    ["KEEPER_NEAR_SECONDS", "1801"],
+    ["KEEPER_NEAR_SECONDS", "90.5"],
+  ] as const;
+  for (const [key, value] of bad) {
+    assert.throws(
+      () => withFile(USDC_POOL, { [key]: value }),
+      (error: unknown) => error instanceof ConfigError && error.message.includes(`${key} must be a whole number`),
+      `${key}="${value}" should have been refused`,
+    );
+  }
 });

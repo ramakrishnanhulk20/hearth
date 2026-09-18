@@ -5,7 +5,9 @@ import { line, problem, useName } from "./log.js";
 
 const USAGE = `hearth-keeper: drives Hearth draws on Sepolia.
 
-  hearth-keeper              run forever, one pass every KEEPER_POLL_SECONDS
+  hearth-keeper              run forever. A full pass every KEEPER_POLL_SECONDS while there is
+                             work or a period boundary is within KEEPER_NEAR_SECONDS, and a two
+                             question check every KEEPER_IDLE_SECONDS while there is nothing to do
   hearth-keeper --once       run one pass and exit
   hearth-keeper --dry-run    simulate every call and print what would be sent, send nothing
   hearth-keeper --help       this text

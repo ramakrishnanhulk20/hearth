@@ -50,7 +50,12 @@ export interface KeeperConfig {
   readonly vault: string;
   readonly pool: string;
   readonly source: string | null;
+  /** How often a pass runs while there is work, and the fastest rate the keeper ever polls at. */
   readonly pollMs: number;
+  /** The longest the keeper sleeps when the last pass found nothing to do. */
+  readonly idleMs: number;
+  /** How close to a period boundary counts as "a draw is about to need me", on either side of it. */
+  readonly nearMs: number;
   readonly batchSize: number;
   readonly lookbackDraws: number;
   /** Zero means "start at the current window", any other value pins the oldest draw watched. */
@@ -255,6 +260,8 @@ export function loadConfig(overrides: ConfigOverrides = {}): LoadedKeeper {
   }
 
   const pollSeconds = integer("KEEPER_POLL_SECONDS", 30, 5, 3600, problems);
+  const idleSeconds = integer("KEEPER_IDLE_SECONDS", 600, 30, 3600, problems);
+  const nearSeconds = integer("KEEPER_NEAR_SECONDS", 120, 30, 1800, problems);
   const batchSize = integer("KEEPER_BATCH", 4, 1, 256, problems);
   const lookbackDraws = integer("KEEPER_LOOKBACK_DRAWS", 4, 1, 64, problems);
   const scanFrom = integer("KEEPER_SCAN_FROM", 0, 0, 1_000_000, problems);
@@ -281,6 +288,8 @@ export function loadConfig(overrides: ConfigOverrides = {}): LoadedKeeper {
     pool: pool ?? "",
     source,
     pollMs: pollSeconds * 1000,
+    idleMs: idleSeconds * 1000,
+    nearMs: nearSeconds * 1000,
     batchSize,
     lookbackDraws,
     scanFrom,
@@ -314,6 +323,6 @@ export function describeConfig(config: KeeperConfig): string {
   return (
     `${mode}, keeper ${config.keeperAddress} (account ${config.accountIndex}), ` +
     `vault ${config.vault}, pool ${config.pool}, ${config.symbol}, ` +
-    `batch ${config.batchSize}, poll ${config.pollMs / 1000}s, ${gas}`
+    `batch ${config.batchSize}, poll ${config.pollMs / 1000}s, rest ${config.idleMs / 1000}s, ${gas}`
   );
 }

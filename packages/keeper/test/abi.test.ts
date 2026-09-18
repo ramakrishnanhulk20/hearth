@@ -20,6 +20,8 @@ const POOL = [
   "function reconcile(uint8 tier, uint64 carry, bytes proof)",
   "function reconcileEvery(uint8 tier) view returns (uint16)",
   `function drawOf(uint32 drawId) view returns (${DRAW_STRUCT})`,
+  "function firstPeriodAt() view returns (uint256)",
+  "function periodLength() view returns (uint256)",
 ];
 
 const VAULT = [

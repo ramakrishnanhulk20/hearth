@@ -141,6 +141,8 @@ function config(): KeeperConfig {
     pool: `0x${"02".repeat(20)}`,
     source: null,
     pollMs: 30_000,
+    idleMs: 600_000,
+    nearMs: 120_000,
     batchSize: 4,
     lookbackDraws: 4,
     scanFrom: 0,

@@ -65,7 +65,9 @@ addresses. Everything else has a default.
 | `HEARTH_ADDRESSES_FILE` | | The JSON file the deploy script writes for one pool, instead of the three variables. It also carries that pool's `slug`, `symbol`, `decimals` and `keeperAccountIndex`, which become the defaults for the three settings below. A file holding only the addresses still works. |
 | `KEEPER_ACCOUNT_INDEX` | | Which account of the phrase this process signs from. Defaults to `keeperAccountIndex` in the address file, or 1. Index 0 is refused, because it is the deployer. |
 | `KEEPER_NAME` | | The name printed in front of every log line. Defaults to the address file's `slug`, or `hearth`. |
-| `KEEPER_POLL_SECONDS` | | Seconds between passes. Default 30. |
+| `KEEPER_POLL_SECONDS` | | Seconds between passes while there is work to do or a period boundary is close. Default 30. |
+| `KEEPER_IDLE_SECONDS` | | The longest the keeper sleeps when the last pass found nothing to do. Default 600, minimum 30, maximum 3600. |
+| `KEEPER_NEAR_SECONDS` | | How close to the end of a period counts as "about to have work", on both sides of it. Inside this window the keeper is back on `KEEPER_POLL_SECONDS`. Default 120, minimum 30, maximum 1800. |
 | `KEEPER_BATCH` | | Savers per `evaluate` call. Default 4. The vault stops at `MAX_BATCH` savers of encrypted work per call whatever you ask for, and the keeper prints both numbers at boot. |
 | `KEEPER_LOOKBACK_DRAWS` | | How many past draws each pass reads. Default 4. |
 | `KEEPER_SCAN_FROM` | | Pin the oldest draw watched. Default 0, meaning the current window. |
@@ -88,12 +90,31 @@ Sepolia receipts, listed step by step in [the keeper page](../../docs/operations
 
 ## What a pass asks the endpoint for
 
-Every read is its own `eth_call`. At the default `KEEPER_LOOKBACK_DRAWS` of 4 a pass makes up to
-28 requests: one block read, four pool and vault reads, one `drawOf` per draw in the lookback plus
+Every read is its own `eth_call`. At the default `KEEPER_LOOKBACK_DRAWS` of 4 a full pass makes up
+to 28 requests: one block read, four pool and vault reads, one `drawOf` per draw in the lookback,
 four more for each draw that is awarded, and three `publishedCarry` reads. A pass that finalizes
 reads those three carries a second time, and every transaction adds its own simulation and a
-confirming read, so a busy pass is above 28 and a resting one well below it. At the default 30
-second poll that is roughly 56 requests a minute from the keeper alone.
+confirming read, so a busy pass is above 28. At the default 30 second poll that is roughly 56
+requests a minute from a keeper that has work.
+
+Most of the time it has none, and then it makes a resting pass instead. Every close, award,
+evaluate and finalize is due at the end of a period, so once a pass has found nothing to do the
+next one asks two questions, `currentPeriod` and `closableDraw`. If the period has not turned over
+and no draw is waiting, the keeper prints `resting: period N, next look in Xs` and goes back to
+sleep for up to `KEEPER_IDLE_SECONDS`, default ten minutes. It comes back onto the 30 second rate
+for `KEEPER_NEAR_SECONDS`, default two minutes, on each side of the next period boundary, which is
+the only moment new work appears. The boundaries come from `firstPeriodAt` and `periodLength`,
+read off the pool once at boot and printed in the boot line; if either read fails the keeper says
+so and stays on the fast rate forever. Resting cannot make a draw late: a draw may be closed for a
+period and a half after its window opens, ninety minutes on the hourly pools and nine hours on the
+six-hour ones, and the near window puts the close within a minute of the boundary anyway.
+
+The arithmetic, which is why this exists. Seven keepers polling flat out is 28 reads twice a
+minute, 80,640 a keeper, about 565,000 requests a day, and that was a paid endpoint. At the new
+defaults a six-hour pool rests 144 times a day, 288 reads, plus its four boundary windows and the
+draws themselves. An hourly pool costs roughly 4,000 a day: the same 288 resting reads, and
+twenty-four boundary windows of full passes doing the actual work. Nothing about a pass that has
+work has changed.
 
 They are not batched on purpose. Sending the independent reads together would not reduce the
 number of requests at all, only burst them harder, which is worse against a rate limit.
@@ -201,10 +222,11 @@ Every line is one fact. Times are UTC, and the name in brackets is the pool this
 Amounts carry that pool's own token symbol and its own decimals, both read from the address file.
 
 ```
-09:14:02 [usdc] hearth keeper: live, keeper 0x7099... (account 1), vault 0x..., pool 0x..., cUSDC, batch 4, poll 30s, no gas cap
+09:14:02 [usdc] hearth keeper: live, keeper 0x7099... (account 1), vault 0x..., pool 0x..., cUSDC, batch 4, poll 30s, rest 600s, no gas cap
 09:14:03 [usdc] keeper balance 0.412 ETH
 09:14:04 [usdc] tier reconcile cadence: grand every draw, mid every draw, frequent every draw
 09:14:04 [usdc] evaluating 4 savers per call, the vault allows up to 4
+09:14:05 [usdc] periods of 1h since 2026-09-02T22:00:00.000Z (firstPeriodAt 1788386400, periodLength 3600), resting up to 600s and polling every 30s within 120s of a boundary
 09:14:05 [usdc] period 43, watching draws from 39 upward
 09:14:07 [usdc] finalized draw 39 (gas 509,463)
 09:14:08 [usdc] the grand tier is due, asking the relayer for its carry
@@ -219,12 +241,15 @@ Amounts carry that pool's own token symbol and its own decimals, both read from 
 09:14:53 [usdc] awarded draw 41: 3 tiers, prizes 12.40 / 2.10 / 0.40 cUSDC, harvest 3.60 cUSDC (gas 435,578)
 09:15:07 [usdc] evaluated draw 41: 4 of 9 savers done (gas 3,417,699)
 09:15:38 [usdc] nothing to do: period 43, draw 41 has 8 of 9 savers evaluated
+09:16:08 [usdc] resting: period 43, next look in 600s
 ```
 
 What each kind of line means:
 
-- `nothing to do` is the healthy resting state. The suffix tells you how far the current draw's
-  evaluation has got.
+- `nothing to do` is the healthy idle state, printed by a full pass. The suffix tells you how far
+  the current draw's evaluation has got.
+- `resting: period N, next look in Xs` is the cheap pass that follows it: two reads, then sleep.
+  It stops once the next period boundary is within `KEEPER_NEAR_SECONDS`.
 - `closed draw N` fixed the prize sizes for that draw. Nothing after this can change what a win
   is worth.
 - `draw N is waiting for its award` lists the three prize sizes, largest tier first: grand, mid,
@@ -319,7 +344,13 @@ touches a network, a wallet or the relayer.
   with.
 - **The per-pool settings**: which account each process signs from (the environment first, then
   the address file, then account 1), an index that is not a whole number or is the deployer's
-  being refused, and an address file holding only the three addresses still loading.
+  being refused, an address file holding only the three addresses still loading, and the two
+  resting rates defaulting, parsing and being refused outside their range.
+- **The resting rate**: the sleep after a pass with work, the sleep on both sides of a period
+  boundary, the full idle sleep deep inside a six-hour period, the exact wait when the boundary is
+  nearer than the idle time, the floor at the poll rate, and a resting pass costing two reads
+  where the full pass costs the lot, with the period turning over or a closable draw appearing
+  sending the keeper straight back to the full pass.
 
 Not covered: the live relayer and KMS, real gas, nonce behaviour under a reorg, and anything the
 contracts do once called. Those belong to the contracts test suite and to a live run on Sepolia.

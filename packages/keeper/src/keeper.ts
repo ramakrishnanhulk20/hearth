@@ -45,6 +45,57 @@ function tierName(tier: number): string {
   return TIER_NAMES[tier] ?? `tier ${tier}`;
 }
 
+/** A period length a person can read: "6h", "90m", "45s". */
+function duration(seconds: number): string {
+  if (seconds > 0 && seconds % 3600 === 0) return `${seconds / 3600}h`;
+  if (seconds > 0 && seconds % 60 === 0) return `${seconds / 60}m`;
+  return `${seconds}s`;
+}
+
+/** The pool's period arithmetic: period 1 starts at `firstPeriodAt` and every period is
+ *  `periodLength` seconds long. Both immutable on chain, so the keeper reads them once. */
+export interface PeriodClock {
+  readonly firstPeriodAt: number;
+  readonly periodLength: number;
+}
+
+/** Everything the sleep decision needs: what the last pass left behind, where the period it saw
+ *  ends, and the three rates from the settings. */
+export interface WakeSnapshot {
+  /** True when the last pass had anything to do, or could not finish reading the chain. */
+  readonly pending: boolean;
+  readonly period: number;
+  /** Unix seconds at which period 1 began, and how long each period lasts. Both zero when the
+   *  pool could not be read at boot. */
+  readonly firstPeriodAt: number;
+  readonly periodLength: number;
+  readonly pollMs: number;
+  readonly idleMs: number;
+  readonly nearMs: number;
+}
+
+/**
+ * How long to wait before the next pass, in milliseconds. `now` is unix seconds.
+ *
+ * Nothing this keeper does is due at a random moment: a close, an award and a finalize all hang
+ * off the end of a period. So a keeper with nothing pending sleeps until that boundary comes into
+ * view and only then polls at the fast rate, which is what keeps an idle six-hour pool from
+ * spending twenty-eight requests every thirty seconds to learn nothing.
+ *
+ * Fails toward polling: anything unknown, stale or in the past returns the fast rate.
+ */
+export function nextWake(snapshot: WakeSnapshot, now: number): number {
+  const { pollMs, idleMs, nearMs } = snapshot;
+  if (snapshot.pending) return pollMs;
+  if (snapshot.periodLength <= 0) return pollMs;
+  const endsInMs = (snapshot.firstPeriodAt + snapshot.period * snapshot.periodLength - now) * 1000;
+  // One line covers all three cases. Before the window it is the time left until the window opens,
+  // capped at the idle rate. Inside the window that time is below the poll rate, so the floor
+  // takes over. Past the boundary it is negative, which means the period here is stale and the
+  // floor sends the keeper to look.
+  return Math.max(pollMs, Math.min(idleMs, endsInMs - nearMs));
+}
+
 export class Keeper {
   private readonly config: KeeperConfig;
   private readonly provider: JsonRpcProvider;
@@ -56,11 +107,20 @@ export class Keeper {
   private scanFrom = 1;
   private stopped = false;
   private wake: (() => void) | null = null;
+  /** The pool's period arithmetic, read once at boot. Zero until then, and zero for good if the
+   *  pool would not answer, which keeps the keeper on the fast rate rather than guessing. */
+  private firstPeriodAt = 0;
+  private periodLength = 0;
+  /** What the last pass saw. `lastTickIdle` starts false so the first pass after boot reads
+   *  everything, whatever the clock says. */
+  private lastTickIdle = false;
+  private lastPeriod = 0;
 
   /**
    * `connect` is the entry point for a real run: it builds the provider and the contracts and runs
    * the boot checks. This takes them ready made, which is how the tick test drives a whole pass
-   * against a stub chain with no network and no wallet.
+   * against a stub chain with no network and no wallet. `periods` is what `connect` would have
+   * read off the pool at boot; left out, the keeper polls at the fast rate and never rests.
    */
   constructor(
     config: KeeperConfig,
@@ -69,6 +129,7 @@ export class Keeper {
     vault: Contract,
     drawFields: Map<string, number>,
     decryptor: Decryptor,
+    periods: PeriodClock = { firstPeriodAt: 0, periodLength: 0 },
   ) {
     this.config = config;
     this.provider = provider;
@@ -77,6 +138,8 @@ export class Keeper {
     this.drawFields = drawFields;
     this.decryptor = decryptor;
     this.ifaces = [pool.interface, vault.interface];
+    this.firstPeriodAt = periods.firstPeriodAt;
+    this.periodLength = periods.periodLength;
   }
 
   static async connect(loaded: LoadedKeeper, decryptor?: Decryptor): Promise<Keeper> {
@@ -137,18 +200,24 @@ export class Keeper {
         problem(`tick failed while reading the chain: ${this.causeText(error)}`);
       }
       if (this.stopped) break;
-      await this.sleep(this.config.pollMs);
+      await this.sleep(this.untilNextPass());
     }
     line("keeper stopped");
   }
 
   async tick(): Promise<void> {
+    if (await this.resting()) return;
+
+    // Cleared before the reads, so a pass that throws leaves the keeper on the fast rate.
+    this.lastTickIdle = false;
     const { snapshot, rows } = await this.readState();
+    this.lastPeriod = snapshot.period;
     const finalizes = planFinalizes(snapshot);
     const rest = planAfterFinalizes(snapshot);
     this.scanFrom = nextScanFrom(this.scanFrom, snapshot.draws, snapshot.period);
 
     if (finalizes.length === 0 && rest.length === 0) {
+      this.lastTickIdle = true;
       line(`nothing to do: period ${snapshot.period}${this.watching(snapshot)}`);
       return;
     }
@@ -169,6 +238,43 @@ export class Keeper {
     }
     const settled: TickSnapshot = { ...snapshot, pendingCarries: await this.readPendingCarries() };
     await this.performAll(planAfterFinalizes(settled), rows);
+  }
+
+  private wakeSnapshot(pending: boolean): WakeSnapshot {
+    return {
+      pending,
+      period: this.lastPeriod,
+      firstPeriodAt: this.firstPeriodAt,
+      periodLength: this.periodLength,
+      pollMs: this.config.pollMs,
+      idleMs: this.config.idleMs,
+      nearMs: this.config.nearMs,
+    };
+  }
+
+  private untilNextPass(): number {
+    return nextWake(this.wakeSnapshot(!this.lastTickIdle), Math.floor(Date.now() / 1000));
+  }
+
+  /**
+   * The cheap pass, and true when it answered the question so the full pass can be skipped.
+   *
+   * A full pass costs about twenty-eight reads. Once one of them has found nothing to do, two
+   * reads are enough to know the next one would find nothing either: the period has not turned
+   * over and the pool has no draw waiting to be closed. It only applies away from a period
+   * boundary, which is the only moment new work appears, and never on the first pass after boot.
+   */
+  private async resting(): Promise<boolean> {
+    if (!this.lastTickIdle) return false;
+    const sleepMs = this.untilNextPass();
+    if (sleepMs <= this.config.pollMs) return false;
+
+    const period = num(await this.read(this.pool, "currentPeriod"));
+    const closableDraw = num(await this.read(this.pool, "closableDraw"));
+    if (period !== this.lastPeriod || closableDraw > 0) return false;
+
+    line(`resting: period ${period}, next look in ${Math.round(sleepMs / 1000)}s`);
+    return true;
   }
 
   private async performAll(actions: readonly Action[], rows: Map<number, DrawRow>): Promise<void> {
@@ -218,6 +324,30 @@ export class Keeper {
       }
     } catch {
       line(`evaluating ${this.config.batchSize} savers per call`);
+    }
+
+    // The pool's two immutables are the whole basis of the resting rate: every close, award and
+    // finalize is due at the end of a period, so knowing where the boundaries are is what lets an
+    // idle keeper stop asking. Read once, because they can never change.
+    try {
+      const firstPeriodAt = num(await this.read(this.pool, "firstPeriodAt"));
+      const periodLength = num(await this.read(this.pool, "periodLength"));
+      if (!Number.isFinite(firstPeriodAt) || !Number.isFinite(periodLength) || periodLength <= 0) {
+        throw new Error(`the pool reports periodLength ${periodLength} and firstPeriodAt ${firstPeriodAt}`);
+      }
+      this.firstPeriodAt = firstPeriodAt;
+      this.periodLength = periodLength;
+      line(
+        `periods of ${duration(periodLength)} since ${new Date(firstPeriodAt * 1000).toISOString()} ` +
+          `(firstPeriodAt ${firstPeriodAt}, periodLength ${periodLength}), resting up to ` +
+          `${this.config.idleMs / 1000}s and polling every ${this.config.pollMs / 1000}s within ` +
+          `${this.config.nearMs / 1000}s of a boundary`,
+      );
+    } catch (error) {
+      problem(
+        `could not read the pool's period arithmetic, so this keeper polls every ` +
+          `${this.config.pollMs / 1000}s and never rests: ${this.causeText(error)}`,
+      );
     }
 
     const period = num(await this.read(this.pool, "currentPeriod"));

@@ -90,6 +90,8 @@ export const POOL_FUNCTIONS = [
   "reconcile",
   "reconcileEvery",
   "drawOf",
+  "firstPeriodAt",
+  "periodLength",
 ] as const;
 
 /** Everything the keeper calls on the vault. */
